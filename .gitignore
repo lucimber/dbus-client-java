@@ -1,0 +1,16 @@
+# MacOS
+.DS_Store
+
+# Netbeans
+nb-configuration.xml
+
+# IntelliJ
+.idea
+*.iml
+
+# Java
+*.jks
+
+# Maven
+target/
+generated/
