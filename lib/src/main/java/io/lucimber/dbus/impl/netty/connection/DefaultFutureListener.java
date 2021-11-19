@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+@SuppressWarnings("PMD.LoggerIsNotStaticFinal")
 final class DefaultFutureListener<T extends Future<?>> implements GenericFutureListener<T> {
 
     private final ChannelHandlerContext ctx;
