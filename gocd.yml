@@ -1,0 +1,114 @@
+format_version: 10
+common:
+  fetch_build_task: &fetch_build_task
+    - fetch:
+        stage: build-and-share
+        job: compile
+        is_file: false
+        source: build
+        destination: lib/build
+        run_if: passed
+pipelines:
+  dbus-app_java:
+    group: lucimber
+    lock_behavior: none
+    materials:
+      git_lucimber-dbus-app-java_master:
+        git: gitea@gitea.lucimber.io:lucimber/dbus-app_java.git
+        shallow_clone: false
+        auto_update: true
+        branch: master
+    stages:
+      - build-and-share:
+          approval:
+            type: success
+            allow_only_on_success: false
+          jobs:
+            compile:
+              artifacts:
+                - build:
+                    source: lib/build
+                    destination: ''
+              tasks:
+                - exec:
+                    command: ./gradlew
+                    arguments:
+                      - classes
+                      - --info
+                    run_if: passed
+      - test-and-report:
+          fetch_materials: false
+          approval:
+            type: success
+            allow_only_on_success: true
+          jobs:
+            unit-tests:
+              artifacts:
+                - build:
+                    source: lib/build/reports/tests
+                    destination: ''
+                - build:
+                    source: lib/build/reports/jacoco
+                    destination: ''
+                - test:
+                    source: lib/build/test-results/test/*.xml
+              tabs:
+                junit: tests/test/index.html
+                code-coverage: jacoco/test/html/index.html
+              tasks:
+                - *fetch_build_task
+                - exec:
+                    command: ./gradlew
+                    arguments:
+                      - test
+                      - --info
+                    run_if: passed
+      - analyse-and-report:
+          fetch_materials: false
+          approval:
+            type: success
+            allow_only_on_success: true
+          jobs:
+            check-style:
+              artifacts:
+                - build:
+                    source: lib/build/reports/checkstyle
+                    destination: ''
+              tasks:
+                - *fetch_build_task
+                - exec:
+                    command: ./gradlew
+                    arguments:
+                      - checkstyleMain
+                      - checkstyleTest
+                      - --info
+                    run_if: passed
+            programming-flaws:
+              artifacts:
+                - build:
+                    source: lib/build/reports/pmd
+                    destination: ''
+              tasks:
+                - *fetch_build_task
+                - exec:
+                    command: ./gradlew
+                    arguments:
+                      - pmdMain
+                      - pmdTest
+                      - --info
+                    run_if: passed
+      - publish-to-repository:
+          fetch_materials: false
+          approval:
+            type: success
+            allow_only_on_success: true
+          jobs:
+            publish:
+              tasks:
+                - *fetch_build_task
+                - exec:
+                    command: ./gradlew
+                    arguments:
+                      - publish
+                      - --info
+                    run_if: passed

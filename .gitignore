@@ -11,6 +11,6 @@ nb-configuration.xml
 # Java
 *.jks
 
-# Maven
-target/
-generated/
+# Gradle
+.gradle
+lib/build

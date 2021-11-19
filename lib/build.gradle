@@ -1,0 +1,75 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'checkstyle'
+    id 'jacoco'
+    id 'pmd'
+}
+
+dependencies {
+    implementation 'io.netty:netty-all:4.1.68.Final'
+    implementation 'io.netty:netty-transport-native-epoll:4.1.68.Final'
+    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.14.1'
+    testImplementation 'org.apache.logging.log4j:log4j-api:2.14.1'
+    testImplementation 'org.apache.logging.log4j:log4j-core:2.14.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.0'
+    testImplementation 'org.mockito:mockito-core:3.12.4'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+    withJavadocJar()
+    withSourcesJar()
+}
+
+repositories {
+    maven {
+        name = 'lucimber'
+        url = uri('https://artifactory.lucimber.io/artifactory/gradle-dev')
+        url = uri('https://artifactory.lucimber.io/artifactory/gradle-release')
+        credentials {
+            username = "${repo_maven_username}"
+            password = "${repo_maven_password}"
+        }
+    }
+}
+
+publishing {
+    publications {
+        library(MavenPublication) {
+            groupId = 'com.lucimber'
+            artifactId = 'dbus'
+            version = '1.0-SNAPSHOT'
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name = 'lucimber'
+            def releasesRepoUrl = uri('https://artifactory.lucimber.io/artifactory/gradle-release-local')
+            def snapshotsRepoUrl = uri('https://artifactory.lucimber.io/artifactory/gradle-dev-local')
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username = "${repo_maven_username}"
+                password = "${repo_maven_password}"
+            }
+        }
+    }
+}
+
+tasks.withType(Test) {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport // report is always generated after tests run
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+pmd {
+    rulesMinimumPriority = 2
+}
