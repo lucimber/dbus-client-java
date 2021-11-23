@@ -1,7 +1,7 @@
 package com.lucimber.dbus.impl.netty.connection;
 
-import com.lucimber.dbus.util.LoggerUtils;
 import com.lucimber.dbus.connection.sasl.SaslMessage;
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;

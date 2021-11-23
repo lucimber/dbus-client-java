@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public final class ObjectPathDecoderTest {
+final class ObjectPathDecoderTest {
 
     private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
     private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
@@ -24,17 +24,14 @@ public final class ObjectPathDecoderTest {
     void decodeObjectPath(final ByteOrder byteOrder) throws DecoderException {
         final ByteBuf buffer = Unpooled.buffer();
         // UINT32 bytes
+        final byte dec11 = 0x0B;
+        final byte[] strLength;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x0B);
+            strLength = new byte[]{0x00, 0x00, 0x00, dec11};
         } else {
-            buffer.writeByte(0x0B);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
+            strLength = new byte[]{dec11, 0x00, 0x00, 0x00};
         }
+        buffer.writeBytes(strLength);
         // UTF-8 bytes (11 bytes)
         buffer.writeBytes(VALID_OBJECT_PATH.getBytes(StandardCharsets.UTF_8));
         // Trailing NUL byte
@@ -52,17 +49,14 @@ public final class ObjectPathDecoderTest {
     void failDueToIndexLimitation(final ByteOrder byteOrder) {
         final ByteBuf buffer = Unpooled.buffer();
         // UINT32 bytes (Integer.MAX_VALUE + 1 = 2147483648)
+        final byte dec128 = (byte) 0x80;
+        final byte[] strLength;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeByte(0x80);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
+            strLength = new byte[]{dec128, 0x00, 0x00, 0x00};
         } else {
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x80);
+            strLength = new byte[]{0x00, 0x00, 0x00, dec128};
         }
+        buffer.writeBytes(strLength);
         // UTF-8 bytes (12 bytes)
         buffer.writeBytes(VALID_OBJECT_PATH.getBytes(StandardCharsets.UTF_8));
         // Trailing NUL byte
@@ -76,17 +70,14 @@ public final class ObjectPathDecoderTest {
     void failDueToInvalidObjectPath(final ByteOrder byteOrder) {
         final ByteBuf buffer = Unpooled.buffer();
         // UINT32 bytes
+        final byte dec5 = 0x05;
+        final byte[] strLength;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x05);
+            strLength = new byte[]{0x00, 0x00, 0x00, dec5};
         } else {
-            buffer.writeByte(0x05);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
+            strLength = new byte[]{dec5, 0x00, 0x00, 0x00};
         }
+        buffer.writeBytes(strLength);
         // UTF-8 bytes (5 bytes)
         buffer.writeBytes(INVALID_OBJECT_PATH.getBytes(StandardCharsets.UTF_8));
         // Trailing NUL byte

@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public final class BooleanDecoderTest {
+final class BooleanDecoderTest {
 
     private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
     private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
@@ -19,13 +19,11 @@ public final class BooleanDecoderTest {
     @Test
     void decodeFalseOnBigEndian() throws DecoderException {
         final ByteBuf buffer = Unpooled.buffer();
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x00);
+        final byte[] bytes = {0x00, 0x00, 0x00, 0x00};
+        buffer.writeBytes(bytes);
         final BooleanDecoder decoder = new BooleanDecoder(ByteOrder.BIG_ENDIAN);
         final DecoderResult<DBusBoolean> result = decoder.decode(buffer, 0);
-        assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+        assertEquals(bytes.length, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         assertFalse(result.getValue().getDelegate());
     }
@@ -33,13 +31,11 @@ public final class BooleanDecoderTest {
     @Test
     void decodeFalseOnLittleEndian() throws DecoderException {
         final ByteBuf buffer = Unpooled.buffer();
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x00);
+        final byte[] bytes = {0x00, 0x00, 0x00, 0x00};
+        buffer.writeBytes(bytes);
         final BooleanDecoder decoder = new BooleanDecoder(ByteOrder.LITTLE_ENDIAN);
         final DecoderResult<DBusBoolean> result = decoder.decode(buffer, 0);
-        assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+        assertEquals(bytes.length, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         assertFalse(result.getValue().getDelegate());
     }
@@ -47,13 +43,11 @@ public final class BooleanDecoderTest {
     @Test
     void decodeTrueOnBigEndian() throws DecoderException {
         final ByteBuf buffer = Unpooled.buffer();
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x01);
+        final byte[] bytes = {0x00, 0x00, 0x00, 0x01};
+        buffer.writeBytes(bytes);
         final BooleanDecoder decoder = new BooleanDecoder(ByteOrder.BIG_ENDIAN);
         final DecoderResult<DBusBoolean> result = decoder.decode(buffer, 0);
-        assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+        assertEquals(bytes.length, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         assertTrue(result.getValue().getDelegate());
     }
@@ -61,13 +55,11 @@ public final class BooleanDecoderTest {
     @Test
     void decodeTrueOnLittleEndian() throws DecoderException {
         final ByteBuf buffer = Unpooled.buffer();
-        buffer.writeByte(0x01);
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x00);
+        final byte[] bytes = {0x01, 0x00, 0x00, 0x00};
+        buffer.writeBytes(bytes);
         final BooleanDecoder decoder = new BooleanDecoder(ByteOrder.LITTLE_ENDIAN);
         final DecoderResult<DBusBoolean> result = decoder.decode(buffer, 0);
-        assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+        assertEquals(bytes.length, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         assertTrue(result.getValue().getDelegate());
     }
@@ -75,10 +67,8 @@ public final class BooleanDecoderTest {
     @Test
     void failOnBigEndian() {
         final ByteBuf buffer = Unpooled.buffer();
-        buffer.writeByte(0x01);
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x01);
+        final byte[] bytes = {0x01, 0x00, 0x00, 0x01};
+        buffer.writeBytes(bytes);
         final BooleanDecoder decoder = new BooleanDecoder(ByteOrder.BIG_ENDIAN);
         assertThrows(DecoderException.class, () -> decoder.decode(buffer, 0));
     }
@@ -86,10 +76,8 @@ public final class BooleanDecoderTest {
     @Test
     void failOnLittleEndian() {
         final ByteBuf buffer = Unpooled.buffer();
-        buffer.writeByte(0x01);
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x00);
-        buffer.writeByte(0x01);
+        final byte[] bytes = {0x01, 0x00, 0x00, 0x01};
+        buffer.writeBytes(bytes);
         final BooleanDecoder decoder = new BooleanDecoder(ByteOrder.BIG_ENDIAN);
         assertThrows(DecoderException.class, () -> decoder.decode(buffer, 0));
     }

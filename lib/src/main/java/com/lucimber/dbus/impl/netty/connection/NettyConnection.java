@@ -1,12 +1,12 @@
 package com.lucimber.dbus.impl.netty.connection;
 
-import com.lucimber.dbus.type.UInt32;
-import com.lucimber.dbus.util.LoggerUtils;
 import com.lucimber.dbus.connection.Connection;
 import com.lucimber.dbus.connection.Pipeline;
 import com.lucimber.dbus.connection.PipelineFactory;
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
+import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;

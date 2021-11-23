@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class LongDecoderTest {
+final class LongDecoderTest {
 
     private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
     private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
@@ -24,9 +24,10 @@ public final class LongDecoderTest {
         } else {
             buffer.writeLongLE(value);
         }
+        final int numOfWrittenBytes = buffer.readableBytes();
         final Int64Decoder decoder = new Int64Decoder(byteOrder);
         final DecoderResult<Int64> result = decoder.decode(buffer, 0);
-        assertEquals(8, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+        assertEquals(numOfWrittenBytes, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         assertEquals(value, result.getValue().getDelegate());
     }

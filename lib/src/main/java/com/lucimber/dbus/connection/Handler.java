@@ -1,7 +1,7 @@
 package com.lucimber.dbus.connection;
 
-import com.lucimber.dbus.message.OutboundMessage;
 import com.lucimber.dbus.message.InboundMessage;
+import com.lucimber.dbus.message.OutboundMessage;
 
 /**
  * A handler is assigned to a pipeline and reacts to events that arise within this pipeline.

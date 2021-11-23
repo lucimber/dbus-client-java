@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class BooleanEncoderTest {
@@ -19,14 +20,14 @@ final class BooleanEncoderTest {
     void encodeBooleanFalse(final ByteOrder byteOrder) {
         final Encoder<DBusBoolean, ByteBuf> encoder = new BooleanEncoder(ByteBufAllocator.DEFAULT, byteOrder);
         final EncoderResult<ByteBuf> result = encoder.encode(DBusBoolean.valueOf(false), 0);
-        final int expectedBytes = 4;
-        assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
+        final int expectedNumOfBytes = 4;
+        assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
         final ByteBuf buffer = result.getBuffer();
-        assertEquals(expectedBytes, buffer.readableBytes(), READABLE_BYTES);
-        assertEquals((byte) 0x00, buffer.getByte(0));
-        assertEquals((byte) 0x00, buffer.getByte(1));
-        assertEquals((byte) 0x00, buffer.getByte(2));
-        assertEquals((byte) 0x00, buffer.getByte(3));
+        assertEquals(expectedNumOfBytes, buffer.readableBytes(), READABLE_BYTES);
+        final byte[] expectedBytes = {0x00, 0x00, 0x00, 0x00};
+        final byte[] actualBytes = new byte[buffer.readableBytes()];
+        buffer.getBytes(0, actualBytes);
+        assertArrayEquals(expectedBytes, actualBytes);
         buffer.release();
     }
 
@@ -36,17 +37,14 @@ final class BooleanEncoderTest {
         final Encoder<DBusBoolean, ByteBuf> encoder = new BooleanEncoder(ByteBufAllocator.DEFAULT, byteOrder);
         final int offset = 5;
         final EncoderResult<ByteBuf> result = encoder.encode(DBusBoolean.valueOf(false), offset);
-        final int expectedBytes = 7;
-        assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
+        final int expectedNumOfBytes = 7;
+        assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
         final ByteBuf buffer = result.getBuffer();
-        assertEquals(expectedBytes, buffer.readableBytes(), READABLE_BYTES);
-        assertEquals((byte) 0x00, buffer.getByte(0));
-        assertEquals((byte) 0x00, buffer.getByte(1));
-        assertEquals((byte) 0x00, buffer.getByte(2));
-        assertEquals((byte) 0x00, buffer.getByte(3));
-        assertEquals((byte) 0x00, buffer.getByte(4));
-        assertEquals((byte) 0x00, buffer.getByte(5));
-        assertEquals((byte) 0x00, buffer.getByte(6));
+        assertEquals(expectedNumOfBytes, buffer.readableBytes(), READABLE_BYTES);
+        final byte[] expectedBytes = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+        final byte[] actualBytes = new byte[buffer.readableBytes()];
+        buffer.getBytes(0, actualBytes);
+        assertArrayEquals(expectedBytes, actualBytes);
         buffer.release();
     }
 
@@ -55,21 +53,20 @@ final class BooleanEncoderTest {
     void encodeBooleanTrue(final ByteOrder byteOrder) {
         final Encoder<DBusBoolean, ByteBuf> encoder = new BooleanEncoder(ByteBufAllocator.DEFAULT, byteOrder);
         final EncoderResult<ByteBuf> result = encoder.encode(DBusBoolean.valueOf(true), 0);
-        final int expectedBytes = 4;
-        assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
+        final int expectedNumOfBytes = 4;
+        assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
         final ByteBuf buffer = result.getBuffer();
-        assertEquals(expectedBytes, buffer.readableBytes(), READABLE_BYTES);
+        assertEquals(expectedNumOfBytes, buffer.readableBytes(), READABLE_BYTES);
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            assertEquals((byte) 0x00, buffer.getByte(0));
+            final byte[] expectedBytes = {0x00, 0x00, 0x00, 0x01};
+            final byte[] actualBytes = new byte[buffer.readableBytes()];
+            buffer.getBytes(0, actualBytes);
+            assertArrayEquals(expectedBytes, actualBytes, "Big Endian");
         } else {
-            assertEquals((byte) 0x01, buffer.getByte(0));
-        }
-        assertEquals((byte) 0x00, buffer.getByte(1));
-        assertEquals((byte) 0x00, buffer.getByte(2));
-        if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            assertEquals((byte) 0x01, buffer.getByte(3));
-        } else {
-            assertEquals((byte) 0x00, buffer.getByte(3));
+            final byte[] expectedBytes = {0x01, 0x00, 0x00, 0x00};
+            final byte[] actualBytes = new byte[buffer.readableBytes()];
+            buffer.getBytes(0, actualBytes);
+            assertArrayEquals(expectedBytes, actualBytes, "Little Endian");
         }
         buffer.release();
     }
@@ -80,24 +77,20 @@ final class BooleanEncoderTest {
         final Encoder<DBusBoolean, ByteBuf> encoder = new BooleanEncoder(ByteBufAllocator.DEFAULT, byteOrder);
         final int offset = 5;
         final EncoderResult<ByteBuf> result = encoder.encode(DBusBoolean.valueOf(true), offset);
-        final int expectedBytes = 7;
-        assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
+        final int expectedNumOfBytes = 7;
+        assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
         final ByteBuf buffer = result.getBuffer();
-        assertEquals(expectedBytes, buffer.readableBytes(), READABLE_BYTES);
-        assertEquals((byte) 0x00, buffer.getByte(0));
-        assertEquals((byte) 0x00, buffer.getByte(1));
-        assertEquals((byte) 0x00, buffer.getByte(2));
+        assertEquals(expectedNumOfBytes, buffer.readableBytes(), READABLE_BYTES);
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            assertEquals((byte) 0x00, buffer.getByte(3));
+            final byte[] expectedBytes = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
+            final byte[] actualBytes = new byte[buffer.readableBytes()];
+            buffer.getBytes(0, actualBytes);
+            assertArrayEquals(expectedBytes, actualBytes, "Big Endian");
         } else {
-            assertEquals((byte) 0x01, buffer.getByte(3));
-        }
-        assertEquals((byte) 0x00, buffer.getByte(4));
-        assertEquals((byte) 0x00, buffer.getByte(5));
-        if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            assertEquals((byte) 0x01, buffer.getByte(6));
-        } else {
-            assertEquals((byte) 0x00, buffer.getByte(6));
+            final byte[] expectedBytes = {0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00};
+            final byte[] actualBytes = new byte[buffer.readableBytes()];
+            buffer.getBytes(0, actualBytes);
+            assertArrayEquals(expectedBytes, actualBytes, "Little Endian");
         }
         buffer.release();
     }

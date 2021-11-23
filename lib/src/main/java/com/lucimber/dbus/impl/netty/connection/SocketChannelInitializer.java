@@ -1,12 +1,12 @@
 package com.lucimber.dbus.impl.netty.connection;
 
-import com.lucimber.dbus.type.UInt32;
-import com.lucimber.dbus.util.LoggerUtils;
 import com.lucimber.dbus.connection.sasl.SaslAnonymousAuthConfig;
 import com.lucimber.dbus.connection.sasl.SaslAuthConfig;
 import com.lucimber.dbus.connection.sasl.SaslAuthMechanism;
 import com.lucimber.dbus.connection.sasl.SaslCookieAuthConfig;
 import com.lucimber.dbus.connection.sasl.SaslExternalAuthConfig;
+import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.unix.UnixChannel;

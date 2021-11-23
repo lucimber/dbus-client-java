@@ -25,20 +25,25 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class InboundByteBufHandlerTest {
 
+    private static final byte BIG_ENDIAN_MAGIC = 0x42;
     private static final int HEADER_BOUNDARY = 8;
+    private static final byte LITTLE_ENDIAN_MAGIC = 0x6C;
 
     @ParameterizedTest
     @EnumSource(ByteOrder.class)
     void succeedWithError(final ByteOrder byteOrder) {
         final ByteBuf buffer = Unpooled.buffer();
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeByte(0x42); // Big Endian
+            buffer.writeByte(BIG_ENDIAN_MAGIC);
         } else {
-            buffer.writeByte(0x6C); // Little Endian
+            buffer.writeByte(LITTLE_ENDIAN_MAGIC);
         }
-        buffer.writeByte(0x03); // Message type: Error
-        buffer.writeZero(1); // Skip message flags byte
-        buffer.writeByte(0x01); // Protocol version
+        final byte msgTypeError = 0x03;
+        buffer.writeByte(msgTypeError);
+        final byte msgFlag = 0x00;
+        buffer.writeByte(msgFlag);
+        final byte version = 0x01;
+        buffer.writeByte(version);
         // Body length
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
             buffer.writeInt(0);
@@ -89,13 +94,16 @@ final class InboundByteBufHandlerTest {
     void succeedWithMethodCall(final ByteOrder byteOrder) {
         final ByteBuf buffer = Unpooled.buffer();
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeByte(0x42); // Big Endian
+            buffer.writeByte(BIG_ENDIAN_MAGIC);
         } else {
-            buffer.writeByte(0x6C); // Little Endian
+            buffer.writeByte(LITTLE_ENDIAN_MAGIC);
         }
-        buffer.writeByte(0x01); // Message type: Method call
-        buffer.writeZero(1); // Skip message flags byte
-        buffer.writeByte(0x01); // Protocol version
+        final byte msgTypeMethodCall = 0x01;
+        buffer.writeByte(msgTypeMethodCall);
+        final byte msgFlag = 0x00;
+        buffer.writeByte(msgFlag);
+        final byte version = 0x01;
+        buffer.writeByte(version);
         // Body length
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
             buffer.writeInt(0);
@@ -150,13 +158,16 @@ final class InboundByteBufHandlerTest {
     void succeedWithMethodReturnMessage(final ByteOrder byteOrder) {
         final ByteBuf buffer = Unpooled.buffer();
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeByte(0x42); // Big Endian
+            buffer.writeByte(BIG_ENDIAN_MAGIC);
         } else {
-            buffer.writeByte(0x6C); // Little Endian
+            buffer.writeByte(LITTLE_ENDIAN_MAGIC);
         }
-        buffer.writeByte(0x02); // Message type: Method return
-        buffer.writeZero(1); // Skip message flags byte
-        buffer.writeByte(0x01); // Protocol version
+        final byte msgTypeMethodReturn = 0x02;
+        buffer.writeByte(msgTypeMethodReturn);
+        final byte msgFlag = 0x00;
+        buffer.writeByte(msgFlag);
+        final byte version = 0x01;
+        buffer.writeByte(version);
         // Body length
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
             buffer.writeInt(0);
@@ -203,13 +214,16 @@ final class InboundByteBufHandlerTest {
     void succeedWithSignalMessage(final ByteOrder byteOrder) {
         final ByteBuf buffer = Unpooled.buffer();
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeByte(0x42); // Big Endian
+            buffer.writeByte(BIG_ENDIAN_MAGIC);
         } else {
-            buffer.writeByte(0x6C); // Little Endian
+            buffer.writeByte(LITTLE_ENDIAN_MAGIC);
         }
-        buffer.writeByte(0x04); // Message type: Signal
-        buffer.writeZero(1); // Skip message flags byte
-        buffer.writeByte(0x01); // Protocol version
+        final byte msgTypeSignal = 0x04;
+        buffer.writeByte(msgTypeSignal);
+        final byte msgFlag = 0x00;
+        buffer.writeByte(msgFlag);
+        final byte version = 0x01;
+        buffer.writeByte(version);
         // Body length
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
             buffer.writeInt(0);

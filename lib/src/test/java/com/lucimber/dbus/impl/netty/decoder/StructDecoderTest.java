@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class StructDecoderTest {
+final class StructDecoderTest {
 
     private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
     private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
@@ -28,16 +28,14 @@ public final class StructDecoderTest {
         final Signature signature = Signature.valueOf(FIRST_COMPLEX_SIGNATURE);
         final ByteBuf buffer = Unpooled.buffer();
         // Array of bytes
+        final int arrayLengthInBytes = 5;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(5);
+            buffer.writeInt(arrayLengthInBytes);
         } else {
-            buffer.writeIntLE(5);
+            buffer.writeIntLE(arrayLengthInBytes);
         }
-        buffer.writeByte(1);
-        buffer.writeByte(2);
-        buffer.writeByte(3);
-        buffer.writeByte(4);
-        buffer.writeByte(5);
+        final byte[] bytes = {0x01, 0x02, 0x03, 0x04, 0x05};
+        buffer.writeBytes(bytes);
         // Variant
         final String rawVariantSignature = "i";
         buffer.writeByte(rawVariantSignature.length());
@@ -55,7 +53,8 @@ public final class StructDecoderTest {
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         final Struct struct = result.getValue();
         assertEquals(FIRST_COMPLEX_SIGNATURE, struct.getSignature().getDelegate(), "Signature");
-        assertEquals(2, struct.getDelegate().size(), "Elements in struct");
+        final int numOfStructElements = 2;
+        assertEquals(numOfStructElements, struct.getDelegate().size(), "Elements in struct");
     }
 
     @ParameterizedTest
@@ -78,15 +77,15 @@ public final class StructDecoderTest {
     void decodeStructOfTwoBytes(final ByteOrder byteOrder) {
         final Signature signature = Signature.valueOf(TWO_BYTES_SIGNATURE);
         final ByteBuf buffer = Unpooled.buffer();
-        buffer.writeByte(Byte.MAX_VALUE);
-        buffer.writeByte(Byte.MIN_VALUE);
+        final byte[] bytes = {Byte.MAX_VALUE, Byte.MIN_VALUE};
+        buffer.writeBytes(bytes);
         final StructDecoder decoder = new StructDecoder(byteOrder, signature);
         final DecoderResult<Struct> result = decoder.decode(buffer, 0);
-        assertEquals(2, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+        assertEquals(bytes.length, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         final Struct struct = result.getValue();
         assertEquals(TWO_BYTES_SIGNATURE, struct.getSignature().getDelegate(), "Signature");
-        assertEquals(2, struct.getDelegate().size(), "Elements in struct");
+        assertEquals(bytes.length, struct.getDelegate().size(), "Elements in struct");
     }
 
     @ParameterizedTest
@@ -101,7 +100,8 @@ public final class StructDecoderTest {
         }
         final StructDecoder decoder = new StructDecoder(byteOrder, signature);
         final DecoderResult<Struct> result = decoder.decode(buffer, 0);
-        assertEquals(8, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+        final int numOfConsumedBytes = 8;
+        assertEquals(numOfConsumedBytes, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         final Struct struct = result.getValue();
         assertEquals(ONE_DOUBLE_SIGNATURE, struct.getSignature().getDelegate(), "Signature");
@@ -120,7 +120,8 @@ public final class StructDecoderTest {
         }
         final StructDecoder decoder = new StructDecoder(byteOrder, signature);
         final DecoderResult<Struct> result = decoder.decode(buffer, 0);
-        assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+        final int numOfConsumedBytes = 4;
+        assertEquals(numOfConsumedBytes, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         final Struct struct = result.getValue();
         assertEquals(ONE_INTEGER_SIGNATURE, struct.getSignature().toString(), "Signature");

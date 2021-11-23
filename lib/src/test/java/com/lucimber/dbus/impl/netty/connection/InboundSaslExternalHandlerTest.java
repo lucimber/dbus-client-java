@@ -9,22 +9,15 @@ import com.lucimber.dbus.connection.sasl.SaslOkMessage;
 import com.lucimber.dbus.connection.sasl.SaslRejectedMessage;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.embedded.EmbeddedChannel;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.MDC;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class InboundSaslExternalHandlerTest {
+final class InboundSaslExternalHandlerTest {
 
     private static final String IDENTITY = "1234";
-
-    @BeforeEach
-    void resetDiagnosticContext() {
-        MDC.clear();
-    }
 
     @Test
     void writeCorrectAuthMessage() {

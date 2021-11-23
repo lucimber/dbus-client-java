@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public final class SignatureDecoderTest {
+final class SignatureDecoderTest {
 
     private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
     private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
@@ -36,7 +36,8 @@ public final class SignatureDecoderTest {
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         final Signature signature = result.getValue();
         assertEquals(VALID_SIGNATURE, signature.toString());
-        assertEquals(2, signature.getQuantity());
+        final int numOfTypes = 2;
+        assertEquals(numOfTypes, signature.getQuantity());
     }
 
     @Test
@@ -55,7 +56,8 @@ public final class SignatureDecoderTest {
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         final Signature signature = result.getValue();
         assertEquals(COMPLEX_VALID_SIGNATURE, signature.toString());
-        assertEquals(7, signature.getQuantity());
+        final int numOfTypes = 7;
+        assertEquals(numOfTypes, signature.getQuantity());
     }
 
     @Test

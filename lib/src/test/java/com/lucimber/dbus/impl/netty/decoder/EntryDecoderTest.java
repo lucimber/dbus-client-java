@@ -3,10 +3,10 @@ package com.lucimber.dbus.impl.netty.decoder;
 import com.lucimber.dbus.impl.netty.ByteOrder;
 import com.lucimber.dbus.type.DBusByte;
 import com.lucimber.dbus.type.DictEntry;
+import com.lucimber.dbus.type.Int32;
 import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.SignatureException;
 import com.lucimber.dbus.type.Variant;
-import com.lucimber.dbus.type.Int32;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public final class EntryDecoderTest {
+final class EntryDecoderTest {
 
     private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
     private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";

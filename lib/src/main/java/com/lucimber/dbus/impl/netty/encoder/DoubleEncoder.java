@@ -1,9 +1,9 @@
 package com.lucimber.dbus.impl.netty.encoder;
 
-import com.lucimber.dbus.type.Type;
-import com.lucimber.dbus.util.LoggerUtils;
 import com.lucimber.dbus.impl.netty.ByteOrder;
 import com.lucimber.dbus.type.DBusDouble;
+import com.lucimber.dbus.type.Type;
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.slf4j.Logger;

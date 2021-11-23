@@ -8,22 +8,15 @@ import com.lucimber.dbus.type.ObjectPath;
 import com.lucimber.dbus.type.UInt32;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.MDC;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class OutboundSignalHandlerTest {
-
-    @BeforeEach
-    void resetDiagnosticContext() {
-        MDC.clear();
-    }
+final class OutboundSignalHandlerTest {
 
     @Test
-    public void encodeSuccessfully() {
+    void encodeSuccessfully() {
         final OutboundMessageEncoder handler = new OutboundMessageEncoder();
         final EmbeddedChannel channel = new EmbeddedChannel(handler);
         final UInt32 serialNumber = UInt32.valueOf(1);

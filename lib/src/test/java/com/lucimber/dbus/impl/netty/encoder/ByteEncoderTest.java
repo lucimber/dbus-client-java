@@ -34,7 +34,8 @@ final class ByteEncoderTest {
         assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
         final ByteBuf buffer = result.getBuffer();
         assertEquals(expectedBytes, buffer.readableBytes(), READABLE_BYTES);
-        assertEquals((byte) 0xFF, buffer.getByte(0));
+        final byte byteMaxValue = (byte) 0xFF;
+        assertEquals(byteMaxValue, buffer.getByte(0));
         buffer.release();
     }
 }

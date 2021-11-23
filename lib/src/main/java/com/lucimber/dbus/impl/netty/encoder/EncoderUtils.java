@@ -1,7 +1,18 @@
 package com.lucimber.dbus.impl.netty.encoder;
 
+import com.lucimber.dbus.impl.netty.ByteOrder;
+import com.lucimber.dbus.type.DBusArray;
 import com.lucimber.dbus.type.DBusBasicType;
+import com.lucimber.dbus.type.DBusBoolean;
+import com.lucimber.dbus.type.DBusByte;
+import com.lucimber.dbus.type.DBusContainerType;
+import com.lucimber.dbus.type.DBusDouble;
+import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.Dict;
+import com.lucimber.dbus.type.DictEntry;
+import com.lucimber.dbus.type.Int16;
+import com.lucimber.dbus.type.Int32;
 import com.lucimber.dbus.type.Int64;
 import com.lucimber.dbus.type.ObjectPath;
 import com.lucimber.dbus.type.Signature;
@@ -13,17 +24,6 @@ import com.lucimber.dbus.type.UInt32;
 import com.lucimber.dbus.type.UInt64;
 import com.lucimber.dbus.type.UnixFd;
 import com.lucimber.dbus.type.Variant;
-import com.lucimber.dbus.impl.netty.ByteOrder;
-import com.lucimber.dbus.type.DBusArray;
-import com.lucimber.dbus.type.DBusBoolean;
-import com.lucimber.dbus.type.DBusByte;
-import com.lucimber.dbus.type.DBusContainerType;
-import com.lucimber.dbus.type.DBusDouble;
-import com.lucimber.dbus.type.Int32;
-import com.lucimber.dbus.type.Int16;
-import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.DictEntry;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 
@@ -99,16 +99,13 @@ public final class EncoderUtils {
         try {
             final Signature signature = value.getSignature();
             if (signature.isArray()) {
-                @SuppressWarnings("unchecked")
-                final DBusArray<DBusType> array = (DBusArray<DBusType>) value;
+                @SuppressWarnings("unchecked") final DBusArray<DBusType> array = (DBusArray<DBusType>) value;
                 return new ArrayEncoder<>(allocator, order, signature).encode(array, offset);
             } else if (signature.isDictionary()) {
-                @SuppressWarnings("unchecked")
-                final Dict<DBusBasicType, DBusType> dict = (Dict<DBusBasicType, DBusType>) value;
+                @SuppressWarnings("unchecked") final Dict<DBusBasicType, DBusType> dict = (Dict<DBusBasicType, DBusType>) value;
                 return new DictEncoder<>(allocator, order, signature).encode(dict, offset);
             } else if (signature.isDictionaryEntry()) {
-                @SuppressWarnings("unchecked")
-                final DictEntry<DBusBasicType, DBusType> dictEntry = (DictEntry<DBusBasicType, DBusType>) value;
+                @SuppressWarnings("unchecked") final DictEntry<DBusBasicType, DBusType> dictEntry = (DictEntry<DBusBasicType, DBusType>) value;
                 return new DictEntryEncoder<>(allocator, order, signature).encode(dictEntry, offset);
             } else if (signature.isStruct()) {
                 final Struct struct = (Struct) value;

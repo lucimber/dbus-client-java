@@ -1,18 +1,18 @@
 package com.lucimber.dbus.impl.netty.encoder;
 
 import com.lucimber.dbus.impl.netty.ByteOrder;
+import com.lucimber.dbus.type.DBusArray;
 import com.lucimber.dbus.type.DBusBoolean;
 import com.lucimber.dbus.type.DBusByte;
 import com.lucimber.dbus.type.DBusDouble;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.Int16;
+import com.lucimber.dbus.type.Int32;
 import com.lucimber.dbus.type.Int64;
 import com.lucimber.dbus.type.ObjectPath;
 import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.UInt16;
 import com.lucimber.dbus.type.UInt64;
-import com.lucimber.dbus.type.DBusArray;
-import com.lucimber.dbus.type.Int32;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -93,11 +93,16 @@ final class ArrayEncoderTest {
     void encodeByteArray(final ByteOrder byteOrder) {
         final Signature signature = Signature.valueOf("ay");
         final DBusArray<DBusByte> array = new DBusArray<>(signature);
-        array.add(DBusByte.valueOf((byte) 0x01));
-        array.add(DBusByte.valueOf((byte) 0x02));
-        array.add(DBusByte.valueOf((byte) 0x03));
-        array.add(DBusByte.valueOf((byte) 0x04));
-        array.add(DBusByte.valueOf((byte) 0x05));
+        final byte one = 0x01;
+        array.add(DBusByte.valueOf(one));
+        final byte two = 0x02;
+        array.add(DBusByte.valueOf(two));
+        final byte three = 0x03;
+        array.add(DBusByte.valueOf(three));
+        final byte four = 0x04;
+        array.add(DBusByte.valueOf(four));
+        final byte five = 0x05;
+        array.add(DBusByte.valueOf(five));
         final Encoder<DBusArray<DBusByte>, ByteBuf> encoder =
                 new ArrayEncoder<>(ByteBufAllocator.DEFAULT, byteOrder, signature);
         final EncoderResult<ByteBuf> result = encoder.encode(array, 0);

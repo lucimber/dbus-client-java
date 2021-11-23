@@ -1,7 +1,7 @@
 package com.lucimber.dbus.impl.netty.decoder;
 
-import com.lucimber.dbus.util.LoggerUtils;
 import com.lucimber.dbus.type.DBusByte;
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class ByteDecoderTest {
+final class ByteDecoderTest {
 
     private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
     private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
@@ -15,7 +15,8 @@ public final class ByteDecoderTest {
     @Test
     void decodeByte() {
         final ByteBuf buffer = Unpooled.buffer();
-        buffer.writeByte(0xFF);
+        final byte maxValue = (byte) 0xFF;
+        buffer.writeByte(maxValue);
         final ByteDecoder decoder = new ByteDecoder();
         final DecoderResult<DBusByte> result = decoder.decode(buffer, 0);
         assertEquals(1, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);

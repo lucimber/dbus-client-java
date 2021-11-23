@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public final class DictionaryDecoderTest {
+final class DictionaryDecoderTest {
 
     private static final String ARRAY_OF_ENTRIES = "a{yv}";
     private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
@@ -26,12 +26,14 @@ public final class DictionaryDecoderTest {
     void decodeDictionary(final ByteOrder byteOrder) {
         final Signature signature = Signature.valueOf(ARRAY_OF_ENTRIES);
         final ByteBuf buffer = Unpooled.buffer();
+        final int numOfBytes = 12;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(12);
+            buffer.writeInt(numOfBytes);
         } else {
-            buffer.writeIntLE(12);
+            buffer.writeIntLE(numOfBytes);
         }
-        buffer.writeZero(4); // Padding for dict-entry
+        final byte[] dictEntryPadding = {0x00, 0x00, 0x00, 0x00};
+        buffer.writeBytes(dictEntryPadding);
         // Byte (y)
         buffer.writeByte(Byte.MAX_VALUE);
         // Variant (v)
@@ -65,7 +67,8 @@ public final class DictionaryDecoderTest {
         } else {
             buffer.writeIntLE(0);
         }
-        buffer.writeZero(4);
+        final byte[] dictEntryPadding = {0x00, 0x00, 0x00, 0x00};
+        buffer.writeBytes(dictEntryPadding);
         final int numOfBytes = buffer.readableBytes();
         final DictDecoder<DBusByte, Variant> decoder = new DictDecoder<>(byteOrder, signature);
         final DecoderResult<Dict<DBusByte, Variant>> result = decoder.decode(buffer, 0);

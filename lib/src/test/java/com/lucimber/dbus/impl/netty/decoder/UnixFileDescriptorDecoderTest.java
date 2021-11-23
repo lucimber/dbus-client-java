@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class UnixFileDescriptorDecoderTest {
+final class UnixFileDescriptorDecoderTest {
 
     private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
     private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
@@ -27,7 +27,8 @@ public final class UnixFileDescriptorDecoderTest {
         final int expected = -1024;
         final Decoder<ByteBuf, UnixFd> decoder = new UnixFdDecoder(byteOrder);
         final DecoderResult<UnixFd> result = decoder.decode(buffer, 0);
-        assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+        final int numOfBytes = 4;
+        assertEquals(numOfBytes, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         final UnixFd descriptor = result.getValue();
         assertEquals(expected, descriptor.getDelegate());

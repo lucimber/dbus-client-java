@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public final class VariantDecoderTest {
+final class VariantDecoderTest {
 
     private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
     private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
@@ -46,11 +46,13 @@ public final class VariantDecoderTest {
         buffer.writeByte(DOUBLE_SIGNATURE.length());
         buffer.writeBytes(DOUBLE_SIGNATURE.getBytes(StandardCharsets.UTF_8));
         buffer.writeZero(1); // NUL byte
-        buffer.writeZero(5); // Padding for double
+        final int paddingForDouble = 5;
+        buffer.writeZero(paddingForDouble);
+        final double testValue = 13.7;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeDouble(13.7);
+            buffer.writeDouble(testValue);
         } else {
-            buffer.writeDoubleLE(13.7);
+            buffer.writeDoubleLE(testValue);
         }
         final int numOfBytes = buffer.readableBytes();
         final VariantDecoder decoder = new VariantDecoder(byteOrder);
@@ -90,12 +92,14 @@ public final class VariantDecoderTest {
         buffer.writeByte(TOO_MANY_TYPES.length());
         buffer.writeBytes(TOO_MANY_TYPES.getBytes(StandardCharsets.UTF_8));
         buffer.writeZero(1);
+        final int firstTestValue = 1024;
+        final int secondTestValue = 2048;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(1024);
-            buffer.writeInt(2048);
+            buffer.writeInt(firstTestValue);
+            buffer.writeInt(secondTestValue);
         } else {
-            buffer.writeIntLE(1024);
-            buffer.writeIntLE(2048);
+            buffer.writeIntLE(firstTestValue);
+            buffer.writeIntLE(secondTestValue);
         }
         final VariantDecoder decoder = new VariantDecoder(byteOrder);
         assertThrows(DecoderException.class, () -> decoder.decode(buffer, 0));

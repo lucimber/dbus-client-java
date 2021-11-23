@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class DoubleEncoderTest {
@@ -19,18 +20,14 @@ final class DoubleEncoderTest {
                 new DoubleEncoder(ByteBufAllocator.DEFAULT, ByteOrder.BIG_ENDIAN);
         final DBusDouble dbusDouble = DBusDouble.valueOf(2.3);
         final EncoderResult<ByteBuf> result = encoder.encode(dbusDouble, 0);
-        final int expectedBytes = 8;
-        assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
+        final int expectedNumOfBytes = 8;
+        assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
         final ByteBuf buffer = result.getBuffer();
-        assertEquals(expectedBytes, buffer.readableBytes(), READABLE_BYTES);
-        assertEquals((byte) 0x40, buffer.getByte(0));
-        assertEquals((byte) 0x02, buffer.getByte(1));
-        assertEquals((byte) 0x66, buffer.getByte(2));
-        assertEquals((byte) 0x66, buffer.getByte(3));
-        assertEquals((byte) 0x66, buffer.getByte(4));
-        assertEquals((byte) 0x66, buffer.getByte(5));
-        assertEquals((byte) 0x66, buffer.getByte(6));
-        assertEquals((byte) 0x66, buffer.getByte(7));
+        assertEquals(expectedNumOfBytes, buffer.readableBytes(), READABLE_BYTES);
+        final byte[] expectedBytes = {0x40, 0x02, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66};
+        final byte[] actualBytes = new byte[expectedNumOfBytes];
+        buffer.getBytes(0, actualBytes);
+        assertArrayEquals(expectedBytes, actualBytes);
         buffer.release();
     }
 
@@ -41,21 +38,14 @@ final class DoubleEncoderTest {
         final DBusDouble dbusDouble = DBusDouble.valueOf(2.3);
         final int offset = 5;
         final EncoderResult<ByteBuf> result = encoder.encode(dbusDouble, offset);
-        final int expectedBytes = 11;
-        assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
+        final int expectedNumOfBytes = 11;
+        assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
         final ByteBuf buffer = result.getBuffer();
-        assertEquals(expectedBytes, buffer.readableBytes(), READABLE_BYTES);
-        assertEquals((byte) 0x00, buffer.getByte(0));
-        assertEquals((byte) 0x00, buffer.getByte(1));
-        assertEquals((byte) 0x00, buffer.getByte(2));
-        assertEquals((byte) 0x40, buffer.getByte(3));
-        assertEquals((byte) 0x02, buffer.getByte(4));
-        assertEquals((byte) 0x66, buffer.getByte(5));
-        assertEquals((byte) 0x66, buffer.getByte(6));
-        assertEquals((byte) 0x66, buffer.getByte(7));
-        assertEquals((byte) 0x66, buffer.getByte(8));
-        assertEquals((byte) 0x66, buffer.getByte(9));
-        assertEquals((byte) 0x66, buffer.getByte(10));
+        assertEquals(expectedNumOfBytes, buffer.readableBytes(), READABLE_BYTES);
+        final byte[] expectedBytes = {0x00, 0x00, 0x00, 0x40, 0x02, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66};
+        final byte[] actualBytes = new byte[expectedNumOfBytes];
+        buffer.getBytes(0, actualBytes);
+        assertArrayEquals(expectedBytes, actualBytes);
         buffer.release();
     }
 
@@ -65,18 +55,14 @@ final class DoubleEncoderTest {
                 new DoubleEncoder(ByteBufAllocator.DEFAULT, ByteOrder.LITTLE_ENDIAN);
         final DBusDouble dbusDouble = DBusDouble.valueOf(2.3);
         final EncoderResult<ByteBuf> result = encoder.encode(dbusDouble, 0);
-        final int expectedBytes = 8;
-        assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
+        final int expectedNumOfBytes = 8;
+        assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
         final ByteBuf buffer = result.getBuffer();
-        assertEquals(expectedBytes, buffer.readableBytes(), READABLE_BYTES);
-        assertEquals((byte) 0x66, buffer.getByte(0));
-        assertEquals((byte) 0x66, buffer.getByte(1));
-        assertEquals((byte) 0x66, buffer.getByte(2));
-        assertEquals((byte) 0x66, buffer.getByte(3));
-        assertEquals((byte) 0x66, buffer.getByte(4));
-        assertEquals((byte) 0x66, buffer.getByte(5));
-        assertEquals((byte) 0x02, buffer.getByte(6));
-        assertEquals((byte) 0x40, buffer.getByte(7));
+        assertEquals(expectedNumOfBytes, buffer.readableBytes(), READABLE_BYTES);
+        final byte[] expectedBytes = {0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x02, 0x40};
+        final byte[] actualBytes = new byte[expectedNumOfBytes];
+        buffer.getBytes(0, actualBytes);
+        assertArrayEquals(expectedBytes, actualBytes);
         buffer.release();
     }
 
@@ -87,21 +73,14 @@ final class DoubleEncoderTest {
         final DBusDouble dbusDouble = DBusDouble.valueOf(2.3);
         final int offset = 5;
         final EncoderResult<ByteBuf> result = encoder.encode(dbusDouble, offset);
-        final int expectedBytes = 11;
-        assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
+        final int expectedNumOfBytes = 11;
+        assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
         final ByteBuf buffer = result.getBuffer();
-        assertEquals(expectedBytes, buffer.readableBytes(), READABLE_BYTES);
-        assertEquals((byte) 0x00, buffer.getByte(0));
-        assertEquals((byte) 0x00, buffer.getByte(1));
-        assertEquals((byte) 0x00, buffer.getByte(2));
-        assertEquals((byte) 0x66, buffer.getByte(3));
-        assertEquals((byte) 0x66, buffer.getByte(4));
-        assertEquals((byte) 0x66, buffer.getByte(5));
-        assertEquals((byte) 0x66, buffer.getByte(6));
-        assertEquals((byte) 0x66, buffer.getByte(7));
-        assertEquals((byte) 0x66, buffer.getByte(8));
-        assertEquals((byte) 0x02, buffer.getByte(9));
-        assertEquals((byte) 0x40, buffer.getByte(10));
+        assertEquals(expectedNumOfBytes, buffer.readableBytes(), READABLE_BYTES);
+        final byte[] expectedBytes = {0x00, 0x00, 0x00, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x02, 0x40};
+        final byte[] actualBytes = new byte[expectedNumOfBytes];
+        buffer.getBytes(0, actualBytes);
+        assertArrayEquals(expectedBytes, actualBytes);
         buffer.release();
     }
 }

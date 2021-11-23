@@ -6,9 +6,9 @@ import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.InboundMethodCall;
 import com.lucimber.dbus.message.OutboundMethodReturn;
 import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.UInt32;
 import com.lucimber.dbus.util.LoggerUtils;
-import com.lucimber.dbus.type.DBusType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

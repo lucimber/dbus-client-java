@@ -7,22 +7,15 @@ import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.UInt32;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.MDC;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class OutboundMethodReturnHandlerTest {
-
-    @BeforeEach
-    void resetDiagnosticContext() {
-        MDC.clear();
-    }
+final class OutboundMethodReturnHandlerTest {
 
     @Test
-    public void encodeSuccessfully() {
+    void encodeSuccessfully() {
         final OutboundMessageEncoder handler = new OutboundMessageEncoder();
         final EmbeddedChannel channel = new EmbeddedChannel(handler);
         final DBusString destination = DBusString.valueOf("io.lucimber.test.destination");

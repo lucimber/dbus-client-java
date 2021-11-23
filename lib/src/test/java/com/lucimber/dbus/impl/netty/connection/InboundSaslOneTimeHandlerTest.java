@@ -3,19 +3,12 @@ package com.lucimber.dbus.impl.netty.connection;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.embedded.EmbeddedChannel;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.MDC;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class InboundSaslOneTimeHandlerTest {
-
-    @BeforeEach
-    void resetDiagnosticContext() {
-        MDC.clear();
-    }
+final class InboundSaslOneTimeHandlerTest {
 
     @Test
     void testSendingOfNulByte() {

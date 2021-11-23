@@ -9,9 +9,7 @@ import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.UInt32;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.MDC;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,15 +17,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class OutboundErrorHandlerTest {
-
-    @BeforeEach
-    void resetDiagnosticContext() {
-        MDC.clear();
-    }
+final class OutboundErrorHandlerTest {
 
     @Test
-    public void encodeOutboundError() {
+    void encodeOutboundError() {
         final OutboundMessageEncoder handler = new OutboundMessageEncoder();
         final EmbeddedChannel channel = new EmbeddedChannel(handler);
         final DBusString errorName = DBusString.valueOf("io.lucimber.Error.TestError");
@@ -48,7 +41,7 @@ public class OutboundErrorHandlerTest {
     }
 
     @Test
-    public void encodeOutboundErrorWithMessage() {
+    void encodeOutboundErrorWithMessage() {
         final OutboundMessageEncoder handler = new OutboundMessageEncoder();
         final EmbeddedChannel channel = new EmbeddedChannel(handler);
         final DBusString errorName = DBusString.valueOf("io.lucimber.Error.TestError");

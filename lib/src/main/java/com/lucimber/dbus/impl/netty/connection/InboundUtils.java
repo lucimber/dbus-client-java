@@ -4,15 +4,15 @@ import com.lucimber.dbus.impl.netty.ByteOrder;
 import com.lucimber.dbus.impl.netty.decoder.ArrayDecoder;
 import com.lucimber.dbus.impl.netty.decoder.DecoderException;
 import com.lucimber.dbus.impl.netty.decoder.DecoderResult;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.Struct;
-import com.lucimber.dbus.type.Variant;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageFlag;
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.type.DBusArray;
 import com.lucimber.dbus.type.DBusByte;
 import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Struct;
+import com.lucimber.dbus.type.Variant;
 import io.netty.buffer.ByteBuf;
 
 import java.util.HashMap;

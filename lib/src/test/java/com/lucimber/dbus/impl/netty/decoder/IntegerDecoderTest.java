@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class IntegerDecoderTest {
+final class IntegerDecoderTest {
 
     private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
     private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
@@ -18,17 +18,18 @@ public final class IntegerDecoderTest {
     @EnumSource(ByteOrder.class)
     void decodeSignedInteger(final ByteOrder byteOrder) {
         final ByteBuf buffer = Unpooled.buffer();
-        final int value = 0xFFFFFC00;
+        final int testValue = -1024;
+        final int testValueHex = 0xFFFFFC00;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(value);
+            buffer.writeInt(testValueHex);
         } else {
-            buffer.writeIntLE(value);
+            buffer.writeIntLE(testValueHex);
         }
-        final int expected = -1024;
+        final int numOfWrittenBytes = buffer.readableBytes();
         final Int32Decoder decoder = new Int32Decoder(byteOrder);
         final DecoderResult<Int32> result = decoder.decode(buffer, 0);
-        assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+        assertEquals(numOfWrittenBytes, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
-        assertEquals(expected, result.getValue().getDelegate());
+        assertEquals(testValue, result.getValue().getDelegate());
     }
 }

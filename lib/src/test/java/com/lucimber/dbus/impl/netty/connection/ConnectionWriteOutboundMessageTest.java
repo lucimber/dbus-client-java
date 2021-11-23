@@ -23,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class ConnectionWriteOutboundMessageTest {
 
+    private static final int TIMEOUT_IN_SECONDS = 5;
+
     @Test
     void succeedWithInvokingMethod() throws InterruptedException {
         final PipelineFactory chainFactory = new DefaultPipelineFactory();
@@ -59,7 +61,7 @@ final class ConnectionWriteOutboundMessageTest {
         final InboundMethodReturn answer = new InboundMethodReturn(serialNumber, replySerialNumber, destination);
         channel.writeInbound(answer);
         // Verify method return
-        countDownLatch.await(5, TimeUnit.SECONDS);
+        countDownLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
         final InboundMessage inboundMessage = atomicInboundMessage.get();
         assertTrue(inboundMessage instanceof InboundMethodReturn);
         final InboundMethodReturn methodReturn = (InboundMethodReturn) inboundMessage;
@@ -107,7 +109,7 @@ final class ConnectionWriteOutboundMessageTest {
         channel.writeInbound(answer);
         // Verify error
         // Verify method return
-        countDownLatch.await(5, TimeUnit.SECONDS);
+        countDownLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
         final InboundMessage inboundMessage = atomicInboundMessage.get();
         assertTrue(inboundMessage instanceof InboundError);
         final InboundError inboundError = (InboundError) inboundMessage;

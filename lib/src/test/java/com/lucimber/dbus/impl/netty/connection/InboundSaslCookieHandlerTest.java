@@ -9,10 +9,8 @@ import com.lucimber.dbus.connection.sasl.SaslOkMessage;
 import com.lucimber.dbus.connection.sasl.SaslRejectedMessage;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.embedded.EmbeddedChannel;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.slf4j.MDC;
 
 import java.nio.file.Path;
 import java.util.Base64;
@@ -22,16 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class InboundSaslCookieHandlerTest {
+final class InboundSaslCookieHandlerTest {
 
     private static final String IDENTITY = "1234";
     @TempDir
-    static Path sharedTempDir;
-
-    @BeforeEach
-    void resetDiagnosticContext() {
-        MDC.clear();
-    }
+    private static Path sharedTempDir;
 
     @Test
     void writeCorrectAuthMessage() {

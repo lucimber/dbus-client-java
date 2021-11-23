@@ -1,14 +1,14 @@
 package com.lucimber.dbus.impl.netty.encoder;
 
+import com.lucimber.dbus.impl.netty.ByteOrder;
 import com.lucimber.dbus.type.DBusBasicType;
+import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.Dict;
+import com.lucimber.dbus.type.DictEntry;
 import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.UInt32;
 import com.lucimber.dbus.util.LoggerUtils;
-import com.lucimber.dbus.impl.netty.ByteOrder;
-import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.DictEntry;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.slf4j.Logger;

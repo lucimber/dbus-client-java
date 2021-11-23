@@ -10,23 +10,16 @@ import com.lucimber.dbus.type.ObjectPath;
 import com.lucimber.dbus.type.UInt32;
 import io.netty.channel.ChannelOutboundHandler;
 import io.netty.channel.embedded.EmbeddedChannel;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.slf4j.MDC;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 
 final class NettyConnectionTest {
 
-    @BeforeEach
-    void resetDiagnosticContext() {
-        MDC.clear();
-    }
-
     @Test
-    public void testInboundFailure() {
+    void testInboundFailure() {
         final Pipeline pipeline = Mockito.mock(Pipeline.class);
         final PipelineFactory factory = Mockito.mock(PipelineFactory.class);
         Mockito.doAnswer(invocationOnMock -> pipeline).when(factory).create(any(Connection.class));
@@ -38,7 +31,7 @@ final class NettyConnectionTest {
     }
 
     @Test
-    public void testOutboundFailure() {
+    void testOutboundFailure() {
         final Exception ex = new Exception("test");
         final ChannelOutboundHandler outboundHandler = new WriteFailureOutboundHandler(ex);
         final Pipeline pipeline = Mockito.mock(Pipeline.class);

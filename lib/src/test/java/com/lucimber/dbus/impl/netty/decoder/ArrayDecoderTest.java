@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public final class ArrayDecoderTest {
+final class ArrayDecoderTest {
 
     private static final String ARRAY_OF_BYTES = "ay";
     private static final String ARRAY_OF_BYTE_ARRAYS = "aay";
@@ -38,23 +38,21 @@ public final class ArrayDecoderTest {
     void decodeArrayOfBytes(final ByteOrder byteOrder) {
         final Signature signature = Signature.valueOf(ARRAY_OF_BYTES);
         final ByteBuf buffer = Unpooled.buffer();
+        final int numOfBytes = 9;
+        final int numOfContentBytes = 5;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(5);
+            buffer.writeInt(numOfContentBytes);
         } else {
-            buffer.writeIntLE(5);
+            buffer.writeIntLE(numOfContentBytes);
         }
-        buffer.writeByte(1);
-        buffer.writeByte(2);
-        buffer.writeByte(3);
-        buffer.writeByte(4);
-        buffer.writeByte(5);
-        final int numOfBytes = buffer.readableBytes();
+        final byte[] items = {0x01, 0x02, 0x03, 0x04, 0x05};
+        buffer.writeBytes(items);
         final ArrayDecoder<DBusByte> decoder = new ArrayDecoder<>(byteOrder, signature);
         final DecoderResult<DBusArray<DBusByte>> result = decoder.decode(buffer, 0);
         assertEquals(numOfBytes, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         final DBusArray<DBusByte> array = result.getValue();
-        assertEquals(5, array.size(), ASSERT_SIZE_OF_ARRAY);
+        assertEquals(items.length, array.size(), ASSERT_SIZE_OF_ARRAY);
         buffer.release();
     }
 
@@ -63,14 +61,17 @@ public final class ArrayDecoderTest {
     void decodeMessageHeader(final ByteOrder byteOrder) {
         final ByteBuf buffer = Unpooled.buffer();
         // Length of array
+        final int numOfContentBytes = 52;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(52);
+            buffer.writeInt(numOfContentBytes);
         } else {
-            buffer.writeIntLE(52);
+            buffer.writeIntLE(numOfContentBytes);
         }
-        buffer.writeZero(4); // Pad to struct boundary
+        final byte[] paddingStruct = {0x00, 0x00, 0x00, 0x00};
+        buffer.writeBytes(paddingStruct);
         // Struct 1 (yv)
-        buffer.writeByte(4);
+        final byte firstStructLength = 4;
+        buffer.writeByte(firstStructLength);
         final byte[] v1Signature = "s".getBytes(StandardCharsets.UTF_8);
         buffer.writeByte(v1Signature.length);
         buffer.writeBytes(v1Signature);
@@ -83,17 +84,20 @@ public final class ArrayDecoderTest {
         }
         buffer.writeBytes(v1Content);
         buffer.writeZero(1); // NUL byte
-        buffer.writeZero(5); // Pad to struct/variant boundary
+        final int structVariantPadding = 5;
+        buffer.writeZero(structVariantPadding);
         // Struct 2 (yv)
-        buffer.writeByte(5);
+        final byte secondStructLength = 5;
+        buffer.writeByte(secondStructLength);
         final byte[] v2Signature = "i".getBytes(StandardCharsets.UTF_8);
         buffer.writeByte(v2Signature.length);
         buffer.writeBytes(v2Signature);
         buffer.writeZero(1); // NUL byte
+        final int randTestVal = 7;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(7);
+            buffer.writeInt(randTestVal);
         } else {
-            buffer.writeIntLE(7);
+            buffer.writeIntLE(randTestVal);
         }
         // Test
         final int expectedBytes = 56;
@@ -103,7 +107,8 @@ public final class ArrayDecoderTest {
         assertEquals(expectedBytes, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         final DBusArray<Struct> array = result.getValue();
-        assertEquals(2, array.size(), ASSERT_SIZE_OF_ARRAY);
+        final int expectedArraySize = 2;
+        assertEquals(expectedArraySize, array.size(), ASSERT_SIZE_OF_ARRAY);
     }
 
     @ParameterizedTest
@@ -111,45 +116,49 @@ public final class ArrayDecoderTest {
     void decodeArrayOfArrays(final ByteOrder byteOrder) {
         final Signature signature = Signature.valueOf(ARRAY_OF_BYTE_ARRAYS);
         final ByteBuf buffer = Unpooled.buffer();
+        // Length of outer array
+        final int numOfContentBytesOuterArray = 22;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(22);
+            buffer.writeInt(numOfContentBytesOuterArray);
         } else {
-            buffer.writeIntLE(22);
+            buffer.writeIntLE(numOfContentBytesOuterArray);
         }
-        // aa1
+        // Arrays: aa1 + aa2 + aa3
+        final int numOfContentBytesInnerArray = 2;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(2);
+            buffer.writeInt(numOfContentBytesInnerArray);
         } else {
-            buffer.writeIntLE(2);
+            buffer.writeIntLE(numOfContentBytesInnerArray);
         }
-        buffer.writeByte(1);
-        buffer.writeByte(2);
-        buffer.writeZero(2); // Padding for array
+        final byte[] innerItems = {0x01, 0x02};
+        buffer.writeBytes(innerItems);
+        final byte[] padding = {0x00, 0x00};
+        buffer.writeBytes(padding);
         // aa2
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(2);
+            buffer.writeInt(numOfContentBytesInnerArray);
         } else {
-            buffer.writeIntLE(2);
+            buffer.writeIntLE(numOfContentBytesInnerArray);
         }
-        buffer.writeByte(1);
-        buffer.writeByte(2);
-        buffer.writeZero(2); // Padding for array
+        buffer.writeBytes(innerItems);
+        buffer.writeBytes(padding);
         // aa3
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(2);
+            buffer.writeInt(numOfContentBytesInnerArray);
         } else {
-            buffer.writeIntLE(2);
+            buffer.writeIntLE(numOfContentBytesInnerArray);
         }
-        buffer.writeByte(1);
-        buffer.writeByte(2);
+        buffer.writeBytes(innerItems);
         final int expectedBytes = 26;
         final ArrayDecoder<DBusArray<DBusByte>> decoder = new ArrayDecoder<>(byteOrder, signature);
         final DecoderResult<DBusArray<DBusArray<DBusByte>>> result = decoder.decode(buffer, 0);
         assertEquals(expectedBytes, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         final DBusArray<DBusArray<DBusByte>> array = result.getValue();
-        assertEquals(3, array.size(), ASSERT_SIZE_OF_ARRAY);
-        assertEquals(2, array.get(0).size());
+        final int expectedArraySize = 3;
+        assertEquals(expectedArraySize, array.size(), ASSERT_SIZE_OF_ARRAY);
+        final int expectedInnerArraySize = 2;
+        assertEquals(expectedInnerArraySize, array.get(0).size());
     }
 
     @ParameterizedTest
@@ -157,20 +166,25 @@ public final class ArrayDecoderTest {
     void decodeArrayOfDoubles(final ByteOrder byteOrder) {
         final Signature signature = Signature.valueOf(ARRAY_OF_DOUBLES);
         final ByteBuf buffer = Unpooled.buffer();
+        final int numOfContentBytes = 24;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(3 * 8);
+            buffer.writeInt(numOfContentBytes);
         } else {
-            buffer.writeIntLE(3 * 8);
+            buffer.writeIntLE(numOfContentBytes);
         }
-        buffer.writeZero(4);
+        final byte[] paddingDouble = {0x00, 0x00, 0x00, 0x00};
+        buffer.writeBytes(paddingDouble);
+        final double one = 1;
+        final double two = 2;
+        final double three = 3;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeDouble(1);
-            buffer.writeDouble(2);
-            buffer.writeDouble(3);
+            buffer.writeDouble(one);
+            buffer.writeDouble(two);
+            buffer.writeDouble(three);
         } else {
-            buffer.writeDoubleLE(1);
-            buffer.writeDoubleLE(2);
-            buffer.writeDoubleLE(3);
+            buffer.writeDoubleLE(one);
+            buffer.writeDoubleLE(two);
+            buffer.writeDoubleLE(three);
         }
         final int numOfBytes = buffer.readableBytes();
         final ArrayDecoder<DBusDouble> decoder = new ArrayDecoder<>(byteOrder, signature);
@@ -178,7 +192,8 @@ public final class ArrayDecoderTest {
         assertEquals(numOfBytes, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         final DBusArray<DBusDouble> array = result.getValue();
-        assertEquals(3, array.size(), ASSERT_SIZE_OF_ARRAY);
+        final int expectedArraySize = 3;
+        assertEquals(expectedArraySize, array.size(), ASSERT_SIZE_OF_ARRAY);
     }
 
     @ParameterizedTest
@@ -186,57 +201,61 @@ public final class ArrayDecoderTest {
     void decodeArrayOfDoubleArrays(final ByteOrder byteOrder) {
         final Signature signature = Signature.valueOf(ARRAY_OF_DOUBLE_ARRAYS);
         final ByteBuf buffer = Unpooled.buffer();
+        final int numOfContentBytesOuterArray = 92;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(92);
+            buffer.writeInt(numOfContentBytesOuterArray);
         } else {
-            buffer.writeIntLE(92);
+            buffer.writeIntLE(numOfContentBytesOuterArray);
         }
-        // aa1
+        // Inner: aa1 + aa2 + aa3
+        final int numOfContentBytesInnerArray = 24;
+        final double one = 1;
+        final double two = 2;
+        final double three = 3;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(24);
+            buffer.writeInt(numOfContentBytesInnerArray);
         } else {
-            buffer.writeIntLE(24);
+            buffer.writeIntLE(numOfContentBytesInnerArray);
         }
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeDouble(1);
-            buffer.writeDouble(2);
-            buffer.writeDouble(3);
+            buffer.writeDouble(one);
+            buffer.writeDouble(two);
+            buffer.writeDouble(three);
         } else {
-            buffer.writeDoubleLE(1);
-            buffer.writeDoubleLE(2);
-            buffer.writeDoubleLE(3);
+            buffer.writeDoubleLE(one);
+            buffer.writeDoubleLE(two);
+            buffer.writeDoubleLE(three);
         }
-        // aa2
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(24);
+            buffer.writeInt(numOfContentBytesInnerArray);
         } else {
-            buffer.writeIntLE(24);
+            buffer.writeIntLE(numOfContentBytesInnerArray);
         }
-        buffer.writeZero(4);
+        final byte[] doublePadding = {0x00, 0x00, 0x00, 0x00};
+        buffer.writeBytes(doublePadding);
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeDouble(1);
-            buffer.writeDouble(2);
-            buffer.writeDouble(3);
+            buffer.writeDouble(one);
+            buffer.writeDouble(two);
+            buffer.writeDouble(three);
         } else {
-            buffer.writeDoubleLE(1);
-            buffer.writeDoubleLE(2);
-            buffer.writeDoubleLE(3);
+            buffer.writeDoubleLE(one);
+            buffer.writeDoubleLE(two);
+            buffer.writeDoubleLE(three);
         }
-        // aa3
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(24);
+            buffer.writeInt(numOfContentBytesInnerArray);
         } else {
-            buffer.writeIntLE(24);
+            buffer.writeIntLE(numOfContentBytesInnerArray);
         }
-        buffer.writeZero(4);
+        buffer.writeBytes(doublePadding);
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeDouble(1);
-            buffer.writeDouble(2);
-            buffer.writeDouble(3);
+            buffer.writeDouble(one);
+            buffer.writeDouble(two);
+            buffer.writeDouble(three);
         } else {
-            buffer.writeDoubleLE(1);
-            buffer.writeDoubleLE(2);
-            buffer.writeDoubleLE(3);
+            buffer.writeDoubleLE(one);
+            buffer.writeDoubleLE(two);
+            buffer.writeDoubleLE(three);
         }
         final int numOfBytes = buffer.readableBytes();
         final ArrayDecoder<DBusArray<DBusDouble>> decoder = new ArrayDecoder<>(byteOrder, signature);
@@ -244,8 +263,10 @@ public final class ArrayDecoderTest {
         assertEquals(numOfBytes, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         final DBusArray<DBusArray<DBusDouble>> array = result.getValue();
-        assertEquals(3, array.size(), ASSERT_SIZE_OF_ARRAY);
-        assertEquals(3, array.get(1).size(), "Sub list size");
+        final int expectedArraySize = 3;
+        assertEquals(expectedArraySize, array.size(), ASSERT_SIZE_OF_ARRAY);
+        final int expectedInnerArraySize = 3;
+        assertEquals(expectedInnerArraySize, array.get(1).size(), "Size of inner array");
     }
 
     @ParameterizedTest
@@ -253,18 +274,23 @@ public final class ArrayDecoderTest {
     void decodeArrayOfSignedShorts(final ByteOrder byteOrder) {
         final Signature signature = Signature.valueOf(ARRAY_OF_SIGNED_SHORTS);
         final ByteBuf buffer = Unpooled.buffer();
+        final int numOfContentBytes = 8;
+        final short one = 1;
+        final short two = 2;
+        final short three = 3;
+        final short four = 4;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeInt(4 * 2);
-            buffer.writeShort(1);
-            buffer.writeShort(2);
-            buffer.writeShort(3);
-            buffer.writeShort(4);
+            buffer.writeInt(numOfContentBytes);
+            buffer.writeShort(one);
+            buffer.writeShort(two);
+            buffer.writeShort(three);
+            buffer.writeShort(four);
         } else {
-            buffer.writeIntLE(4 * 2);
-            buffer.writeShortLE(1);
-            buffer.writeShortLE(2);
-            buffer.writeShortLE(3);
-            buffer.writeShortLE(4);
+            buffer.writeIntLE(numOfContentBytes);
+            buffer.writeShortLE(one);
+            buffer.writeShortLE(two);
+            buffer.writeShortLE(three);
+            buffer.writeShortLE(four);
         }
         final int expectedBytes = buffer.readableBytes();
         final ArrayDecoder<Int16> decoder = new ArrayDecoder<>(byteOrder, signature);
@@ -272,7 +298,8 @@ public final class ArrayDecoderTest {
         assertEquals(expectedBytes, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         final DBusArray<Int16> array = result.getValue();
-        assertEquals(4, array.size(), ASSERT_SIZE_OF_ARRAY);
+        final int expectedArraySize = 4;
+        assertEquals(expectedArraySize, array.size(), ASSERT_SIZE_OF_ARRAY);
     }
 
     @ParameterizedTest
@@ -291,7 +318,8 @@ public final class ArrayDecoderTest {
         }
         stringBuffer.writeBytes(s1bytes);
         stringBuffer.writeZero(1);
-        stringBuffer.writeZero(3); // Padding of string
+        final byte[] stringPadding = {0x00, 0x00, 0x00};
+        stringBuffer.writeBytes(stringPadding);
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
             stringBuffer.writeInt(s2bytes.length);
         } else {
@@ -312,7 +340,8 @@ public final class ArrayDecoderTest {
         assertEquals(numOfBytes, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         final DBusArray<DBusString> array = result.getValue();
-        assertEquals(2, array.size(), ASSERT_SIZE_OF_ARRAY);
+        final int expectedArraySize = 2;
+        assertEquals(expectedArraySize, array.size(), ASSERT_SIZE_OF_ARRAY);
     }
 
     @ParameterizedTest
@@ -325,7 +354,8 @@ public final class ArrayDecoderTest {
         } else {
             buffer.writeIntLE(0);
         }
-        buffer.writeZero(4);
+        final int padding = 4;
+        buffer.writeZero(padding);
         final int numOfBytes = buffer.readableBytes();
         final ArrayDecoder<Int64> decoder = new ArrayDecoder<>(byteOrder, signature);
         final DecoderResult<DBusArray<Int64>> result = decoder.decode(buffer, 0);

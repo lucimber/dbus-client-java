@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class ShortDecoderTest {
+final class ShortDecoderTest {
 
     private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
     private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
@@ -18,17 +18,18 @@ public final class ShortDecoderTest {
     @EnumSource(ByteOrder.class)
     void decodeSignedShort(final ByteOrder byteOrder) {
         final ByteBuf buffer = Unpooled.buffer();
+        final byte dec128 = (byte) 0x80;
+        final byte[] testValue;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeByte(0x80);
-            buffer.writeByte(0x00);
+            testValue = new byte[]{dec128, 0x00};
         } else {
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x80);
+            testValue = new byte[]{0x00, dec128};
         }
+        buffer.writeBytes(testValue);
         final short expected = -32768;
         final Int16Decoder decoder = new Int16Decoder(byteOrder);
         final DecoderResult<Int16> result = decoder.decode(buffer, 0);
-        assertEquals(2, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+        assertEquals(testValue.length, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
         assertEquals(0, buffer.readableBytes(), ASSERT_BUFFER_EMPTY);
         assertEquals(expected, result.getValue().getDelegate());
     }

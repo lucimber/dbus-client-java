@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public final class StringDecoderTest {
+final class StringDecoderTest {
 
     private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
     private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
@@ -24,16 +24,13 @@ public final class StringDecoderTest {
         final ByteBuf buffer = Unpooled.buffer();
         // UINT32 bytes
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x07);
+            final byte[] lengthBytes = {0x00, 0x00, 0x00, 0x07};
+            buffer.writeBytes(lengthBytes);
         } else {
-            buffer.writeByte(0x07);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
+            final byte[] lengthBytes = {0x07, 0x00, 0x00, 0x00};
+            buffer.writeBytes(lengthBytes);
         }
+
         // UTF-8 bytes (7 bytes)
         buffer.writeBytes(VALID_STRING.getBytes(StandardCharsets.UTF_8));
         // Trailing NUL byte
@@ -52,15 +49,11 @@ public final class StringDecoderTest {
         final ByteBuf buffer = Unpooled.buffer();
         // UINT32 bytes (Integer.MAX_VALUE + 1 = 2147483648)
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            buffer.writeByte(0x80);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
+            final byte[] lengthBytes = {(byte) 0x80, 0x00, 0x00, 0x00};
+            buffer.writeBytes(lengthBytes);
         } else {
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x00);
-            buffer.writeByte(0x80);
+            final byte[] lengthBytes = {0x00, 0x00, 0x00, (byte) 0x80};
+            buffer.writeBytes(lengthBytes);
         }
         // UTF-8 bytes (7 bytes)
         buffer.writeBytes(VALID_STRING.getBytes(StandardCharsets.UTF_8));

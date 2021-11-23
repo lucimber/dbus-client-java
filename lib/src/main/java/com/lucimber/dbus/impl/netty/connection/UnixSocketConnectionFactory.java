@@ -1,12 +1,12 @@
 package com.lucimber.dbus.impl.netty.connection;
 
-import com.lucimber.dbus.util.LoggerUtils;
 import com.lucimber.dbus.connection.Connection;
 import com.lucimber.dbus.connection.ConnectionException;
 import com.lucimber.dbus.connection.ConnectionFactory;
 import com.lucimber.dbus.connection.PipelineFactory;
 import com.lucimber.dbus.connection.PipelineInitializer;
 import com.lucimber.dbus.connection.impl.DefaultPipelineFactory;
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;

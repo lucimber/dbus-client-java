@@ -1,11 +1,11 @@
 package com.lucimber.dbus.impl.netty.connection;
 
 import com.lucimber.dbus.impl.netty.ByteOrder;
-import com.lucimber.dbus.type.UInt32;
-import com.lucimber.dbus.type.Variant;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageFlag;
 import com.lucimber.dbus.message.MessageType;
+import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.Variant;
 import io.netty.buffer.ByteBuf;
 
 import java.util.HashMap;

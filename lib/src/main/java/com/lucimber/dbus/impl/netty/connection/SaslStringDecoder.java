@@ -1,7 +1,6 @@
 package com.lucimber.dbus.impl.netty.connection;
 
 import com.lucimber.dbus.connection.sasl.SaslAgreeMessage;
-import com.lucimber.dbus.util.LoggerUtils;
 import com.lucimber.dbus.connection.sasl.SaslAuthMessage;
 import com.lucimber.dbus.connection.sasl.SaslBeginMessage;
 import com.lucimber.dbus.connection.sasl.SaslCancelMessage;
@@ -12,6 +11,7 @@ import com.lucimber.dbus.connection.sasl.SaslMessage;
 import com.lucimber.dbus.connection.sasl.SaslNegotiateMessage;
 import com.lucimber.dbus.connection.sasl.SaslOkMessage;
 import com.lucimber.dbus.connection.sasl.SaslRejectedMessage;
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderException;

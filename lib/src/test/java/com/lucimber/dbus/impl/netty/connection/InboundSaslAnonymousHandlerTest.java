@@ -9,19 +9,12 @@ import com.lucimber.dbus.connection.sasl.SaslOkMessage;
 import com.lucimber.dbus.connection.sasl.SaslRejectedMessage;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.embedded.EmbeddedChannel;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.MDC;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class InboundSaslAnonymousHandlerTest {
-
-    @BeforeEach
-    void resetDiagnosticContext() {
-        MDC.clear();
-    }
+final class InboundSaslAnonymousHandlerTest {
 
     @Test
     void writeCorrectAuthMessage() {
@@ -74,5 +67,4 @@ public class InboundSaslAnonymousHandlerTest {
         channel.writeInbound(new SaslRejectedMessage("unit test"));
         assertFalse(channel.isOpen());
     }
-
 }
