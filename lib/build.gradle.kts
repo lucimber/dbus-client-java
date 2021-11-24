@@ -88,6 +88,10 @@ tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
+checkstyle {
+    toolVersion = "9.1"
+}
+
 pmd {
     rulesMinimumPriority.set(2)
 }

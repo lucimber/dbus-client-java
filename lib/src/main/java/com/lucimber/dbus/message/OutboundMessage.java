@@ -8,17 +8,17 @@ import com.lucimber.dbus.type.DBusString;
  */
 public interface OutboundMessage extends Message {
 
-    /**
-     * Gets the unique name of the destination.
-     *
-     * @return a {@link DBusString}
-     */
-    DBusString getDestination();
+  /**
+   * Gets the unique name of the destination.
+   *
+   * @return a {@link DBusString}
+   */
+  DBusString getDestination();
 
-    /**
-     * Sets the unique name of the destination.
-     *
-     * @param destination a {@link DBusString}
-     */
-    void setDestination(DBusString destination);
+  /**
+   * Sets the unique name of the destination.
+   *
+   * @param destination a {@link DBusString}
+   */
+  void setDestination(DBusString destination);
 }

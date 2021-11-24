@@ -10,26 +10,26 @@ import com.lucimber.dbus.type.DBusType;
  * @param <ValueT> data type
  */
 public interface DecoderResult<ValueT extends DBusType> {
-    /**
-     * Gets the number of bytes, that have been consumed by a decoder
-     * while producing this result.
-     *
-     * @return An integer as the number of consumed bytes.
-     */
-    int getConsumedBytes();
+  /**
+   * Gets the number of bytes, that have been consumed by a decoder
+   * while producing this result.
+   *
+   * @return An integer as the number of consumed bytes.
+   */
+  int getConsumedBytes();
 
-    /**
-     * Sets the number of bytes, that have been consumed by a decoder
-     * while producing this result.
-     *
-     * @param consumedBytes an {@link Integer}
-     */
-    void setConsumedBytes(int consumedBytes);
+  /**
+   * Sets the number of bytes, that have been consumed by a decoder
+   * while producing this result.
+   *
+   * @param consumedBytes an {@link Integer}
+   */
+  void setConsumedBytes(int consumedBytes);
 
-    /**
-     * Gets the decoded value.
-     *
-     * @return the value.
-     */
-    ValueT getValue();
+  /**
+   * Gets the decoded value.
+   *
+   * @return the value.
+   */
+  ValueT getValue();
 }

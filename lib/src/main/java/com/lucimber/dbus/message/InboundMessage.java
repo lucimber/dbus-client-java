@@ -8,18 +8,18 @@ import com.lucimber.dbus.type.DBusString;
  */
 public interface InboundMessage extends Message {
 
-    /**
-     * Gets the sender of this inbound message.
-     *
-     * @return a {@link DBusString}
-     */
-    DBusString getSender();
+  /**
+   * Gets the sender of this inbound message.
+   *
+   * @return a {@link DBusString}
+   */
+  DBusString getSender();
 
-    /**
-     * Sets the sender of this inbound message.
-     * Must not be {@code NULL}.
-     *
-     * @param sender a {@link DBusString}
-     */
-    void setSender(DBusString sender);
+  /**
+   * Sets the sender of this inbound message.
+   * Must not be {@code NULL}.
+   *
+   * @param sender a {@link DBusString}
+   */
+  void setSender(DBusString sender);
 }

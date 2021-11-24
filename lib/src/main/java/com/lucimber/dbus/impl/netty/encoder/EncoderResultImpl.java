@@ -9,27 +9,27 @@ import java.util.Objects;
  */
 public final class EncoderResultImpl<T> implements EncoderResult<T> {
 
-    private final T buffer;
-    private final int byteCount;
+  private final T buffer;
+  private final int byteCount;
 
-    /**
-     * Creates a new instance with the necessary arguments.
-     *
-     * @param byteCount The number of encoded bytes.
-     * @param buffer    The buffer that contains the result of the encoding.
-     */
-    public EncoderResultImpl(final int byteCount, final T buffer) {
-        this.byteCount = byteCount;
-        this.buffer = Objects.requireNonNull(buffer);
-    }
+  /**
+   * Creates a new instance with the necessary arguments.
+   *
+   * @param byteCount The number of encoded bytes.
+   * @param buffer    The buffer that contains the result of the encoding.
+   */
+  public EncoderResultImpl(final int byteCount, final T buffer) {
+    this.byteCount = byteCount;
+    this.buffer = Objects.requireNonNull(buffer);
+  }
 
-    @Override
-    public int getProducedBytes() {
-        return byteCount;
-    }
+  @Override
+  public int getProducedBytes() {
+    return byteCount;
+  }
 
-    @Override
-    public T getBuffer() {
-        return buffer;
-    }
+  @Override
+  public T getBuffer() {
+    return buffer;
+  }
 }

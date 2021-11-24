@@ -14,40 +14,40 @@ package com.lucimber.dbus.type;
  */
 public enum TypeCode {
 
-    BYTE('y'),
-    BOOLEAN('b'),
-    INT16('n'),
-    UINT16('q'),
-    INT32('i'),
-    UINT32('u'),
-    INT64('x'),
-    UINT64('t'),
-    DOUBLE('d'),
-    STRING('s'),
-    OBJECT_PATH('o'),
-    SIGNATURE('g'),
-    ARRAY('a'),
-    // STRUCT('r'),
-    STRUCT_START('('),
-    STRUCT_END(')'),
-    VARIANT('v'),
-    // DICT_ENTRY('e'),
-    DICT_ENTRY_START('{'),
-    DICT_ENTRY_END('}'),
-    UNIX_FD('h');
+  BYTE('y'),
+  BOOLEAN('b'),
+  INT16('n'),
+  UINT16('q'),
+  INT32('i'),
+  UINT32('u'),
+  INT64('x'),
+  UINT64('t'),
+  DOUBLE('d'),
+  STRING('s'),
+  OBJECT_PATH('o'),
+  SIGNATURE('g'),
+  ARRAY('a'),
+  // STRUCT('r'),
+  STRUCT_START('('),
+  STRUCT_END(')'),
+  VARIANT('v'),
+  // DICT_ENTRY('e'),
+  DICT_ENTRY_START('{'),
+  DICT_ENTRY_END('}'),
+  UNIX_FD('h');
 
-    private final char c;
+  private final char ch;
 
-    TypeCode(final char c) {
-        this.c = c;
-    }
+  TypeCode(final char ch) {
+    this.ch = ch;
+  }
 
-    /**
-     * Gets the char of this type code.
-     *
-     * @return a {@link Character}
-     */
-    public char getChar() {
-        return c;
-    }
+  /**
+   * Gets the char of this type code.
+   *
+   * @return a {@link Character}
+   */
+  public char getChar() {
+    return ch;
+  }
 }

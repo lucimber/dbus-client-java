@@ -3,7 +3,6 @@ package com.lucimber.dbus.standard;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.Dict;
 import com.lucimber.dbus.type.Variant;
-
 import java.util.Optional;
 
 /**
@@ -18,36 +17,36 @@ import java.util.Optional;
  * target="_top">D-Bus Specification (Standard Interfaces)</a>
  */
 public interface Properties {
-    /**
-     * Gets the value of a property.
-     *
-     * @param interfaceName the name of the interface
-     * @param propertyName  the name of the property
-     * @return An {@link Optional} of {@link Variant}.
-     * @throws NotSupportedException If the interface or property is not supported by this object.
-     * @throws NotPermittedException If the property is not accessible to the caller.
-     */
-    Optional<Variant> getProperty(DBusString interfaceName, DBusString propertyName)
-            throws NotSupportedException, NotPermittedException;
+  /**
+   * Gets the value of a property.
+   *
+   * @param interfaceName the name of the interface
+   * @param propertyName  the name of the property
+   * @return An {@link Optional} of {@link Variant}.
+   * @throws NotSupportedException If the interface or property is not supported by this object.
+   * @throws NotPermittedException If the property is not accessible to the caller.
+   */
+  Optional<Variant> getProperty(DBusString interfaceName, DBusString propertyName)
+          throws NotSupportedException, NotPermittedException;
 
-    /**
-     * Sets the value of a property.
-     *
-     * @param interfaceName the name of the interface
-     * @param propertyName  the name of the property
-     * @param value         the value that should be assigned
-     * @throws NotSupportedException If the interface or property is not supported by this object.
-     * @throws NotPermittedException If the property is read-only or not accessible to the caller.
-     */
-    void setProperty(DBusString interfaceName, DBusString propertyName, Variant value)
-            throws NotSupportedException, NotPermittedException;
+  /**
+   * Sets the value of a property.
+   *
+   * @param interfaceName the name of the interface
+   * @param propertyName  the name of the property
+   * @param value         the value that should be assigned
+   * @throws NotSupportedException If the interface or property is not supported by this object.
+   * @throws NotPermittedException If the property is read-only or not accessible to the caller.
+   */
+  void setProperty(DBusString interfaceName, DBusString propertyName, Variant value)
+          throws NotSupportedException, NotPermittedException;
 
-    /**
-     * Gets all properties and their values.
-     *
-     * @param interfaceName the name of the interface
-     * @return A {@link Dict} of {@link DBusString} and {@link Variant}.
-     * @throws NotSupportedException If the interface is not supported by this object.
-     */
-    Dict<DBusString, Variant> getProperties(DBusString interfaceName) throws NotSupportedException;
+  /**
+   * Gets all properties and their values.
+   *
+   * @param interfaceName the name of the interface
+   * @return A {@link Dict} of {@link DBusString} and {@link Variant}.
+   * @throws NotSupportedException If the interface is not supported by this object.
+   */
+  Dict<DBusString, Variant> getProperties(DBusString interfaceName) throws NotSupportedException;
 }

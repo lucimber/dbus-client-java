@@ -12,43 +12,43 @@ package com.lucimber.dbus.connection;
 public interface Pipeline extends InboundMessageInvoker, OutboundMessageInvoker,
         ConnectionEventMediator, UserEventMediator {
 
-    /**
-     * Adds a handler in front of another handler to this pipeline.
-     *
-     * @param nameOther the name of the other {@link Handler}
-     * @param name      the, unique to this pipeline, name of the {@link Handler}
-     * @param handler   the {@link Handler}
-     */
-    void addBefore(String nameOther, String name, Handler handler);
+  /**
+   * Adds a handler in front of another handler to this pipeline.
+   *
+   * @param nameOther the name of the other {@link Handler}
+   * @param name      the, unique to this pipeline, name of the {@link Handler}
+   * @param handler   the {@link Handler}
+   */
+  void addBefore(String nameOther, String name, Handler handler);
 
-    /**
-     * Adds a handler to the end of this pipeline.
-     *
-     * @param name    the, unique to this chain, name of the {@link Handler}
-     * @param handler the {@link Handler}
-     */
-    void addLast(String name, Handler handler);
+  /**
+   * Adds a handler to the end of this pipeline.
+   *
+   * @param name    the, unique to this chain, name of the {@link Handler}
+   * @param handler the {@link Handler}
+   */
+  void addLast(String name, Handler handler);
 
-    /**
-     * Returns the connection that this pipeline is attached to.
-     *
-     * @return the {@link Connection}
-     */
-    Connection getConnection();
+  /**
+   * Returns the connection that this pipeline is attached to.
+   *
+   * @return the {@link Connection}
+   */
+  Connection getConnection();
 
-    /**
-     * Removes a handler from this pipeline.
-     *
-     * @param name the, unique to this pipeline, name of the {@link Handler}
-     */
-    void remove(String name);
+  /**
+   * Removes a handler from this pipeline.
+   *
+   * @param name the, unique to this pipeline, name of the {@link Handler}
+   */
+  void remove(String name);
 
-    /**
-     * Replaces a handler with another handler on this pipeline.
-     *
-     * @param oldName the name of the old {@link Handler}
-     * @param newName the name of the new {@link Handler}
-     * @param handler the new {@link Handler}
-     */
-    void replace(String oldName, String newName, Handler handler);
+  /**
+   * Replaces a handler with another handler on this pipeline.
+   *
+   * @param oldName the name of the old {@link Handler}
+   * @param newName the name of the new {@link Handler}
+   * @param handler the new {@link Handler}
+   */
+  void replace(String oldName, String newName, Handler handler);
 }

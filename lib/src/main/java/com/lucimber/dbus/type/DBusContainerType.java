@@ -11,22 +11,22 @@ import java.util.List;
  * D-Bus Specification: Container types</a>
  */
 public interface DBusContainerType extends DBusType {
-    /**
-     * Gets the signature of this container type.
-     * The returned signature describes the container and its content.
-     *
-     * @return a {@link Signature}
-     */
-    Signature getSignature();
+  /**
+   * Gets the signature of this container type.
+   * The returned signature describes the container and its content.
+   *
+   * @return a {@link Signature}
+   */
+  Signature getSignature();
 
-    /**
-     * Gets the wrapped value of this container type.
-     * The D-Bus type system is made of ASCII characters representing the value's type.
-     * Each D-Bus data type is mapped in this framework by its corresponding class.
-     * This method enables the access to the Java's data type - the delegate.
-     * If this container is for example a {@link DBusArray}, the returned object will be a {@link List}.
-     *
-     * @return an {@link Object}
-     */
-    Object getDelegate();
+  /**
+   * Gets the wrapped value of this container type.
+   * The D-Bus type system is made of ASCII characters representing the value's type.
+   * Each D-Bus data type is mapped in this framework by its corresponding class.
+   * This method enables the access to the Java's data type - the delegate.
+   * If this container is for example a {@link DBusArray}, the returned object will be a {@link List}.
+   *
+   * @return an {@link Object}
+   */
+  Object getDelegate();
 }

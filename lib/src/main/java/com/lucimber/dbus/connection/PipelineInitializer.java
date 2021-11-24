@@ -1,5 +1,14 @@
 package com.lucimber.dbus.connection;
 
+/**
+ * A component that initializes a pipeline.
+ */
 public interface PipelineInitializer {
-    void initiate(Pipeline pipeline);
+  /**
+   * Initializes a pipeline with custom components or settings
+   * before it gets used by other components.
+   *
+   * @param pipeline a (new) pipeline
+   */
+  void initiate(Pipeline pipeline);
 }

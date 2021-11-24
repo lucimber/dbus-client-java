@@ -5,10 +5,10 @@ package com.lucimber.dbus.connection.sasl;
  * A concrete SASL configuration must implement this interface.
  */
 public interface SaslAuthConfig {
-    /**
-     * Gets the authentication mechanism.
-     *
-     * @return the mechanism as a {@link SaslAuthMechanism}
-     */
-    SaslAuthMechanism getAuthMechanism();
+  /**
+   * Gets the authentication mechanism.
+   *
+   * @return the mechanism as a {@link SaslAuthMechanism}
+   */
+  SaslAuthMechanism getAuthMechanism();
 }

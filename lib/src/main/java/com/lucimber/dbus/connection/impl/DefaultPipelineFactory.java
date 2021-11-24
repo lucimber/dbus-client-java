@@ -4,9 +4,14 @@ import com.lucimber.dbus.connection.Connection;
 import com.lucimber.dbus.connection.Pipeline;
 import com.lucimber.dbus.connection.PipelineFactory;
 
+/**
+ * A default implementation of the pipeline factory interface.
+ *
+ * @see PipelineFactory
+ */
 public final class DefaultPipelineFactory implements PipelineFactory {
-    @Override
-    public Pipeline create(final Connection connection) {
-        return new DefaultPipeline(connection);
-    }
+  @Override
+  public Pipeline create(final Connection connection) {
+    return new DefaultPipeline(connection);
+  }
 }
