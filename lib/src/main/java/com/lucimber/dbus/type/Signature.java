@@ -449,5 +449,23 @@ public final class Signature implements DBusBasicType {
     public String toString() {
       return "Node";
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      final Node node = (Node) o;
+      return type == node.type
+          && Objects.equals(children, node.children);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(type, children);
+    }
   }
 }

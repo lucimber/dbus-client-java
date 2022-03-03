@@ -67,6 +67,14 @@ final class SignatureTest {
   }
 
   @Test
+  public void equalsAndHashCode() {
+    final Signature a = Signature.valueOf("a{oa{sa{sv}}}");
+    final Signature b = Signature.valueOf("a{oa{sa{sv}}}");
+    assertEquals(a, b);
+    assertEquals(a.hashCode(), b.hashCode());
+  }
+
+  @Test
   public void failDueToEmptyStruct() {
     final String sequence = "so()";
     assertThrows(SignatureException.class, () -> Signature.valueOf(sequence));
