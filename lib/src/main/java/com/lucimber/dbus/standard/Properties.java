@@ -13,8 +13,7 @@ import java.util.Optional;
  * valid member names (in particular, GObject-style dash-separated property names) can cause interoperability
  * problems and should be avoided.
  *
- * @see <a href="https://dbus.freedesktop.org/doc/dbus-specification.html#standard-interfaces"
- * target="_top">D-Bus Specification (Standard Interfaces)</a>
+ * @see <a href="https://dbus.freedesktop.org/doc/dbus-specification.html#standard-interfaces" target="_top">D-Bus Specification (Standard Interfaces)</a>
  */
 public interface Properties {
   /**
@@ -27,7 +26,7 @@ public interface Properties {
    * @throws NotPermittedException If the property is not accessible to the caller.
    */
   Optional<Variant> getProperty(DBusString interfaceName, DBusString propertyName)
-          throws NotSupportedException, NotPermittedException;
+      throws NotSupportedException, NotPermittedException;
 
   /**
    * Sets the value of a property.
@@ -39,7 +38,7 @@ public interface Properties {
    * @throws NotPermittedException If the property is read-only or not accessible to the caller.
    */
   void setProperty(DBusString interfaceName, DBusString propertyName, Variant value)
-          throws NotSupportedException, NotPermittedException;
+      throws NotSupportedException, NotPermittedException;
 
   /**
    * Gets all properties and their values.
