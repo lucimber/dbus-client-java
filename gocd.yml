@@ -25,6 +25,9 @@ pipelines:
             allow_only_on_success: false
           jobs:
             compile:
+              resources:
+                - git
+                - openjdk-11
               artifacts:
                 - build:
                     source: lib/build
@@ -37,12 +40,17 @@ pipelines:
                       - --info
                     run_if: passed
       - test-and-report:
-          fetch_materials: false
+          clean_workspace: true
+          fetch_materials: true
           approval:
             type: success
             allow_only_on_success: true
           jobs:
             unit-tests:
+              resources:
+                - git
+                - docker-20
+                - openjdk-11
               artifacts:
                 - build:
                     source: lib/build/reports/tests
@@ -64,12 +72,16 @@ pipelines:
                       - --info
                     run_if: passed
       - analyse-and-report:
-          fetch_materials: false
+          clean_workspace: true
+          fetch_materials: true
           approval:
             type: success
             allow_only_on_success: true
           jobs:
             check-style:
+              resources:
+                - git
+                - openjdk-11
               artifacts:
                 - build:
                     source: lib/build/reports/checkstyle
@@ -84,6 +96,9 @@ pipelines:
                       - --info
                     run_if: passed
             programming-flaws:
+              resources:
+                - git
+                - openjdk-11
               artifacts:
                 - build:
                     source: lib/build/reports/pmd
@@ -98,12 +113,16 @@ pipelines:
                       - --info
                     run_if: passed
       - publish-to-repository:
-          fetch_materials: false
+          clean_workspace: true
+          fetch_materials: true
           approval:
             type: success
             allow_only_on_success: true
           jobs:
             publish:
+              resources:
+                - git
+                - openjdk-11
               tasks:
                 - *fetch_build_task
                 - exec:
