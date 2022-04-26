@@ -3,7 +3,7 @@ package com.lucimber.dbus.exception;
 import com.lucimber.dbus.type.DBusString;
 import java.util.Objects;
 
-abstract class AbstractException extends Exception {
+public abstract class AbstractException extends Exception {
   private final DBusString errorName;
 
   public AbstractException(final DBusString errorName) {
