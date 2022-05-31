@@ -3,6 +3,7 @@ package com.lucimber.dbus.message;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.UInt32;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * An outbound method return.
@@ -25,8 +26,8 @@ public final class OutboundMethodReturn extends AbstractReply implements Outboun
   }
 
   @Override
-  public DBusString getDestination() {
-    return destination;
+  public Optional<DBusString> getDestination() {
+    return Optional.of(destination);
   }
 
   @Override

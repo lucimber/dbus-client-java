@@ -94,8 +94,10 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     headerFields.put(HeaderField.INTERFACE, interfaceVariant);
     final Variant memberVariant = Variant.valueOf(msg.getName());
     headerFields.put(HeaderField.MEMBER, memberVariant);
-    final Variant destinationVariant = Variant.valueOf(msg.getDestination());
-    headerFields.put(HeaderField.DESTINATION, destinationVariant);
+    msg.getDestination().ifPresent(destination -> {
+      final Variant destinationVariant = Variant.valueOf(destination);
+      headerFields.put(HeaderField.DESTINATION, destinationVariant);
+    });
     msg.getSignature().ifPresent(signature -> {
       final Variant signatureVariant = Variant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
@@ -108,8 +110,10 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     final HashMap<HeaderField, Variant> headerFields = new HashMap<>();
     final Variant replySerialVariant = Variant.valueOf(msg.getReplySerial());
     headerFields.put(HeaderField.REPLY_SERIAL, replySerialVariant);
-    final Variant destinationVariant = Variant.valueOf(msg.getDestination());
-    headerFields.put(HeaderField.DESTINATION, destinationVariant);
+    msg.getDestination().ifPresent(destination -> {
+      final Variant destinationVariant = Variant.valueOf(destination);
+      headerFields.put(HeaderField.DESTINATION, destinationVariant);
+    });
     msg.getSignature().ifPresent(signature -> {
       final Variant signatureVariant = Variant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
@@ -128,8 +132,10 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
       final Variant interfaceVariant = Variant.valueOf(interfaceName);
       headerFields.put(HeaderField.INTERFACE, interfaceVariant);
     });
-    final Variant destinationVariant = Variant.valueOf(msg.getDestination());
-    headerFields.put(HeaderField.DESTINATION, destinationVariant);
+    msg.getDestination().ifPresent(destination -> {
+      final Variant destinationVariant = Variant.valueOf(destination);
+      headerFields.put(HeaderField.DESTINATION, destinationVariant);
+    });
     msg.getSignature().ifPresent(signature -> {
       final Variant signatureVariant = Variant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
@@ -144,8 +150,10 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     headerFields.put(HeaderField.ERROR_NAME, errorNameVariant);
     final Variant replySerialVariant = Variant.valueOf(msg.getReplySerial());
     headerFields.put(HeaderField.REPLY_SERIAL, replySerialVariant);
-    final Variant destinationVariant = Variant.valueOf(msg.getDestination());
-    headerFields.put(HeaderField.DESTINATION, destinationVariant);
+    msg.getDestination().ifPresent(destination -> {
+      final Variant destinationVariant = Variant.valueOf(destination);
+      headerFields.put(HeaderField.DESTINATION, destinationVariant);
+    });
     msg.getSignature().ifPresent(signature -> {
       final Variant signatureVariant = Variant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
@@ -183,7 +191,7 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     try {
       final char c = signature.toString().charAt(0);
       final Type signatureType = TypeUtils.getTypeFromChar(c)
-              .orElseThrow(() -> new Exception("can not map char to type: " + c));
+          .orElseThrow(() -> new Exception("can not map char to type: " + c));
       return signatureType.getCode() == object.getType().getCode();
     } catch (Exception ex) {
       ex.printStackTrace();

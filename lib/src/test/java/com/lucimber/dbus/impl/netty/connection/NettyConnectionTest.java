@@ -40,11 +40,10 @@ final class NettyConnectionTest {
     final NettyConnection nettyConnection = new NettyConnection(factory);
     final EmbeddedChannel channel = new EmbeddedChannel(outboundHandler, nettyConnection);
     final UInt32 serial = UInt32.valueOf(1);
-    final DBusString destination = DBusString.valueOf("org.example.destination");
     final ObjectPath objectPath = ObjectPath.valueOf("/org/example/path");
     final DBusString interfaceName = DBusString.valueOf("org.example.interface");
     final DBusString signalName = DBusString.valueOf("ExampleSignal");
-    final OutboundMessage msg = new OutboundSignal(serial, destination, objectPath, interfaceName, signalName);
+    final OutboundMessage msg = new OutboundSignal(serial, objectPath, interfaceName, signalName);
     nettyConnection.writeOutboundMessage(msg);
     assertThrows(Exception.class, channel::checkException);
     Mockito.verify(pipeline).passOutboundFailure(ex);

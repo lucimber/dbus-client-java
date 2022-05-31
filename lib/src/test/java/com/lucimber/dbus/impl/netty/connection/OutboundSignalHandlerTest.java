@@ -20,11 +20,10 @@ final class OutboundSignalHandlerTest {
     final OutboundMessageEncoder handler = new OutboundMessageEncoder();
     final EmbeddedChannel channel = new EmbeddedChannel(handler);
     final UInt32 serialNumber = UInt32.valueOf(1);
-    final DBusString destination = DBusString.valueOf("io.lucimber.test.destination");
     final DBusString interfaceName = DBusString.valueOf("io.lucimber.dbus1");
     final ObjectPath path = ObjectPath.valueOf("/test");
     final DBusString signalName = DBusString.valueOf("UnitTest");
-    final OutboundSignal signal = new OutboundSignal(serialNumber, destination, path, interfaceName, signalName);
+    final OutboundSignal signal = new OutboundSignal(serialNumber, path, interfaceName, signalName);
     assertTrue(channel.writeOutbound(signal));
     assertTrue(channel.finish());
     final Frame frame = channel.readOutbound();

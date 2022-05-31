@@ -50,7 +50,7 @@ final class ConnectionWriteOutboundMessageTest {
     connection.writeOutboundMessage(methodCall);
     // Verify method call
     final OutboundMethodCall writtenMethodCall = channel.readOutbound();
-    assertEquals(destination, writtenMethodCall.getDestination());
+    assertEquals(destination, writtenMethodCall.getDestination().orElse(null));
     assertEquals(path.getWrappedValue(), writtenMethodCall.getObjectPath().getWrappedValue());
     assertEquals(interfaceName, writtenMethodCall.getInterfaceName().orElse(null));
     assertEquals(methodName, writtenMethodCall.getName());
@@ -95,7 +95,7 @@ final class ConnectionWriteOutboundMessageTest {
     connection.writeOutboundMessage(methodCall);
     // Verify method call
     final OutboundMethodCall writtenMethodCall = channel.readOutbound();
-    assertEquals(destination, writtenMethodCall.getDestination());
+    assertEquals(destination, writtenMethodCall.getDestination().orElse(null));
     assertEquals(path.getWrappedValue(), writtenMethodCall.getObjectPath().getWrappedValue());
     assertEquals(interfaceName, writtenMethodCall.getInterfaceName().orElse(null));
     assertEquals(methodName, writtenMethodCall.getName());

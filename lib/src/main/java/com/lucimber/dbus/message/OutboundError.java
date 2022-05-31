@@ -3,6 +3,7 @@ package com.lucimber.dbus.message;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.UInt32;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * An outbound error message.
@@ -28,8 +29,8 @@ public final class OutboundError extends AbstractReply implements OutboundReply 
   }
 
   @Override
-  public DBusString getDestination() {
-    return destination;
+  public Optional<DBusString> getDestination() {
+    return Optional.of(destination);
   }
 
   @Override

@@ -1,6 +1,7 @@
 package com.lucimber.dbus.message;
 
 import com.lucimber.dbus.type.DBusString;
+import java.util.Optional;
 
 /**
  * An outbound message is a message that should be sent from this service to another service
@@ -11,9 +12,9 @@ public interface OutboundMessage extends Message {
   /**
    * Gets the unique name of the destination.
    *
-   * @return a {@link DBusString}
+   * @return an {@link Optional} of {@link DBusString}
    */
-  DBusString getDestination();
+  Optional<DBusString> getDestination();
 
   /**
    * Sets the unique name of the destination.
