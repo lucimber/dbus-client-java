@@ -1,7 +1,6 @@
 package com.lucimber.dbus.impl.netty.connection;
 
 import com.lucimber.dbus.util.LoggerUtils;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import java.util.Objects;
@@ -11,16 +10,14 @@ import org.slf4j.Logger;
 @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
 final class DefaultFutureListener<T extends Future<?>> implements GenericFutureListener<T> {
 
-  private final ChannelHandlerContext ctx;
   private final Consumer<T> futureConsumer;
   private final Logger logger;
 
-  DefaultFutureListener(final ChannelHandlerContext ctx, final Logger logger) {
-    this(ctx, logger, null);
+  DefaultFutureListener(final Logger logger) {
+    this(logger, null);
   }
 
-  DefaultFutureListener(final ChannelHandlerContext ctx, final Logger logger, final Consumer<T> futureConsumer) {
-    this.ctx = Objects.requireNonNull(ctx);
+  DefaultFutureListener(final Logger logger, final Consumer<T> futureConsumer) {
     this.logger = Objects.requireNonNull(logger);
     this.futureConsumer = futureConsumer;
   }
@@ -31,7 +28,6 @@ final class DefaultFutureListener<T extends Future<?>> implements GenericFutureL
       LoggerUtils.debug(logger, () -> "I/O operation was completed successfully.");
     } else if (future.cause() != null) {
       LoggerUtils.error(logger, () -> "I/O operation was completed with failure.", future.cause());
-      ctx.fireExceptionCaught(future.cause());
     } else if (future.isCancelled()) {
       LoggerUtils.debug(logger, () -> "I/O operation was completed by cancellation.");
     }

@@ -29,7 +29,7 @@ final class SaslAnonymousInboundHandler extends AbstractSaslInboundHandler {
   public void channelActive(final ChannelHandlerContext ctx) {
     LoggerUtils.trace(LOGGER, () -> "Channel is now active.");
     final ChannelFuture future = sendAuthMessage(ctx);
-    future.addListener(new DefaultFutureListener<>(ctx, LOGGER, v -> setCurrentState(State.WAITING_FOR_OK)));
+    future.addListener(new DefaultFutureListener<>(LOGGER, v -> setCurrentState(State.WAITING_FOR_OK)));
   }
 
   @Override
@@ -55,8 +55,7 @@ final class SaslAnonymousInboundHandler extends AbstractSaslInboundHandler {
     } else if (commandName.equals(SaslCommandName.SHARED_DATA)
             || commandName.equals(SaslCommandName.SHARED_ERROR)) {
       final ChannelFuture cancelFuture = sendCancelMessage(ctx);
-      cancelFuture.addListener(new DefaultFutureListener<>(ctx, LOGGER,
-              v -> setCurrentState(State.WAITING_FOR_REJECT)));
+      cancelFuture.addListener(new DefaultFutureListener<>(LOGGER, v -> setCurrentState(State.WAITING_FOR_REJECT)));
     } else if (commandName.equals(SaslCommandName.SERVER_REJECTED)) {
       ctx.close();
     } else {
@@ -67,7 +66,7 @@ final class SaslAnonymousInboundHandler extends AbstractSaslInboundHandler {
   private void handleOkMessage(final ChannelHandlerContext ctx) {
     LoggerUtils.debug(LOGGER, () -> "Sending begin message.");
     final ChannelFuture future = ctx.writeAndFlush(new SaslBeginMessage());
-    future.addListener(new DefaultFutureListener<>(ctx, LOGGER, v -> {
+    future.addListener(new DefaultFutureListener<>(LOGGER, v -> {
       ctx.pipeline().remove(this);
       LoggerUtils.info(LOGGER, () -> "SASL authentication was completed successfully.");
       ctx.pipeline().fireUserEventTriggered(CustomChannelEvent.SASL_AUTH_COMPLETE);

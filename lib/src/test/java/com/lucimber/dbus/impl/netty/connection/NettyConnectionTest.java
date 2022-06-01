@@ -1,6 +1,5 @@
 package com.lucimber.dbus.impl.netty.connection;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 
 import com.lucimber.dbus.connection.Connection;
@@ -45,7 +44,7 @@ final class NettyConnectionTest {
     final DBusString signalName = DBusString.valueOf("ExampleSignal");
     final OutboundMessage msg = new OutboundSignal(serial, objectPath, interfaceName, signalName);
     nettyConnection.writeOutboundMessage(msg);
-    assertThrows(Exception.class, channel::checkException);
+    channel.checkException(); // Must not rethrow exception
     Mockito.verify(pipeline).passOutboundFailure(ex);
   }
 }

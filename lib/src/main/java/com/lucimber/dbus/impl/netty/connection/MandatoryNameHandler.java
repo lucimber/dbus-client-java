@@ -35,7 +35,7 @@ final class MandatoryNameHandler extends ChannelInboundHandlerAdapter {
                                               final OutboundMethodCall methodCall) {
     LoggerUtils.trace(LOGGER, () -> "Writing outbound method call.");
     final ChannelFuture future = ctx.writeAndFlush(methodCall);
-    final DefaultFutureListener<ChannelFuture> listener = new DefaultFutureListener<>(ctx, LOGGER);
+    final DefaultFutureListener<ChannelFuture> listener = new DefaultFutureListener<>(LOGGER);
     future.addListener(listener);
   }
 

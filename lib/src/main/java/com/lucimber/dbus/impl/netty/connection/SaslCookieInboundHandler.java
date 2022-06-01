@@ -82,7 +82,7 @@ final class SaslCookieInboundHandler extends AbstractSaslInboundHandler {
   @Override
   public void channelActive(final ChannelHandlerContext ctx) {
     sendAuthMessage(ctx, identity)
-            .addListener(new DefaultFutureListener<>(ctx, LOGGER, v -> setCurrentState(State.WAITING_FOR_DATA)));
+            .addListener(new DefaultFutureListener<>(LOGGER, v -> setCurrentState(State.WAITING_FOR_DATA)));
   }
 
   @Override
@@ -137,8 +137,8 @@ final class SaslCookieInboundHandler extends AbstractSaslInboundHandler {
                 dataValues[2], challenge, cookie);
         final byte[] digest = SaslUtils.computeHashValue(compositeString.getBytes(StandardCharsets.US_ASCII));
         final String hexDigest = SaslUtils.toHexadecimalString(digest);
-        sendDataMessage(ctx, challenge, hexDigest).addListener(new DefaultFutureListener<>(ctx, LOGGER,
-                v -> setCurrentState(State.WAITING_FOR_OK)));
+        sendDataMessage(ctx, challenge, hexDigest)
+            .addListener(new DefaultFutureListener<>(LOGGER, v -> setCurrentState(State.WAITING_FOR_OK)));
       } catch (AccessDeniedException | NoSuchAlgorithmException e) {
         sendCancelMessage(ctx);
         setCurrentState(State.WAITING_FOR_REJECT);
@@ -161,7 +161,7 @@ final class SaslCookieInboundHandler extends AbstractSaslInboundHandler {
   private void handleOkMessage(final ChannelHandlerContext ctx) {
     LoggerUtils.debug(LOGGER, () -> "Sending begin message.");
     final ChannelFuture future = ctx.writeAndFlush(new SaslBeginMessage());
-    future.addListener(new DefaultFutureListener<>(ctx, LOGGER, v -> {
+    future.addListener(new DefaultFutureListener<>(LOGGER, v -> {
       LoggerUtils.trace(LOGGER, () -> "Detaching from channel pipeline.");
       ctx.pipeline().remove(this);
       LoggerUtils.debug(LOGGER, () -> "Firing SASL_AUTH_COMPLETE as user event to next channel handler.");

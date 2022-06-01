@@ -47,7 +47,7 @@ final class SaslMechanismInboundHandler extends ChannelInboundHandlerAdapter {
     LoggerUtils.debug(LOGGER, () -> "Sending cancel message and closing channel.");
     final SaslMessage msg = new SaslCancelMessage();
     final ChannelFuture future = ctx.writeAndFlush(msg);
-    future.addListener(new DefaultFutureListener<>(ctx, LOGGER, v -> ctx.close()));
+    future.addListener(new DefaultFutureListener<>(LOGGER, v -> ctx.close()));
   }
 
   private static ChannelFuture sendErrorMessage(final ChannelHandlerContext ctx) {
@@ -105,7 +105,7 @@ final class SaslMechanismInboundHandler extends ChannelInboundHandlerAdapter {
     LoggerUtils.debug(LOGGER, () -> "Received user event: " + evt);
     if (evt == CustomChannelEvent.SASL_NUL_BYTE_SENT) {
       final ChannelFuture future = requestAvailableAuthMechanisms(ctx);
-      future.addListener(new DefaultFutureListener<>(ctx, LOGGER, v -> ctx.fireUserEventTriggered(evt)));
+      future.addListener(new DefaultFutureListener<>(LOGGER, v -> ctx.fireUserEventTriggered(evt)));
     }
     ctx.fireUserEventTriggered(evt);
   }
@@ -168,7 +168,7 @@ final class SaslMechanismInboundHandler extends ChannelInboundHandlerAdapter {
           sendCancelMessageAndCloseChannel(ctx);
         } else {
           serverPreviouslyAnsweredWithoutList = true;
-          sendErrorMessage(ctx).addListener(new DefaultFutureListener<>(ctx, LOGGER));
+          sendErrorMessage(ctx).addListener(new DefaultFutureListener<>(LOGGER));
         }
       }
     }

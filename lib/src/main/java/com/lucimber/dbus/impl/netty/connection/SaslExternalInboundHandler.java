@@ -28,7 +28,7 @@ final class SaslExternalInboundHandler extends AbstractSaslInboundHandler {
 
   private void sendAuthMessageAndChangeState(final ChannelHandlerContext ctx) {
     final ChannelFuture future = sendAuthMessage(ctx);
-    future.addListener(new DefaultFutureListener<>(ctx, LOGGER, v -> setCurrentState(State.WAITING_FOR_OK)));
+    future.addListener(new DefaultFutureListener<>(LOGGER, v -> setCurrentState(State.WAITING_FOR_OK)));
   }
 
   private ChannelFuture sendAuthMessage(final ChannelHandlerContext ctx) {
@@ -48,7 +48,7 @@ final class SaslExternalInboundHandler extends AbstractSaslInboundHandler {
   void handleMessageInDataState(final ChannelHandlerContext ctx, final SaslMessage msg) {
     LoggerUtils.trace(LOGGER, () -> "Handling incoming message in state: " + State.WAITING_FOR_DATA);
     sendCancelMessage(ctx)
-            .addListener(new DefaultFutureListener<>(ctx, LOGGER, v -> setCurrentState(State.WAITING_FOR_REJECT)));
+            .addListener(new DefaultFutureListener<>(LOGGER, v -> setCurrentState(State.WAITING_FOR_REJECT)));
   }
 
   @Override
@@ -71,7 +71,7 @@ final class SaslExternalInboundHandler extends AbstractSaslInboundHandler {
   private void handleOkMessage(final ChannelHandlerContext ctx) {
     LoggerUtils.debug(LOGGER, () -> "Sending begin message.");
     final ChannelFuture future = ctx.writeAndFlush(new SaslBeginMessage());
-    future.addListener(new DefaultFutureListener<>(ctx, LOGGER, v -> {
+    future.addListener(new DefaultFutureListener<>(LOGGER, v -> {
       LoggerUtils.trace(LOGGER, () -> "Detaching from channel pipeline.");
       ctx.pipeline().remove(this);
       LoggerUtils.info(LOGGER, () -> "SASL authentication was completed successfully.");

@@ -93,7 +93,7 @@ final class NettyConnection extends ChannelDuplexHandler implements Connection {
       }
     };
     final ChannelPromise promise = ctx.newPromise();
-    promise.addListener(new DefaultFutureListener<>(ctx, LOGGER, consumer));
+    promise.addListener(new DefaultFutureListener<>(LOGGER, consumer));
     ctx.writeAndFlush(msg, promise);
   }
 
