@@ -10,6 +10,7 @@ import com.lucimber.dbus.message.InboundMethodCall;
 import com.lucimber.dbus.message.InboundMethodReturn;
 import com.lucimber.dbus.message.InboundSignal;
 import com.lucimber.dbus.message.Message;
+import com.lucimber.dbus.message.MessageFlag;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.ObjectPath;
@@ -181,7 +182,8 @@ final class FrameDecoder extends MessageToMessageDecoder<Frame> {
     final DBusString sender = getSenderFromHeader(headerFields);
     final ObjectPath path = getObjectPathFromHeader(headerFields);
     final DBusString name = getMemberFromHeader(headerFields);
-    final InboundMethodCall methodCall = new InboundMethodCall(serial, sender, path, name);
+    final boolean replyExpected = !frame.getFlags().contains(MessageFlag.NO_REPLY_EXPECTED);
+    final InboundMethodCall methodCall = new InboundMethodCall(serial, sender, path, name, replyExpected);
     final Optional<DBusString> optionalInterface = getInterfaceNameFromHeader(headerFields);
     optionalInterface.ifPresent(methodCall::setInterfaceName);
     final Optional<Signature> optionalSignature = getSignatureFromHeader(headerFields);
@@ -273,7 +275,7 @@ final class FrameDecoder extends MessageToMessageDecoder<Frame> {
     if (msg == null) {
       LoggerUtils.warn(LOGGER, MARKER, () -> "Ignoring inbound message with invalid type.");
     } else {
-      LoggerUtils.debug(LOGGER, MARKER, () -> "Decoded frame to inbound message: " + msg);
+      LoggerUtils.debug(LOGGER, MARKER, () -> "Decoded an " + msg);
       out.add(msg);
     }
   }
