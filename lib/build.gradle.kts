@@ -12,9 +12,9 @@ version = "1.0-SNAPSHOT"
 dependencies {
     implementation("io.netty:netty-all:4.1.68.Final")
     implementation("io.netty:netty-transport-native-epoll:4.1.68.Final")
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.14.1")
-    testImplementation("org.apache.logging.log4j:log4j-api:2.14.1")
-    testImplementation("org.apache.logging.log4j:log4j-core:2.14.1")
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.17.1")
+    testImplementation("org.apache.logging.log4j:log4j-api:2.17.1")
+    testImplementation("org.apache.logging.log4j:log4j-core:2.17.1")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.0")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.0")
@@ -22,9 +22,8 @@ dependencies {
 }
 
 java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
-    }
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
     withJavadocJar()
     withSourcesJar()
 }
