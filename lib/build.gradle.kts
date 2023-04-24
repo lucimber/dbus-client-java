@@ -10,8 +10,8 @@ group = "com.lucimber"
 version = "1.0-SNAPSHOT"
 
 dependencies {
-    implementation("io.netty:netty-all:4.1.68.Final")
-    implementation("io.netty:netty-transport-native-epoll:4.1.68.Final")
+    implementation("io.netty:netty-all:4.1.86.Final")
+    implementation("io.netty:netty-transport-native-epoll:4.1.86.Final")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.17.1")
     testImplementation("org.apache.logging.log4j:log4j-api:2.17.1")
     testImplementation("org.apache.logging.log4j:log4j-core:2.17.1")
