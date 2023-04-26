@@ -13,6 +13,12 @@ public final class Int64 extends Number implements Comparable<Int64>, DBusBasicT
     this.delegate = delegate;
   }
 
+  /**
+   * Constructs a new D-Bus INT64 from its Java counterpart.
+   *
+   * @param value the long value
+   * @return a new instance
+   */
   public static Int64 valueOf(final long value) {
     return new Int64(value);
   }

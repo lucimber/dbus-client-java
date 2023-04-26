@@ -13,6 +13,12 @@ public final class UInt32 extends Number implements Comparable<UInt32>, DBusBasi
     this.delegate = delegate;
   }
 
+  /**
+   * Constructs a new D-Bus UIN32 from its Java counterpart.
+   *
+   * @param value the integer value
+   * @return a new instance
+   */
   public static UInt32 valueOf(final int value) {
     return new UInt32(value);
   }

@@ -13,6 +13,12 @@ public final class UnixFd implements DBusBasicType {
     this.delegate = delegate;
   }
 
+  /**
+   * Constructs a new D-Bus unix file descriptor.
+   *
+   * @param value the integer value
+   * @return a new instance
+   */
   public static UnixFd valueOf(final int value) {
     return new UnixFd(value);
   }

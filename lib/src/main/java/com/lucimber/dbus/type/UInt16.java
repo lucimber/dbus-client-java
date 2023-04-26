@@ -13,6 +13,12 @@ public final class UInt16 extends Number implements Comparable<UInt16>, DBusBasi
     this.delegate = delegate;
   }
 
+  /**
+   * Constructs a new D-Bus UINT16 from its Java counterpart.
+   *
+   * @param value the short value
+   * @return a new instance
+   */
   public static UInt16 valueOf(final short value) {
     return new UInt16(value);
   }

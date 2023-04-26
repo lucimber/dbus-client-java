@@ -43,6 +43,10 @@ public final class ObjectPath implements DBusBasicType {
     }
   }
 
+  /**
+   * Gets the wrapped string value of this object path.
+   * @return a string value
+   */
   public CharSequence getWrappedValue() {
     return delegate;
   }

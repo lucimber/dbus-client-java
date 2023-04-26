@@ -13,6 +13,12 @@ public final class DecoderResultImpl<ValueT extends DBusType> implements Decoder
   private final ValueT value;
   private int consumedBytes;
 
+  /**
+   * Constructs a new decoder result.
+   *
+   * @param consumedBytes number of consumed bytes
+   * @param value         the decoded value
+   */
   public DecoderResultImpl(final int consumedBytes, final ValueT value) {
     this.consumedBytes = consumedBytes;
     this.value = Objects.requireNonNull(value, "value must not be null");

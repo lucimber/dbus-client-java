@@ -13,6 +13,12 @@ public final class DBusDouble extends Number implements Comparable<DBusDouble>, 
     this.delegate = delegate;
   }
 
+  /**
+   * Constructs a new D-Bus double from its Java counterpart.
+   *
+   * @param value the double value
+   * @return a new instance
+   */
   public static DBusDouble valueOf(final double value) {
     return new DBusDouble(value);
   }

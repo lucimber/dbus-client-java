@@ -13,6 +13,12 @@ public final class Int16 extends Number implements Comparable<Int16>, DBusBasicT
     this.delegate = delegate;
   }
 
+  /**
+   * Constructs a new D-Bus INT16 from its Java counterpart.
+   *
+   * @param value the short value
+   * @return a new instance
+   */
   public static Int16 valueOf(final short value) {
     return new Int16(value);
   }

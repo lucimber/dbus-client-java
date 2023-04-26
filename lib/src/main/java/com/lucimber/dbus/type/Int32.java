@@ -13,6 +13,12 @@ public final class Int32 extends Number implements Comparable<Int32>, DBusBasicT
     this.delegate = delegate;
   }
 
+  /**
+   * Constructs a new D-Bus INT32 from its Java counterpart.
+   *
+   * @param value the integer value
+   * @return a new instance
+   */
   public static Int32 valueOf(final int value) {
     return new Int32(value);
   }

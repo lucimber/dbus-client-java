@@ -13,6 +13,12 @@ public final class DBusBoolean implements DBusBasicType {
     this.delegate = delegate;
   }
 
+  /**
+   * Constructs a new D-Bus boolean from its Java counterpart.
+   *
+   * @param value the boolean value
+   * @return a new instance
+   */
   public static DBusBoolean valueOf(final boolean value) {
     return new DBusBoolean(value);
   }

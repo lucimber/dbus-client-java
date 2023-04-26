@@ -13,6 +13,12 @@ public final class DBusByte extends Number implements Comparable<DBusByte>, DBus
     this.delegate = delegate;
   }
 
+  /**
+   * Constructs a new D-Bus byte from its Java counterpart.
+   *
+   * @param value the byte value
+   * @return a new instance
+   */
   public static DBusByte valueOf(final byte value) {
     return new DBusByte(value);
   }

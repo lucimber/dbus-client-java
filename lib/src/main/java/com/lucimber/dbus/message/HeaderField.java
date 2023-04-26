@@ -116,6 +116,12 @@ public enum HeaderField {
     return STRING_TO_ENUM.get(customName);
   }
 
+  /**
+   * Gets a header field from its decimal code.
+   *
+   * @param decimalCode the corresponding decimal code
+   * @return a header field
+   */
   public static HeaderField fromDecimalCode(final int decimalCode) {
     return INTEGER_TO_ENUM.get(decimalCode);
   }

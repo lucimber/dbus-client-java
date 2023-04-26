@@ -13,6 +13,12 @@ public final class UInt64 extends Number implements Comparable<UInt64>, DBusBasi
     this.delegate = delegate;
   }
 
+  /**
+   * Constructs a new D-Bus UINT64 from its Java counterpart.
+   *
+   * @param value the long value
+   * @return a new instance
+   */
   public static UInt64 valueOf(final long value) {
     return new UInt64(value);
   }

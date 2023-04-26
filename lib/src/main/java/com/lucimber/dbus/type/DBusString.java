@@ -13,6 +13,12 @@ public final class DBusString implements DBusBasicType {
     this.delegate = delegate;
   }
 
+  /**
+   * Constructs a new D-Bus string from its Java counterpart.
+   *
+   * @param value the string value
+   * @return a new instance
+   */
   public static DBusString valueOf(final String value) {
     return new DBusString(value);
   }
