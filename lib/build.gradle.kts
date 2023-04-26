@@ -22,8 +22,9 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
     withJavadocJar()
     withSourcesJar()
 }
@@ -78,18 +79,26 @@ publishing {
     }
 }
 
-tasks.withType<Test> {
+tasks.named<Test>("test") {
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
 }
 
-tasks.withType<JavaCompile> {
+tasks.named<JavaCompile>("compileJava") {
     options.encoding = "UTF-8"
 }
 
-tasks.withType<Javadoc> {
+tasks.named<Javadoc>("javadoc") {
     options.windowTitle = rootProject.name
+    options.encoding = "UTF-8"
     isVerbose = true
+}
+
+tasks.named<Jar>("jar") {
+    manifest {
+        attributes(mapOf("Implementation-Title" to project.name,
+            "Implementation-Version" to project.version))
+    }
 }
 
 checkstyle {
