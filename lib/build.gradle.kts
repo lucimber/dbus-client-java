@@ -88,11 +88,8 @@ tasks.withType<JavaCompile> {
 }
 
 tasks.withType<Javadoc> {
-    options {
-        this as StandardJavadocDocletOptions
-        addBooleanOption("Xdoclint:none", true)
-        addStringOption("Xmaxwarns", "1")
-    }
+    options.windowTitle = rootProject.name
+    isVerbose = true
 }
 
 checkstyle {
