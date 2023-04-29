@@ -1,2 +1,2 @@
-rootProject.name = "dbus-app"
+rootProject.name = "dbus-client"
 include("lib")
