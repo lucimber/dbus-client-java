@@ -9,15 +9,15 @@ common:
         destination: lib/build
         run_if: passed
 pipelines:
-  dbus-app_java:
+  dbus-client:
     group: lucimber
     lock_behavior: none
     materials:
-      git_lucimber-dbus-app-java_master:
-        git: gitea@gitea.lucimber.io:lucimber/dbus-app_java.git
+      git_lucimber-dbus-client_main:
+        git: gitea@gitea.lucimber.io:lucimber/dbus-client.git
         shallow_clone: false
         auto_update: true
-        branch: master
+        branch: main
     stages:
       - build-and-share:
           approval:
