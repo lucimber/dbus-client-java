@@ -21,6 +21,10 @@ dependencies {
     testImplementation("org.mockito:mockito-core:3.12.4")
 }
 
+repositories {
+    mavenCentral()
+}
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(8))
