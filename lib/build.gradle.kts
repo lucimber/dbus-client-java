@@ -29,56 +29,6 @@ java {
     withSourcesJar()
 }
 
-repositories {
-    val mavenUsername: String by project
-    val mavenPassword: String by project
-    maven {
-        name = "LucimberRelease"
-        url = uri("https://artifactory.lucimber.io/artifactory/gradle-release")
-        mavenContent {
-            releasesOnly()
-        }
-        credentials {
-            username = mavenUsername
-            password = mavenPassword
-        }
-    }
-    maven {
-        name = "LucimberSnapshot"
-        url = uri("https://artifactory.lucimber.io/artifactory/gradle-dev")
-        mavenContent {
-            snapshotsOnly()
-        }
-        credentials {
-            username = mavenUsername
-            password = mavenPassword
-        }
-    }
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("library") {
-            artifactId = "dbus-app"
-            from(components["java"])
-        }
-    }
-    repositories {
-        val mavenUsername: String by project
-        val mavenPassword: String by project
-        maven {
-            name = "LucimberLocal"
-            val releaseUrl = uri("https://artifactory.lucimber.io/artifactory/gradle-release-local")
-            val snapshotUrl = uri("https://artifactory.lucimber.io/artifactory/gradle-dev-local")
-            url = if (version.toString().endsWith("SNAPSHOT")) snapshotUrl else releaseUrl
-            credentials {
-                username = mavenUsername
-                password = mavenPassword
-            }
-        }
-    }
-}
-
 tasks.named<Test>("test") {
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
@@ -89,7 +39,7 @@ tasks.named<JavaCompile>("compileJava") {
 }
 
 tasks.named<Javadoc>("javadoc") {
-    options.windowTitle = rootProject.name
+    options.windowTitle = project.name
     options.encoding = "UTF-8"
     isVerbose = true
 }
