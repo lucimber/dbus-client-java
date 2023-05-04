@@ -1,3 +1,8 @@
+/*
+ * Copyright 2023 Lucimber UG
+ * Subject to the Apache License 2.0
+ */
+
 package com.lucimber.dbus.impl.netty.encoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

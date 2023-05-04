@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2020. Lucimber GmbH - All Rights Reserved
- * Unauthorized copying of this file, via any medium is strictly prohibited.
+ * Copyright 2023 Lucimber UG
+ * Subject to the Apache License 2.0
  */
 
 package com.lucimber.dbus.type;

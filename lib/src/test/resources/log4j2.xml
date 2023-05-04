@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration name="Lucimber BLE" strict="true">
+<Configuration name="Lucimber D-Bus" strict="true">
     <Appenders>
         <Appender type="Console" name="ConsoleAppender" target="SYSTEM_OUT">
             <Layout type="PatternLayout">
