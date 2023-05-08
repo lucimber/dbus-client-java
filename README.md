@@ -26,7 +26,7 @@ on the wire format of D-Bus.
 
 ## Architecture
 This framework is based on a non-blocking I/O framework
-called Netty. Therefore its an asynchronous event-driven
+called [Netty](https://netty.io). Therefore its an asynchronous event-driven
 network application framework.
 
 The application needs to implement specific handlers
@@ -46,22 +46,83 @@ the use of this framework approachable.
 ## Examples
 
 ### Bootstrap a connection
-    String userId = "1000";
-    String cookiePath = "~/.dbus-keyrings/";
-    String socketPath = "/var/run/dbus/system_bus_socket";
-    ConnectionFactory factory = new UnixSocketConnectionFactory(userId, cookiePath, socketPath);
-    PipelineInitializer initializer = pipeline ->
-        pipeline.addLast(EXAMPLE_HANDLER, new ExampleHandler());
-    CompletionStage<Connection> connStage = factory.create(initializer);
+```
+String userId = "1000";
+String cookiePath = "~/.dbus-keyrings/";
+String socketPath = "/var/run/dbus/system_bus_socket";
+ConnectionFactory factory = new UnixSocketConnectionFactory(userId, cookiePath, socketPath);
+PipelineInitializer initializer = pipeline ->
+    pipeline.addLast(EXAMPLE_HANDLER, new ExampleHandler());
+CompletionStage<Connection> connStage = factory.create(initializer);
+```
+
 ### Make a method call
-    UInt32 serial = pipeline.getConnection().getNextSerial();
-    DBusString destination = DBusString.valueOf("org.bluez");
-    ObjectPath path = ObjectPath.valueOf("/");
-    DBusString name = DBusString.valueOf("GetManagedObjects");
-    OutboundMethodCall msg = new OutboundMethodCall(serial, destination, path, name);
-    DBusString iface = DBusString.valueOf("org.freedesktop.DBus.ObjectManager");
-    msg.setInterfaceName(iface);
-    pipeline.passOutboundMessage(msg);
+```
+UInt32 serial = pipeline.getConnection().getNextSerial();
+DBusString destination = DBusString.valueOf("org.bluez");
+ObjectPath path = ObjectPath.valueOf("/");
+DBusString name = DBusString.valueOf("GetManagedObjects");
+OutboundMethodCall msg = new OutboundMethodCall(serial, destination, path, name);
+DBusString iface = DBusString.valueOf("org.freedesktop.DBus.ObjectManager");
+msg.setInterfaceName(iface);
+pipeline.passOutboundMessage(msg);
+```
+
+### Example Handler (D-Bus Peer)
+In this example, the handler implements the `org.freedesktop.DBus.Peer` interface,
+in order to respond to a ping request and/or to a request to return the machine-id.
+```java
+public final class DbusPeerHandler implements Handler {
+  private static final DBusString INTERFACE = DBusString.valueOf("org.freedesktop.DBus.Peer");
+  private final UUID machineId;
+
+  public DbusPeerHandler(final UUID machineId) {
+    this.machineId = Objects.requireNonNull(machineId);
+  }
+
+  private static void respondToPing(final HandlerContext ctx, final InboundMethodCall methodCall) {
+    final DBusString destination = methodCall.getSender();
+    final UInt32 serial = ctx.getPipeline().getConnection().getNextSerial();
+    final UInt32 replySerial = methodCall.getSerial();
+    final OutboundMethodReturn methodReturn = new OutboundMethodReturn(destination, serial, replySerial);
+    ctx.passOutboundMessage(methodReturn);
+  }
+
+  private void handleInboundMethodCall(final HandlerContext ctx, final InboundMethodCall methodCall) {
+    if (methodCall.getInterfaceName().orElse(DBusString.valueOf("")).equals(INTERFACE)) {
+      if (methodCall.getName().equals(DBusString.valueOf("Ping"))) {
+        respondToPing(ctx, methodCall);
+      } else if (methodCall.getName().equals(DBusString.valueOf("GetMachineId"))) {
+        respondWithMachineId(ctx, methodCall);
+      } else {
+        ctx.passInboundMessage(methodCall);
+      }
+    } else {
+      ctx.passInboundMessage(methodCall);
+    }
+  }
+
+  private void respondWithMachineId(final HandlerContext ctx, final InboundMethodCall methodCall) {
+    final DBusString destination = methodCall.getSender();
+    final UInt32 serial = ctx.getPipeline().getConnection().getNextSerial();
+    final UInt32 replySerial = methodCall.getSerial();
+    final OutboundMethodReturn methodReturn = new OutboundMethodReturn(destination, serial, replySerial);
+    final List<DBusType> payload = new ArrayList<>();
+    payload.add(DBusString.valueOf(machineId.toString()));
+    methodReturn.setPayload(payload);
+    ctx.passOutboundMessage(methodReturn);
+  }
+
+  @Override
+  public void onInboundMessage(final HandlerContext ctx, final InboundMessage msg) {
+    if (msg instanceof InboundMethodCall) {
+      handleInboundMethodCall(ctx, (InboundMethodCall) msg);
+    } else {
+      ctx.passInboundMessage(msg);
+    }
+  }
+}
+```
 
 ## Participation
 Participation is welcome and endorsed by the chosen license
