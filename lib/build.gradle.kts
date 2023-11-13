@@ -11,7 +11,7 @@ version = "1.0-SNAPSHOT"
 
 dependencies {
     implementation("io.netty:netty-all:4.1.100.Final")
-    implementation("io.netty:netty-transport-native-epoll:4.1.100.Final")
+    implementation("io.netty:netty-transport-native-epoll:4.1.101.Final")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.21.1")
     testImplementation("org.apache.logging.log4j:log4j-api:2.21.1")
     testImplementation("org.apache.logging.log4j:log4j-core:2.21.1")
