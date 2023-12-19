@@ -17,7 +17,7 @@ dependencies {
     testImplementation("org.apache.logging.log4j:log4j-core:2.21.1")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.1")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
     testImplementation("org.mockito:mockito-core:4.11.0")
 }
 
