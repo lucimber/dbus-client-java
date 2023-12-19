@@ -7,18 +7,18 @@ plugins {
 }
 
 group = "com.lucimber"
-version = "1.0"
+version = "2.0-SNAPSHOT"
 
 dependencies {
     implementation("io.netty:netty-all:4.1.104.Final")
     implementation("io.netty:netty-transport-native-epoll:4.1.104.Final")
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.21.1")
-    testImplementation("org.apache.logging.log4j:log4j-api:2.21.1")
-    testImplementation("org.apache.logging.log4j:log4j-core:2.21.1")
+    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.22.0")
+    testImplementation("org.apache.logging.log4j:log4j-api:2.22.0")
+    testImplementation("org.apache.logging.log4j:log4j-core:2.22.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.1")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
-    testImplementation("org.mockito:mockito-core:4.11.0")
+    testImplementation("org.mockito:mockito-core:5.8.0")
 }
 
 repositories {
@@ -27,7 +27,7 @@ repositories {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
+        languageVersion.set(JavaLanguageVersion.of(11))
     }
     withJavadocJar()
     withSourcesJar()
