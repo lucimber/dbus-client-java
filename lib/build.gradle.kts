@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.lucimber"
-version = "1.0-SNAPSHOT"
+version = "1.0"
 
 dependencies {
     implementation("io.netty:netty-all:4.1.104.Final")
