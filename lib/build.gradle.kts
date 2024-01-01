@@ -13,7 +13,7 @@ dependencies {
     implementation("io.netty:netty-all:4.1.104.Final")
     implementation("io.netty:netty-transport-native-epoll:4.1.104.Final")
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.22.0")
-    testImplementation("org.apache.logging.log4j:log4j-api:2.22.0")
+    testImplementation("org.apache.logging.log4j:log4j-api:2.22.1")
     testImplementation("org.apache.logging.log4j:log4j-core:2.22.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.1")
