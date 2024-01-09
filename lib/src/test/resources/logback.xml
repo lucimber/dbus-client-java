@@ -1,0 +1,18 @@
+<!--
+  ~ Copyright 2024 Lucimber UG
+  ~ Subject to the Apache License 2.0
+  -->
+
+<configuration>
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d{ISO8601} [%thread] %highlight(%-5level) %logger{10} [line:%line] %msg%n%ex{full}</pattern>
+        </encoder>
+    </appender>
+    <root level="info">
+        <appender-ref ref="console"/>
+    </root>
+    <logger name="com.lucimber.dbus" level="trace"/>
+</configuration>
