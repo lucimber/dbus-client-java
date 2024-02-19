@@ -13,7 +13,7 @@ dependencies {
     implementation("io.netty:netty-all:4.1.106.Final")
     implementation("io.netty:netty-transport-native-epoll:4.1.106.Final")
     implementation("org.slf4j:slf4j-api:2.0.11")
-    testImplementation("ch.qos.logback:logback-classic:1.4.14")
+    testImplementation("ch.qos.logback:logback-classic:1.5.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.2")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
