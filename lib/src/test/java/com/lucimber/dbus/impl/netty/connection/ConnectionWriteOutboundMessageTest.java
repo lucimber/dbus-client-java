@@ -5,9 +5,6 @@
 
 package com.lucimber.dbus.impl.netty.connection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.lucimber.dbus.connection.Handler;
 import com.lucimber.dbus.connection.HandlerContext;
 import com.lucimber.dbus.connection.PipelineFactory;
@@ -24,6 +21,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 final class ConnectionWriteOutboundMessageTest {
 
@@ -67,7 +66,7 @@ final class ConnectionWriteOutboundMessageTest {
     // Verify method return
     countDownLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
     final InboundMessage inboundMessage = atomicInboundMessage.get();
-    assertTrue(inboundMessage instanceof InboundMethodReturn);
+    assertInstanceOf(InboundMethodReturn.class, inboundMessage);
     final InboundMethodReturn methodReturn = (InboundMethodReturn) inboundMessage;
     assertEquals(destination, methodReturn.getSender(), "Sender");
     assertEquals(methodCall.getSerial(), methodReturn.getReplySerial(), "Serial number");
@@ -115,7 +114,7 @@ final class ConnectionWriteOutboundMessageTest {
     // Verify method return
     countDownLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
     final InboundMessage inboundMessage = atomicInboundMessage.get();
-    assertTrue(inboundMessage instanceof InboundError);
+    assertInstanceOf(InboundError.class, inboundMessage);
     final InboundError inboundError = (InboundError) inboundMessage;
     assertEquals(destination, inboundError.getSender(), "Sender");
     assertEquals(methodCall.getSerial(), inboundError.getReplySerial());

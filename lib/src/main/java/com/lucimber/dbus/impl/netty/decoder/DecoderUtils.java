@@ -118,8 +118,6 @@ public final class DecoderUtils {
                                                                     final int offset, final ByteOrder order)
           throws DecoderException {
     switch (code) {
-      default:
-        throw new DecoderException("Unsupported basic type: " + code);
       case BOOLEAN:
         return (DecoderResult<R>) new BooleanDecoder(order).decode(buffer, offset);
       case BYTE:
@@ -146,6 +144,8 @@ public final class DecoderUtils {
         return (DecoderResult<R>) new UInt64Decoder(order).decode(buffer, offset);
       case UNIX_FD:
         return (DecoderResult<R>) new UnixFdDecoder(order).decode(buffer, offset);
+      default:
+        throw new DecoderException("Unsupported basic type: " + code);
     }
   }
 }

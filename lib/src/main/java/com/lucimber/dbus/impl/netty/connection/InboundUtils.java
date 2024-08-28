@@ -57,11 +57,7 @@ final class InboundUtils {
     final byte ub = buffer.readByte();
     final int decimalCode = Byte.toUnsignedInt(ub);
     final MessageType messageType = MessageType.fromDecimalCode(decimalCode);
-    if (messageType == null) {
-      return MessageType.INVALID;
-    } else {
-      return messageType;
-    }
+    return Objects.requireNonNullElse(messageType, MessageType.INVALID);
   }
 
   static Set<MessageFlag> decodeFlags(final ByteBuf buffer) {

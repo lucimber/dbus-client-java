@@ -60,13 +60,14 @@ public final class UnixFdEncoder implements Encoder<UnixFd, ByteBuf> {
     try {
       final int padding = EncoderUtils.applyPadding(buffer, offset, Type.UNIX_FD);
       switch (order) {
-        default:
-          throw new Exception("unknown byte order");
         case BIG_ENDIAN:
           buffer.writeInt(value.getDelegate());
           break;
         case LITTLE_ENDIAN:
           buffer.writeIntLE(value.getDelegate());
+          break;
+        default:
+          throw new Exception("unknown byte order");
       }
       final int producedBytes = padding + TYPE_SIZE;
       final EncoderResult<ByteBuf> result = new EncoderResultImpl<>(producedBytes, buffer);

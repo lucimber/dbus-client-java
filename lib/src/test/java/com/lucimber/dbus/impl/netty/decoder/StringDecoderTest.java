@@ -27,14 +27,13 @@ final class StringDecoderTest {
   void decodeString(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     // UINT32 bytes
+    final byte[] lengthBytes;
     if (byteOrder == ByteOrder.BIG_ENDIAN) {
-      final byte[] lengthBytes = {0x00, 0x00, 0x00, 0x07};
-      buffer.writeBytes(lengthBytes);
+      lengthBytes = new byte[]{0x00, 0x00, 0x00, 0x07};
     } else {
-      final byte[] lengthBytes = {0x07, 0x00, 0x00, 0x00};
-      buffer.writeBytes(lengthBytes);
+      lengthBytes = new byte[]{0x07, 0x00, 0x00, 0x00};
     }
-
+    buffer.writeBytes(lengthBytes);
     // UTF-8 bytes (7 bytes)
     buffer.writeBytes(VALID_STRING.getBytes(StandardCharsets.UTF_8));
     // Trailing NUL byte
@@ -52,13 +51,13 @@ final class StringDecoderTest {
   void failDueToIndexLimitation(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     // UINT32 bytes (Integer.MAX_VALUE + 1 = 2147483648)
+    final byte[] lengthBytes;
     if (byteOrder == ByteOrder.BIG_ENDIAN) {
-      final byte[] lengthBytes = {(byte) 0x80, 0x00, 0x00, 0x00};
-      buffer.writeBytes(lengthBytes);
+      lengthBytes = new byte[]{(byte) 0x80, 0x00, 0x00, 0x00};
     } else {
-      final byte[] lengthBytes = {0x00, 0x00, 0x00, (byte) 0x80};
-      buffer.writeBytes(lengthBytes);
+      lengthBytes = new byte[]{0x00, 0x00, 0x00, (byte) 0x80};
     }
+    buffer.writeBytes(lengthBytes);
     // UTF-8 bytes (7 bytes)
     buffer.writeBytes(VALID_STRING.getBytes(StandardCharsets.UTF_8));
     // Trailing NUL byte

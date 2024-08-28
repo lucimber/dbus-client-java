@@ -130,7 +130,7 @@ public final class Signature implements DBusBasicType {
               + " Missing opening parenthesis of struct.";
       throw new SignatureException(String.format(msg, idx));
     }
-    if (node.children == null || node.children.size() == 0) {
+    if (node.children == null || node.children.isEmpty()) {
       final String msg = "Error at position %d."
               + " Empty structures are not allowed.";
       throw new SignatureException(String.format(msg, idx));

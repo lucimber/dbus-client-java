@@ -6,13 +6,13 @@
 package com.lucimber.dbus.standard;
 
 import com.lucimber.dbus.exception.AccessDeniedException;
-import com.lucimber.dbus.exception.NotSupportedException;
 import com.lucimber.dbus.exception.PropertyReadOnlyException;
 import com.lucimber.dbus.exception.UnknownInterfaceException;
 import com.lucimber.dbus.exception.UnknownPropertyException;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.Dict;
 import com.lucimber.dbus.type.Variant;
+
 import java.util.Optional;
 
 /**

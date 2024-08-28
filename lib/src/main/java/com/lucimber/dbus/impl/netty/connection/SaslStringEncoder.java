@@ -30,7 +30,7 @@ final class SaslStringEncoder extends MessageToByteEncoder<String> {
   @Override
   protected void encode(final ChannelHandlerContext ctx, final String msg, final ByteBuf out) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding SASL string to bytes.");
-    if (msg.length() != 0) {
+    if (!msg.isEmpty()) {
       final CharBuffer charBuffer = CharBuffer.wrap(msg + CRLF);
       final ByteBuf byteBuffer = ByteBufUtil.encodeString(ctx.alloc(), charBuffer, StandardCharsets.US_ASCII);
       out.writeBytes(byteBuffer);

@@ -45,13 +45,14 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
     final byte bigEndian = 0x42;
     final byte littleEndian = 0x6C;
     switch (order) {
-      default:
-        throw new EncoderException("unknown byte order");
       case BIG_ENDIAN:
         buffer.writeByte(bigEndian);
         break;
       case LITTLE_ENDIAN:
         buffer.writeByte(littleEndian);
+        break;
+      default:
+        throw new EncoderException("unknown byte order");
     }
     return buffer;
   }
@@ -61,13 +62,14 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
     final int capacity = 1;
     final ByteBuf buffer = allocator.buffer(capacity, capacity);
     switch (type) {
-      default:
-        throw new EncoderException("unknown message type");
       case ERROR:
       case METHOD_CALL:
       case METHOD_RETURN:
       case SIGNAL:
         buffer.writeByte(type.getDecimalCode());
+        break;
+      default:
+        throw new EncoderException("unknown message type");
     }
     return buffer;
   }

@@ -138,7 +138,7 @@ public final class Dict<KeyT extends DBusBasicType, ValueT extends DBusType>
    */
   public Set<DictEntry<KeyT, ValueT>> dictionaryEntrySet() {
     final Signature subSig = signature.subContainer();
-    return delegate.entrySet().stream().sequential()
+    return delegate.entrySet().stream()
             .map(e -> new DictEntry<>(subSig, e.getKey(), e.getValue()))
             .collect(Collectors.toSet());
   }

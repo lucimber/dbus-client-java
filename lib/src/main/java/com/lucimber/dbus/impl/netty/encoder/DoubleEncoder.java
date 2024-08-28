@@ -59,13 +59,14 @@ public final class DoubleEncoder implements Encoder<DBusDouble, ByteBuf> {
     try {
       final int padding = EncoderUtils.applyPadding(buffer, offset, Type.DOUBLE);
       switch (order) {
-        default:
-          throw new Exception("unknown byte order");
         case BIG_ENDIAN:
           buffer.writeDouble(value.getDelegate());
           break;
         case LITTLE_ENDIAN:
           buffer.writeDoubleLE(value.getDelegate());
+          break;
+        default:
+          throw new Exception("unknown byte order");
       }
       final int producedBytes = TYPE_SIZE + padding;
       final EncoderResult<ByteBuf> result = new EncoderResultImpl<>(producedBytes, buffer);

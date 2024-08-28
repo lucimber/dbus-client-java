@@ -61,13 +61,14 @@ public final class Int16Encoder implements Encoder<Int16, ByteBuf> {
       final int padding = EncoderUtils.applyPadding(buffer, offset, Type.INT16);
       producedBytes += padding;
       switch (order) {
-        default:
-          throw new Exception("unknown byte order");
         case BIG_ENDIAN:
           buffer.writeShort(value.getDelegate());
           break;
         case LITTLE_ENDIAN:
           buffer.writeShortLE(value.getDelegate());
+          break;
+        default:
+          throw new Exception("unknown byte order");
       }
       producedBytes += TYPE_SIZE;
       final EncoderResult<ByteBuf> result = new EncoderResultImpl<>(producedBytes, buffer);

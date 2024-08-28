@@ -85,6 +85,7 @@ final class Frame {
 
   @Override
   public String toString() {
+    @SuppressWarnings("StringBufferReplaceableByString")
     final StringBuilder builder = new StringBuilder();
     builder.append("Frame{");
     builder.append("byteOrder=").append(byteOrder);

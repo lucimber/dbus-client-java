@@ -164,7 +164,7 @@ final class FrameDecoder extends MessageToMessageDecoder<Frame> {
     final UInt32 replySerial = getReplySerialFromHeader(headerFields);
     final DBusString sender = getSenderFromHeader(headerFields);
     final Optional<DBusString> optionalName = getErrorNameFromHeader(headerFields);
-    if (!optionalName.isPresent()) {
+    if (optionalName.isEmpty()) {
       final String msg = "Missing error name in message header.";
       throw new CorruptedFrameException(msg);
     }
@@ -227,7 +227,7 @@ final class FrameDecoder extends MessageToMessageDecoder<Frame> {
     final DBusString sender = getSenderFromHeader(headerFields);
     final ObjectPath path = getObjectPathFromHeader(headerFields);
     final Optional<DBusString> optionalInterface = getInterfaceNameFromHeader(headerFields);
-    if (!optionalInterface.isPresent()) {
+    if (optionalInterface.isEmpty()) {
       final String msg = "Missing interface name in message header.";
       throw new CorruptedFrameException(msg);
     }
@@ -287,8 +287,6 @@ final class FrameDecoder extends MessageToMessageDecoder<Frame> {
 
   private InboundMessage mapFrameToInboundMessage(final Frame frame) {
     switch (frame.getType()) {
-      default:
-        return null;
       case ERROR:
         return mapToError(frame);
       case METHOD_CALL:
@@ -297,6 +295,8 @@ final class FrameDecoder extends MessageToMessageDecoder<Frame> {
         return mapToMethodReturn(frame);
       case SIGNAL:
         return mapToSignal(frame);
+      default:
+        return null;
     }
   }
 }

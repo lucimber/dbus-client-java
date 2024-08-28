@@ -61,13 +61,14 @@ public final class BooleanEncoder implements Encoder<DBusBoolean, ByteBuf> {
       final int padding = EncoderUtils.applyPadding(buffer, offset, Type.BOOLEAN);
       producedBytes += padding;
       switch (order) {
-        default:
-          throw new Exception("Unknown byte order");
         case BIG_ENDIAN:
           buffer.writeInt(value.getDelegate() ? 1 : 0);
           break;
         case LITTLE_ENDIAN:
           buffer.writeIntLE(value.getDelegate() ? 1 : 0);
+          break;
+        default:
+          throw new Exception("Unknown byte order");
       }
       producedBytes += TYPE_SIZE;
       final EncoderResult<ByteBuf> result = new EncoderResultImpl<>(producedBytes, buffer);
