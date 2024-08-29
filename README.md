@@ -26,8 +26,8 @@ on the wire format of D-Bus.
 
 ## Architecture
 This framework is based on a non-blocking I/O framework
-called [Netty](https://netty.io). Therefore its an asynchronous event-driven
-network application framework.
+called [Netty](https://netty.io). Therefore, it's an asynchronous
+event-driven network application framework.
 
 The application needs to implement specific handlers
 that will get called by this framework. Those handlers
@@ -35,12 +35,12 @@ must be programmed in a non-blocking fashion.
 Using Future and CompletionStage is a good way to do so.
 
 The type system of D-Bus is implemented by introducing
-facades to the data types of Java (Facade Design Pattern).
+wrappers to the data types of Java.
 This choice makes the framework a bit more robust and
 the use of this framework approachable.
 
 ## Dependencies
-* Java Runtime 8 or higher
+* Java Runtime 11 or higher
 * D-Bus 1.12 or higher
 
 ## Examples
