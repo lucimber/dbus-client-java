@@ -16,7 +16,7 @@ dependencies {
     testImplementation("ch.qos.logback:logback-classic:1.5.7")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.3")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.1")
     testImplementation("org.mockito:mockito-core:5.8.0")
 }
 
