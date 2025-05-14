@@ -40,7 +40,7 @@ This choice makes the framework a bit more robust and
 the use of this framework approachable.
 
 ## Dependencies
-* Java Runtime 11 or higher
+* Java Runtime 17 or higher
 * D-Bus 1.12 or higher
 
 ## Examples
