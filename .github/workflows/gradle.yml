@@ -18,9 +18,7 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up JDK 17
@@ -28,7 +26,7 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - name: Build with Gradle
+    - name: Build and run tests with detailed output
       uses: gradle/gradle-build-action@v2
       with:
-        arguments: build
+        arguments: build --console=plain --info --stacktrace
