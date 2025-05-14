@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.lucimber.dbus.impl.netty.ByteOrder;
-import com.lucimber.dbus.type.DBusBoolean;
+import com.lucimber.dbus.protocol.types.DBusBoolean;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;

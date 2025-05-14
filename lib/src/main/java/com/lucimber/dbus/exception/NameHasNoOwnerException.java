@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.exception;
 
-import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.protocol.types.DBusString;
 
 /**
  * The specified bus service name currently has no owner.

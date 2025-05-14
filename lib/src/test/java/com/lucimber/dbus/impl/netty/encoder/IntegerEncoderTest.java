@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.lucimber.dbus.impl.netty.ByteOrder;
-import com.lucimber.dbus.type.Int32;
+import com.lucimber.dbus.protocol.types.Int32;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.api.Test;

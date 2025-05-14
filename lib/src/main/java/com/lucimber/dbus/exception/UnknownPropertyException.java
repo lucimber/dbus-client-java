@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.exception;
 
-import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.protocol.types.DBusString;
 
 /**
  * The requested property does not exist in the selected interface.

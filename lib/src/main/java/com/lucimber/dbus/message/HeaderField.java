@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.Type;
+import com.lucimber.dbus.protocol.types.Type;
 import java.util.HashMap;
 import java.util.Map;
 

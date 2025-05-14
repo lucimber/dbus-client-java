@@ -6,8 +6,8 @@
 package com.lucimber.dbus.impl.netty.decoder;
 
 import com.lucimber.dbus.impl.netty.ByteOrder;
-import com.lucimber.dbus.type.Int16;
-import com.lucimber.dbus.type.Type;
+import com.lucimber.dbus.protocol.types.Int16;
+import com.lucimber.dbus.protocol.types.Type;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import java.lang.invoke.MethodHandles;

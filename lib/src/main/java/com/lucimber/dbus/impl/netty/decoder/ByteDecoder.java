@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.impl.netty.decoder;
 
-import com.lucimber.dbus.type.DBusByte;
+import com.lucimber.dbus.protocol.types.DBusByte;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import java.lang.invoke.MethodHandles;
