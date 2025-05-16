@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.exception;
 
-import com.lucimber.dbus.protocol.types.DBusString;
+import com.lucimber.dbus.type.DBusString;
 
 /**
  * One or more invalid arguments have been passed.

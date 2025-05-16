@@ -7,7 +7,7 @@ package com.lucimber.dbus.impl.netty.decoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.lucimber.dbus.protocol.types.DBusByte;
+import com.lucimber.dbus.type.DBusByte;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;

@@ -6,11 +6,11 @@
 package com.lucimber.dbus.impl.netty.encoder;
 
 import com.lucimber.dbus.impl.netty.ByteOrder;
-import com.lucimber.dbus.protocol.types.DBusBasicType;
-import com.lucimber.dbus.protocol.types.DBusContainerType;
-import com.lucimber.dbus.protocol.types.DBusType;
-import com.lucimber.dbus.protocol.types.Signature;
-import com.lucimber.dbus.protocol.types.Variant;
+import com.lucimber.dbus.type.DBusBasicType;
+import com.lucimber.dbus.type.DBusContainerType;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Variant;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;

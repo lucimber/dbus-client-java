@@ -9,12 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.lucimber.dbus.impl.netty.ByteOrder;
-import com.lucimber.dbus.protocol.types.DBusByte;
-import com.lucimber.dbus.protocol.types.DictEntry;
-import com.lucimber.dbus.protocol.types.Int32;
-import com.lucimber.dbus.protocol.types.Signature;
-import com.lucimber.dbus.protocol.types.SignatureException;
-import com.lucimber.dbus.protocol.types.Variant;
+import com.lucimber.dbus.type.DBusByte;
+import com.lucimber.dbus.type.DictEntry;
+import com.lucimber.dbus.type.Int32;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.SignatureException;
+import com.lucimber.dbus.type.Variant;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.nio.charset.StandardCharsets;

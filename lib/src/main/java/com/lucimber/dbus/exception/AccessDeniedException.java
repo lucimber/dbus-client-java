@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.exception;
 
-import com.lucimber.dbus.protocol.types.DBusString;
+import com.lucimber.dbus.type.DBusString;
 
 /**
  * Access to a resource has been denied due to security restrictions.

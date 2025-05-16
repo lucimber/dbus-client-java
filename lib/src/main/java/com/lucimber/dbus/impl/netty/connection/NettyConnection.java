@@ -10,7 +10,7 @@ import com.lucimber.dbus.connection.Pipeline;
 import com.lucimber.dbus.connection.PipelineFactory;
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
-import com.lucimber.dbus.protocol.types.UInt32;
+import com.lucimber.dbus.type.UInt32;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFuture;

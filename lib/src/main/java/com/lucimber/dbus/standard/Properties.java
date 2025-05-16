@@ -9,9 +9,9 @@ import com.lucimber.dbus.exception.AccessDeniedException;
 import com.lucimber.dbus.exception.PropertyReadOnlyException;
 import com.lucimber.dbus.exception.UnknownInterfaceException;
 import com.lucimber.dbus.exception.UnknownPropertyException;
-import com.lucimber.dbus.protocol.types.DBusString;
-import com.lucimber.dbus.protocol.types.Dict;
-import com.lucimber.dbus.protocol.types.Variant;
+import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.Dict;
+import com.lucimber.dbus.type.Variant;
 
 import java.util.Optional;
 

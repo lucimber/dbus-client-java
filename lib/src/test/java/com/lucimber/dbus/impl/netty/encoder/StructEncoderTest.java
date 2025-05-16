@@ -8,12 +8,12 @@ package com.lucimber.dbus.impl.netty.encoder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.lucimber.dbus.impl.netty.ByteOrder;
-import com.lucimber.dbus.protocol.types.DBusBoolean;
-import com.lucimber.dbus.protocol.types.DBusDouble;
-import com.lucimber.dbus.protocol.types.Int32;
-import com.lucimber.dbus.protocol.types.Signature;
-import com.lucimber.dbus.protocol.types.Struct;
-import com.lucimber.dbus.protocol.types.Variant;
+import com.lucimber.dbus.type.DBusBoolean;
+import com.lucimber.dbus.type.DBusDouble;
+import com.lucimber.dbus.type.Int32;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Struct;
+import com.lucimber.dbus.type.Variant;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.params.ParameterizedTest;

@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.exception;
 
-import com.lucimber.dbus.protocol.types.DBusString;
+import com.lucimber.dbus.type.DBusString;
 
 /**
  * A message did not receive a reply. This error is usually generated after a timeout.

@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.impl.netty.decoder;
 
-import com.lucimber.dbus.protocol.types.DBusType;
+import com.lucimber.dbus.type.DBusType;
 
 /**
  * Decodes marshalled D-Bus data types.

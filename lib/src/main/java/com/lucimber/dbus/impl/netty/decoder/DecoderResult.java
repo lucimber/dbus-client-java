@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.impl.netty.decoder;
 
-import com.lucimber.dbus.protocol.types.DBusType;
+import com.lucimber.dbus.type.DBusType;
 
 /**
  * The DecoderResult class yields the decoded D-Bus data type and the number of decoded bytes.
