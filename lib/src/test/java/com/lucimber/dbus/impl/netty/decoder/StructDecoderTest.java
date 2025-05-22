@@ -8,8 +8,8 @@ package com.lucimber.dbus.impl.netty.decoder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.lucimber.dbus.impl.netty.ByteOrder;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.Struct;
+import com.lucimber.dbus.protocol.types.Signature;
+import com.lucimber.dbus.protocol.types.Struct;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.nio.charset.StandardCharsets;

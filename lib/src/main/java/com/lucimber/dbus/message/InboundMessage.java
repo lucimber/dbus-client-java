@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.protocol.types.DBusString;
 
 /**
  * An inbound message is a message that got send from another service to this service

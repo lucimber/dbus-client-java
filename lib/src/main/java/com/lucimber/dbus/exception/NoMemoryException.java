@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.exception;
 
-import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.protocol.types.DBusString;
 
 /**
  * A memory allocation failed, and the requested operation could not be completed.

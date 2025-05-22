@@ -5,9 +5,9 @@
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.protocol.types.DBusType;
+import com.lucimber.dbus.protocol.types.Signature;
+import com.lucimber.dbus.protocol.types.UInt32;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
