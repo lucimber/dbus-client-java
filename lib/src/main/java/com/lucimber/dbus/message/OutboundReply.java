@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.protocol.types.UInt32;
+import com.lucimber.dbus.type.UInt32;
 
 /**
  * An outbound reply to a previously received message.

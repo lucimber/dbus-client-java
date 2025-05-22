@@ -6,13 +6,13 @@
 package com.lucimber.dbus.impl.netty.decoder;
 
 import com.lucimber.dbus.impl.netty.ByteOrder;
-import com.lucimber.dbus.protocol.types.DBusBasicType;
-import com.lucimber.dbus.protocol.types.DBusType;
-import com.lucimber.dbus.protocol.types.DictEntry;
-import com.lucimber.dbus.protocol.types.Signature;
-import com.lucimber.dbus.protocol.types.Type;
-import com.lucimber.dbus.protocol.types.TypeCode;
-import com.lucimber.dbus.protocol.types.TypeUtils;
+import com.lucimber.dbus.type.DBusBasicType;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.DictEntry;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Type;
+import com.lucimber.dbus.type.TypeCode;
+import com.lucimber.dbus.type.TypeUtils;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import java.lang.invoke.MethodHandles;

@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.exception;
 
-import com.lucimber.dbus.protocol.types.DBusString;
+import com.lucimber.dbus.type.DBusString;
 
 /**
  * Generic input/output error, for example when accessing a socket or other I/O context.

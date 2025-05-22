@@ -9,8 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.lucimber.dbus.impl.netty.ByteOrder;
-import com.lucimber.dbus.protocol.types.DBusString;
-import com.lucimber.dbus.protocol.types.ObjectPath;
+import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.ObjectPath;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.params.ParameterizedTest;

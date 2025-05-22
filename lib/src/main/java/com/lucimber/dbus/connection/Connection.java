@@ -6,7 +6,7 @@
 package com.lucimber.dbus.connection;
 
 import com.lucimber.dbus.message.OutboundMessage;
-import com.lucimber.dbus.protocol.types.UInt32;
+import com.lucimber.dbus.type.UInt32;
 
 /**
  * Virtual channel that mediates the message between processes.
