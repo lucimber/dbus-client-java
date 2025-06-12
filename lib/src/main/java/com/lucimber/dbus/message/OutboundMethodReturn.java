@@ -1,48 +1,69 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.message;
 
+import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.UInt32;
-import java.util.Objects;
+
+import java.util.List;
 import java.util.Optional;
 
 /**
- * An outbound method return.
+ * An outbound method return message.
+ *
+ * @since 1.0
  */
-public final class OutboundMethodReturn extends AbstractReply implements OutboundReply {
+public final class OutboundMethodReturn extends AbstractReply implements OutboundMessage, Reply {
 
-  private DBusString destination;
+  private final DBusString dst;
 
   /**
    * Constructs a new instance with mandatory parameter.
    *
-   * @param destination the destination of this method return
    * @param serial      the serial number
    * @param replySerial the reply serial number
    */
-  public OutboundMethodReturn(final DBusString destination, final UInt32 serial,
-                              final UInt32 replySerial) {
+  public OutboundMethodReturn(
+        UInt32 serial,
+        UInt32 replySerial) {
     super(serial, replySerial);
-    this.destination = Objects.requireNonNull(destination);
+    this.dst = null;
+  }
+
+  /**
+   * Constructs a new instance with all parameter.
+   *
+   * @param serial      the serial number
+   * @param replySerial the reply serial number
+   * @param dst         optional; the destination of this method return
+   * @param signature   optional; the signature of the message body
+   * @param payload     optional; the message body
+   */
+  public OutboundMethodReturn(
+        UInt32 serial,
+        UInt32 replySerial,
+        DBusString dst,
+        Signature signature,
+        List<? extends DBusType> payload) {
+    super(serial, replySerial, signature, payload);
+    this.dst = dst;
   }
 
   @Override
   public Optional<DBusString> getDestination() {
-    return Optional.of(destination);
-  }
-
-  @Override
-  public void setDestination(final DBusString destination) {
-    this.destination = Objects.requireNonNull(destination);
+    return Optional.ofNullable(dst);
   }
 
   @Override
   public String toString() {
-    final String s = "OutboundMethodReturn{destination='%s', serial=%s, replySerial=%s, signature=%s}";
-    return String.format(s, destination, getSerial(), getReplySerial(), getSignature());
+    var s = "OutboundMethodReturn{dst='%s', serial='%s', replySerial='%s', sig=%s}";
+    var mappedDst = getDestination().map(DBusString::toString).orElse("");
+    var sig = getSignature().map(Signature::toString).orElse("");
+    return String.format(s, mappedDst, getSerial(), getReplySerial(), sig);
   }
 }

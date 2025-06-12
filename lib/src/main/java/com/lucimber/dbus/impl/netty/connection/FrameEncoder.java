@@ -66,7 +66,7 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
       case METHOD_CALL:
       case METHOD_RETURN:
       case SIGNAL:
-        buffer.writeByte(type.getDecimalCode());
+        buffer.writeByte(type.getCode());
         break;
       default:
         throw new EncoderException("unknown message type");
@@ -85,7 +85,7 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding header fields: " + fields);
     final DBusArray<Struct> structs = new DBusArray<>(Signature.valueOf("a(yv)"));
     for (Map.Entry<HeaderField, Variant> entry : fields.entrySet()) {
-      final DBusByte dbusByte = DBusByte.valueOf((byte) entry.getKey().getDecimalCode());
+      final DBusByte dbusByte = DBusByte.valueOf(entry.getKey().getCode());
       final Signature signature = Signature.valueOf("(yv)");
       final Struct struct = new Struct(signature, dbusByte, entry.getValue());
       structs.add(struct);

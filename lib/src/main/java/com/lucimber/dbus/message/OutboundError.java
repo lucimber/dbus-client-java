@@ -1,46 +1,70 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.message;
 
+import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.UInt32;
+
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 /**
  * An outbound error message.
+ *
+ * @since 1.0
  */
-public final class OutboundError extends AbstractReply implements OutboundReply {
+public final class OutboundError extends AbstractReply implements OutboundMessage, Reply {
 
-  private DBusString destination;
-  private DBusString name;
+  private final DBusString dst;
+  private final DBusString errorName;
 
   /**
    * Constructs a new instance with mandatory parameter.
    *
    * @param serial      the serial number
    * @param replySerial the reply serial number
-   * @param destination the destination of this error
-   * @param name        the name of this error
+   * @param errorName   the name of this error
    */
-  public OutboundError(final UInt32 serial, final UInt32 replySerial,
-                       final DBusString destination, final DBusString name) {
+  public OutboundError(
+        UInt32 serial,
+        UInt32 replySerial,
+        DBusString errorName) {
     super(serial, replySerial);
-    this.destination = Objects.requireNonNull(destination);
-    this.name = Objects.requireNonNull(name);
+    this.errorName = Objects.requireNonNull(errorName);
+    this.dst = null;
+  }
+
+  /**
+   * Constructs a new instance with all parameter.
+   *
+   * @param serial      the serial number
+   * @param replySerial the reply serial number
+   * @param errorName   the name of this error
+   * @param dst         optional; the destination of this error
+   * @param signature   optional; the signature of the message body
+   * @param payload     optional; the message body
+   */
+  public OutboundError(
+        UInt32 serial,
+        UInt32 replySerial,
+        DBusString errorName,
+        DBusString dst,
+        Signature signature,
+        List<? extends DBusType> payload) {
+    super(serial, replySerial, signature, payload);
+    this.errorName = Objects.requireNonNull(errorName);
+    this.dst = dst;
   }
 
   @Override
   public Optional<DBusString> getDestination() {
-    return Optional.of(destination);
-  }
-
-  @Override
-  public void setDestination(final DBusString destination) {
-    this.destination = Objects.requireNonNull(destination);
+    return Optional.ofNullable(dst);
   }
 
   /**
@@ -48,22 +72,15 @@ public final class OutboundError extends AbstractReply implements OutboundReply 
    *
    * @return a {@link DBusString}
    */
-  public DBusString getName() {
-    return name;
-  }
-
-  /**
-   * Sets the name of this error.
-   *
-   * @param name a {@link DBusString}
-   */
-  public void setName(final DBusString name) {
-    this.name = Objects.requireNonNull(name);
+  public DBusString getErrorName() {
+    return errorName;
   }
 
   @Override
   public String toString() {
-    final String s = "OutboundError{destination='%s', serial=%s, replySerial=%s, name='%s', signature=%s}";
-    return String.format(s, destination, getSerial(), getReplySerial(), getName(), getSignature());
+    var s = "OutboundError{destination='%s', serial='%s', replySerial='%s', name='%s', sig='%s'}";
+    var mappedDst = getDestination().map(DBusString::toString).orElse("");
+    var sig = getSignature().map(Signature::toString).orElse("");
+    return String.format(s, mappedDst, getSerial(), getReplySerial(), getErrorName(), sig);
   }
 }

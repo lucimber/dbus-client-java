@@ -9,18 +9,21 @@ import com.lucimber.dbus.connection.Handler;
 import com.lucimber.dbus.connection.HandlerContext;
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.InboundMethodCall;
+import com.lucimber.dbus.message.OutboundMessage;
 import com.lucimber.dbus.message.OutboundMethodReturn;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.UInt32;
 import com.lucimber.dbus.util.LoggerUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A pipeline handler which implements the {@code org.freedesktop.DBus.Peer} interface.
@@ -42,30 +45,30 @@ public final class DbusPeerHandler implements Handler {
    *
    * @param machineId A hex-encoded UUID representing the identity of the machine the process is running on.
    */
-  public DbusPeerHandler(final UUID machineId) {
+  public DbusPeerHandler(UUID machineId) {
     this.machineId = Objects.requireNonNull(machineId);
   }
 
-  private static void respondToPing(final HandlerContext ctx, final InboundMethodCall methodCall) {
-    final DBusString destination = methodCall.getSender();
-    final UInt32 serial = ctx.getPipeline().getConnection().getNextSerial();
-    final UInt32 replySerial = methodCall.getSerial();
-    final OutboundMethodReturn methodReturn = new OutboundMethodReturn(destination, serial, replySerial);
+  private static void respondToPing(HandlerContext ctx, InboundMethodCall methodCall) {
+    DBusString dst = methodCall.getSender();
+    UInt32 serial = ctx.getPipeline().getConnection().getNextSerial();
+    UInt32 replySerial = methodCall.getSerial();
+    OutboundMessage methodReturn = new OutboundMethodReturn(serial, replySerial, dst, null, null);
     LoggerUtils.trace(LOGGER, methodReturn::toString);
     ctx.passOutboundMessage(methodReturn);
   }
 
-  private static void passInboundMessage(final HandlerContext ctx, final InboundMessage msg) {
+  private static void passInboundMessage(HandlerContext ctx, InboundMessage msg) {
     LoggerUtils.debug(LOGGER, () -> String.format(DEBUG_MSG_PASSING, msg));
     ctx.passInboundMessage(msg);
   }
 
-  private void handleInboundMethodCall(final HandlerContext ctx, final InboundMethodCall methodCall) {
+  private void handleInboundMethodCall(HandlerContext ctx, InboundMethodCall methodCall) {
     if (methodCall.getInterfaceName().orElse(DBusString.valueOf("")).equals(INTERFACE)) {
-      if (methodCall.getName().equals(DBusString.valueOf("Ping"))) {
+      if (methodCall.getMember().equals(DBusString.valueOf("Ping"))) {
         LoggerUtils.debug(LOGGER, () -> String.format(DEBUG_MSG_HANDLING, methodCall));
         respondToPing(ctx, methodCall);
-      } else if (methodCall.getName().equals(DBusString.valueOf("GetMachineId"))) {
+      } else if (methodCall.getMember().equals(DBusString.valueOf("GetMachineId"))) {
         respondWithMachineId(ctx, methodCall);
       } else {
         passInboundMessage(ctx, methodCall);
@@ -75,20 +78,20 @@ public final class DbusPeerHandler implements Handler {
     }
   }
 
-  private void respondWithMachineId(final HandlerContext ctx, final InboundMethodCall methodCall) {
-    final DBusString destination = methodCall.getSender();
-    final UInt32 serial = ctx.getPipeline().getConnection().getNextSerial();
-    final UInt32 replySerial = methodCall.getSerial();
-    final OutboundMethodReturn methodReturn = new OutboundMethodReturn(destination, serial, replySerial);
-    final List<DBusType> payload = new ArrayList<>();
+  private void respondWithMachineId(HandlerContext ctx, InboundMethodCall methodCall) {
+    UInt32 serial = ctx.getPipeline().getConnection().getNextSerial();
+    UInt32 replySerial = methodCall.getSerial();
+    DBusString dst = methodCall.getSender();
+    Signature sig = Signature.valueOf("s");
+    List<DBusType> payload = new ArrayList<>();
     payload.add(DBusString.valueOf(machineId.toString()));
-    methodReturn.setPayload(payload);
+    OutboundMessage methodReturn = new OutboundMethodReturn(serial, replySerial, dst, sig, payload);
     LoggerUtils.trace(LOGGER, methodReturn::toString);
     ctx.passOutboundMessage(methodReturn);
   }
 
   @Override
-  public void onInboundMessage(final HandlerContext ctx, final InboundMessage msg) {
+  public void onInboundMessage(HandlerContext ctx, InboundMessage msg) {
     Objects.requireNonNull(ctx, "ctx must not be null");
     Objects.requireNonNull(msg, "msg must not be null");
     if (msg instanceof InboundMethodCall) {

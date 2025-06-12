@@ -9,32 +9,23 @@ import com.lucimber.dbus.impl.netty.ByteOrder;
 import com.lucimber.dbus.impl.netty.encoder.EncoderResult;
 import com.lucimber.dbus.impl.netty.encoder.EncoderResultImpl;
 import com.lucimber.dbus.impl.netty.encoder.EncoderUtils;
-import com.lucimber.dbus.message.HeaderField;
-import com.lucimber.dbus.message.MessageType;
-import com.lucimber.dbus.message.OutboundError;
-import com.lucimber.dbus.message.OutboundMessage;
-import com.lucimber.dbus.message.OutboundMethodCall;
-import com.lucimber.dbus.message.OutboundMethodReturn;
-import com.lucimber.dbus.message.OutboundSignal;
-import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.Type;
-import com.lucimber.dbus.type.TypeUtils;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.message.*;
+import com.lucimber.dbus.type.*;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToMessageEncoder;
-import java.lang.invoke.MethodHandles;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
+
+import java.lang.invoke.MethodHandles;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Encodes {@link OutboundMessage}s to the D-Bus marshalling format.
@@ -71,7 +62,7 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     } else if (msg instanceof OutboundSignal) {
       return MessageType.SIGNAL;
     } else {
-      return MessageType.INVALID;
+      throw new EncoderException("Invalid message type.");
     }
   }
 
@@ -97,7 +88,7 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     headerFields.put(HeaderField.PATH, pathVariant);
     final Variant interfaceVariant = Variant.valueOf(msg.getInterfaceName());
     headerFields.put(HeaderField.INTERFACE, interfaceVariant);
-    final Variant memberVariant = Variant.valueOf(msg.getName());
+    final Variant memberVariant = Variant.valueOf(msg.getMember());
     headerFields.put(HeaderField.MEMBER, memberVariant);
     msg.getDestination().ifPresent(destination -> {
       final Variant destinationVariant = Variant.valueOf(destination);
@@ -131,7 +122,7 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     final HashMap<HeaderField, Variant> headerFields = new HashMap<>();
     final Variant pathVariant = Variant.valueOf(msg.getObjectPath());
     headerFields.put(HeaderField.PATH, pathVariant);
-    final Variant memberVariant = Variant.valueOf(msg.getName());
+    final Variant memberVariant = Variant.valueOf(msg.getMember());
     headerFields.put(HeaderField.MEMBER, memberVariant);
     msg.getInterfaceName().ifPresent(interfaceName -> {
       final Variant interfaceVariant = Variant.valueOf(interfaceName);
@@ -151,7 +142,7 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
   private static Map<HeaderField, Variant> buildHeaderFieldsForError(final OutboundError msg) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields for error message.");
     final HashMap<HeaderField, Variant> headerFields = new HashMap<>();
-    final Variant errorNameVariant = Variant.valueOf(msg.getName());
+    final Variant errorNameVariant = Variant.valueOf(msg.getErrorName());
     headerFields.put(HeaderField.ERROR_NAME, errorNameVariant);
     final Variant replySerialVariant = Variant.valueOf(msg.getReplySerial());
     headerFields.put(HeaderField.REPLY_SERIAL, replySerialVariant);
@@ -192,14 +183,14 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     }
   }
 
-  private static boolean isObjectMatchingWithSignature(final DBusType object, final Signature signature) {
+  private static boolean isObjectMatchingWithSignature(DBusType object, Signature signature) {
     try {
-      final char c = signature.toString().charAt(0);
-      final Type signatureType = TypeUtils.getTypeFromChar(c)
-          .orElseThrow(() -> new Exception("can not map char to type: " + c));
+      char c = signature.toString().charAt(0);
+      Type signatureType = TypeUtils.getTypeFromChar(c)
+            .orElseThrow(() -> new Exception("can not map char to type: " + c));
       return signatureType.getCode() == object.getType().getCode();
     } catch (Exception ex) {
-      ex.printStackTrace();
+      LOGGER.warn("Object isn't matching with signature.", ex);
       return false;
     }
   }

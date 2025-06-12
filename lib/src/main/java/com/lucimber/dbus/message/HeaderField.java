@@ -1,156 +1,84 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.Type;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Contains all header fields used by D-Bus.
+ * D-Bus header field codes, as defined by the D-Bus specification.
+ * <p>
+ * Each header field is represented as a single byte code and
+ * maps to a standard D-Bus header entry in the a{yv} dict.</p>
+ *
+ * @since 1.0
  */
 public enum HeaderField {
+  /**
+   * Object path to the object receiving or emitting the message.
+   */
+  PATH((byte) 1),
+  /**
+   * Interface name associated with the message.
+   */
+  INTERFACE((byte) 2),
+  /**
+   * Member (method or signal) name.
+   */
+  MEMBER((byte) 3),
+  /**
+   * Error name for error messages.
+   */
+  ERROR_NAME((byte) 4),
+  /**
+   * Reply serial for method return messages.
+   */
+  REPLY_SERIAL((byte) 5),
+  /**
+   * Destination bus name.
+   */
+  DESTINATION((byte) 6),
+  /**
+   * Sender bus name.
+   */
+  SENDER((byte) 7),
+  /**
+   * Signature of the body parameters.
+   */
+  SIGNATURE((byte) 8),
+  /**
+   * Number of UNIX file descriptors in the message.
+   */
+  UNIX_FDS((byte) 9);
+
+  private final byte code;
+
+  HeaderField(final byte code) {
+    this.code = code;
+  }
 
   /**
-   * The name of the connection this message is intended for.
-   * This field is usually only meaningful in combination
-   * with the message bus (see the section called “Message Bus Specification”),
-   * but other servers may define their own meanings for it.
-   * This header field is controlled by the message sender.
+   * Returns the byte code for this header field.
+   *
+   * @return the D-Bus header field code
    */
-  DESTINATION("DESTINATION", 6, Type.STRING),
+  public byte getCode() {
+    return code;
+  }
 
   /**
-   * The name of the error that occurred; used for errors.
+   * Looks up a HeaderField by its byte code.
+   *
+   * @param code the byte code
+   * @return the matching HeaderField
+   * @throws IllegalArgumentException if no matching field exists
    */
-  ERROR_NAME("ERROR_NAME", 4, Type.STRING),
-
-  /**
-   * The interface to invoke a method call on, or that a signal is emitted from.
-   * Optional for method calls, required for signals.
-   * The special interface {@code org.freedesktop.DBus.Local} is reserved;
-   * implementations should not send messages with this interface,
-   * and the reference implementation of the bus daemon will disconnect
-   * any application that attempts to do so.
-   * This header field is controlled by the message sender.
-   */
-  INTERFACE("INTERFACE", 2, Type.STRING),
-
-  /**
-   * The member, either the method name or signal name.
-   * This header field is controlled by the message sender.
-   */
-  MEMBER("MEMBER", 3, Type.STRING),
-
-  /**
-   * The serial number of the message this message is a reply to.
-   * (The serial number is the second UINT32 in the header.)
-   * This header field is controlled by the message sender.
-   */
-  REPLY_SERIAL("REPLY_SERIAL", 5, Type.UINT32),
-
-  /**
-   * Unique name of the sending connection.
-   * This field is usually only meaningful in combination with the message bus,
-   * but other servers may define their own meanings for it.
-   * On a message bus, this header field is controlled by the message bus,
-   * so it is as reliable and trustworthy as the message bus itself.
-   * Otherwise, this header field is controlled by the message sender,
-   * unless there is out-of-band information that indicates otherwise.
-   */
-  SENDER("SENDER", 7, Type.STRING),
-
-  /**
-   * The signature of the message body.
-   * If omitted, it is assumed to be the empty signature "" (i.e. the body must be 0-length).
-   * This header field is controlled by the message sender.
-   */
-  SIGNATURE("SIGNATURE", 8, Type.SIGNATURE),
-
-  /**
-   * The object to send a call to, or the object a signal is emitted from.
-   * The special path {@code /org/freedesktop/DBus/Local} is reserved;
-   * implementations should not send messages with this path,
-   * and the reference implementation of the bus daemon will disconnect
-   * any application that attempts to do so.
-   * This header field is controlled by the message sender.
-   */
-  PATH("PATH", 1, Type.OBJECT_PATH),
-
-  /**
-   * The number of Unix file descriptors that accompany the message.
-   * If omitted, it is assumed that no Unix file descriptors accompany the message.
-   * The actual file descriptors need to be transferred via platform specific mechanism out-of-band.
-   * They must be sent at the same time as part of the message itself.
-   * They may not be sent before the first byte of the message itself is transferred
-   * or after the last byte of the message itself.
-   * This header field is controlled by the message sender.
-   */
-  UNIX_FDS("UNIX_FDS", 9, Type.UINT32);
-
-  private static final Map<Integer, HeaderField> INTEGER_TO_ENUM = new HashMap<>();
-  private static final Map<String, HeaderField> STRING_TO_ENUM = new HashMap<>();
-
-  static {
-    for (HeaderField headerField : values()) {
-      STRING_TO_ENUM.put(headerField.toString(), headerField);
-      INTEGER_TO_ENUM.put(headerField.getDecimalCode(), headerField);
+  public static HeaderField fromCode(final byte code) {
+    for (HeaderField field : values()) {
+      if (field.code == code) {
+        return field;
+      }
     }
-  }
-
-  private final String customName;
-  private final int decimalCode;
-  private final Type type;
-
-  HeaderField(final String customName, final int decimalCode, final Type type) {
-    this.customName = customName;
-    this.decimalCode = decimalCode;
-    this.type = type;
-  }
-
-  /**
-   * Translates the custom string representation back to the corresponding enum.
-   *
-   * @param customName The custom string representation.
-   * @return The corresponding {@link HeaderField}.
-   */
-  public static HeaderField fromString(final String customName) {
-    return STRING_TO_ENUM.get(customName);
-  }
-
-  /**
-   * Gets a header field from its decimal code.
-   *
-   * @param decimalCode the corresponding decimal code
-   * @return a header field
-   */
-  public static HeaderField fromDecimalCode(final int decimalCode) {
-    return INTEGER_TO_ENUM.get(decimalCode);
-  }
-
-  @Override
-  public String toString() {
-    return customName;
-  }
-
-  /**
-   * Gets the decimal code of the header field.
-   *
-   * @return The decimal code as an {@link Integer}.
-   */
-  public int getDecimalCode() {
-    return decimalCode;
-  }
-
-  /**
-   * Gets the associated {@link Type}.
-   *
-   * @return The D-Bus type.
-   */
-  public Type getType() {
-    return type;
+    throw new IllegalArgumentException("Unknown D-Bus header field code: " + code);
   }
 }

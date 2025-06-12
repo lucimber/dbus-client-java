@@ -1,105 +1,65 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.message;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 /**
- * Contains all message types used by D-Bus.
+ * D-Bus message types as defined in the D-Bus wire protocol.
+ * <p>
+ * Each message begins with a single byte indicating its type.
+ * </p>
+ *
+ * @see <a href="https://dbus.freedesktop.org/doc/dbus-specification.html#message-protocol-types">D-Bus Specification: Message Protocol Types</a>
+ * @since 1.0
  */
 public enum MessageType {
-
   /**
-   * An invalid message type.
+   * Method call request. Bit mask: 0x01
    */
-  INVALID("INVALID", -1),
+  METHOD_CALL((byte) 1),
+  /**
+   * Method return (reply). Bit mask: 0x02
+   */
+  METHOD_RETURN((byte) 2),
+  /**
+   * Error reply. Bit mask: 0x03
+   */
+  ERROR((byte) 3),
+  /**
+   * Signal emission. Bit mask: 0x04
+   */
+  SIGNAL((byte) 4);
+
+  private final byte code;
+
+  MessageType(byte code) {
+    this.code = code;
+  }
 
   /**
-   * Method call. This message type may prompt a reply.
+   * Returns the byte code corresponding to this message type.
    *
-   * @see InboundMethodCall
-   * @see OutboundMethodCall
+   * @return the D-Bus message type code
    */
-  METHOD_CALL("METHOD_CALL", 1),
+  public byte getCode() {
+    return code;
+  }
 
   /**
-   * Method reply with returned data.
+   * Looks up a MessageType by its byte code.
    *
-   * @see InboundMethodReturn
-   * @see OutboundMethodReturn
+   * @param code the byte code from the wire
+   * @return the matching MessageType
+   * @throws IllegalArgumentException if the code is unrecognized
    */
-  METHOD_RETURN("METHOD_RETURN", 2),
-
-  /**
-   * Error reply. If the first argument exists and is a string, it is an error message.
-   *
-   * @see InboundError
-   * @see OutboundError
-   */
-  ERROR("ERROR", 3),
-
-  /**
-   * Signal emission.
-   *
-   * @see InboundSignal
-   * @see OutboundSignal
-   */
-  SIGNAL("SIGNAL", 4);
-
-  private static final Map<Integer, MessageType> INTEGER_TO_ENUM = new HashMap<>();
-  private static final Map<String, MessageType> STRING_TO_ENUM = new HashMap<>();
-
-  static {
-    for (MessageType type : values()) {
-      STRING_TO_ENUM.put(type.toString(), type);
-      INTEGER_TO_ENUM.put(type.getDecimalCode(), type);
+  public static MessageType fromCode(byte code) {
+    for (MessageType t : values()) {
+      if (t.code == code) {
+        return t;
+      }
     }
-  }
-
-  private final String customName;
-  private final int decimalCode;
-
-  MessageType(final String customName, final int decimalCode) {
-    this.customName = Objects.requireNonNull(customName);
-    this.decimalCode = decimalCode;
-  }
-
-  /**
-   * Translates the custom string representation back to the corresponding enum.
-   *
-   * @param customName a {@link String}
-   * @return a {@link MessageType}
-   */
-  public static MessageType fromString(final String customName) {
-    return STRING_TO_ENUM.get(customName);
-  }
-
-  /**
-   * Translates the decimal code back to the corresponding enum.
-   *
-   * @param decimalCode an {@link Integer}
-   * @return a {@link MessageType}.
-   */
-  public static MessageType fromDecimalCode(final int decimalCode) {
-    return INTEGER_TO_ENUM.get(decimalCode);
-  }
-
-  /**
-   * Gets the decimal code of this message type.
-   *
-   * @return an {@link Integer}.
-   */
-  public int getDecimalCode() {
-    return decimalCode;
-  }
-
-  @Override
-  public String toString() {
-    return customName;
+    throw new IllegalArgumentException("Unknown D-Bus message type code: " + code);
   }
 }

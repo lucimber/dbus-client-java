@@ -12,19 +12,10 @@ import com.lucimber.dbus.impl.netty.decoder.DecoderResult;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageFlag;
 import com.lucimber.dbus.message.MessageType;
-import com.lucimber.dbus.type.DBusArray;
-import com.lucimber.dbus.type.DBusByte;
-import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.Struct;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.*;
 import io.netty.buffer.ByteBuf;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+
+import java.util.*;
 
 /**
  * Utility class for common methods used for decoding and encoding messages.
@@ -52,12 +43,10 @@ final class InboundUtils {
     }
   }
 
-  static MessageType decodeType(final ByteBuf buffer) {
+  static MessageType decodeType(ByteBuf buffer) {
     Objects.requireNonNull(buffer, "buffer must not be null");
-    final byte ub = buffer.readByte();
-    final int decimalCode = Byte.toUnsignedInt(ub);
-    final MessageType messageType = MessageType.fromDecimalCode(decimalCode);
-    return Objects.requireNonNullElse(messageType, MessageType.INVALID);
+    byte ub = buffer.readByte();
+    return MessageType.fromCode(ub);
   }
 
   static Set<MessageFlag> decodeFlags(final ByteBuf buffer) {
@@ -78,7 +67,7 @@ final class InboundUtils {
   }
 
   static DecoderResult<DBusArray<Struct>> decodeHeaderFields(final ByteBuf buffer, final ByteOrder order)
-          throws DecoderException {
+        throws DecoderException {
     Objects.requireNonNull(buffer, "buffer must not be null");
     Objects.requireNonNull(order, "order must not be null");
     final Signature signature = Signature.valueOf("a(yv)");
@@ -87,13 +76,13 @@ final class InboundUtils {
     return decoder.decode(buffer, messageHeaderSigOffset);
   }
 
-  static Map<HeaderField, Variant> mapHeaderFields(final List<Struct> headerFields) {
-    final Map<HeaderField, Variant> map = new HashMap<>();
+  static Map<HeaderField, Variant> mapHeaderFields(List<Struct> headerFields) {
+    Map<HeaderField, Variant> map = new HashMap<>();
     for (Struct struct : headerFields) {
-      final List<DBusType> structList = struct.getDelegate();
-      final DBusByte dbusByte = (DBusByte) structList.get(0);
-      final HeaderField headerField = HeaderField.fromDecimalCode(dbusByte.getDelegate());
-      final Variant variant = (Variant) structList.get(1);
+      List<DBusType> structList = struct.getDelegate();
+      DBusByte dbusByte = (DBusByte) structList.get(0);
+      HeaderField headerField = HeaderField.fromCode(dbusByte.getDelegate());
+      Variant variant = (Variant) structList.get(1);
       map.put(headerField, variant);
     }
     return map;

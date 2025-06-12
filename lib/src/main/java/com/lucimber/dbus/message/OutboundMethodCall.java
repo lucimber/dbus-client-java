@@ -1,52 +1,89 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.UInt32;
-import java.util.Objects;
+import com.lucimber.dbus.type.*;
+
+import java.util.List;
 import java.util.Optional;
 
 /**
  * An outbound method call.
+ *
+ * @since 1.0
  */
 public final class OutboundMethodCall extends AbstractMethodCall implements OutboundMessage {
 
-  private DBusString destination;
+  private final DBusString dst;
+  private final boolean replyExpected;
 
   /**
    * Constructs a new instance with mandatory parameter.
    *
-   * @param serial      the serial number
-   * @param destination the destination of this method call
-   * @param objectPath  the object path
-   * @param name        the name of the method
+   * @param serial        the serial number
+   * @param path          the object path
+   * @param member        the name of the method
+   * @param replyExpected states if reply is expected
    */
-  public OutboundMethodCall(final UInt32 serial, final DBusString destination,
-                            final ObjectPath objectPath, final DBusString name) {
-    super(serial, objectPath, name);
-    this.destination = Objects.requireNonNull(destination);
+  public OutboundMethodCall(
+        UInt32 serial,
+        ObjectPath path,
+        DBusString member,
+        boolean replyExpected) {
+    super(serial, path, member);
+    this.dst = null;
+    this.replyExpected = replyExpected;
   }
 
-  @Override
-  public String toString() {
-    final String s = "OutboundMethodCall{destination='%s', serial=%s, path=%s,"
-            + " interface='%s', member='%s', signature=%s}";
-    return String.format(s, destination, getSerial(), getObjectPath(), getInterfaceName(), getName(),
-            getSignature());
+  /**
+   * Constructs a new instance with all parameter.
+   *
+   * @param serial        the serial number
+   * @param path          the object path
+   * @param member        the name of the method
+   * @param replyExpected states if reply is expected
+   * @param dst           optional; the destination of this method call
+   * @param iface         optional; the name of the interface
+   * @param signature     optional; the signature of the message body
+   * @param payload       optional; the message body
+   */
+  public OutboundMethodCall(
+        UInt32 serial,
+        ObjectPath path,
+        DBusString member,
+        boolean replyExpected,
+        DBusString dst,
+        DBusString iface,
+        Signature signature,
+        List<? extends DBusType> payload) {
+    super(serial, path, member, iface, signature, payload);
+    this.dst = dst;
+    this.replyExpected = replyExpected;
   }
 
   @Override
   public Optional<DBusString> getDestination() {
-    return Optional.of(destination);
+    return Optional.ofNullable(dst);
+  }
+
+  /**
+   * States if the sender expects a reply to this method call or not.
+   *
+   * @return {@code TRUE} if reply is expected, {@code FALSE} otherwise.
+   */
+  public boolean isReplyExpected() {
+    return replyExpected;
   }
 
   @Override
-  public void setDestination(final DBusString destination) {
-    this.destination = Objects.requireNonNull(destination);
+  public String toString() {
+    var s = "OutboundMethodCall{dst='%s', serial='%s', path='%s', iface='%s', member='%s', sig='%s'}";
+    var dst = getDestination().map(DBusString::toString).orElse("");
+    var iface = getInterfaceName().map(DBusString::toString).orElse("");
+    var sig = getSignature().map(Signature::toString).orElse("");
+    return String.format(s, dst, getSerial(), getObjectPath(), iface, getMember(), sig);
   }
 }

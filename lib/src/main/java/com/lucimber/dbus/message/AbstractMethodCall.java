@@ -1,32 +1,65 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.*;
+
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * An abstract implementation of a method call message.
+ *
+ * @since 1.0
+ */
 abstract class AbstractMethodCall extends AbstractMessage {
 
-  private ObjectPath objectPath;
-  private DBusString name;
-  private DBusString interfaceName;
+  private final ObjectPath path;
+  private final DBusString member;
+  private final DBusString iface;
 
-  AbstractMethodCall(final UInt32 serial, final ObjectPath objectPath, final DBusString name) {
+  /**
+   * Constructs a new instance with mandatory parameter.
+   *
+   * @param serial the serial number
+   * @param path   the object path
+   * @param member the name of the method
+   */
+  AbstractMethodCall(
+        UInt32 serial,
+        ObjectPath path,
+        DBusString member) {
     super(serial);
-    this.objectPath = Objects.requireNonNull(objectPath);
-    this.name = Objects.requireNonNull(name);
+    this.path = Objects.requireNonNull(path);
+    this.member = Objects.requireNonNull(member);
+    this.iface = null;
   }
 
-  @Override
-  public String toString() {
-    final String s = "AbstractMethodCall{serial=%s, path=%s, interface='%s', member='%s', signature=%s}";
-    return String.format(s, getSerial(), objectPath, interfaceName, name, getSignature());
+  /**
+   * Constructs a new instance with all parameter.
+   *
+   * @param serial    the serial number
+   * @param path      the object path
+   * @param member    the name of the method
+   * @param iface     optional; the name of the interface
+   * @param signature optional; the signature of the message body
+   * @param payload   optional; the message body
+   */
+  AbstractMethodCall(
+        UInt32 serial,
+        ObjectPath path,
+        DBusString member,
+        DBusString iface,
+        Signature signature,
+        List<? extends DBusType> payload) {
+    super(serial, signature, payload);
+    this.path = Objects.requireNonNull(path);
+    this.member = Objects.requireNonNull(member);
+    this.iface = iface;
   }
 
   /**
@@ -35,16 +68,7 @@ abstract class AbstractMethodCall extends AbstractMessage {
    * @return an {@link ObjectPath}
    */
   public ObjectPath getObjectPath() {
-    return objectPath;
-  }
-
-  /**
-   * Sets the object path of this method.
-   *
-   * @param objectPath an {@link ObjectPath}
-   */
-  public void setObjectPath(final ObjectPath objectPath) {
-    this.objectPath = Objects.requireNonNull(objectPath);
+    return path;
   }
 
   /**
@@ -52,17 +76,8 @@ abstract class AbstractMethodCall extends AbstractMessage {
    *
    * @return a {@link DBusString}
    */
-  public DBusString getName() {
-    return name;
-  }
-
-  /**
-   * Sets the name of this method.
-   *
-   * @param name a {@link DBusString}
-   */
-  public void setName(final DBusString name) {
-    this.name = Objects.requireNonNull(name);
+  public DBusString getMember() {
+    return member;
   }
 
   /**
@@ -71,15 +86,14 @@ abstract class AbstractMethodCall extends AbstractMessage {
    * @return a {@link DBusString}
    */
   public Optional<DBusString> getInterfaceName() {
-    return Optional.ofNullable(interfaceName);
+    return Optional.ofNullable(iface);
   }
 
-  /**
-   * Sets the name of the interface, to which this method belongs.
-   *
-   * @param interfaceName a {@link DBusString}
-   */
-  public void setInterfaceName(final DBusString interfaceName) {
-    this.interfaceName = interfaceName;
+  @Override
+  public String toString() {
+    var s = "AbstractMethodCall{serial='%s', path='%s', iface='%s', member='%s', sig='%s'}";
+    var mappedIface = getInterfaceName().map(DBusString::toString).orElse("");
+    var sig = getSignature().map(Signature::toString).orElse("");
+    return String.format(s, getSerial(), path, mappedIface, member, sig);
   }
 }

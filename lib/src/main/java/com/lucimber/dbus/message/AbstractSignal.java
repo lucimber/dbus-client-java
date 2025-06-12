@@ -1,27 +1,63 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.*;
+
+import java.util.List;
 import java.util.Objects;
 
+/**
+ * An abstract implementation of a signal message.
+ *
+ * @since 1.0
+ */
 abstract class AbstractSignal extends AbstractMessage {
 
-  private ObjectPath objectPath;
-  private DBusString name;
-  private DBusString interfaceName;
+  private final ObjectPath path;
+  private final DBusString member;
+  private final DBusString iface;
 
-  AbstractSignal(final UInt32 serial, final ObjectPath objectPath,
-                 final DBusString interfaceName, final DBusString name) {
-    super(serial);
-    this.objectPath = Objects.requireNonNull(objectPath);
-    this.interfaceName = Objects.requireNonNull(interfaceName);
-    this.name = Objects.requireNonNull(name);
+  /**
+   * Constructs a new instance with mandatory parameter.
+   *
+   * @param serial the serial number
+   * @param path   the object path
+   * @param iface  the name of the interface
+   * @param member the name of the signal
+   */
+  AbstractSignal(
+        UInt32 serial,
+        ObjectPath path,
+        DBusString iface,
+        DBusString member) {
+    this(serial, path, iface, member, null, null);
+  }
+
+  /**
+   * Constructs a new instance with all parameter.
+   *
+   * @param serial    the serial number
+   * @param path      the object path
+   * @param iface     the name of the interface
+   * @param member    the name of the signal
+   * @param signature optional; the signature of the message body
+   * @param payload   optional; the message body
+   */
+  AbstractSignal(
+        UInt32 serial,
+        ObjectPath path,
+        DBusString iface,
+        DBusString member,
+        Signature signature,
+        List<? extends DBusType> payload) {
+    super(serial, signature, payload);
+    this.path = Objects.requireNonNull(path);
+    this.iface = Objects.requireNonNull(iface);
+    this.member = Objects.requireNonNull(member);
   }
 
   /**
@@ -30,16 +66,7 @@ abstract class AbstractSignal extends AbstractMessage {
    * @return The path as an {@link ObjectPath}.
    */
   public ObjectPath getObjectPath() {
-    return objectPath;
-  }
-
-  /**
-   * Sets the object path of this signal.
-   *
-   * @param objectPath an {@link ObjectPath}
-   */
-  public void setObjectPath(final ObjectPath objectPath) {
-    this.objectPath = Objects.requireNonNull(objectPath);
+    return path;
   }
 
   /**
@@ -47,17 +74,8 @@ abstract class AbstractSignal extends AbstractMessage {
    *
    * @return a {@link DBusString}
    */
-  public DBusString getName() {
-    return name;
-  }
-
-  /**
-   * Sets the name of this signal.
-   *
-   * @param name a {@link DBusString}
-   */
-  public void setName(final DBusString name) {
-    this.name = Objects.requireNonNull(name);
+  public DBusString getMember() {
+    return member;
   }
 
   /**
@@ -66,21 +84,13 @@ abstract class AbstractSignal extends AbstractMessage {
    * @return a {@link DBusString}
    */
   public DBusString getInterfaceName() {
-    return interfaceName;
-  }
-
-  /**
-   * Sets the name of the interface, to which this signal belongs.
-   *
-   * @param interfaceName a {@link DBusString}
-   */
-  public void setInterfaceName(final DBusString interfaceName) {
-    this.interfaceName = Objects.requireNonNull(interfaceName);
+    return iface;
   }
 
   @Override
   public String toString() {
-    final String s = "AbstractSignal{serial=%s, path=%s, interface='%s', member='%s', signature=%s}";
-    return String.format(s, getSerial(), objectPath, interfaceName, name, getSignature());
+    var s = "AbstractSignal{serial='%s', path='%s', iface='%s', member='%s', sig='%s'}";
+    var sig = getSignature().map(Signature::toString).orElse("");
+    return String.format(s, getSerial(), path, iface, member, sig);
   }
 }

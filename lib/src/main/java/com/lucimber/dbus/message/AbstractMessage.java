@@ -1,27 +1,50 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.UInt32;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
+import java.util.*;
+
+/**
+ * An abstract implementation of message.
+ *
+ * @since 1.0
+ */
 abstract class AbstractMessage implements Message {
 
-  private UInt32 serial;
-  private List<DBusType> payload;
-  private Signature signature;
+  private final UInt32 serial;
+  private final List<DBusType> payload;
+  private final Signature signature;
 
-  AbstractMessage(final UInt32 serial) {
+  /**
+   * Constructs a new instance with mandatory parameter.
+   *
+   * @param serial the serial number
+   */
+  AbstractMessage(UInt32 serial) {
+    this(serial, null, null);
+  }
+
+  /**
+   * Constructs a new instance with all parameter.
+   *
+   * @param serial    the serial number
+   * @param signature optional; the signature of the message body
+   * @param payload   optional; the message body
+   */
+  AbstractMessage(
+        UInt32 serial,
+        Signature signature,
+        List<? extends DBusType> payload) {
     this.serial = Objects.requireNonNull(serial);
+    this.signature = signature;
+    this.payload = (payload == null) ? Collections.emptyList() : new ArrayList<>(payload);
   }
 
   @Override
@@ -30,18 +53,8 @@ abstract class AbstractMessage implements Message {
   }
 
   @Override
-  public void setSerial(final UInt32 serial) {
-    this.serial = Objects.requireNonNull(serial);
-  }
-
-  @Override
   public List<DBusType> getPayload() {
-    return payload == null ? Collections.emptyList() : new ArrayList<>(payload);
-  }
-
-  @Override
-  public void setPayload(final List<? extends DBusType> payload) {
-    this.payload = (payload == null) ? null : new ArrayList<>(payload);
+    return new ArrayList<>(payload);
   }
 
   @Override
@@ -50,12 +63,9 @@ abstract class AbstractMessage implements Message {
   }
 
   @Override
-  public void setSignature(final Signature signature) {
-    this.signature = signature;
-  }
-
-  @Override
   public String toString() {
-    return String.format("AbstractMessage{serial=%s, signature=%s}", serial, getSignature());
+    var s = "AbstractMessage{serial='%s', sig='%s'}";
+    var sig = getSignature().map(Signature::toString).orElse("");
+    return String.format(s, serial, sig);
   }
 }

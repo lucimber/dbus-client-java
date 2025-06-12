@@ -13,14 +13,14 @@ import com.lucimber.dbus.message.InboundError;
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.InboundMethodReturn;
 import com.lucimber.dbus.message.OutboundMethodCall;
-import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.*;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,11 +30,11 @@ final class ConnectionWriteOutboundMessageTest {
 
   @Test
   void succeedWithInvokingMethod() throws InterruptedException {
-    final PipelineFactory chainFactory = new DefaultPipelineFactory();
-    final NettyConnection connection = new NettyConnection(chainFactory);
-    final AtomicReference<InboundMessage> atomicInboundMessage = new AtomicReference<>();
-    final CountDownLatch countDownLatch = new CountDownLatch(1);
-    final Handler processor = new Handler() {
+    PipelineFactory chainFactory = new DefaultPipelineFactory();
+    NettyConnection connection = new NettyConnection(chainFactory);
+    AtomicReference<InboundMessage> atomicInboundMessage = new AtomicReference<>();
+    CountDownLatch countDownLatch = new CountDownLatch(1);
+    Handler processor = new Handler() {
       @Override
       public void onInboundMessage(final HandlerContext ctx, final InboundMessage msg) {
         atomicInboundMessage.set(msg);
@@ -42,44 +42,51 @@ final class ConnectionWriteOutboundMessageTest {
       }
     };
     connection.getPipeline().addLast("unit test processor", processor);
-    final EmbeddedChannel channel = new EmbeddedChannel(connection);
+    EmbeddedChannel channel = new EmbeddedChannel(connection);
+
     // Write method call
-    final DBusString destination = DBusString.valueOf("org.freedesktop.DBus");
-    final ObjectPath path = ObjectPath.valueOf("/org/freedesktop/DBus");
-    final DBusString interfaceName = DBusString.valueOf("org.freedesktop.DBus.Peer");
-    final DBusString methodName = DBusString.valueOf("Ping");
-    final OutboundMethodCall methodCall =
-            new OutboundMethodCall(connection.getNextSerial(), destination, path, methodName);
-    methodCall.setInterfaceName(interfaceName);
+    UInt32 methodCallSerial = connection.getNextSerial();
+    ObjectPath path = ObjectPath.valueOf("/org/freedesktop/DBus");
+    DBusString member = DBusString.valueOf("Ping");
+    boolean replyExpected = true;
+    DBusString dst = DBusString.valueOf("org.freedesktop.DBus");
+    DBusString iface = DBusString.valueOf("org.freedesktop.DBus.Peer");
+    Signature sig = null;
+    List<DBusType> payload = null;
+    OutboundMethodCall methodCall = new OutboundMethodCall(methodCallSerial, path, member, replyExpected,
+          dst, iface, sig, payload);
     connection.writeOutboundMessage(methodCall);
+
     // Verify method call
-    final OutboundMethodCall writtenMethodCall = channel.readOutbound();
-    assertEquals(destination, writtenMethodCall.getDestination().orElse(null));
+    OutboundMethodCall writtenMethodCall = channel.readOutbound();
+    assertEquals(dst, writtenMethodCall.getDestination().orElse(null));
     assertEquals(path.getWrappedValue(), writtenMethodCall.getObjectPath().getWrappedValue());
-    assertEquals(interfaceName, writtenMethodCall.getInterfaceName().orElse(null));
-    assertEquals(methodName, writtenMethodCall.getName());
+    assertEquals(iface, writtenMethodCall.getInterfaceName().orElse(null));
+    assertEquals(member, writtenMethodCall.getMember());
+
     // Write method return
-    final UInt32 serialNumber = UInt32.valueOf(1);
-    final UInt32 replySerialNumber = methodCall.getSerial();
-    final InboundMethodReturn answer = new InboundMethodReturn(serialNumber, replySerialNumber, destination);
+    UInt32 methodReturnSerial = UInt32.valueOf(1);
+    UInt32 replySerial = methodCall.getSerial();
+    InboundMethodReturn answer = new InboundMethodReturn(methodReturnSerial, replySerial, dst);
     channel.writeInbound(answer);
+
     // Verify method return
     countDownLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-    final InboundMessage inboundMessage = atomicInboundMessage.get();
+    InboundMessage inboundMessage = atomicInboundMessage.get();
     assertInstanceOf(InboundMethodReturn.class, inboundMessage);
-    final InboundMethodReturn methodReturn = (InboundMethodReturn) inboundMessage;
-    assertEquals(destination, methodReturn.getSender(), "Sender");
-    assertEquals(methodCall.getSerial(), methodReturn.getReplySerial(), "Serial number");
-    assertTrue(methodReturn.getPayload().isEmpty(), "Payload");
+    InboundMethodReturn methodReturn = (InboundMethodReturn) inboundMessage;
+    assertEquals(dst, methodReturn.getSender(), "Sender");
+    assertEquals(methodCall.getSerial(), methodReturn.getReplySerial(), "Matching reply serial");
+    assertTrue(methodReturn.getPayload().isEmpty(), "Empty payload");
   }
 
   @Test
   void failDueToMethodUnknown() throws InterruptedException {
-    final PipelineFactory chainFactory = new DefaultPipelineFactory();
-    final NettyConnection connection = new NettyConnection(chainFactory);
-    final AtomicReference<InboundMessage> atomicInboundMessage = new AtomicReference<>();
-    final CountDownLatch countDownLatch = new CountDownLatch(1);
-    final Handler processor = new Handler() {
+    PipelineFactory chainFactory = new DefaultPipelineFactory();
+    NettyConnection connection = new NettyConnection(chainFactory);
+    AtomicReference<InboundMessage> atomicInboundMessage = new AtomicReference<>();
+    CountDownLatch countDownLatch = new CountDownLatch(1);
+    Handler processor = new Handler() {
       @Override
       public void onInboundMessage(final HandlerContext ctx, final InboundMessage msg) {
         atomicInboundMessage.set(msg);
@@ -87,36 +94,41 @@ final class ConnectionWriteOutboundMessageTest {
       }
     };
     connection.getPipeline().addLast("unit test processor", processor);
-    final EmbeddedChannel channel = new EmbeddedChannel(connection);
+    EmbeddedChannel channel = new EmbeddedChannel(connection);
+
     // Write method call
-    final DBusString destination = DBusString.valueOf("org.freedesktop.DBus");
-    final ObjectPath path = ObjectPath.valueOf("/org/freedesktop/DBus");
-    final DBusString interfaceName = DBusString.valueOf("org.freedesktop.DBus.Peer");
-    final DBusString methodName = DBusString.valueOf("Ping");
-    final OutboundMethodCall methodCall =
-            new OutboundMethodCall(connection.getNextSerial(), destination, path, methodName);
-    methodCall.setInterfaceName(interfaceName);
+    UInt32 serial = connection.getNextSerial();
+    ObjectPath path = ObjectPath.valueOf("/org/freedesktop/DBus");
+    DBusString member = DBusString.valueOf("Ping");
+    boolean replyExpected = false;
+    DBusString dst = DBusString.valueOf("org.freedesktop.DBus");
+    DBusString iface = DBusString.valueOf("org.freedesktop.DBus.Peer");
+    Signature sig = null;
+    List<DBusType> payload = null;
+    OutboundMethodCall methodCall = new OutboundMethodCall(serial, path, member, replyExpected,
+                dst, iface, sig, payload);
     connection.writeOutboundMessage(methodCall);
+
     // Verify method call
-    final OutboundMethodCall writtenMethodCall = channel.readOutbound();
-    assertEquals(destination, writtenMethodCall.getDestination().orElse(null));
+    OutboundMethodCall writtenMethodCall = channel.readOutbound();
+    assertEquals(dst, writtenMethodCall.getDestination().orElse(null));
     assertEquals(path.getWrappedValue(), writtenMethodCall.getObjectPath().getWrappedValue());
-    assertEquals(interfaceName, writtenMethodCall.getInterfaceName().orElse(null));
-    assertEquals(methodName, writtenMethodCall.getName());
+    assertEquals(iface, writtenMethodCall.getInterfaceName().orElse(null));
+    assertEquals(member, writtenMethodCall.getMember());
+
     // Write error
-    final UInt32 serialNumber = UInt32.valueOf(1);
-    final UInt32 replySerialNumber = methodCall.getSerial();
-    final DBusString errorName = DBusString.valueOf("org.freedesktop.DBus.Error.UnknownMethod");
-    final InboundError answer = new InboundError(serialNumber, replySerialNumber, destination, errorName);
-    answer.setSender(destination);
+    UInt32 errorSerial = UInt32.valueOf(1);
+    UInt32 replySerial = methodCall.getSerial();
+    DBusString errorName = DBusString.valueOf("org.freedesktop.DBus.Error.UnknownMethod");
+    InboundError answer = new InboundError(errorSerial, replySerial, dst, errorName);
     channel.writeInbound(answer);
+
     // Verify error
-    // Verify method return
     countDownLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-    final InboundMessage inboundMessage = atomicInboundMessage.get();
+    InboundMessage inboundMessage = atomicInboundMessage.get();
     assertInstanceOf(InboundError.class, inboundMessage);
-    final InboundError inboundError = (InboundError) inboundMessage;
-    assertEquals(destination, inboundError.getSender(), "Sender");
+    InboundError inboundError = (InboundError) inboundMessage;
+    assertEquals(dst, inboundError.getSender(), "Sender");
     assertEquals(methodCall.getSerial(), inboundError.getReplySerial());
     assertTrue(inboundError.getPayload().isEmpty());
   }

@@ -7,8 +7,8 @@ package com.lucimber.dbus.impl.netty.connection;
 
 import com.lucimber.dbus.message.InboundError;
 import com.lucimber.dbus.message.InboundMethodReturn;
-import com.lucimber.dbus.message.InboundReply;
 import com.lucimber.dbus.message.OutboundMethodCall;
+import com.lucimber.dbus.message.Reply;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.ObjectPath;
@@ -17,11 +17,12 @@ import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Requests the mandatory service name from the bus after successful SASL authentication.
@@ -32,12 +33,11 @@ final class MandatoryNameHandler extends ChannelInboundHandlerAdapter {
 
   private final UInt32 serial;
 
-  MandatoryNameHandler(final UInt32 serial) {
+  MandatoryNameHandler(UInt32 serial) {
     this.serial = Objects.requireNonNull(serial);
   }
 
-  private static void writeOutboundMethodCall(final ChannelHandlerContext ctx,
-                                              final OutboundMethodCall methodCall) {
+  private static void writeOutboundMethodCall(ChannelHandlerContext ctx, OutboundMethodCall methodCall) {
     LoggerUtils.trace(LOGGER, () -> "Writing outbound method call.");
     final ChannelFuture future = ctx.writeAndFlush(methodCall);
     final DefaultFutureListener<ChannelFuture> listener = new DefaultFutureListener<>(LOGGER);
@@ -45,16 +45,16 @@ final class MandatoryNameHandler extends ChannelInboundHandlerAdapter {
   }
 
   @Override
-  public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
-    if (msg instanceof InboundReply) {
-      handleInboundReply(ctx, (InboundReply) msg);
+  public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    if (msg instanceof Reply) {
+      handleInboundReply(ctx, (Reply) msg);
     } else {
       ctx.fireChannelRead(msg);
     }
   }
 
   @Override
-  public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) {
+  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
     if (evt == CustomChannelEvent.SASL_AUTH_COMPLETE) {
       LoggerUtils.debug(LOGGER, () -> "Requesting mandatory service name from bus.");
       final OutboundMethodCall methodCall = prepareOutboundMethodCall();
@@ -63,12 +63,12 @@ final class MandatoryNameHandler extends ChannelInboundHandlerAdapter {
     ctx.fireUserEventTriggered(evt);
   }
 
-  private void handleInboundError(final InboundError error) throws Exception {
+  private void handleInboundError(InboundError error) throws Exception {
     LoggerUtils.debug(LOGGER, () -> "Handling inbound error: " + error);
-    throw new Exception(error.getName().toString());
+    throw new Exception(error.getErrorName().toString());
   }
 
-  private void handleInboundMethodReturn(final ChannelHandlerContext ctx, final InboundMethodReturn methodReturn) {
+  private void handleInboundMethodReturn(ChannelHandlerContext ctx, InboundMethodReturn methodReturn) {
     LoggerUtils.debug(LOGGER, () -> "Handling inbound method return: " + methodReturn);
     final String warnMsg = "Could not read mandatory name from inbound method return.";
     try {
@@ -87,7 +87,7 @@ final class MandatoryNameHandler extends ChannelInboundHandlerAdapter {
     ctx.fireUserEventTriggered(CustomChannelEvent.MANDATORY_NAME_ACQUIRED);
   }
 
-  private void handleInboundReply(final ChannelHandlerContext ctx, final InboundReply reply) throws Exception {
+  private void handleInboundReply(ChannelHandlerContext ctx, Reply reply) throws Exception {
     if (reply.getReplySerial().equals(serial)) {
       if (reply instanceof InboundError) {
         handleInboundError((InboundError) reply);
@@ -103,12 +103,11 @@ final class MandatoryNameHandler extends ChannelInboundHandlerAdapter {
 
   private OutboundMethodCall prepareOutboundMethodCall() {
     LoggerUtils.trace(LOGGER, () -> "Preparing outbound method call.");
-    final DBusString service = DBusString.valueOf("org.freedesktop.DBus");
-    final ObjectPath path = ObjectPath.valueOf("/org/freedesktop/DBus");
-    final DBusString interfaceName = DBusString.valueOf("org.freedesktop.DBus");
-    final DBusString methodName = DBusString.valueOf("Hello");
-    final OutboundMethodCall methodCall = new OutboundMethodCall(serial, service, path, methodName);
-    methodCall.setInterfaceName(interfaceName);
-    return methodCall;
+    ObjectPath path = ObjectPath.valueOf("/org/freedesktop/DBus");
+    DBusString methodName = DBusString.valueOf("Hello");
+    DBusString dst = DBusString.valueOf("org.freedesktop.DBus");
+    DBusString iface = DBusString.valueOf("org.freedesktop.DBus");
+    return new OutboundMethodCall(serial, path, methodName, true,
+          dst, iface, null, null);
   }
 }
