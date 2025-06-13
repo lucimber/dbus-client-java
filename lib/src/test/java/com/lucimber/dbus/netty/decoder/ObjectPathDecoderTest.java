@@ -5,16 +5,17 @@
 
 package com.lucimber.dbus.netty.decoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.ObjectPath;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 final class ObjectPathDecoderTest {
 
@@ -24,7 +25,7 @@ final class ObjectPathDecoderTest {
   private static final String VALID_OBJECT_PATH = "/abc/d1/e_f";
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeObjectPath(final ByteOrder byteOrder) throws DecoderException {
     final ByteBuf buffer = Unpooled.buffer();
     // UINT32 bytes
@@ -49,7 +50,7 @@ final class ObjectPathDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void failDueToIndexLimitation(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     // UINT32 bytes (Integer.MAX_VALUE + 1 = 2147483648)
@@ -70,7 +71,7 @@ final class ObjectPathDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void failDueToInvalidObjectPath(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     // UINT32 bytes

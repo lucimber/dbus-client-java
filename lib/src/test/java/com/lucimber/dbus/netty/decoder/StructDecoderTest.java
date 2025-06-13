@@ -5,16 +5,17 @@
 
 package com.lucimber.dbus.netty.decoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.Struct;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class StructDecoderTest {
 
@@ -27,7 +28,7 @@ final class StructDecoderTest {
   private static final String TWO_BYTES_SIGNATURE = "(yy)";
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeFirstComplexSignature(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf(FIRST_COMPLEX_SIGNATURE);
     final ByteBuf buffer = Unpooled.buffer();
@@ -62,7 +63,7 @@ final class StructDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeStructOfOneByte(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf(ONE_BYTE_SIGNATURE);
     final ByteBuf buffer = Unpooled.buffer();
@@ -77,7 +78,7 @@ final class StructDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeStructOfTwoBytes(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf(TWO_BYTES_SIGNATURE);
     final ByteBuf buffer = Unpooled.buffer();
@@ -93,7 +94,7 @@ final class StructDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeStructOfOneDouble(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf(ONE_DOUBLE_SIGNATURE);
     final ByteBuf buffer = Unpooled.buffer();
@@ -113,7 +114,7 @@ final class StructDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodingStructOfOneInteger(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf(ONE_INTEGER_SIGNATURE);
     final ByteBuf buffer = Unpooled.buffer();

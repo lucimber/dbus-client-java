@@ -5,28 +5,22 @@
 
 package com.lucimber.dbus.netty.connection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import com.lucimber.dbus.netty.ByteOrder;
+import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.netty.encoder.ArrayEncoder;
 import com.lucimber.dbus.netty.encoder.Encoder;
 import com.lucimber.dbus.netty.encoder.EncoderResult;
-import com.lucimber.dbus.message.MessageType;
-import com.lucimber.dbus.type.DBusArray;
-import com.lucimber.dbus.type.DBusByte;
-import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.Struct;
-import com.lucimber.dbus.type.UInt32;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class InboundByteBufHandlerTest {
 
@@ -35,7 +29,7 @@ final class InboundByteBufHandlerTest {
   private static final byte LITTLE_ENDIAN_MAGIC = 0x6C;
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void succeedWithError(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     if (byteOrder == ByteOrder.BIG_ENDIAN) {
@@ -95,7 +89,7 @@ final class InboundByteBufHandlerTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void succeedWithMethodCall(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     if (byteOrder == ByteOrder.BIG_ENDIAN) {
@@ -159,7 +153,7 @@ final class InboundByteBufHandlerTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void succeedWithMethodReturnMessage(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     if (byteOrder == ByteOrder.BIG_ENDIAN) {
@@ -215,7 +209,7 @@ final class InboundByteBufHandlerTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void succeedWithSignalMessage(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     if (byteOrder == ByteOrder.BIG_ENDIAN) {

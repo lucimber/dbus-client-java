@@ -5,7 +5,6 @@
 
 package com.lucimber.dbus.netty.encoder;
 
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.DBusBasicType;
 import com.lucimber.dbus.type.DBusContainerType;
 import com.lucimber.dbus.type.DBusType;
@@ -15,6 +14,7 @@ import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import java.lang.invoke.MethodHandles;
+import java.nio.ByteOrder;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,8 +88,7 @@ public final class VariantEncoder implements Encoder<Variant, ByteBuf> {
     if (content instanceof DBusBasicType) {
       final String s = String.valueOf(content.getType().getCode().getChar());
       return Signature.valueOf(s);
-    } else if (content instanceof DBusContainerType) {
-      final DBusContainerType containerType = (DBusContainerType) content;
+    } else if (content instanceof DBusContainerType containerType) {
       return containerType.getSignature();
     } else {
       throw new Exception("can not determine content signature");

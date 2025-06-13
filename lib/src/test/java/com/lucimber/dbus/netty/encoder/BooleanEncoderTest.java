@@ -5,15 +5,16 @@
 
 package com.lucimber.dbus.netty.encoder;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.DBusBoolean;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class BooleanEncoderTest {
 
@@ -21,7 +22,7 @@ final class BooleanEncoderTest {
   static final String READABLE_BYTES = "Number of readable bytes";
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeBooleanFalse(final ByteOrder byteOrder) {
     final Encoder<DBusBoolean, ByteBuf> encoder = new BooleanEncoder(ByteBufAllocator.DEFAULT, byteOrder);
     final EncoderResult<ByteBuf> result = encoder.encode(DBusBoolean.valueOf(false), 0);
@@ -37,7 +38,7 @@ final class BooleanEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeBooleanFalseWithOffset(final ByteOrder byteOrder) {
     final Encoder<DBusBoolean, ByteBuf> encoder = new BooleanEncoder(ByteBufAllocator.DEFAULT, byteOrder);
     final int offset = 5;
@@ -54,7 +55,7 @@ final class BooleanEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeBooleanTrue(final ByteOrder byteOrder) {
     final Encoder<DBusBoolean, ByteBuf> encoder = new BooleanEncoder(ByteBufAllocator.DEFAULT, byteOrder);
     final EncoderResult<ByteBuf> result = encoder.encode(DBusBoolean.valueOf(true), 0);
@@ -77,7 +78,7 @@ final class BooleanEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeBooleanTrueWithOffset(final ByteOrder byteOrder) {
     final Encoder<DBusBoolean, ByteBuf> encoder = new BooleanEncoder(ByteBufAllocator.DEFAULT, byteOrder);
     final int offset = 5;

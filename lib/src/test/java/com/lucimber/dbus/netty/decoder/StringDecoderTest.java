@@ -5,16 +5,17 @@
 
 package com.lucimber.dbus.netty.decoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.DBusString;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 final class StringDecoderTest {
 
@@ -23,7 +24,7 @@ final class StringDecoderTest {
   private static final String VALID_STRING = "test!ü";
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeString(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     // UINT32 bytes
@@ -47,7 +48,7 @@ final class StringDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void failDueToIndexLimitation(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     // UINT32 bytes (Integer.MAX_VALUE + 1 = 2147483648)

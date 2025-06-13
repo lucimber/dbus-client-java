@@ -8,7 +8,6 @@ package com.lucimber.dbus.netty.connection;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.netty.encoder.Encoder;
 import com.lucimber.dbus.netty.encoder.EncoderResult;
 import com.lucimber.dbus.netty.encoder.StringEncoder;
@@ -22,6 +21,8 @@ import com.lucimber.dbus.type.Variant;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.embedded.EmbeddedChannel;
+
+import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;

@@ -5,16 +5,17 @@
 
 package com.lucimber.dbus.netty.encoder;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.ObjectPath;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class StringEncoderTest {
 
@@ -22,7 +23,7 @@ final class StringEncoderTest {
   static final String READABLE_BYTES = "Number of readable bytes";
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSimpleString(final ByteOrder byteOrder) {
     final Encoder<DBusString, ByteBuf> encoder = new StringEncoder(ByteBufAllocator.DEFAULT, byteOrder);
     final DBusString dbusString = DBusString.valueOf("abcABC_äüö");
@@ -53,7 +54,7 @@ final class StringEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSimpleStringWithOffset(final ByteOrder byteOrder) {
     final Encoder<DBusString, ByteBuf> encoder = new StringEncoder(ByteBufAllocator.DEFAULT, byteOrder);
     final DBusString dbusString = DBusString.valueOf("abcABC_äüö");
@@ -87,7 +88,7 @@ final class StringEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeEmptyString(final ByteOrder byteOrder) {
     final Encoder<DBusString, ByteBuf> encoder = new StringEncoder(ByteBufAllocator.DEFAULT, byteOrder);
     final DBusString dbusString = DBusString.valueOf("");
@@ -108,7 +109,7 @@ final class StringEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeStringOfObjectPath(final ByteOrder byteOrder) {
     final ObjectPath objectPath = ObjectPath.valueOf("/abc/d1/e_f");
     final DBusString rawPath = DBusString.valueOf(objectPath.getWrappedValue().toString());

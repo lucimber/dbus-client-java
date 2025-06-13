@@ -5,18 +5,21 @@
 
 package com.lucimber.dbus.netty.encoder;
 
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.UnixFd;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import java.lang.invoke.MethodHandles;
+import java.nio.ByteOrder;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
+
+import static java.nio.ByteOrder.BIG_ENDIAN;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 /**
  * An encoder which encodes a file-descriptor to the D-Bus marshalling format.
@@ -59,15 +62,12 @@ public final class UnixFdEncoder implements Encoder<UnixFd, ByteBuf> {
     final ByteBuf buffer = allocator.buffer();
     try {
       final int padding = EncoderUtils.applyPadding(buffer, offset, Type.UNIX_FD);
-      switch (order) {
-        case BIG_ENDIAN:
-          buffer.writeInt(value.getDelegate());
-          break;
-        case LITTLE_ENDIAN:
-          buffer.writeIntLE(value.getDelegate());
-          break;
-        default:
-          throw new Exception("unknown byte order");
+      if (order.equals(BIG_ENDIAN)) {
+        buffer.writeInt(value.getDelegate());
+      } else if (order.equals(LITTLE_ENDIAN)) {
+        buffer.writeIntLE(value.getDelegate());
+      } else {
+        throw new Exception("unknown byte order");
       }
       final int producedBytes = padding + TYPE_SIZE;
       final EncoderResult<ByteBuf> result = new EncoderResultImpl<>(producedBytes, buffer);

@@ -5,13 +5,13 @@
 
 package com.lucimber.dbus.netty.decoder;
 
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.ObjectPath;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import java.lang.invoke.MethodHandles;
+import java.nio.ByteOrder;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -5,13 +5,14 @@
 
 package com.lucimber.dbus.netty.connection;
 
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageFlag;
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.type.UInt32;
 import com.lucimber.dbus.type.Variant;
 import io.netty.buffer.ByteBuf;
+
+import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

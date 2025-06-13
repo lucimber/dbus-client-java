@@ -5,7 +5,6 @@
 
 package com.lucimber.dbus.netty.decoder;
 
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.DBusBasicType;
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DictEntry;
@@ -16,6 +15,7 @@ import com.lucimber.dbus.type.TypeUtils;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import java.lang.invoke.MethodHandles;
+import java.nio.ByteOrder;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;

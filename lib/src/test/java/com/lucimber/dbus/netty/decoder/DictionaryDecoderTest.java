@@ -5,19 +5,20 @@
 
 package com.lucimber.dbus.netty.decoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.DBusByte;
 import com.lucimber.dbus.type.Dict;
 import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.Variant;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class DictionaryDecoderTest {
 
@@ -26,7 +27,7 @@ final class DictionaryDecoderTest {
   private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeDictionary(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf(ARRAY_OF_ENTRIES);
     final ByteBuf buffer = Unpooled.buffer();
@@ -62,7 +63,7 @@ final class DictionaryDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeEmptyDictionary(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf(ARRAY_OF_ENTRIES);
     final ByteBuf buffer = Unpooled.buffer();

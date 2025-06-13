@@ -5,7 +5,6 @@
 
 package com.lucimber.dbus.netty.connection;
 
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.netty.decoder.ArrayDecoder;
 import com.lucimber.dbus.netty.decoder.DecoderException;
 import com.lucimber.dbus.netty.decoder.DecoderResult;
@@ -15,6 +14,7 @@ import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.type.*;
 import io.netty.buffer.ByteBuf;
 
+import java.nio.ByteOrder;
 import java.util.*;
 
 /**
@@ -31,12 +31,12 @@ final class InboundUtils {
 
   static ByteOrder decodeByteOrder(final ByteBuf buffer) throws DecoderException {
     Objects.requireNonNull(buffer, "buffer must not be null");
-    final byte bigEndian = 0x42;
-    final byte littleEndian = 0x6C;
+    final byte B = 0x42;
+    final byte l = 0x6C;
     final byte byteOrder = buffer.readByte();
-    if (byteOrder == bigEndian) {
+    if (byteOrder == B) {
       return ByteOrder.BIG_ENDIAN;
-    } else if (byteOrder == littleEndian) {
+    } else if (byteOrder == l) {
       return ByteOrder.LITTLE_ENDIAN;
     } else {
       throw new DecoderException("unknown byte order");

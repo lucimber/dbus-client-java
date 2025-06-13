@@ -5,17 +5,18 @@
 
 package com.lucimber.dbus.netty.decoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.TypeCode;
 import com.lucimber.dbus.type.Variant;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 final class VariantDecoderTest {
 
@@ -27,7 +28,7 @@ final class VariantDecoderTest {
   private static final String TOO_MANY_TYPES = "ii";
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeVariantOfByte(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     buffer.writeByte(BYTE_SIGNATURE.length());
@@ -44,7 +45,7 @@ final class VariantDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeVariantOfDouble(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     buffer.writeByte(DOUBLE_SIGNATURE.length());
@@ -68,7 +69,7 @@ final class VariantDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeVariantOfInteger(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     buffer.writeByte(INTEGER_SIGNATURE.length());
@@ -90,7 +91,7 @@ final class VariantDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void failDueToTooManyTypes(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     buffer.writeByte(TOO_MANY_TYPES.length());

@@ -5,7 +5,6 @@
 
 package com.lucimber.dbus.netty.connection;
 
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.message.OutboundMethodReturn;
 import com.lucimber.dbus.type.DBusString;
@@ -16,6 +15,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteOrder;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

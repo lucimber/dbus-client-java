@@ -7,11 +7,12 @@ package com.lucimber.dbus.netty.decoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.DBusDouble;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;
+
+import java.nio.ByteOrder;
 
 final class DoubleDecoderTest {
 

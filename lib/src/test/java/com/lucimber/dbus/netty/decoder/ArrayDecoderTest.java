@@ -5,23 +5,17 @@
 
 package com.lucimber.dbus.netty.decoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import com.lucimber.dbus.netty.ByteOrder;
-import com.lucimber.dbus.type.DBusArray;
-import com.lucimber.dbus.type.DBusByte;
-import com.lucimber.dbus.type.DBusDouble;
-import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.Int16;
-import com.lucimber.dbus.type.Int64;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.Struct;
+import com.lucimber.dbus.type.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class ArrayDecoderTest {
 
@@ -38,7 +32,7 @@ final class ArrayDecoderTest {
   private static final String HEADER_SIGNATURE = "a(yv)";
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeArrayOfBytes(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf(ARRAY_OF_BYTES);
     final ByteBuf buffer = Unpooled.buffer();
@@ -61,7 +55,7 @@ final class ArrayDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeMessageHeader(final ByteOrder byteOrder) {
     final ByteBuf buffer = Unpooled.buffer();
     // Length of array
@@ -116,7 +110,7 @@ final class ArrayDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeArrayOfArrays(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf(ARRAY_OF_BYTE_ARRAYS);
     final ByteBuf buffer = Unpooled.buffer();
@@ -166,7 +160,7 @@ final class ArrayDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeArrayOfDoubles(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf(ARRAY_OF_DOUBLES);
     final ByteBuf buffer = Unpooled.buffer();
@@ -201,7 +195,7 @@ final class ArrayDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeArrayOfDoubleArrays(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf(ARRAY_OF_DOUBLE_ARRAYS);
     final ByteBuf buffer = Unpooled.buffer();
@@ -274,7 +268,7 @@ final class ArrayDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeArrayOfSignedShorts(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf(ARRAY_OF_SIGNED_SHORTS);
     final ByteBuf buffer = Unpooled.buffer();
@@ -307,7 +301,7 @@ final class ArrayDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeArrayOfStrings(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf(ARRAY_OF_STRINGS);
     final String s1 = "abc1";
@@ -349,7 +343,7 @@ final class ArrayDecoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeEmptyArrayOfSignedLongs(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf(ARRAY_OF_SIGNED_LONGS);
     final ByteBuf buffer = Unpooled.buffer();

@@ -5,25 +5,15 @@
 
 package com.lucimber.dbus.netty.encoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import com.lucimber.dbus.netty.ByteOrder;
-import com.lucimber.dbus.type.DBusArray;
-import com.lucimber.dbus.type.DBusBoolean;
-import com.lucimber.dbus.type.DBusByte;
-import com.lucimber.dbus.type.DBusDouble;
-import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.Int16;
-import com.lucimber.dbus.type.Int32;
-import com.lucimber.dbus.type.Int64;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt16;
-import com.lucimber.dbus.type.UInt64;
+import com.lucimber.dbus.type.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class ArrayEncoderTest {
 
@@ -31,7 +21,7 @@ final class ArrayEncoderTest {
   static final String READABLE_BYTES = "Number of readable bytes";
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeEmptyShortArray(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("an");
     final DBusArray<Int16> array = new DBusArray<>(signature);
@@ -46,7 +36,7 @@ final class ArrayEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeEmptyBooleanArray(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("ab");
     final DBusArray<DBusBoolean> array = new DBusArray<>(signature);
@@ -61,7 +51,7 @@ final class ArrayEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeEmptyLongArray(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("ax");
     final DBusArray<Int64> array = new DBusArray<>(signature);
@@ -76,7 +66,7 @@ final class ArrayEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeBooleanArray(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("ab");
     final DBusArray<DBusBoolean> array = new DBusArray<>(signature);
@@ -94,7 +84,7 @@ final class ArrayEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeByteArray(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("ay");
     final DBusArray<DBusByte> array = new DBusArray<>(signature);
@@ -119,7 +109,7 @@ final class ArrayEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeDoubleArray(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("ad");
     final DBusArray<DBusDouble> array = new DBusArray<>(signature);
@@ -138,7 +128,7 @@ final class ArrayEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeIntegerArray(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("ai");
     final DBusArray<Int32> array = new DBusArray<>(signature);
@@ -157,7 +147,7 @@ final class ArrayEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeLongArray(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("at");
     final DBusArray<UInt64> array = new DBusArray<>(signature);
@@ -174,7 +164,7 @@ final class ArrayEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeObjectPathArray(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("ao");
     final DBusArray<ObjectPath> array = new DBusArray<>(signature);
@@ -192,7 +182,7 @@ final class ArrayEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeShortArray(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("aq");
     final DBusArray<UInt16> array = new DBusArray<>(signature);
@@ -209,7 +199,7 @@ final class ArrayEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSignatureArray(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("ag");
     final DBusArray<Signature> array = new DBusArray<>(signature);
@@ -227,7 +217,7 @@ final class ArrayEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeStringArray(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("as");
     final DBusArray<DBusString> array = new DBusArray<>(signature);

@@ -5,7 +5,6 @@
 
 package com.lucimber.dbus.netty.connection;
 
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.netty.encoder.EncoderResult;
 import com.lucimber.dbus.netty.encoder.EncoderResultImpl;
 import com.lucimber.dbus.netty.encoder.EncoderUtils;
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

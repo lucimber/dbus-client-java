@@ -8,11 +8,12 @@ package com.lucimber.dbus.netty.encoder;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.DBusDouble;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.api.Test;
+
+import java.nio.ByteOrder;
 
 final class DoubleEncoderTest {
 

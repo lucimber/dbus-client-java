@@ -5,18 +5,21 @@
 
 package com.lucimber.dbus.netty.encoder;
 
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.Int16;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import java.lang.invoke.MethodHandles;
+import java.nio.ByteOrder;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
+
+import static java.nio.ByteOrder.BIG_ENDIAN;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 /**
  * An encoder which encodes a short to the D-Bus marshalling format.
@@ -60,15 +63,12 @@ public final class Int16Encoder implements Encoder<Int16, ByteBuf> {
       int producedBytes = 0;
       final int padding = EncoderUtils.applyPadding(buffer, offset, Type.INT16);
       producedBytes += padding;
-      switch (order) {
-        case BIG_ENDIAN:
-          buffer.writeShort(value.getDelegate());
-          break;
-        case LITTLE_ENDIAN:
-          buffer.writeShortLE(value.getDelegate());
-          break;
-        default:
-          throw new Exception("unknown byte order");
+      if (order.equals(BIG_ENDIAN)) {
+        buffer.writeShort(value.getDelegate());
+      } else if (order.equals(LITTLE_ENDIAN)) {
+        buffer.writeShortLE(value.getDelegate());
+      } else {
+        throw new Exception("unknown byte order");
       }
       producedBytes += TYPE_SIZE;
       final EncoderResult<ByteBuf> result = new EncoderResultImpl<>(producedBytes, buffer);

@@ -5,21 +5,15 @@
 
 package com.lucimber.dbus.netty.encoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import com.lucimber.dbus.netty.ByteOrder;
-import com.lucimber.dbus.type.DBusArray;
-import com.lucimber.dbus.type.Int32;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.Struct;
-import com.lucimber.dbus.type.UInt16;
-import com.lucimber.dbus.type.UInt64;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class VariantEncoderTest {
 
@@ -27,7 +21,7 @@ final class VariantEncoderTest {
   static final String READABLE_BYTES = "Number of readable bytes";
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeVariantOfSignedInteger(final ByteOrder byteOrder) {
     final Variant variant = Variant.valueOf(Int32.valueOf(Integer.MAX_VALUE));
     final Encoder<Variant, ByteBuf> encoder = new VariantEncoder(ByteBufAllocator.DEFAULT, byteOrder);
@@ -40,7 +34,7 @@ final class VariantEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeVariantOfSignedIntegerWithOffset(final ByteOrder byteOrder) {
     final Variant variant = Variant.valueOf(Int32.valueOf(Integer.MAX_VALUE));
     final Encoder<Variant, ByteBuf> encoder = new VariantEncoder(ByteBufAllocator.DEFAULT, byteOrder);
@@ -54,7 +48,7 @@ final class VariantEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeVariantOfArray(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("at");
     final DBusArray<UInt64> array = new DBusArray<>(signature);
@@ -70,7 +64,7 @@ final class VariantEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodingVariantOfStruct(final ByteOrder byteOrder) {
     final Signature structSig = Signature.valueOf("(aqo)");
     final Signature arraySig = Signature.valueOf("aq");

@@ -5,15 +5,16 @@
 
 package com.lucimber.dbus.netty.encoder;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.Int16;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class ShortEncoderTest {
 
@@ -21,7 +22,7 @@ final class ShortEncoderTest {
   static final String READABLE_BYTES = "Number of readable bytes";
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSignedShortMaxValue(final ByteOrder byteOrder) {
     final Encoder<Int16, ByteBuf> encoder = new Int16Encoder(ByteBufAllocator.DEFAULT, byteOrder);
     final Int16 int16 = Int16.valueOf(Short.MAX_VALUE);
@@ -45,7 +46,7 @@ final class ShortEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSignedShortMaxValueWithOffset(final ByteOrder byteOrder) {
     final Encoder<Int16, ByteBuf> encoder = new Int16Encoder(ByteBufAllocator.DEFAULT, byteOrder);
     final Int16 int16 = Int16.valueOf(Short.MAX_VALUE);
@@ -70,7 +71,7 @@ final class ShortEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSignedShortMinValue(final ByteOrder byteOrder) {
     final Encoder<Int16, ByteBuf> encoder = new Int16Encoder(ByteBufAllocator.DEFAULT, byteOrder);
     final Int16 int16 = Int16.valueOf(Short.MIN_VALUE);
@@ -94,7 +95,7 @@ final class ShortEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSignedShortMinValueWithOffset(final ByteOrder byteOrder) {
     final Encoder<Int16, ByteBuf> encoder = new Int16Encoder(ByteBufAllocator.DEFAULT, byteOrder);
     final Int16 int16 = Int16.valueOf(Short.MIN_VALUE);

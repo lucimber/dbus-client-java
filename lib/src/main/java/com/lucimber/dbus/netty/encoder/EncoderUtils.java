@@ -5,7 +5,6 @@
 
 package com.lucimber.dbus.netty.encoder;
 
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.DBusArray;
 import com.lucimber.dbus.type.DBusBasicType;
 import com.lucimber.dbus.type.DBusBoolean;
@@ -31,6 +30,8 @@ import com.lucimber.dbus.type.UnixFd;
 import com.lucimber.dbus.type.Variant;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+
+import java.nio.ByteOrder;
 
 /**
  * Various methods used by the netty based implementations of the encoders.

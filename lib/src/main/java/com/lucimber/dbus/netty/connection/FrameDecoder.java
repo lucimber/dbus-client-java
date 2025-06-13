@@ -5,7 +5,6 @@
 
 package com.lucimber.dbus.netty.connection;
 
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.netty.decoder.DecoderUtils;
 import com.lucimber.dbus.message.*;
 import com.lucimber.dbus.type.*;
@@ -20,6 +19,7 @@ import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
 import java.lang.invoke.MethodHandles;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

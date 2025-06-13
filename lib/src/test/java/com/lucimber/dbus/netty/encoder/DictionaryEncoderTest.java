@@ -5,20 +5,15 @@
 
 package com.lucimber.dbus.netty.encoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import com.lucimber.dbus.netty.ByteOrder;
-import com.lucimber.dbus.type.DBusBoolean;
-import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.Dict;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt16;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class DictionaryEncoderTest {
 
@@ -26,7 +21,7 @@ final class DictionaryEncoderTest {
   static final String READABLE_BYTES = "Number of readable bytes";
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeEmptySimpleDictionary(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("a{sb}");
     final DictEncoder<DBusString, DBusBoolean> encoder =
@@ -42,7 +37,7 @@ final class DictionaryEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeEmptySimpleDictionaryWithOffset(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("a{sb}");
     final DictEncoder<DBusString, DBusBoolean> encoder =
@@ -59,7 +54,7 @@ final class DictionaryEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeEmptyComplexDictionary(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("a{oa{sv}}");
     final DictEncoder<ObjectPath, Dict<DBusString, Variant>> encoder =
@@ -75,7 +70,7 @@ final class DictionaryEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeComplexDictionary(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("a{oa{sa{sv}}}");
     final Signature innerDictSignature = Signature.valueOf("a{sv}");

@@ -5,9 +5,6 @@
 
 package com.lucimber.dbus.netty.encoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.DBusBoolean;
 import com.lucimber.dbus.type.DictEntry;
 import com.lucimber.dbus.type.Int64;
@@ -15,7 +12,11 @@ import com.lucimber.dbus.type.Signature;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class DictEntryEncoderTest {
 
@@ -23,7 +24,7 @@ final class DictEntryEncoderTest {
   static final String READABLE_BYTES = "Number of readable bytes";
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSimpleDictEntry(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("{xb}");
     final Encoder<DictEntry<Int64, DBusBoolean>, ByteBuf> encoder =
@@ -39,7 +40,7 @@ final class DictEntryEncoderTest {
   }
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSimpleDictEntryWithOffset(final ByteOrder byteOrder) {
     final Signature signature = Signature.valueOf("{xb}");
     final Encoder<DictEntry<Int64, DBusBoolean>, ByteBuf> encoder =

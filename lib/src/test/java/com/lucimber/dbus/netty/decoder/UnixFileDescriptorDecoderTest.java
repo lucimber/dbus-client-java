@@ -5,14 +5,15 @@
 
 package com.lucimber.dbus.netty.decoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import com.lucimber.dbus.netty.ByteOrder;
 import com.lucimber.dbus.type.UnixFd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.ByteOrder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class UnixFileDescriptorDecoderTest {
 
@@ -20,7 +21,7 @@ final class UnixFileDescriptorDecoderTest {
   private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
 
   @ParameterizedTest
-  @EnumSource(ByteOrder.class)
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeUnixFileDescriptor(final ByteOrder byteOrder) throws DecoderException {
     final ByteBuf buffer = Unpooled.buffer();
     final int value = 0xFFFFFC00;
