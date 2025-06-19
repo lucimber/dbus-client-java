@@ -1,47 +1,48 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.netty.connection;
 
-import com.lucimber.dbus.netty.encoder.EncoderResult;
-import com.lucimber.dbus.netty.encoder.EncoderResultImpl;
-import com.lucimber.dbus.netty.encoder.EncoderUtils;
+import com.lucimber.dbus.encoder.EncoderResult;
+import com.lucimber.dbus.encoder.EncoderUtils;
 import com.lucimber.dbus.message.*;
 import com.lucimber.dbus.type.*;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 final class FrameDecoderTest {
 
   private static final int PROTOCOL_VERSION = 1;
 
-  private static EncoderResult<ByteBuf> encodeFrameBody(final List<DBusType> args, final ByteOrder byteOrder) {
-    final ByteBufAllocator allocator = ByteBufAllocator.DEFAULT;
-    final ByteBuf body = allocator.buffer();
+  private static ByteBuffer encodeFrameBody(List<DBusType> args, ByteOrder byteOrder) {
     int localByteCount = 0;
+    List<ByteBuffer> values = new ArrayList<>();
     for (DBusType dbusObject : args) {
-      final EncoderResult<ByteBuf> result = EncoderUtils.encode(dbusObject, localByteCount, byteOrder);
+      EncoderResult<ByteBuffer> result = EncoderUtils.encode(dbusObject, localByteCount, byteOrder);
       localByteCount += result.getProducedBytes();
-      final ByteBuf buffer = result.getBuffer();
-      body.writeBytes(buffer);
-      buffer.release();
+      values.add(result.getBuffer());
     }
-    return new EncoderResultImpl<>(localByteCount, body);
+
+    ByteBuffer body = ByteBuffer.allocate(localByteCount);
+    for (ByteBuffer bb : values) {
+      body.put(bb);
+    }
+    body.flip();
+
+    return body;
   }
 
   @BeforeEach
@@ -98,8 +99,11 @@ final class FrameDecoderTest {
     Signature sig = Signature.valueOf("s");
     headerFields.put(HeaderField.SIGNATURE, Variant.valueOf(sig));
     frame.setHeaderFields(headerFields);
-    EncoderResult<ByteBuf> bodyResult = encodeFrameBody(args, frame.getByteOrder());
-    frame.setBody(bodyResult.getBuffer());
+    ByteBuffer bodyBuffer = encodeFrameBody(args, frame.getByteOrder());
+    frame.setBody(bodyBuffer);
+
+    assertNotNull(frame.getBody());
+    assertTrue(frame.getBody().hasRemaining());
 
     assertTrue(channel.writeInbound(frame));
     InboundMethodCall inboundMessage = channel.readInbound();

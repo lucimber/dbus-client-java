@@ -1,22 +1,22 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.netty.connection;
 
+import com.lucimber.dbus.encoder.ArrayEncoder;
+import com.lucimber.dbus.encoder.Encoder;
+import com.lucimber.dbus.encoder.EncoderResult;
 import com.lucimber.dbus.message.MessageType;
-import com.lucimber.dbus.netty.encoder.ArrayEncoder;
-import com.lucimber.dbus.netty.encoder.Encoder;
-import com.lucimber.dbus.netty.encoder.EncoderResult;
 import com.lucimber.dbus.type.*;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,12 +68,10 @@ final class InboundByteBufHandlerTest {
     final Variant replySerialVariant = Variant.valueOf(replySerial);
     final Struct replySerialStruct = new Struct(structSignature, DBusByte.valueOf((byte) 5), replySerialVariant);
     array.add(replySerialStruct);
-    final Encoder<DBusArray<Struct>, ByteBuf> headerEncoder =
-            new ArrayEncoder<>(ByteBufAllocator.DEFAULT, byteOrder, signature);
-    final EncoderResult<ByteBuf> headerResult = headerEncoder.encode(array, 12);
-    final ByteBuf headerBuffer = headerResult.getBuffer();
-    buffer.writeBytes(headerBuffer);
-    headerBuffer.release();
+    final Encoder<DBusArray<Struct>, ByteBuffer> headerEncoder =
+          new ArrayEncoder<>(byteOrder, signature);
+    final EncoderResult<ByteBuffer> headerResult = headerEncoder.encode(array, 12);
+    buffer.writeBytes(headerResult.getBuffer());
     addAlignmentPaddingAfterHeaderIfNecessary(buffer);
     final ByteBufDecoder inboundHandler = new ByteBufDecoder();
     final EmbeddedChannel channel = new EmbeddedChannel(inboundHandler);
@@ -84,8 +82,7 @@ final class InboundByteBufHandlerTest {
     assertEquals(1, frame.getProtocolVersion(), "Protocol version");
     assertEquals(serial, frame.getSerial().getDelegate(), "Serial number");
     assertEquals(MessageType.ERROR, frame.getType(), "Message type");
-    assertEquals(0, frame.getBody().readableBytes(), "Frame body");
-    frame.getBody().release();
+    assertEquals(0, frame.getBody().remaining(), "Frame body");
   }
 
   @ParameterizedTest
@@ -132,12 +129,10 @@ final class InboundByteBufHandlerTest {
     final Variant pathVariant = Variant.valueOf(path);
     final Struct pathStruct = new Struct(structSignature, DBusByte.valueOf((byte) 1), pathVariant);
     structList.add(pathStruct);
-    final Encoder<DBusArray<Struct>, ByteBuf> headerEncoder =
-            new ArrayEncoder<>(ByteBufAllocator.DEFAULT, byteOrder, signature);
-    final EncoderResult<ByteBuf> headerResult = headerEncoder.encode(structList, 12);
-    final ByteBuf headerBuffer = headerResult.getBuffer();
-    buffer.writeBytes(headerBuffer);
-    headerBuffer.release();
+    final Encoder<DBusArray<Struct>, ByteBuffer> headerEncoder =
+          new ArrayEncoder<>(byteOrder, signature);
+    final EncoderResult<ByteBuffer> headerResult = headerEncoder.encode(structList, 12);
+    buffer.writeBytes(headerResult.getBuffer());
     addAlignmentPaddingAfterHeaderIfNecessary(buffer);
     final ByteBufDecoder inboundHandler = new ByteBufDecoder();
     final EmbeddedChannel channel = new EmbeddedChannel(inboundHandler);
@@ -148,8 +143,7 @@ final class InboundByteBufHandlerTest {
     assertEquals(1, frame.getProtocolVersion(), "Protocol version");
     assertEquals(serial, frame.getSerial().getDelegate(), "Serial number");
     assertEquals(MessageType.METHOD_CALL, frame.getType(), "Message type");
-    assertEquals(0, frame.getBody().readableBytes(), "Frame body");
-    frame.getBody().release();
+    assertEquals(0, frame.getBody().remaining(), "Frame body");
   }
 
   @ParameterizedTest
@@ -188,12 +182,10 @@ final class InboundByteBufHandlerTest {
     final Variant replySerialVariant = Variant.valueOf(replySerial);
     final Struct replySerialStruct = new Struct(structSignature, DBusByte.valueOf((byte) 5), replySerialVariant);
     array.add(replySerialStruct);
-    final Encoder<DBusArray<Struct>, ByteBuf> headerEncoder =
-            new ArrayEncoder<>(ByteBufAllocator.DEFAULT, byteOrder, signature);
-    final EncoderResult<ByteBuf> headerResult = headerEncoder.encode(array, 12);
-    final ByteBuf headerBuffer = headerResult.getBuffer();
-    buffer.writeBytes(headerBuffer);
-    headerBuffer.release();
+    final Encoder<DBusArray<Struct>, ByteBuffer> headerEncoder =
+          new ArrayEncoder<>(byteOrder, signature);
+    final EncoderResult<ByteBuffer> headerResult = headerEncoder.encode(array, 12);
+    buffer.writeBytes(headerResult.getBuffer());
     addAlignmentPaddingAfterHeaderIfNecessary(buffer);
     final ByteBufDecoder inboundHandler = new ByteBufDecoder();
     final EmbeddedChannel channel = new EmbeddedChannel(inboundHandler);
@@ -204,8 +196,7 @@ final class InboundByteBufHandlerTest {
     assertEquals(1, frame.getProtocolVersion(), "Protocol version");
     assertEquals(serial, frame.getSerial().getDelegate(), "Serial number");
     assertEquals(MessageType.METHOD_RETURN, frame.getType(), "Message type");
-    assertEquals(0, frame.getBody().readableBytes(), "Frame body");
-    frame.getBody().release();
+    assertEquals(0, frame.getBody().remaining(), "Frame body");
   }
 
   @ParameterizedTest
@@ -252,12 +243,10 @@ final class InboundByteBufHandlerTest {
     final Variant pathVariant = Variant.valueOf(path);
     final Struct pathStruct = new Struct(structSignature, DBusByte.valueOf((byte) 1), pathVariant);
     array.add(pathStruct);
-    final Encoder<DBusArray<Struct>, ByteBuf> headerEncoder =
-            new ArrayEncoder<>(ByteBufAllocator.DEFAULT, byteOrder, signature);
-    final EncoderResult<ByteBuf> headerResult = headerEncoder.encode(array, 12);
-    final ByteBuf headerBuffer = headerResult.getBuffer();
-    buffer.writeBytes(headerBuffer);
-    headerBuffer.release();
+    final Encoder<DBusArray<Struct>, ByteBuffer> headerEncoder =
+          new ArrayEncoder<>(byteOrder, signature);
+    final EncoderResult<ByteBuffer> headerResult = headerEncoder.encode(array, 12);
+    buffer.writeBytes(headerResult.getBuffer());
     addAlignmentPaddingAfterHeaderIfNecessary(buffer);
     final ByteBufDecoder inboundHandler = new ByteBufDecoder();
     final EmbeddedChannel channel = new EmbeddedChannel(inboundHandler);
@@ -268,8 +257,7 @@ final class InboundByteBufHandlerTest {
     assertEquals(1, frame.getProtocolVersion(), "Protocol version");
     assertEquals(serial, frame.getSerial().getDelegate(), "Serial number");
     assertEquals(MessageType.SIGNAL, frame.getType(), "Message type");
-    assertEquals(0, frame.getBody().readableBytes(), "Frame body");
-    frame.getBody().release();
+    assertEquals(0, frame.getBody().remaining(), "Frame body");
   }
 
   private void addAlignmentPaddingAfterHeaderIfNecessary(final ByteBuf frame) {

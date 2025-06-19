@@ -1,33 +1,29 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.netty.connection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import com.lucimber.dbus.netty.encoder.Encoder;
-import com.lucimber.dbus.netty.encoder.EncoderResult;
-import com.lucimber.dbus.netty.encoder.StringEncoder;
+import com.lucimber.dbus.encoder.Encoder;
+import com.lucimber.dbus.encoder.EncoderResult;
+import com.lucimber.dbus.encoder.StringEncoder;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageType;
-import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt32;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.*;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.embedded.EmbeddedChannel;
-
-import java.nio.ByteOrder;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class FrameEncoderMethodCallTest {
 
@@ -63,8 +59,8 @@ final class FrameEncoderMethodCallTest {
     final Variant signatureVariant = Variant.valueOf(signature);
     headerFields.put(HeaderField.SIGNATURE, signatureVariant);
     frame.setHeaderFields(headerFields);
-    final Encoder<DBusString, ByteBuf> encoder = new StringEncoder(ByteBufAllocator.DEFAULT, byteOrder);
-    final EncoderResult<ByteBuf> encoderResult = encoder.encode(methodArg, 0);
+    final Encoder<DBusString, ByteBuffer> encoder = new StringEncoder(byteOrder);
+    final EncoderResult<ByteBuffer> encoderResult = encoder.encode(methodArg, 0);
     frame.setBody(encoderResult.getBuffer());
     final FrameEncoder handler = new FrameEncoder();
     final EmbeddedChannel channel = new EmbeddedChannel(handler);

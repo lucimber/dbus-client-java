@@ -1,52 +1,48 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.netty.connection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import com.lucimber.dbus.netty.encoder.EncoderResult;
-import com.lucimber.dbus.netty.encoder.EncoderResultImpl;
-import com.lucimber.dbus.netty.encoder.EncoderUtils;
+import com.lucimber.dbus.encoder.EncoderResult;
+import com.lucimber.dbus.encoder.EncoderResultImpl;
+import com.lucimber.dbus.encoder.EncoderUtils;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.InboundMethodReturn;
 import com.lucimber.dbus.message.MessageType;
-import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Dict;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt32;
-import com.lucimber.dbus.type.Variant;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
+import com.lucimber.dbus.type.*;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class FrameDecoderMethodReturnTest {
 
   private static final int PROTOCOL_VERSION = 1;
 
-  private static EncoderResult<ByteBuf> encodeFrameBody(final List<DBusType> payload, final ByteOrder byteOrder) {
-    final ByteBufAllocator allocator = ByteBufAllocator.DEFAULT;
-    final ByteBuf body = allocator.buffer();
+  private static EncoderResult<ByteBuffer> encodeFrameBody(List<DBusType> args, ByteOrder byteOrder) {
     int localByteCount = 0;
-    for (DBusType o : payload) {
-      final EncoderResult<ByteBuf> result = EncoderUtils.encode(o, localByteCount, byteOrder);
+    List<ByteBuffer> values = new ArrayList<>();
+    for (DBusType dbusObject : args) {
+      final com.lucimber.dbus.encoder.EncoderResult<ByteBuffer> result = EncoderUtils.encode(dbusObject, localByteCount, byteOrder);
       localByteCount += result.getProducedBytes();
-      final ByteBuf buffer = result.getBuffer();
-      body.writeBytes(buffer);
-      buffer.release();
+      values.add(result.getBuffer());
     }
+
+    ByteBuffer body = ByteBuffer.allocate(localByteCount);
+    for (ByteBuffer bb : values) {
+      body.put(bb);
+    }
+
     return new EncoderResultImpl<>(localByteCount, body);
   }
 
@@ -95,10 +91,10 @@ final class FrameDecoderMethodReturnTest {
     headerFields.put(HeaderField.SIGNATURE, signatureVariant);
     frame.setHeaderFields(headerFields);
     final Dict<ObjectPath, Dict<DBusString, Dict<DBusString, Variant>>> dict =
-            new Dict<>(signature);
+          new Dict<>(signature);
     final List<DBusType> payload = new ArrayList<>();
     payload.add(dict);
-    final EncoderResult<ByteBuf> result = encodeFrameBody(payload, byteOrder);
+    final EncoderResult<ByteBuffer> result = encodeFrameBody(payload, byteOrder);
     frame.setBody(result.getBuffer());
     assertTrue(channel.writeInbound(frame));
     final InboundMethodReturn methodReturn = channel.readInbound();

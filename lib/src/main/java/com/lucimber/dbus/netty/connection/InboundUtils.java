@@ -5,13 +5,14 @@
 
 package com.lucimber.dbus.netty.connection;
 
-import com.lucimber.dbus.netty.decoder.ArrayDecoder;
-import com.lucimber.dbus.netty.decoder.DecoderException;
-import com.lucimber.dbus.netty.decoder.DecoderResult;
+import com.lucimber.dbus.decoder.DecoderException;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageFlag;
 import com.lucimber.dbus.message.MessageType;
-import com.lucimber.dbus.type.*;
+import com.lucimber.dbus.type.DBusByte;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Struct;
+import com.lucimber.dbus.type.Variant;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.ByteOrder;
@@ -64,16 +65,6 @@ final class InboundUtils {
       flags.add(MessageFlag.ALLOW_INTERACTIVE_AUTHORIZATION);
     }
     return flags;
-  }
-
-  static DecoderResult<DBusArray<Struct>> decodeHeaderFields(final ByteBuf buffer, final ByteOrder order)
-        throws DecoderException {
-    Objects.requireNonNull(buffer, "buffer must not be null");
-    Objects.requireNonNull(order, "order must not be null");
-    final Signature signature = Signature.valueOf("a(yv)");
-    final ArrayDecoder<Struct> decoder = new ArrayDecoder<>(order, signature);
-    final int messageHeaderSigOffset = 12;
-    return decoder.decode(buffer, messageHeaderSigOffset);
   }
 
   static Map<HeaderField, Variant> mapHeaderFields(List<Struct> headerFields) {

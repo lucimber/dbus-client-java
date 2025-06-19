@@ -1,15 +1,14 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.netty.connection;
 
-import com.lucimber.dbus.netty.decoder.DecoderUtils;
+import com.lucimber.dbus.decoder.DecoderUtils;
 import com.lucimber.dbus.message.*;
 import com.lucimber.dbus.type.*;
 import com.lucimber.dbus.util.LoggerUtils;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.CorruptedFrameException;
 import io.netty.handler.codec.MessageToMessageDecoder;
@@ -19,7 +18,7 @@ import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.nio.ByteOrder;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -158,8 +157,8 @@ final class FrameDecoder extends MessageToMessageDecoder<Frame> {
     }
     Optional<Signature> sig = getSignatureFromHeader(headerFields);
     List<DBusType> payload = null;
-    if (sig.isPresent() && frame.getBody().readableBytes() > 0) {
-      payload = decodeFrameBody(frame.getBody(), sig.get(), frame.getByteOrder());
+    if (sig.isPresent() && frame.getBody().hasRemaining()) {
+      payload = decodeFrameBody(frame.getBody(), sig.get());
     }
     return new InboundError(serial, replySerial, sender, errorName.get(),
           sig.orElse(null), payload);
@@ -176,8 +175,8 @@ final class FrameDecoder extends MessageToMessageDecoder<Frame> {
     Optional<DBusString> iface = getInterfaceNameFromHeader(headerFields);
     Optional<Signature> sig = getSignatureFromHeader(headerFields);
     List<DBusType> payload = null;
-    if (sig.isPresent() && frame.getBody().readableBytes() > 0) {
-      payload = decodeFrameBody(frame.getBody(), sig.get(), frame.getByteOrder());
+    if (sig.isPresent() && frame.getBody().hasRemaining()) {
+      payload = decodeFrameBody(frame.getBody(), sig.get());
     }
     return new InboundMethodCall(serial, sender, path, member, replyExpected,
           iface.orElse(null), sig.orElse(null), payload);
@@ -191,8 +190,8 @@ final class FrameDecoder extends MessageToMessageDecoder<Frame> {
     DBusString sender = getSenderFromHeader(headerFields);
     Optional<Signature> sig = getSignatureFromHeader(headerFields);
     List<DBusType> payload = null;
-    if (sig.isPresent() && frame.getBody().readableBytes() > 0) {
-      payload = decodeFrameBody(frame.getBody(), sig.get(), frame.getByteOrder());
+    if (sig.isPresent() && frame.getBody().hasRemaining()) {
+      payload = decodeFrameBody(frame.getBody(), sig.get());
     }
     return new InboundMethodReturn(serial, replySerial, sender,
           sig.orElse(null), payload);
@@ -212,26 +211,26 @@ final class FrameDecoder extends MessageToMessageDecoder<Frame> {
     DBusString member = getMemberFromHeader(headerFields);
     Optional<Signature> sig = getSignatureFromHeader(headerFields);
     List<DBusType> payload = null;
-    if (sig.isPresent() && frame.getBody().readableBytes() > 0) {
-      payload = decodeFrameBody(frame.getBody(), sig.get(), frame.getByteOrder());
+    if (sig.isPresent() && frame.getBody().hasRemaining()) {
+      payload = decodeFrameBody(frame.getBody(), sig.get());
     }
     return new InboundSignal(serial, sender, path, iface.get(), member,
           sig.orElse(null), payload);
   }
 
-  private static List<DBusType> decodeFrameBody(ByteBuf body, Signature sig, ByteOrder byteOrder) {
+  private static List<DBusType> decodeFrameBody(ByteBuffer body, Signature sig) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Decoding frame body.");
     ArrayList<DBusType> list = new ArrayList<>();
     try {
       if (sig.getQuantity() == 1) {
         int offset = 0;
-        var result = DecoderUtils.decode(sig, body, offset, byteOrder);
+        var result = DecoderUtils.decode(sig, body, offset);
         list.add(result.getValue());
       } else {
         List<Signature> subSignatures = sig.getChildren();
         int offset = 0;
         for (Signature s : subSignatures) {
-          var result = DecoderUtils.decode(s, body, offset, byteOrder);
+          var result = DecoderUtils.decode(s, body, offset);
           list.add(result.getValue());
           offset += result.getConsumedBytes();
         }
@@ -241,7 +240,6 @@ final class FrameDecoder extends MessageToMessageDecoder<Frame> {
       LoggerUtils.error(LOGGER, MARKER, () -> failureMsg, ex);
       throw new CorruptedFrameException(failureMsg, ex);
     }
-    body.release();
     list.trimToSize();
     return list;
   }

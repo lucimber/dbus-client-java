@@ -1,6 +1,6 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.netty.connection;
@@ -35,8 +35,7 @@ final class OutboundErrorHandlerTest {
     DBusString dst = DBusString.valueOf("io.lucimber.test.destination");
     Signature sig = null;
     List<DBusType> payload = null;
-    OutboundError error = new OutboundError(serial, replySerial, errorName,
-          dst, sig, payload);
+    OutboundError error = new OutboundError(serial, replySerial, errorName, dst, sig, payload);
 
     assertTrue(channel.writeOutbound(error));
     assertTrue(channel.finish());
@@ -47,7 +46,7 @@ final class OutboundErrorHandlerTest {
     assertTrue(frame.getFlags().isEmpty());
     assertEquals(1, frame.getProtocolVersion(), "Protocol version");
     int bodyLength = 0;
-    assertEquals(bodyLength, frame.getBody().readableBytes(), "Body length");
+    assertEquals(bodyLength, frame.getBody().remaining(), "Body length");
     Assertions.assertEquals(serial, frame.getSerial(), "Serial number");
   }
 
@@ -74,7 +73,7 @@ final class OutboundErrorHandlerTest {
     assertTrue(frame.getFlags().isEmpty());
     assertEquals(1, frame.getProtocolVersion(), "Protocol version");
     int bodyLength = 24;
-    assertEquals(bodyLength, frame.getBody().readableBytes(), "Body length");
+    assertEquals(bodyLength, frame.getBody().remaining(), "Body length");
     Assertions.assertEquals(serial, frame.getSerial(), "Serial number");
   }
 }

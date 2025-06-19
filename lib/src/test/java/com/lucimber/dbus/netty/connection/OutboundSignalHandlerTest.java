@@ -1,6 +1,6 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.netty.connection;
@@ -38,7 +38,7 @@ final class OutboundSignalHandlerTest {
     assertTrue(frame.getFlags().isEmpty());
     assertEquals(1, frame.getProtocolVersion(), "Protocol version");
     final int bodyLength = 0;
-    assertEquals(bodyLength, frame.getBody().readableBytes(), "Body length");
+    assertEquals(bodyLength, frame.getBody().remaining(), "Body length");
     assertEquals(serialNumber, frame.getSerial(), "Serial number");
   }
 }

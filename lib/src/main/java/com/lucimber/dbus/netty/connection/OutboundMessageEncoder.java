@@ -1,18 +1,16 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.netty.connection;
 
-import com.lucimber.dbus.netty.encoder.EncoderResult;
-import com.lucimber.dbus.netty.encoder.EncoderResultImpl;
-import com.lucimber.dbus.netty.encoder.EncoderUtils;
+import com.lucimber.dbus.encoder.EncoderResult;
+import com.lucimber.dbus.encoder.EncoderResultImpl;
+import com.lucimber.dbus.encoder.EncoderUtils;
 import com.lucimber.dbus.message.*;
 import com.lucimber.dbus.type.*;
 import com.lucimber.dbus.util.LoggerUtils;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToMessageEncoder;
@@ -22,7 +20,9 @@ import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
 import java.lang.invoke.MethodHandles;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,21 +37,28 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_CONNECTION_OUTBOUND);
   private static final int PROTOCOL_VERSION = 1;
 
-  private static EncoderResult<ByteBuf> encodeBody(final ByteBufAllocator allocator, final List<DBusType> payload) {
+  private static EncoderResult<ByteBuffer> encodeBody(List<DBusType> payload) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding message body.");
-    final ByteBuf buffer = allocator.buffer();
-    int localByteCount = 0;
+
+    int totalSize = 0;
+    List<ByteBuffer> values = new ArrayList<>();
+
     for (DBusType value : payload) {
-      final EncoderResult<ByteBuf> result = EncoderUtils.encode(value, localByteCount, BYTE_ORDER);
-      final ByteBuf tmp = result.getBuffer();
-      buffer.writeBytes(tmp);
-      tmp.release();
-      localByteCount += result.getProducedBytes();
+      EncoderResult<ByteBuffer> result = EncoderUtils.encode(value, totalSize, BYTE_ORDER);
+      totalSize += result.getProducedBytes();
+      values.add(result.getBuffer());
     }
-    return new EncoderResultImpl<>(localByteCount, buffer);
+
+    ByteBuffer buffer = ByteBuffer.allocate(totalSize).order(OutboundMessageEncoder.BYTE_ORDER);
+    for (ByteBuffer bb : values) {
+      buffer.put(bb);
+    }
+    buffer.flip();
+
+    return new EncoderResultImpl<>(totalSize, buffer);
   }
 
-  private static MessageType determineMessageType(final OutboundMessage msg) {
+  private static MessageType determineMessageType(OutboundMessage msg) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Determining message type.");
     if (msg instanceof OutboundError) {
       return MessageType.ERROR;
@@ -66,7 +73,7 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     }
   }
 
-  private static Map<HeaderField, Variant> buildHeaderFields(final OutboundMessage msg) {
+  private static Map<HeaderField, Variant> buildHeaderFields(OutboundMessage msg) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields.");
     if (msg instanceof OutboundError) {
       return buildHeaderFieldsForError((OutboundError) msg);
@@ -81,84 +88,84 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     }
   }
 
-  private static Map<HeaderField, Variant> buildHeaderFieldsForSignal(final OutboundSignal msg) {
+  private static Map<HeaderField, Variant> buildHeaderFieldsForSignal(OutboundSignal msg) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields for signal message.");
-    final HashMap<HeaderField, Variant> headerFields = new HashMap<>();
-    final Variant pathVariant = Variant.valueOf(msg.getObjectPath());
+    HashMap<HeaderField, Variant> headerFields = new HashMap<>();
+    Variant pathVariant = Variant.valueOf(msg.getObjectPath());
     headerFields.put(HeaderField.PATH, pathVariant);
-    final Variant interfaceVariant = Variant.valueOf(msg.getInterfaceName());
+    Variant interfaceVariant = Variant.valueOf(msg.getInterfaceName());
     headerFields.put(HeaderField.INTERFACE, interfaceVariant);
-    final Variant memberVariant = Variant.valueOf(msg.getMember());
+    Variant memberVariant = Variant.valueOf(msg.getMember());
     headerFields.put(HeaderField.MEMBER, memberVariant);
     msg.getDestination().ifPresent(destination -> {
-      final Variant destinationVariant = Variant.valueOf(destination);
+      Variant destinationVariant = Variant.valueOf(destination);
       headerFields.put(HeaderField.DESTINATION, destinationVariant);
     });
     msg.getSignature().ifPresent(signature -> {
-      final Variant signatureVariant = Variant.valueOf(signature);
+      Variant signatureVariant = Variant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
     });
     return headerFields;
   }
 
-  private static Map<HeaderField, Variant> buildHeaderFieldsForMethodReturn(final OutboundMethodReturn msg) {
+  private static Map<HeaderField, Variant> buildHeaderFieldsForMethodReturn(OutboundMethodReturn msg) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields for method return message.");
-    final HashMap<HeaderField, Variant> headerFields = new HashMap<>();
-    final Variant replySerialVariant = Variant.valueOf(msg.getReplySerial());
+    HashMap<HeaderField, Variant> headerFields = new HashMap<>();
+    Variant replySerialVariant = Variant.valueOf(msg.getReplySerial());
     headerFields.put(HeaderField.REPLY_SERIAL, replySerialVariant);
     msg.getDestination().ifPresent(destination -> {
-      final Variant destinationVariant = Variant.valueOf(destination);
+      Variant destinationVariant = Variant.valueOf(destination);
       headerFields.put(HeaderField.DESTINATION, destinationVariant);
     });
     msg.getSignature().ifPresent(signature -> {
-      final Variant signatureVariant = Variant.valueOf(signature);
+      Variant signatureVariant = Variant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
     });
     return headerFields;
   }
 
-  private static Map<HeaderField, Variant> buildHeaderFieldsForMethodCall(final OutboundMethodCall msg) {
+  private static Map<HeaderField, Variant> buildHeaderFieldsForMethodCall(OutboundMethodCall msg) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields for method call message.");
-    final HashMap<HeaderField, Variant> headerFields = new HashMap<>();
-    final Variant pathVariant = Variant.valueOf(msg.getObjectPath());
+    HashMap<HeaderField, Variant> headerFields = new HashMap<>();
+    Variant pathVariant = Variant.valueOf(msg.getObjectPath());
     headerFields.put(HeaderField.PATH, pathVariant);
-    final Variant memberVariant = Variant.valueOf(msg.getMember());
+    Variant memberVariant = Variant.valueOf(msg.getMember());
     headerFields.put(HeaderField.MEMBER, memberVariant);
     msg.getInterfaceName().ifPresent(interfaceName -> {
-      final Variant interfaceVariant = Variant.valueOf(interfaceName);
+      Variant interfaceVariant = Variant.valueOf(interfaceName);
       headerFields.put(HeaderField.INTERFACE, interfaceVariant);
     });
     msg.getDestination().ifPresent(destination -> {
-      final Variant destinationVariant = Variant.valueOf(destination);
+      Variant destinationVariant = Variant.valueOf(destination);
       headerFields.put(HeaderField.DESTINATION, destinationVariant);
     });
     msg.getSignature().ifPresent(signature -> {
-      final Variant signatureVariant = Variant.valueOf(signature);
+      Variant signatureVariant = Variant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
     });
     return headerFields;
   }
 
-  private static Map<HeaderField, Variant> buildHeaderFieldsForError(final OutboundError msg) {
+  private static Map<HeaderField, Variant> buildHeaderFieldsForError(OutboundError msg) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields for error message.");
-    final HashMap<HeaderField, Variant> headerFields = new HashMap<>();
-    final Variant errorNameVariant = Variant.valueOf(msg.getErrorName());
+    HashMap<HeaderField, Variant> headerFields = new HashMap<>();
+    Variant errorNameVariant = Variant.valueOf(msg.getErrorName());
     headerFields.put(HeaderField.ERROR_NAME, errorNameVariant);
-    final Variant replySerialVariant = Variant.valueOf(msg.getReplySerial());
+    Variant replySerialVariant = Variant.valueOf(msg.getReplySerial());
     headerFields.put(HeaderField.REPLY_SERIAL, replySerialVariant);
     msg.getDestination().ifPresent(destination -> {
-      final Variant destinationVariant = Variant.valueOf(destination);
+      Variant destinationVariant = Variant.valueOf(destination);
       headerFields.put(HeaderField.DESTINATION, destinationVariant);
     });
     msg.getSignature().ifPresent(signature -> {
-      final Variant signatureVariant = Variant.valueOf(signature);
+      Variant signatureVariant = Variant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
     });
     return headerFields;
   }
 
-  private static void validatePayload(final List<DBusType> payload, final Signature signature) {
-    final boolean matching = isPayloadMatchingWithSignature(payload, signature);
+  private static void validatePayload(List<DBusType> payload, Signature signature) {
+    boolean matching = isPayloadMatchingWithSignature(payload, signature);
     if (matching) {
       LoggerUtils.debug(LOGGER, () -> "Payload matches signature in message.");
     } else {
@@ -166,15 +173,15 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     }
   }
 
-  private static boolean isPayloadMatchingWithSignature(final List<DBusType> payload, final Signature signature) {
+  private static boolean isPayloadMatchingWithSignature(List<DBusType> payload, Signature signature) {
     if (payload.size() != signature.getQuantity()) {
       return false;
     } else if (signature.getQuantity() == 1) {
       return isObjectMatchingWithSignature(payload.get(0), signature);
     } else {
-      final List<Signature> children = signature.getChildren();
+      List<Signature> children = signature.getChildren();
       for (int i = 0; i < payload.size(); i++) {
-        final boolean matches = isObjectMatchingWithSignature(payload.get(i), children.get(i));
+        boolean matches = isObjectMatchingWithSignature(payload.get(i), children.get(i));
         if (!matches) {
           return false;
         }
@@ -196,18 +203,18 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
   }
 
   @Override
-  protected void encode(final ChannelHandlerContext ctx, final OutboundMessage msg, final List<Object> out) {
+  protected void encode(ChannelHandlerContext ctx, OutboundMessage msg, List<Object> out) {
     LoggerUtils.debug(LOGGER, MARKER, () -> "Mapping an outbound message to frame: " + msg);
     msg.getSignature().ifPresent(signature -> validatePayload(msg.getPayload(), signature));
-    final Frame frame = new Frame();
+    Frame frame = new Frame();
     frame.setByteOrder(BYTE_ORDER);
-    final MessageType messageType = determineMessageType(msg);
+    MessageType messageType = determineMessageType(msg);
     frame.setType(messageType);
     frame.setProtocolVersion(PROTOCOL_VERSION);
-    final EncoderResult<ByteBuf> bodyResult = encodeBody(ctx.alloc(), msg.getPayload());
+    EncoderResult<ByteBuffer> bodyResult = encodeBody(msg.getPayload());
     frame.setBody(bodyResult.getBuffer());
     frame.setSerial(msg.getSerial());
-    final Map<HeaderField, Variant> headerFields = buildHeaderFields(msg);
+    Map<HeaderField, Variant> headerFields = buildHeaderFields(msg);
     frame.setHeaderFields(headerFields);
     out.add(frame);
   }

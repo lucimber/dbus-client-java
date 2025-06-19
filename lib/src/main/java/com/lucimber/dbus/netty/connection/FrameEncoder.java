@@ -1,13 +1,13 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.netty.connection;
 
+import com.lucimber.dbus.encoder.*;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageType;
-import com.lucimber.dbus.netty.encoder.*;
 import com.lucimber.dbus.type.*;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
@@ -21,6 +21,7 @@ import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
 import java.lang.invoke.MethodHandles;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Map;
 
@@ -70,8 +71,7 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
     buffer.writeByte(version);
   }
 
-  private static EncoderResult<ByteBuf> encodeHeaderFields(Map<HeaderField, Variant> fields,
-                                                           ByteBufAllocator allocator,
+  private static EncoderResult<ByteBuffer> encodeHeaderFields(Map<HeaderField, Variant> fields,
                                                            ByteOrder order, int offset) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding header fields: " + fields);
     DBusArray<Struct> structs = new DBusArray<>(Signature.valueOf("a(yv)"));
@@ -82,21 +82,19 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
       structs.add(struct);
     }
     Signature signature = Signature.valueOf("a(yv)");
-    Encoder<DBusArray<Struct>, ByteBuf> encoder = new ArrayEncoder<>(allocator, order, signature);
+    Encoder<DBusArray<Struct>, ByteBuffer> encoder = new ArrayEncoder<>(order, signature);
     return encoder.encode(structs, offset);
   }
 
-  private static EncoderResult<ByteBuf> encodeBodyLength(int bodyLength, ByteBufAllocator allocator,
-                                                         ByteOrder order, int offset) {
+  private static EncoderResult<ByteBuffer> encodeBodyLength(int bodyLength, ByteOrder order, int offset) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding length of body: " + bodyLength);
-    Encoder<Int32, ByteBuf> encoder = new Int32Encoder(allocator, order);
+    Encoder<Int32, ByteBuffer> encoder = new Int32Encoder( order);
     return encoder.encode(Int32.valueOf(bodyLength), offset);
   }
 
-  private static EncoderResult<ByteBuf> encodeSerial(ByteBufAllocator allocator, ByteOrder order,
-                                                     UInt32 serial, int offset) {
+  private static EncoderResult<ByteBuffer> encodeSerial(ByteOrder order, UInt32 serial, int offset) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding serial number: " + serial);
-    Encoder<UInt32, ByteBuf> encoder = new UInt32Encoder(allocator, order);
+    Encoder<UInt32, ByteBuffer> encoder = new UInt32Encoder( order);
     return encoder.encode(serial, offset);
   }
 
@@ -128,29 +126,21 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
       byteCount += 1;
       LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: " + msgBuffer.readableBytes());
       // Body length
-      int bodyLength = msg.getBody() == null ? 0 : msg.getBody().readableBytes();
-      EncoderResult<ByteBuf> bodyLengthResult =
-            encodeBodyLength(bodyLength, ctx.alloc(), msg.getByteOrder(), byteCount);
+      int bodyLength = msg.getBody() == null ? 0 : msg.getBody().remaining();
+      EncoderResult<ByteBuffer> bodyLengthResult = encodeBodyLength(bodyLength, msg.getByteOrder(), byteCount);
       byteCount += bodyLengthResult.getProducedBytes();
-      ByteBuf bodyLengthBuffer = bodyLengthResult.getBuffer();
-      msgBuffer.writeBytes(bodyLengthBuffer);
-      bodyLengthBuffer.release();
+      msgBuffer.writeBytes(bodyLengthResult.getBuffer());
       LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: " + msgBuffer.readableBytes());
       // Serial
-      EncoderResult<ByteBuf> serialResult =
-            encodeSerial(ctx.alloc(), msg.getByteOrder(), msg.getSerial(), byteCount);
+      EncoderResult<ByteBuffer> serialResult = encodeSerial(msg.getByteOrder(), msg.getSerial(), byteCount);
       byteCount += serialResult.getProducedBytes();
-      ByteBuf serialBuffer = serialResult.getBuffer();
-      msgBuffer.writeBytes(serialBuffer);
-      serialBuffer.release();
+      msgBuffer.writeBytes(serialResult.getBuffer());
       LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: " + msgBuffer.readableBytes());
       // Header fields
-      EncoderResult<ByteBuf> headerFieldsResult =
-            encodeHeaderFields(msg.getHeaderFields(), ctx.alloc(), msg.getByteOrder(), byteCount);
+      EncoderResult<ByteBuffer> headerFieldsResult =
+            encodeHeaderFields(msg.getHeaderFields(), msg.getByteOrder(), byteCount);
       byteCount += headerFieldsResult.getProducedBytes();
-      ByteBuf headerFieldsBuffer = headerFieldsResult.getBuffer();
-      msgBuffer.writeBytes(headerFieldsBuffer);
-      headerFieldsBuffer.release();
+      msgBuffer.writeBytes(headerFieldsResult.getBuffer());
       LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: " + msgBuffer.readableBytes());
       // Pad before body
       int headerBoundary = 8;
@@ -165,7 +155,6 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
       // Message body
       if (msg.getBody() != null) {
         msgBuffer.writeBytes(msg.getBody());
-        msg.getBody().release();
         LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: "
               + msgBuffer.readableBytes());
       }
