@@ -14,9 +14,11 @@ dependencies {
     implementation("io.netty:netty-transport-native-epoll:4.2.2.Final")
     implementation("org.slf4j:slf4j-api:2.0.17")
     testImplementation("ch.qos.logback:logback-classic:1.5.18")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.3")
+    testImplementation(platform("org.junit:junit-bom:5.12.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-params")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.mockito:mockito-core:5.8.0")
 }
 
@@ -44,7 +46,6 @@ tasks.named<JavaCompile>("compileJava") {
 tasks.named<Javadoc>("javadoc") {
     options.windowTitle = project.name
     options.encoding = "UTF-8"
-    isVerbose = true
 }
 
 tasks.named<Jar>("jar") {
@@ -52,10 +53,6 @@ tasks.named<Jar>("jar") {
         attributes(mapOf("Implementation-Title" to project.name,
             "Implementation-Version" to project.version))
     }
-}
-
-checkstyle {
-    toolVersion = "9.1"
 }
 
 pmd {
