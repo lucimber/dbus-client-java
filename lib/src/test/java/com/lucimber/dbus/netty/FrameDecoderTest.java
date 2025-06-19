@@ -22,7 +22,7 @@ import java.nio.ByteOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-final class InboundByteBufHandlerTest {
+final class FrameDecoderTest {
 
   private static final byte BIG_ENDIAN_MAGIC = 0x42;
   private static final int HEADER_BOUNDARY = 8;
@@ -73,7 +73,7 @@ final class InboundByteBufHandlerTest {
     final EncoderResult<ByteBuffer> headerResult = headerEncoder.encode(array, 12);
     buffer.writeBytes(headerResult.getBuffer());
     addAlignmentPaddingAfterHeaderIfNecessary(buffer);
-    final ByteBufDecoder inboundHandler = new ByteBufDecoder();
+    final FrameDecoder inboundHandler = new FrameDecoder();
     final EmbeddedChannel channel = new EmbeddedChannel(inboundHandler);
     assertTrue(channel.writeInbound(buffer));
     final Frame frame = channel.readInbound();
@@ -134,7 +134,7 @@ final class InboundByteBufHandlerTest {
     final EncoderResult<ByteBuffer> headerResult = headerEncoder.encode(structList, 12);
     buffer.writeBytes(headerResult.getBuffer());
     addAlignmentPaddingAfterHeaderIfNecessary(buffer);
-    final ByteBufDecoder inboundHandler = new ByteBufDecoder();
+    final FrameDecoder inboundHandler = new FrameDecoder();
     final EmbeddedChannel channel = new EmbeddedChannel(inboundHandler);
     assertTrue(channel.writeInbound(buffer));
     final Frame frame = channel.readInbound();
@@ -187,7 +187,7 @@ final class InboundByteBufHandlerTest {
     final EncoderResult<ByteBuffer> headerResult = headerEncoder.encode(array, 12);
     buffer.writeBytes(headerResult.getBuffer());
     addAlignmentPaddingAfterHeaderIfNecessary(buffer);
-    final ByteBufDecoder inboundHandler = new ByteBufDecoder();
+    final FrameDecoder inboundHandler = new FrameDecoder();
     final EmbeddedChannel channel = new EmbeddedChannel(inboundHandler);
     assertTrue(channel.writeInbound(buffer));
     final Frame frame = channel.readInbound();
@@ -248,7 +248,7 @@ final class InboundByteBufHandlerTest {
     final EncoderResult<ByteBuffer> headerResult = headerEncoder.encode(array, 12);
     buffer.writeBytes(headerResult.getBuffer());
     addAlignmentPaddingAfterHeaderIfNecessary(buffer);
-    final ByteBufDecoder inboundHandler = new ByteBufDecoder();
+    final FrameDecoder inboundHandler = new FrameDecoder();
     final EmbeddedChannel channel = new EmbeddedChannel(inboundHandler);
     assertTrue(channel.writeInbound(buffer));
     final Frame frame = channel.readInbound();

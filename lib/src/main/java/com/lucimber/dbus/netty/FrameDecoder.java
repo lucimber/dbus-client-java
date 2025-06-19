@@ -24,7 +24,13 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
-final class ByteBufDecoder extends ByteToMessageDecoder {
+/**
+ * An inbound handler that decodes buffer into frame.
+ *
+ * @see ByteBuf
+ * @see Frame
+ */
+final class FrameDecoder extends ByteToMessageDecoder {
 
   /**
    * The length of the header must be a multiple of eight.
