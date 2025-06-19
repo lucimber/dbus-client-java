@@ -23,7 +23,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-final class FrameDecoderTest {
+final class InboundMessageDecoderTest {
 
   private static final int PROTOCOL_VERSION = 1;
 
@@ -52,7 +52,7 @@ final class FrameDecoderTest {
 
   @Test
   void succeedWithError() {
-    FrameDecoder inboundHandler = new FrameDecoder();
+    InboundMessageDecoder inboundHandler = new InboundMessageDecoder();
     EmbeddedChannel channel = new EmbeddedChannel(inboundHandler);
 
     Frame frame = new Frame();
@@ -79,7 +79,7 @@ final class FrameDecoderTest {
 
   @Test
   void succeedWithMethodCall() {
-    FrameDecoder inboundHandler = new FrameDecoder();
+    InboundMessageDecoder inboundHandler = new InboundMessageDecoder();
     EmbeddedChannel channel = new EmbeddedChannel(inboundHandler);
 
     Frame frame = new Frame();
@@ -116,7 +116,7 @@ final class FrameDecoderTest {
 
   @Test
   void succeedWithMethodReturn() {
-    FrameDecoder inboundHandler = new FrameDecoder();
+    InboundMessageDecoder inboundHandler = new InboundMessageDecoder();
     EmbeddedChannel channel = new EmbeddedChannel(inboundHandler);
 
     Frame frame = new Frame();
@@ -140,7 +140,7 @@ final class FrameDecoderTest {
 
   @Test
   void succeedWithSignal() {
-    FrameDecoder inboundHandler = new FrameDecoder();
+    InboundMessageDecoder inboundHandler = new InboundMessageDecoder();
     EmbeddedChannel channel = new EmbeddedChannel(inboundHandler);
 
     Frame frame = new Frame();

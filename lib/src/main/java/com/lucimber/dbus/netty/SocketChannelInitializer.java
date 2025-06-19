@@ -61,7 +61,7 @@ final class SocketChannelInitializer extends ChannelInitializer<UnixChannel> {
     pipeline.addLast(FrameEncoder.class.getSimpleName(), new FrameEncoder());
     pipeline.addLast(OutboundMessageEncoder.class.getSimpleName(), new OutboundMessageEncoder());
     pipeline.addLast(ByteBufDecoder.class.getSimpleName(), new ByteBufDecoder());
-    pipeline.addLast(FrameDecoder.class.getSimpleName(), new FrameDecoder());
+    pipeline.addLast(InboundMessageDecoder.class.getSimpleName(), new InboundMessageDecoder());
     final UInt32 nameHandlerSerial = connection.getNextSerial();
     pipeline.addLast(MandatoryNameHandler.class.getSimpleName(), new MandatoryNameHandler(nameHandlerSerial));
     pipeline.addLast(ChannelInitCompleter.class.getSimpleName(), new ChannelInitCompleter(initFuture));

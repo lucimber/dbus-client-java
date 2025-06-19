@@ -25,7 +25,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-final class FrameDecoderMethodReturnTest {
+final class InboundMessageDecoderMethodReturnTest {
 
   private static final int PROTOCOL_VERSION = 1;
 
@@ -48,7 +48,7 @@ final class FrameDecoderMethodReturnTest {
 
   @Test
   void succeedWithSimpleMethodReturn() {
-    final FrameDecoder decoder = new FrameDecoder();
+    final InboundMessageDecoder decoder = new InboundMessageDecoder();
     final EmbeddedChannel channel = new EmbeddedChannel(decoder);
     final Frame frame = new Frame();
     frame.setByteOrder(ByteOrder.BIG_ENDIAN);
@@ -71,7 +71,7 @@ final class FrameDecoderMethodReturnTest {
 
   @Test
   void succeedWithComplexMethodReturn() {
-    final FrameDecoder decoder = new FrameDecoder();
+    final InboundMessageDecoder decoder = new InboundMessageDecoder();
     final EmbeddedChannel channel = new EmbeddedChannel(decoder);
     final Frame frame = new Frame();
     final ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;

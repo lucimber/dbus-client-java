@@ -30,7 +30,7 @@ import java.util.Optional;
  * @see Frame
  * @see Message
  */
-final class FrameDecoder extends MessageToMessageDecoder<Frame> {
+final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_CONNECTION_INBOUND);
