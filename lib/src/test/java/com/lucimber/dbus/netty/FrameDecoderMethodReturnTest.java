@@ -1,0 +1,104 @@
+/*
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package com.lucimber.dbus.netty;
+
+import com.lucimber.dbus.encoder.EncoderResult;
+import com.lucimber.dbus.encoder.EncoderResultImpl;
+import com.lucimber.dbus.encoder.EncoderUtils;
+import com.lucimber.dbus.message.HeaderField;
+import com.lucimber.dbus.message.InboundMethodReturn;
+import com.lucimber.dbus.message.MessageType;
+import com.lucimber.dbus.type.*;
+import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.jupiter.api.Test;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+final class FrameDecoderMethodReturnTest {
+
+  private static final int PROTOCOL_VERSION = 1;
+
+  private static EncoderResult<ByteBuffer> encodeFrameBody(List<DBusType> args, ByteOrder byteOrder) {
+    int localByteCount = 0;
+    List<ByteBuffer> values = new ArrayList<>();
+    for (DBusType dbusObject : args) {
+      final com.lucimber.dbus.encoder.EncoderResult<ByteBuffer> result = EncoderUtils.encode(dbusObject, localByteCount, byteOrder);
+      localByteCount += result.getProducedBytes();
+      values.add(result.getBuffer());
+    }
+
+    ByteBuffer body = ByteBuffer.allocate(localByteCount);
+    for (ByteBuffer bb : values) {
+      body.put(bb);
+    }
+
+    return new EncoderResultImpl<>(localByteCount, body);
+  }
+
+  @Test
+  void succeedWithSimpleMethodReturn() {
+    final FrameDecoder decoder = new FrameDecoder();
+    final EmbeddedChannel channel = new EmbeddedChannel(decoder);
+    final Frame frame = new Frame();
+    frame.setByteOrder(ByteOrder.BIG_ENDIAN);
+    frame.setProtocolVersion(PROTOCOL_VERSION);
+    frame.setSerial(UInt32.valueOf(1));
+    frame.setType(MessageType.METHOD_RETURN);
+    final Map<HeaderField, Variant> headerFields = new HashMap<>();
+    final DBusString sender = DBusString.valueOf("io.lucimber.dbus.SomeSender");
+    final Variant senderVariant = Variant.valueOf(sender);
+    headerFields.put(HeaderField.SENDER, senderVariant);
+    final UInt32 replySerial = UInt32.valueOf(1);
+    final Variant replySerialVariant = Variant.valueOf(replySerial);
+    headerFields.put(HeaderField.REPLY_SERIAL, replySerialVariant);
+    frame.setHeaderFields(headerFields);
+    assertTrue(channel.writeInbound(frame));
+    final InboundMethodReturn inboundMessage = channel.readInbound();
+    assertEquals(sender, inboundMessage.getSender(), "Sender");
+    assertEquals(replySerial, inboundMessage.getReplySerial(), "Reply serial");
+  }
+
+  @Test
+  void succeedWithComplexMethodReturn() {
+    final FrameDecoder decoder = new FrameDecoder();
+    final EmbeddedChannel channel = new EmbeddedChannel(decoder);
+    final Frame frame = new Frame();
+    final ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
+    frame.setByteOrder(byteOrder);
+    frame.setProtocolVersion(PROTOCOL_VERSION);
+    frame.setSerial(UInt32.valueOf(1));
+    frame.setType(MessageType.METHOD_RETURN);
+    final Map<HeaderField, Variant> headerFields = new HashMap<>();
+    final DBusString sender = DBusString.valueOf("io.lucimber.dbus.SomeSender");
+    final Variant senderVariant = Variant.valueOf(sender);
+    headerFields.put(HeaderField.SENDER, senderVariant);
+    final UInt32 replySerial = UInt32.valueOf(1);
+    final Variant replySerialVariant = Variant.valueOf(replySerial);
+    headerFields.put(HeaderField.REPLY_SERIAL, replySerialVariant);
+    final Signature signature = Signature.valueOf("a{oa{sa{sv}}}");
+    final Variant signatureVariant = Variant.valueOf(signature);
+    headerFields.put(HeaderField.SIGNATURE, signatureVariant);
+    frame.setHeaderFields(headerFields);
+    final Dict<ObjectPath, Dict<DBusString, Dict<DBusString, Variant>>> dict =
+          new Dict<>(signature);
+    final List<DBusType> payload = new ArrayList<>();
+    payload.add(dict);
+    final EncoderResult<ByteBuffer> result = encodeFrameBody(payload, byteOrder);
+    frame.setBody(result.getBuffer());
+    assertTrue(channel.writeInbound(frame));
+    final InboundMethodReturn methodReturn = channel.readInbound();
+    assertEquals(sender, methodReturn.getSender(), "Sender");
+    assertEquals(replySerial, methodReturn.getReplySerial(), "Reply serial");
+  }
+}
