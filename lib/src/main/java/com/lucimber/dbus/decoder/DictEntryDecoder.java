@@ -1,0 +1,93 @@
+/*
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package com.lucimber.dbus.decoder;
+
+import com.lucimber.dbus.type.*;
+import com.lucimber.dbus.util.LoggerUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
+
+import java.lang.invoke.MethodHandles;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * A decoder which unmarshals a key-value pair from the byte stream format used by D-Bus.
+ *
+ * @param <KeyT>   The data type of the key.
+ * @param <ValueT> The data type of the value.
+ */
+public final class DictEntryDecoder<KeyT extends DBusBasicType, ValueT extends DBusType>
+      implements Decoder<ByteBuffer, DictEntry<KeyT, ValueT>> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
+
+  private final Signature signature;
+
+  /**
+   * Creates a new instance with mandatory parameters.
+   *
+   * @param signature the signature of the dict-entry
+   */
+  public DictEntryDecoder(Signature signature) {
+    this.signature = Objects.requireNonNull(signature, "signature must not be null");
+    List<Signature> children = signature.getChildren();
+    if (children.size() != 2) {
+      throw new DecoderException("Signature must consist of two single complete types.");
+    }
+    if (children.get(0).isContainerType()) {
+      throw new DecoderException("Dict-entry key must be a basic type.");
+    }
+    if (children.get(1).isDictionaryEntry()) {
+      throw new DecoderException("Nested dict-entry is not allowed.");
+    }
+  }
+
+  private static void logResult(Signature signature, int offset, int padding, int consumedBytes) {
+    LoggerUtils.debug(LOGGER, MARKER, () -> {
+      String s = "DICT_ENTRY: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
+      return String.format(s, signature, offset, padding, consumedBytes);
+    });
+  }
+
+  @Override
+  public DecoderResult<DictEntry<KeyT, ValueT>> decode(ByteBuffer buffer, int offset) throws DecoderException {
+    Objects.requireNonNull(buffer, "buffer must not be null");
+    try {
+      int consumedBytes = 0;
+
+      int padding = DecoderUtils.calculateAlignmentPadding(Type.DICT_ENTRY, offset);
+      buffer.position(buffer.position() + padding);
+      consumedBytes += padding;
+
+      List<Signature> children = signature.getChildren();
+      String keySigStr = children.get(0).toString();
+      char keyChar = keySigStr.charAt(0);
+      TypeCode keyCode = TypeUtils.getCodeFromChar(keyChar)
+            .orElseThrow(() -> new DecoderException("Cannot map char to type code: " + keyChar));
+
+      DecoderResult<KeyT> keyResult = DecoderUtils
+            .decodeBasicType(keyCode, buffer, offset + consumedBytes);
+      consumedBytes += keyResult.getConsumedBytes();
+
+      DecoderResult<ValueT> valueResult = DecoderUtils
+            .decode(children.get(1), buffer, offset + consumedBytes);
+      consumedBytes += valueResult.getConsumedBytes();
+
+      DictEntry<KeyT, ValueT> entry = new DictEntry<>(signature, keyResult.getValue(), valueResult.getValue());
+      DecoderResult<DictEntry<KeyT, ValueT>> result = new DecoderResultImpl<>(consumedBytes, entry);
+
+      logResult(signature, offset, padding, consumedBytes);
+      return result;
+    } catch (Throwable t) {
+      throw new DecoderException("Could not decode DICT_ENTRY.", t);
+    }
+  }
+}
