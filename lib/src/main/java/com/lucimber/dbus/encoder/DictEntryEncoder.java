@@ -1,0 +1,94 @@
+/*
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package com.lucimber.dbus.encoder;
+
+import com.lucimber.dbus.type.*;
+import com.lucimber.dbus.util.LoggerUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
+
+import java.lang.invoke.MethodHandles;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Objects;
+
+/**
+ * An encoder which encodes a key-value pair to the D-Bus marshalling format using ByteBuffer.
+ *
+ * @param <KeyT>   The data type of the key.
+ * @param <ValueT> The data type of the value.
+ * @see Encoder
+ * @see DictEntry
+ */
+public final class DictEntryEncoder<KeyT extends DBusBasicType, ValueT extends DBusType>
+      implements Encoder<DictEntry<KeyT, ValueT>, ByteBuffer> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
+
+  private final ByteOrder order;
+  private final Signature signature;
+
+  /**
+   * Constructs a new instance with mandatory parameters.
+   *
+   * @param order     The byte order of the produced bytes.
+   * @param signature The signature of the dictionary entry.
+   */
+  public DictEntryEncoder(ByteOrder order, Signature signature) {
+    this.order = Objects.requireNonNull(order, "order must not be null");
+    this.signature = Objects.requireNonNull(signature, "signature must not be null");
+  }
+
+  private static void logResult(Signature signature, int offset, int padding, int producedBytes) {
+    LoggerUtils.debug(LOGGER, MARKER, () -> {
+      String s = "DICT_ENTRY: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
+      return String.format(s, signature, offset, padding, producedBytes);
+    });
+  }
+
+  @Override
+  public EncoderResult<ByteBuffer> encode(DictEntry<KeyT, ValueT> entry, int offset) throws EncoderException {
+    Objects.requireNonNull(entry, "entry must not be null");
+    try {
+      int producedBytes = 0;
+      int padding = EncoderUtils.calculateAlignmentPadding(Type.DICT_ENTRY.getAlignment(), offset);
+      producedBytes += padding;
+
+      // Encode key
+      KeyT key = entry.getKey();
+      int keyOffset = offset + producedBytes;
+      EncoderResult<ByteBuffer> keyResult = EncoderUtils.encode(key, keyOffset, order);
+      ByteBuffer keyBuffer = keyResult.getBuffer();
+      producedBytes += keyResult.getProducedBytes();
+
+      // Encode value
+      ValueT value = entry.getValue();
+      int valueOffset = offset + producedBytes;
+      EncoderResult<ByteBuffer> valueResult = EncoderUtils.encode(value, valueOffset, order);
+      ByteBuffer valueBuffer = valueResult.getBuffer();
+      producedBytes += valueResult.getProducedBytes();
+
+      // Assemble final buffer
+      ByteBuffer buffer = ByteBuffer.allocate(producedBytes).order(order);
+      for (int i = 0; i < padding; i++) {
+        buffer.put((byte) 0);
+      }
+      buffer.put(keyBuffer);
+      buffer.put(valueBuffer);
+      buffer.flip();
+
+      EncoderResult<ByteBuffer> result = new EncoderResultImpl<>(producedBytes, buffer);
+      logResult(signature, offset, padding, result.getProducedBytes());
+
+      return result;
+    } catch (Exception ex) {
+      throw new EncoderException("Could not encode DICT_ENTRY.", ex);
+    }
+  }
+}
