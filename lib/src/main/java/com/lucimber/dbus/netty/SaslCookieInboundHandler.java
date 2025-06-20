@@ -170,7 +170,7 @@ final class SaslCookieInboundHandler extends AbstractSaslInboundHandler {
       LoggerUtils.trace(LOGGER, () -> "Detaching from channel pipeline.");
       ctx.pipeline().remove(this);
       LoggerUtils.debug(LOGGER, () -> "Firing SASL_AUTH_COMPLETE as user event to next channel handler.");
-      ctx.pipeline().fireUserEventTriggered(CustomChannelEvent.SASL_AUTH_COMPLETE);
+      ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
     }));
   }
 }

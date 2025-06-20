@@ -30,7 +30,7 @@ final class SaslCompletionHandler extends ChannelInboundHandlerAdapter {
   @Override
   public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) {
     LoggerUtils.trace(LOGGER, () -> String.format("Received user event: %s", evt));
-    if (evt == CustomChannelEvent.SASL_AUTH_COMPLETE) {
+    if (evt == DBusChannelEvent.SASL_AUTH_COMPLETE) {
       removeSaslRelatedOutboundHandlers(ctx.pipeline());
       ctx.pipeline().remove(this);
     }

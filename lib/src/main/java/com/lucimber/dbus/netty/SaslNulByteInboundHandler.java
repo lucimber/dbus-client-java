@@ -52,7 +52,7 @@ final class SaslNulByteInboundHandler extends ChannelInboundHandlerAdapter {
         LoggerUtils.trace(LOGGER, MARKER, () -> "I/O operation was completed successfully.");
         LoggerUtils.trace(LOGGER, MARKER, () -> "Detaching from channel pipeline.");
         ctx.pipeline().remove(this);
-        ctx.pipeline().fireUserEventTriggered(CustomChannelEvent.SASL_NUL_BYTE_SENT);
+        ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_NUL_BYTE_SENT);
       } else if (f.isDone() && f.cause() != null) {
         LoggerUtils.error(LOGGER, MARKER, () -> "I/O operation was completed with failure.", f.cause());
         ctx.fireExceptionCaught(f.cause());

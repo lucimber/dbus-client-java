@@ -55,7 +55,7 @@ final class MandatoryNameHandler extends ChannelInboundHandlerAdapter {
 
   @Override
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-    if (evt == CustomChannelEvent.SASL_AUTH_COMPLETE) {
+    if (evt == DBusChannelEvent.SASL_AUTH_COMPLETE) {
       LoggerUtils.debug(LOGGER, () -> "Requesting mandatory service name from bus.");
       final OutboundMethodCall methodCall = prepareOutboundMethodCall();
       writeOutboundMethodCall(ctx, methodCall);
@@ -84,7 +84,7 @@ final class MandatoryNameHandler extends ChannelInboundHandlerAdapter {
       LoggerUtils.warn(LOGGER, () -> warnMsg);
     }
     ctx.pipeline().remove(this);
-    ctx.fireUserEventTriggered(CustomChannelEvent.MANDATORY_NAME_ACQUIRED);
+    ctx.fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUIRED);
   }
 
   private void handleInboundReply(ChannelHandlerContext ctx, Reply reply) throws Exception {

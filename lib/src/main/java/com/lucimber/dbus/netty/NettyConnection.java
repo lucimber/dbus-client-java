@@ -63,7 +63,7 @@ final class NettyConnection extends ChannelDuplexHandler implements Connection {
   @Override
   public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) {
     LoggerUtils.debug(LOGGER, MARKER_INBOUND, () -> "Received an user event: " + evt);
-    if (evt == CustomChannelEvent.SASL_AUTH_COMPLETE) {
+    if (evt == DBusChannelEvent.SASL_AUTH_COMPLETE) {
       pipeline.passConnectionActiveEvent();
     }
     ctx.fireUserEventTriggered(evt);

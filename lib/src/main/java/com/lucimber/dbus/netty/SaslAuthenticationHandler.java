@@ -75,7 +75,7 @@ public class SaslAuthenticationHandler extends ChannelDuplexHandler {
 
   @Override
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-    if (evt == DbusChannelEvent.SASL_NUL_BYTE_SENT && currentState == SaslState.IDLE) {
+    if (evt == DBusChannelEvent.SASL_NUL_BYTE_SENT && currentState == SaslState.IDLE) {
       LOGGER.debug("SASL_NUL_BYTE_SENT event received. Adding SASL string codecs and initiating AUTH.");
       ChannelPipeline pipeline = ctx.pipeline();
       // Add handlers before this one
@@ -311,10 +311,10 @@ public class SaslAuthenticationHandler extends ChannelDuplexHandler {
 
     if (success) {
       LOGGER.debug("Firing SASL_AUTH_COMPLETE event.");
-      ctx.fireUserEventTriggered(DbusChannelEvent.SASL_AUTH_COMPLETE);
+      ctx.fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
     } else {
       LOGGER.debug("Firing SASL_AUTH_FAILED event.");
-      ctx.fireUserEventTriggered(DbusChannelEvent.SASL_AUTH_FAILED);
+      ctx.fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_FAILED);
       // Don't close channel here, let DbusPipelineConfigurer or ConnectionCompletionHandler decide
       // based on SASL_AUTH_FAILED event.
     }

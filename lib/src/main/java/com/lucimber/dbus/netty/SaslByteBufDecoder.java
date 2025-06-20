@@ -57,7 +57,7 @@ final class SaslByteBufDecoder extends ReplayingDecoder<Void> {
   @Override
   public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) {
     LoggerUtils.trace(LOGGER, () -> "Received an user event.");
-    if (evt == CustomChannelEvent.SASL_AUTH_COMPLETE) {
+    if (evt == DBusChannelEvent.SASL_AUTH_COMPLETE) {
       LoggerUtils.trace(LOGGER, () -> "Detaching from the channel pipeline.");
       ctx.pipeline().remove(this);
     }

@@ -74,7 +74,7 @@ final class SaslAnonymousInboundHandler extends AbstractSaslInboundHandler {
     future.addListener(new DefaultFutureListener<>(LOGGER, v -> {
       ctx.pipeline().remove(this);
       LoggerUtils.info(LOGGER, () -> "SASL authentication was completed successfully.");
-      ctx.pipeline().fireUserEventTriggered(CustomChannelEvent.SASL_AUTH_COMPLETE);
+      ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
     }));
   }
 }

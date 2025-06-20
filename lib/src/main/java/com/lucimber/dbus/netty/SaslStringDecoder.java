@@ -124,7 +124,7 @@ final class SaslStringDecoder extends MessageToMessageDecoder<String> {
   @Override
   public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Received new user event: " + evt);
-    if (evt == CustomChannelEvent.SASL_AUTH_COMPLETE) {
+    if (evt == DBusChannelEvent.SASL_AUTH_COMPLETE) {
       LoggerUtils.debug(LOGGER, MARKER, () -> "Detaching from channel pipeline.");
       ctx.pipeline().remove(this);
     }

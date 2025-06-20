@@ -20,7 +20,7 @@ final class ChannelInitCompleter extends ChannelInboundHandlerAdapter {
 
   @Override
   public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) {
-    if (evt == CustomChannelEvent.MANDATORY_NAME_ACQUIRED) {
+    if (evt == DBusChannelEvent.MANDATORY_NAME_ACQUIRED) {
       ctx.pipeline().remove(this);
       future.complete(null);
     } else {

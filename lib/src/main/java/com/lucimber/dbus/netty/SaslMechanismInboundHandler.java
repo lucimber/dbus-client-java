@@ -108,7 +108,7 @@ final class SaslMechanismInboundHandler extends ChannelInboundHandlerAdapter {
   @Override
   public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) {
     LoggerUtils.debug(LOGGER, () -> "Received user event: " + evt);
-    if (evt == CustomChannelEvent.SASL_NUL_BYTE_SENT) {
+    if (evt == DBusChannelEvent.SASL_NUL_BYTE_SENT) {
       final ChannelFuture future = requestAvailableAuthMechanisms(ctx);
       future.addListener(new DefaultFutureListener<>(LOGGER, v -> ctx.fireUserEventTriggered(evt)));
     }

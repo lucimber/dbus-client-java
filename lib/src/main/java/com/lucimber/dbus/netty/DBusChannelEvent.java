@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.netty;
 
-public enum DbusChannelEvent {
+public enum DBusChannelEvent {
   /**
    * Fired by {@link SaslInitiationHandler} after the initial NUL byte has been successfully sent.
    * Signals that the {@link SaslAuthenticationHandler} can begin the AUTH exchange.
