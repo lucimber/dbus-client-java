@@ -5,22 +5,18 @@
 
 package com.lucimber.dbus.netty;
 
-import com.lucimber.dbus.connection.sasl.SaslAnonymousAuthConfig;
-import com.lucimber.dbus.connection.sasl.SaslAuthConfig;
-import com.lucimber.dbus.connection.sasl.SaslAuthMechanism;
-import com.lucimber.dbus.connection.sasl.SaslCookieAuthConfig;
-import com.lucimber.dbus.connection.sasl.SaslExternalAuthConfig;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.connection.sasl.*;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.unix.UnixChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.invoke.MethodHandles;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 final class SocketChannelInitializer extends ChannelInitializer<UnixChannel> {
 
@@ -62,8 +58,7 @@ final class SocketChannelInitializer extends ChannelInitializer<UnixChannel> {
     pipeline.addLast(OutboundMessageEncoder.class.getSimpleName(), new OutboundMessageEncoder());
     pipeline.addLast(FrameDecoder.class.getSimpleName(), new FrameDecoder());
     pipeline.addLast(InboundMessageDecoder.class.getSimpleName(), new InboundMessageDecoder());
-    final UInt32 nameHandlerSerial = connection.getNextSerial();
-    pipeline.addLast(MandatoryNameHandler.class.getSimpleName(), new MandatoryNameHandler(nameHandlerSerial));
+    pipeline.addLast(DBusMandatoryNameHandler.class.getSimpleName(), new DBusMandatoryNameHandler());
     pipeline.addLast(ChannelInitCompleter.class.getSimpleName(), new ChannelInitCompleter(initFuture));
   }
 
@@ -76,7 +71,7 @@ final class SocketChannelInitializer extends ChannelInitializer<UnixChannel> {
     pipeline.addLast(SaslMessageEncoder.class.getSimpleName(), new SaslMessageEncoder());
     final LinkedHashMap<SaslAuthMechanism, SaslAuthConfig> authMechanisms = buildAuthMechanismList();
     pipeline.addLast(SaslMechanismInboundHandler.class.getSimpleName(),
-            new SaslMechanismInboundHandler(authMechanisms));
+          new SaslMechanismInboundHandler(authMechanisms));
     final SaslCompletionHandler saslCompletionHandler = new SaslCompletionHandler();
     pipeline.addLast(SaslCompletionHandler.class.getSimpleName(), saslCompletionHandler);
   }

@@ -12,20 +12,17 @@ import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
 import com.lucimber.dbus.type.UInt32;
 import com.lucimber.dbus.util.LoggerUtils;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
-import java.lang.invoke.MethodHandles;
-import java.net.SocketAddress;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
+import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
+
+import java.lang.invoke.MethodHandles;
+import java.net.SocketAddress;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 final class NettyConnection extends ChannelDuplexHandler implements Connection {
 
@@ -33,20 +30,23 @@ final class NettyConnection extends ChannelDuplexHandler implements Connection {
   private static final Marker MARKER_INBOUND = MarkerFactory.getMarker(LoggerUtils.MARKER_CONNECTION_INBOUND);
   private static final Marker MARKER_OUTBOUND = MarkerFactory.getMarker(LoggerUtils.MARKER_CONNECTION_OUTBOUND);
 
-  private final AtomicInteger atomicInteger;
   private final Pipeline pipeline;
   private ChannelHandlerContext ctx;
 
   NettyConnection(final PipelineFactory factory) {
     Objects.requireNonNull(factory, "factory must not be null");
     this.pipeline = factory.create(this);
-    atomicInteger = new AtomicInteger();
   }
 
   @Override
   public void handlerAdded(final ChannelHandlerContext ctx) {
     LoggerUtils.debug(LOGGER, () -> "I have been added to a channel context.");
     this.ctx = Objects.requireNonNull(ctx);
+    AtomicLong serialCounter = ctx.channel().attr(DBusChannelAttribute.SERIAL_COUNTER).get();
+    if (serialCounter == null) {
+      serialCounter = new AtomicLong(1); // Start serials at 1
+      ctx.channel().attr(DBusChannelAttribute.SERIAL_COUNTER).set(serialCounter);
+    }
   }
 
   @Override
@@ -86,7 +86,9 @@ final class NettyConnection extends ChannelDuplexHandler implements Connection {
 
   @Override
   public UInt32 getNextSerial() {
-    return UInt32.valueOf(atomicInteger.incrementAndGet());
+    AtomicLong serialCounter = ctx.channel().attr(DBusChannelAttribute.SERIAL_COUNTER).get();
+    // D-Bus serial numbers are 32-bit unsigned and allowed to wrap around
+    return UInt32.valueOf((int) serialCounter.incrementAndGet());
   }
 
   @Override
