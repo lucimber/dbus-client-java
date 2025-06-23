@@ -10,9 +10,16 @@ group = "com.lucimber"
 version = "2.0-SNAPSHOT"
 
 dependencies {
+    // Common
     implementation("io.netty:netty-all:4.2.2.Final")
     implementation("io.netty:netty-transport-native-epoll:4.2.2.Final")
     implementation("org.slf4j:slf4j-api:2.0.17")
+
+    // SASL ID Resolver
+    implementation("net.java.dev.jna:jna:5.14.0")
+    implementation("net.java.dev.jna:jna-platform:5.14.0")
+
+    // Testing
     testImplementation("ch.qos.logback:logback-classic:1.5.18")
     testImplementation(platform("org.junit:junit-bom:5.12.0"))
     testImplementation("org.junit.jupiter:junit-jupiter-api")

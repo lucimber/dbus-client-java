@@ -8,9 +8,9 @@ package com.lucimber.dbus.netty;
 import com.lucimber.dbus.message.InboundError;
 import com.lucimber.dbus.message.InboundMethodReturn;
 import com.lucimber.dbus.message.OutboundMethodCall;
-import com.lucimber.dbus.type.ObjectPath;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.ObjectPath;
 import com.lucimber.dbus.type.UInt32;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -37,7 +38,7 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DBusMandatoryNameHandler.class);
 
-  private static final DBusString DBUS_SERVICE_NAME =  DBusString.valueOf("org.freedesktop.DBus");
+  private static final DBusString DBUS_SERVICE_NAME = DBusString.valueOf("org.freedesktop.DBus");
   private static final ObjectPath DBUS_OBJECT_PATH = ObjectPath.valueOf("/org/freedesktop/DBus");
   private static final DBusString DBUS_INTERFACE_NAME = DBusString.valueOf("org.freedesktop.DBus");
   private static final DBusString HELLO_METHOD_NAME = DBusString.valueOf("Hello");
@@ -53,8 +54,7 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
   @Override
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
     LOGGER.debug("Received user event: {}, current state: {}", evt, currentState);
-    if (evt == DBusChannelEvent.DBUS_PIPELINE_READY // Assuming DbusPipelineConfigurer fires this
-          && currentState == State.IDLE) {
+    if (evt == DBusChannelEvent.SASL_AUTH_COMPLETE && currentState == State.IDLE) {
       LOGGER.debug("DBus message pipeline is ready. Sending org.freedesktop.DBus.Hello method call.");
 
       AtomicLong serialCounter = ctx.channel().attr(DBusChannelAttribute.SERIAL_COUNTER).get();
@@ -63,7 +63,7 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
         ctx.channel().attr(DBusChannelAttribute.SERIAL_COUNTER).set(serialCounter);
       }
       // D-Bus serial numbers are 32-bit unsigned and allowed to wrap around
-      helloCallSerial =  UInt32.valueOf((int) serialCounter.getAndIncrement());
+      helloCallSerial = UInt32.valueOf((int) serialCounter.getAndIncrement());
 
       OutboundMethodCall helloCall = new OutboundMethodCall(
             helloCallSerial,
@@ -123,6 +123,7 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
   private void handleHelloReply(ChannelHandlerContext ctx, InboundMethodReturn reply) {
     LOGGER.debug("Received reply for Hello call (serial {}): {}", helloCallSerial.getDelegate(), reply);
     List<DBusType> payload = reply.getPayload();
+
     if (!payload.isEmpty() && payload.get(0) instanceof DBusString assignedName) {
       LOGGER.info("Successfully acquired bus name: {}", assignedName);
       ctx.channel().attr(DBusChannelAttribute.ASSIGNED_BUS_NAME).set(assignedName);
@@ -131,18 +132,19 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
       LOGGER.error("Hello reply did not contain a valid string name in payload. Payload: {}", payload);
       ctx.fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
     }
-    ctx.pipeline().remove(this); // Done with this handler
+
+    try {
+      ctx.pipeline().remove(this);
+      LOGGER.debug("Removed myself as {} from pipeline.", this.getClass().getSimpleName());
+    } catch (NoSuchElementException ignored) {
+      LOGGER.warn("Failed to remove myself as {} from pipeline.", this.getClass().getSimpleName());
+    }
   }
 
   private void handleHelloError(ChannelHandlerContext ctx, InboundError error) {
     LOGGER.error("Received error reply for Hello call (serial {}): Name: {}, Message: {}",
           helloCallSerial.getDelegate(), error.getErrorName(), error.getPayload());
-    // TODO: Implement retry logic or more sophisticated error handling if desired.
-    // For now, signal failure and remove.
     ctx.fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
-    ctx.pipeline().remove(this); // Done with this handler
-    // Consider closing the channel or letting higher layers decide based on the event.
-    // ctx.close();
   }
 
   @Override
@@ -152,8 +154,6 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
     if (currentState == State.AWAITING_HELLO_REPLY) {
       ctx.fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
     }
-    ctx.pipeline().remove(this);
-    ctx.close(); // Or ctx.fireExceptionCaught(cause)
   }
 
   @Override

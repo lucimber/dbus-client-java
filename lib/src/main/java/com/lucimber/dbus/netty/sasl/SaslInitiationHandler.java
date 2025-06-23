@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.lucimber.dbus.netty;
+package com.lucimber.dbus.netty.sasl;
 
+import com.lucimber.dbus.netty.DBusChannelEvent;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -45,12 +46,6 @@ public class SaslInitiationHandler extends ChannelInboundHandlerAdapter {
               ctx.close(); // Close channel on failure to send critical initial byte
             }
           });
-
-    // It's important NOT to call super.channelActive(ctx) if we are removing the handler,
-    // or ensure it's called before removal if other handlers expect it.
-    // In this case, since we remove it, the event propagation for channelActive will stop here
-    // for subsequent handlers that might have been after this one *for this specific event*.
-    // However, fireUserEventTriggered is a different event path.
   }
 
   @Override

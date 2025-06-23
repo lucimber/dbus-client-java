@@ -20,27 +20,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Objects;
 
-public class CookieSaslMechanism implements SaslMechanism {
+public final class CookieSaslMechanism implements SaslMechanism {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CookieSaslMechanism.class);
-  private static final String DEFAULT_COOKIE_CONTEXT = "org_freedesktop_general"; // Common context
 
-  private final String cookieContext;
   private String username;
-  private String clientNonceHex; // Hex-encoded client nonce
-  private boolean challengeProcessed = false;
-
-  public CookieSaslMechanism() {
-    this(DEFAULT_COOKIE_CONTEXT);
-  }
-
-  public CookieSaslMechanism(String cookieContext) {
-    this.cookieContext = Objects.requireNonNull(cookieContext, "Cookie context cannot be null");
-  }
+  private String clientChallenge;
+  private boolean completed = false;
 
   @Override
   public String getName() {
@@ -49,31 +37,24 @@ public class CookieSaslMechanism implements SaslMechanism {
 
   @Override
   public void init(ChannelHandlerContext ctx) throws SaslMechanismException {
-    this.username = System.getProperty("user.name");
-    if (this.username == null || this.username.isEmpty()) {
-      throw new SaslMechanismException("Could not determine username for DBUS_COOKIE_SHA1.");
+    username = System.getProperty("user.name");
+    if (username == null || username.isEmpty()) {
+      throw new SaslMechanismException("Username could not be determined.");
     }
-    SecureRandom random = new SecureRandom();
-    byte[] nonceBytes = new byte[16]; // 128 bits
-    random.nextBytes(nonceBytes);
-    this.clientNonceHex = SaslUtil.hexEncode(nonceBytes);
-    LOGGER.debug("DBUS_COOKIE_SHA1 initialized for user: {}, client_nonce: {}", username, clientNonceHex);
+    byte[] nonce = new byte[16];
+    new SecureRandom().nextBytes(nonce);
+    clientChallenge = SaslUtil.hexEncode(nonce);
   }
 
   @Override
   public Future<String> getInitialResponseAsync(ChannelHandlerContext ctx) {
     Promise<String> promise = ctx.executor().newPromise();
-    EventExecutor worker = findWorkerExecutor(ctx);
-    worker.execute(() -> {
-      if (this.username == null) { // Should have been set by init
-        promise.setFailure(new SaslMechanismException("Username not initialized for DBUS_COOKIE_SHA1."));
-        return;
-      }
+    findWorkerExecutor(ctx).execute(() -> {
       try {
-        String hexEncodedUsername = SaslUtil.hexEncode(this.username.getBytes(StandardCharsets.UTF_8));
-        promise.setSuccess(hexEncodedUsername);
+        String hexUsername = SaslUtil.hexEncode(username.getBytes(StandardCharsets.UTF_8));
+        promise.setSuccess(hexUsername);
       } catch (Exception e) {
-        promise.setFailure(new SaslMechanismException("Failed to create initial response for DBUS_COOKIE_SHA1", e));
+        promise.setFailure(new SaslMechanismException("Failed to encode username.", e));
       }
     });
     return promise;
@@ -82,104 +63,75 @@ public class CookieSaslMechanism implements SaslMechanism {
   @Override
   public Future<String> processChallengeAsync(ChannelHandlerContext ctx, String challengeHex) {
     Promise<String> promise = ctx.executor().newPromise();
-    EventExecutor worker = findWorkerExecutor(ctx);
-
-    worker.execute(() -> {
+    findWorkerExecutor(ctx).execute(() -> {
       try {
-        String challengeStr = new String(SaslUtil.hexDecode(challengeHex), StandardCharsets.UTF_8);
-        String[] parts = challengeStr.split(" ");
+        String decoded = new String(SaslUtil.hexDecode(challengeHex), StandardCharsets.UTF_8);
+        String[] parts = decoded.split(" ");
         if (parts.length != 3) {
-          promise.setFailure(new SaslMechanismException("Invalid DBUS_COOKIE_SHA1 challenge format. Expected 3 parts, got " + parts.length + ". Challenge: " + challengeStr));
-          return;
-        }
-        String cookieId = parts[0]; // This is the actual ID, not hex
-        String serverNonceHex = parts[1];
-        String serverCookieValue = parts[2]; // This is the actual cookie value from server, not hex
-
-        String localCookieValue = readLocalCookie(this.username, this.cookieContext, cookieId);
-        if (localCookieValue == null) {
-          promise.setFailure(new SaslMechanismException("Local cookie not found for ID: " + cookieId + " in context: " + this.cookieContext));
+          promise.setFailure(new SaslMechanismException("Invalid server challenge format. Expected 3 fields."));
           return;
         }
 
-        // Hash ingredients: <cookie_id_from_challenge>:<server_nonce_hex>:<client_nonce_hex>:<local_cookie_value>
-        String stringToHash = cookieId + ":" + serverNonceHex + ":" + this.clientNonceHex + ":" + localCookieValue;
+        String context = parts[0];
+        String cookieId = parts[1];
+        String serverChallenge = parts[2];
 
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
-        byte[] hashBytes = md.digest(stringToHash.getBytes(StandardCharsets.UTF_8));
-        String hexHash = SaslUtil.hexEncode(hashBytes);
+        String cookieValue = readCookieValue(context, cookieId);
+        if (cookieValue == null) {
+          promise.setFailure(new SaslMechanismException("Cookie not found for id: " + cookieId));
+          return;
+        }
 
-        // Response: <client_nonce_hex> <hex_sha1_hash>
-        String clientResponseStr = this.clientNonceHex + " " + hexHash;
-        String hexEncodedClientResponse = SaslUtil.hexEncode(clientResponseStr.getBytes(StandardCharsets.UTF_8));
+        String combined = serverChallenge + ":" + clientChallenge + ":" + cookieValue;
+        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+        String responseHash = SaslUtil.hexEncode(digest.digest(combined.getBytes(StandardCharsets.UTF_8)));
 
-        promise.setSuccess(hexEncodedClientResponse);
-        this.challengeProcessed = true;
-
-      } catch (NoSuchAlgorithmException e) {
-        promise.setFailure(new SaslMechanismException("SHA-1 algorithm not available for DBUS_COOKIE_SHA1", e));
+        String response = clientChallenge + " " + responseHash;
+        String hexResponse = SaslUtil.hexEncode(response.getBytes(StandardCharsets.UTF_8));
+        completed = true;
+        promise.setSuccess(hexResponse);
       } catch (Exception e) {
-        promise.setFailure(new SaslMechanismException("Failed to process DBUS_COOKIE_SHA1 challenge", e));
+        promise.setFailure(new SaslMechanismException("Error processing server challenge.", e));
       }
     });
     return promise;
   }
 
-  private String readLocalCookie(String userName, String contextName, String cookieId) throws IOException {
-    // This path is typical for system bus user keyrings. Session bus might differ.
-    // User-specific directory: ~/.dbus-keyrings/
-    // Filename inside is often the cookie ID.
-    // Content: <cookie_id> <creation_timestamp_unix> <cookie_secret_value>
-    Path cookieDirPath = Paths.get(System.getProperty("user.home"), ".dbus-keyrings");
-    // Some systems might use a subdirectory per context (though often just "session" or "user")
-    // For "org_freedesktop_general", it might be directly in .dbus-keyrings or a subdir.
-    // Let's try a common structure if context is general, or use context as subdir.
-    Path contextPath;
-    if (DEFAULT_COOKIE_CONTEXT.equals(contextName) || "session".equals(contextName) || "user".equals(contextName)) {
-      contextPath = cookieDirPath; // Try root of .dbus-keyrings for common contexts
-    } else {
-      contextPath = cookieDirPath.resolve(contextName); // Or specific context subdir
+  private String readCookieValue(String context, String cookieId) throws IOException {
+    Path cookieFile = Paths.get(System.getProperty("user.home"), ".dbus-keyrings", context);
+    if (!Files.exists(cookieFile) || !Files.isReadable(cookieFile)) {
+      LOGGER.warn("Cookie file not found or unreadable: {}", cookieFile);
+      return null;
     }
-    Path cookieFilePath = contextPath.resolve(cookieId);
 
-    LOGGER.debug("Attempting to read cookie for user '{}', context '{}', id '{}' from: {}",
-          userName, contextName, cookieId, cookieFilePath.toAbsolutePath());
-
-    if (Files.exists(cookieFilePath) && Files.isReadable(cookieFilePath)) {
-      try (BufferedReader reader = Files.newBufferedReader(cookieFilePath, StandardCharsets.UTF_8)) {
-        String line = reader.readLine();
-        if (line != null) {
-          String[] parts = line.trim().split(" ", 3); // Split into 3 parts max
-          if (parts.length == 3 && parts[0].equals(cookieId)) {
-            LOGGER.debug("Successfully read cookie value for id '{}'", cookieId);
-            return parts[2]; // The cookie secret value
-          } else {
-            LOGGER.warn("Cookie file {} has unexpected format or mismatched ID. Line: {}", cookieFilePath, line);
-          }
-        } else {
-          LOGGER.warn("Cookie file {} is empty.", cookieFilePath);
+    try (BufferedReader reader = Files.newBufferedReader(cookieFile, StandardCharsets.UTF_8)) {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        String[] parts = line.trim().split(" ", 3);
+        if (parts.length == 3 && parts[0].equals(cookieId)) {
+          return parts[2];
         }
       }
-    } else {
-      LOGGER.warn("Cookie file not found or not readable: {}", cookieFilePath.toAbsolutePath());
     }
+
+    LOGGER.warn("No matching cookie ID {} in file {}", cookieId, cookieFile);
     return null;
   }
 
-
   @Override
   public boolean isComplete() {
-    return challengeProcessed;
+    return completed;
   }
 
   @Override
   public void dispose() {
-    this.username = null;
-    this.clientNonceHex = null;
-    // No other long-lived sensitive data specific to a single auth attempt
+    username = null;
+    clientChallenge = null;
+    completed = false;
   }
 
   private EventExecutor findWorkerExecutor(ChannelHandlerContext ctx) {
-    return GlobalEventExecutor.INSTANCE; // Simplification; use a dedicated pool in production
+    return GlobalEventExecutor.INSTANCE;
   }
 }
+

@@ -31,7 +31,7 @@ class DBusMandatoryNameHandlerTest {
 
   @Test
   void testHelloCallSentOnPipelineReady() {
-    channel.pipeline().fireUserEventTriggered(DBusChannelEvent.DBUS_PIPELINE_READY);
+    channel.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
 
     Object outbound = channel.readOutbound();
     assertInstanceOf(com.lucimber.dbus.message.OutboundMethodCall.class, outbound);
@@ -43,7 +43,7 @@ class DBusMandatoryNameHandlerTest {
 
   @Test
   void testHelloReplyTriggersNameAcquiredEvent() {
-    channel.pipeline().fireUserEventTriggered(DBusChannelEvent.DBUS_PIPELINE_READY);
+    channel.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
     OutboundMethodCall sent = channel.readOutbound();
     UInt32 sentSerial = sent.getSerial();
 
@@ -65,7 +65,7 @@ class DBusMandatoryNameHandlerTest {
 
   @Test
   void testHelloReplyWithNoPayloadTriggersFailure() {
-    channel.pipeline().fireUserEventTriggered(DBusChannelEvent.DBUS_PIPELINE_READY);
+    channel.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
     OutboundMethodCall sent = channel.readOutbound();
     UInt32 sentSerial = sent.getSerial();
 
@@ -85,7 +85,7 @@ class DBusMandatoryNameHandlerTest {
 
   @Test
   void testHelloErrorTriggersFailure() {
-    channel.pipeline().fireUserEventTriggered(DBusChannelEvent.DBUS_PIPELINE_READY);
+    channel.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
     OutboundMethodCall sent = channel.readOutbound();
     UInt32 sentSerial = sent.getSerial();
 
@@ -104,7 +104,7 @@ class DBusMandatoryNameHandlerTest {
 
   @Test
   void testChannelInactiveDuringAwaitingState() {
-    channel.pipeline().fireUserEventTriggered(DBusChannelEvent.DBUS_PIPELINE_READY);
+    channel.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
     channel.finish(); // triggers channelInactive
 
     // Handler should be gone, failure triggered

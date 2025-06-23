@@ -10,37 +10,41 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import io.netty.util.concurrent.Promise;
 
-public class AnonymousSaslMechanism implements SaslMechanism {
+/**
+ * Implements the ANONYMOUS SASL mechanism as defined in the D-Bus specification.
+ * This mechanism requires no authentication or identity assertion and does not exchange payloads.
+ */
+public final class AnonymousSaslMechanism implements SaslMechanism {
+
+  private static final String MECHANISM_NAME = "ANONYMOUS";
 
   private boolean complete = false;
 
   @Override
   public String getName() {
-    return "ANONYMOUS";
+    return MECHANISM_NAME;
   }
 
   @Override
   public void init(ChannelHandlerContext ctx) {
-    // No initialization needed for ANONYMOUS
+    // No initialization or identity resolution needed.
   }
 
   @Override
   public Future<String> getInitialResponseAsync(ChannelHandlerContext ctx) {
-    // ANONYMOUS has no initial response from client.
-    // Client just sends "AUTH ANONYMOUS\r\n"
-    // Server typically responds with "OK <guid>\r\n"
-    complete = true; // Client part is done after sending AUTH ANONYMOUS
     Promise<String> promise = ImmediateEventExecutor.INSTANCE.newPromise();
-    promise.setSuccess(null); // No initial response payload
+    // ANONYMOUS mechanism sends no payload — just "AUTH ANONYMOUS\r\n"
+    complete = true;
+    promise.setSuccess(null);
     return promise;
   }
 
   @Override
   public Future<String> processChallengeAsync(ChannelHandlerContext ctx, String challenge) {
-    // ANONYMOUS mechanism does not involve challenges.
-    // If server sends one, it's a protocol violation or misunderstanding.
+    // According to spec, ANONYMOUS does not involve challenge/response.
     Promise<String> promise = ImmediateEventExecutor.INSTANCE.newPromise();
-    promise.setFailure(new SaslMechanismException("ANONYMOUS mechanism does not support challenges. Received: " + challenge));
+    promise.setFailure(new SaslMechanismException(
+          "ANONYMOUS mechanism does not support server challenges. Received: " + challenge));
     return promise;
   }
 
@@ -51,6 +55,7 @@ public class AnonymousSaslMechanism implements SaslMechanism {
 
   @Override
   public void dispose() {
-    // No sensitive data to dispose
+    // No state or sensitive data to clear.
+    this.complete = false;
   }
 }
