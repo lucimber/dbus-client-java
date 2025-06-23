@@ -7,7 +7,6 @@ package com.lucimber.dbus.netty.sasl;
 
 import com.lucimber.dbus.netty.DBusChannelEvent;
 import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import org.slf4j.Logger;
@@ -16,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@ChannelHandler.Sharable
 public final class SaslCodec extends ChannelDuplexHandler {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SaslCodec.class);

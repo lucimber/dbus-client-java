@@ -9,7 +9,6 @@ import com.lucimber.dbus.connection.sasl.SaslCommandName;
 import com.lucimber.dbus.connection.sasl.SaslMessage;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.DecoderException;
@@ -22,7 +21,6 @@ import java.util.List;
 /**
  * Decoder: Accumulates ASCII bytes until CRLF, then maps to SaslMessage.
  */
-@ChannelHandler.Sharable
 public class SaslMessageDecoder extends ByteToMessageDecoder {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SaslMessageDecoder.class);

@@ -7,7 +7,6 @@ package com.lucimber.dbus.netty.sasl;
 
 import com.lucimber.dbus.connection.sasl.SaslMessage;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
@@ -16,7 +15,6 @@ import java.nio.charset.StandardCharsets;
 /**
  * Encodes a SaslMessage into a US-ASCII line terminated with CRLF, as required by the D-Bus SASL protocol.
  */
-@ChannelHandler.Sharable
 public final class SaslMessageEncoder extends MessageToByteEncoder<SaslMessage> {
 
   @Override
