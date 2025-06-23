@@ -7,10 +7,13 @@ import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.ObjectPath;
 import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.UInt32;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -89,6 +92,14 @@ class DBusMandatoryNameHandlerTest {
     OutboundMethodCall sent = channel.readOutbound();
     UInt32 sentSerial = sent.getSerial();
 
+    List<Object> userEvents = new ArrayList<>();
+    channel.pipeline().addLast(new ChannelInboundHandlerAdapter() {
+      @Override
+      public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+        userEvents.add(evt);
+      }
+    });
+
     InboundError error = new InboundError(
           UInt32.valueOf(0),
           sentSerial,
@@ -98,8 +109,7 @@ class DBusMandatoryNameHandlerTest {
 
     channel.writeInbound(error);
 
-    assertTrue(channel.pipeline().toMap().values().stream()
-          .noneMatch(h -> h instanceof DBusMandatoryNameHandler));
+    assertTrue(userEvents.contains(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED));
   }
 
   @Test
