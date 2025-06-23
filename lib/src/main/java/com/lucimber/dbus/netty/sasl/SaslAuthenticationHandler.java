@@ -167,7 +167,11 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
             if (future.isSuccess()) {
               String initialResponse = (String) future.getNow();
               String value = initialResponse != null && !initialResponse.isEmpty() ? initialResponse : null;
-              SaslMessage authMsg = new SaslMessage(SaslCommandName.AUTH, value);
+              String commandArgs = candidate.getName();
+              if (value != null) {
+                commandArgs += " " + value;
+              }
+              SaslMessage authMsg = new SaslMessage(SaslCommandName.AUTH, commandArgs);
               ctx.writeAndFlush(authMsg);
               currentState = SaslState.NEGOTIATING;
             } else {

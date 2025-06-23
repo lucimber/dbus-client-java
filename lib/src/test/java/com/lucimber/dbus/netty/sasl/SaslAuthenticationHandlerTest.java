@@ -25,11 +25,20 @@ class SaslAuthenticationHandlerTest {
   @Test
   void testSaslStartAuthFlow() {
     channel.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_NUL_BYTE_SENT);
-    Object outboundMsg = channel.readOutbound();
-    assertInstanceOf(SaslMessage.class, outboundMsg);
-    SaslMessage obSaslMessage = (SaslMessage) outboundMsg;
+
+    Object initialOutbound = channel.readOutbound();
+    assertInstanceOf(SaslMessage.class, initialOutbound);
+    SaslMessage obSaslMessage = (SaslMessage) initialOutbound;
     assertEquals(SaslCommandName.AUTH, obSaslMessage.getCommandName());
-    assertTrue(channel.writeInbound(new SaslMessage(SaslCommandName.REJECTED, "ANONYMOUS")));
+
+    channel.writeInbound(new SaslMessage(SaslCommandName.REJECTED, "ANONYMOUS"));
+
+    Object nextOutbound = channel.readOutbound();
+    assertInstanceOf(SaslMessage.class, nextOutbound);
+    SaslMessage nextAuth = (SaslMessage) nextOutbound;
+
+    assertEquals(SaslCommandName.AUTH, nextAuth.getCommandName());
+    assertEquals("ANONYMOUS", nextAuth.getCommandArgs().orElse(""));
   }
 
   @Test
