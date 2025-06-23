@@ -59,9 +59,11 @@ final class InboundUtils {
     final byte authFlag = 0x04;
     if ((flagsByte & replyFlag) == replyFlag) {
       flags.add(MessageFlag.NO_REPLY_EXPECTED);
-    } else if ((flagsByte & startFlag) == startFlag) {
+    }
+    if ((flagsByte & startFlag) == startFlag) {
       flags.add(MessageFlag.NO_AUTO_START);
-    } else if ((flagsByte & authFlag) == authFlag) {
+    }
+    if ((flagsByte & authFlag) == authFlag) {
       flags.add(MessageFlag.ALLOW_INTERACTIVE_AUTHORIZATION);
     }
     return flags;
