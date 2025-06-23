@@ -156,7 +156,7 @@ final class FrameDecoder extends ByteToMessageDecoder {
 
       DecoderResult<UInt32> serialResult = decoder.decode(nioBuffer, offset);
       offset += serialResult.getConsumedBytes();
-      in.skipBytes(bodyLengthResult.getConsumedBytes());
+      in.skipBytes(serialResult.getConsumedBytes());
       frame.setSerial(serialResult.getValue());
     } catch (DecoderException e) {
       throw new CorruptedFrameException(e);
