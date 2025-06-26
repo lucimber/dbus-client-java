@@ -27,6 +27,6 @@ final class DefaultHeadHandler implements Handler {
   @Override
   public void onOutboundMessage(final HandlerContext ctx, final OutboundMessage msg) {
     LoggerUtils.debug(LOGGER, () -> "Passing an outbound message to the connection.");
-    connection.writeOutboundMessage(msg);
+    connection.sendMessage(msg);
   }
 }

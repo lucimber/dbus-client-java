@@ -16,7 +16,7 @@ import com.lucimber.dbus.connection.PipelineFactory;
  */
 public final class DefaultPipelineFactory implements PipelineFactory {
   @Override
-  public Pipeline create(final Connection connection) {
+  public Pipeline create(Connection connection) {
     return new DefaultPipeline(connection);
   }
 }

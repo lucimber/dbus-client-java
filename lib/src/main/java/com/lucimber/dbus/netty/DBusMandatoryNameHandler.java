@@ -58,10 +58,6 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
       LOGGER.debug("DBus message pipeline is ready. Sending org.freedesktop.DBus.Hello method call.");
 
       AtomicLong serialCounter = ctx.channel().attr(DBusChannelAttribute.SERIAL_COUNTER).get();
-      if (serialCounter == null) { // TODO: Leave it be until we figured out who is responsible for the creation.
-        serialCounter = new AtomicLong(1); // Start serials at 1
-        ctx.channel().attr(DBusChannelAttribute.SERIAL_COUNTER).set(serialCounter);
-      }
       // D-Bus serial numbers are 32-bit unsigned and allowed to wrap around
       helloCallSerial = UInt32.valueOf((int) serialCounter.getAndIncrement());
 

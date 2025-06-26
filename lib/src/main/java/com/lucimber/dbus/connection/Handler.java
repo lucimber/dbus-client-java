@@ -1,6 +1,6 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.connection;
@@ -19,11 +19,12 @@ public interface Handler {
   /**
    * Processes the activation of the D-Bus connection
    * or forwards it to the next receiver on the {@link Pipeline}.
-   * Gets called after the connection was established and the SASL authentication was successful.
+   * Gets called after the connection was established and the SASL authentication was successful
+   * and the mandatory D-Bus name has been acquired.
    *
    * @param ctx the {@link HandlerContext} of this {@link Handler}
    */
-  default void onConnectionActive(final HandlerContext ctx) {
+  default void onConnectionActive(HandlerContext ctx) {
     ctx.passConnectionActiveEvent();
   }
 
@@ -34,7 +35,7 @@ public interface Handler {
    *
    * @param ctx the {@link HandlerContext} of this {@link Handler}
    */
-  default void onConnectionInactive(final HandlerContext ctx) {
+  default void onConnectionInactive(HandlerContext ctx) {
     ctx.passConnectionInactiveEvent();
   }
 
@@ -46,7 +47,7 @@ public interface Handler {
    * @param msg the {@link InboundMessage}
    * @throws Exception If an inbound message could not be processed correctly.
    */
-  default void onInboundMessage(final HandlerContext ctx, final InboundMessage msg) throws Exception {
+  default void onInboundMessage(HandlerContext ctx, InboundMessage msg) throws Exception {
     ctx.passInboundMessage(msg);
   }
 
@@ -58,7 +59,7 @@ public interface Handler {
    * @param msg the {@link OutboundMessage}
    * @throws Exception If an outbound message could not be processed correctly.
    */
-  default void onOutboundMessage(final HandlerContext ctx, final OutboundMessage msg) throws Exception {
+  default void onOutboundMessage(HandlerContext ctx, OutboundMessage msg) throws Exception {
     ctx.passOutboundMessage(msg);
   }
 
@@ -68,7 +69,7 @@ public interface Handler {
    * @param ctx   the {@link HandlerContext} of this {@link Handler}
    * @param event the user event
    */
-  default void onUserEvent(final HandlerContext ctx, final Object event) {
+  default void onUserEvent(HandlerContext ctx, Object event) {
     ctx.passUserEvent(event);
   }
 
@@ -79,7 +80,7 @@ public interface Handler {
    * @param ctx   the {@link HandlerContext} of this {@link Handler}
    * @param cause the cause of the failure
    */
-  default void onInboundFailure(final HandlerContext ctx, final Throwable cause) {
+  default void onInboundFailure(HandlerContext ctx, Throwable cause) {
     ctx.passInboundFailure(cause);
   }
 
@@ -90,7 +91,7 @@ public interface Handler {
    * @param ctx   the {@link HandlerContext} of this {@link Handler}
    * @param cause the cause of the failure
    */
-  default void onOutboundFailure(final HandlerContext ctx, final Throwable cause) {
+  default void onOutboundFailure(HandlerContext ctx, Throwable cause) {
     ctx.passOutboundFailure(cause);
   }
 }
