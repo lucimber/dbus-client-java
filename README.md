@@ -43,6 +43,11 @@ the use of this framework approachable.
 * Java Runtime 17 or higher
 * D-Bus 1.12 or higher
 
+## Build
+This project relies on Gradle's toolchain support. The wrapper will download
+JDK 17 automatically when running the build. Simply execute `./gradlew test`
+to compile and test the code.
+
 ## Examples
 
 ### Bootstrap a connection
