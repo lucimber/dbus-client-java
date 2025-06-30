@@ -21,7 +21,7 @@ dependencies {
 
     // Testing
     testImplementation("ch.qos.logback:logback-classic:1.5.18")
-    testImplementation(platform("org.junit:junit-bom:5.13.1"))
+    testImplementation(platform("org.junit:junit-bom:5.13.2"))
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
