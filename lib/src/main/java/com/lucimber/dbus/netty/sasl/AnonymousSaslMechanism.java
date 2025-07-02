@@ -44,7 +44,7 @@ public final class AnonymousSaslMechanism implements SaslMechanism {
     // According to spec, ANONYMOUS does not involve challenge/response.
     Promise<String> promise = ImmediateEventExecutor.INSTANCE.newPromise();
     promise.setFailure(new SaslMechanismException(
-          "ANONYMOUS mechanism does not support server challenges. Received: " + challenge));
+            "ANONYMOUS mechanism does not support server challenges. Received: " + challenge));
     return promise;
   }
 

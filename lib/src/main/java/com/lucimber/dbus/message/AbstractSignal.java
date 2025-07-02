@@ -5,8 +5,11 @@
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.*;
-
+import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.ObjectPath;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.UInt32;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,10 +33,10 @@ abstract class AbstractSignal extends AbstractMessage {
    * @param member the name of the signal
    */
   AbstractSignal(
-        UInt32 serial,
-        ObjectPath path,
-        DBusString iface,
-        DBusString member) {
+          UInt32 serial,
+          ObjectPath path,
+          DBusString iface,
+          DBusString member) {
     this(serial, path, iface, member, null, null);
   }
 
@@ -48,12 +51,12 @@ abstract class AbstractSignal extends AbstractMessage {
    * @param payload   optional; the message body
    */
   AbstractSignal(
-        UInt32 serial,
-        ObjectPath path,
-        DBusString iface,
-        DBusString member,
-        Signature signature,
-        List<? extends DBusType> payload) {
+          UInt32 serial,
+          ObjectPath path,
+          DBusString iface,
+          DBusString member,
+          Signature signature,
+          List<? extends DBusType> payload) {
     super(serial, signature, payload);
     this.path = Objects.requireNonNull(path);
     this.iface = Objects.requireNonNull(iface);

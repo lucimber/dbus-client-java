@@ -5,11 +5,10 @@
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.UInt32;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -29,8 +28,8 @@ public final class OutboundMethodReturn extends AbstractReply implements Outboun
    * @param replySerial the reply serial number
    */
   public OutboundMethodReturn(
-        UInt32 serial,
-        UInt32 replySerial) {
+          UInt32 serial,
+          UInt32 replySerial) {
     super(serial, replySerial);
     this.dst = null;
   }
@@ -45,11 +44,11 @@ public final class OutboundMethodReturn extends AbstractReply implements Outboun
    * @param payload     optional; the message body
    */
   public OutboundMethodReturn(
-        UInt32 serial,
-        UInt32 replySerial,
-        DBusString dst,
-        Signature signature,
-        List<? extends DBusType> payload) {
+          UInt32 serial,
+          UInt32 replySerial,
+          DBusString dst,
+          Signature signature,
+          List<? extends DBusType> payload) {
     super(serial, replySerial, signature, payload);
     this.dst = dst;
   }

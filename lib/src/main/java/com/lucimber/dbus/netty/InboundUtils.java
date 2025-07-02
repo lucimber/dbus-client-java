@@ -14,9 +14,13 @@ import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.Struct;
 import com.lucimber.dbus.type.Variant;
 import io.netty.buffer.ByteBuf;
-
 import java.nio.ByteOrder;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Utility class for common methods used for decoding and encoding messages.

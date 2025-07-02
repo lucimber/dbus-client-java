@@ -7,7 +7,6 @@ package com.lucimber.dbus.connection;
 
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
-
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,8 +29,8 @@ public final class DefaultPipeline implements Pipeline {
    */
   public DefaultPipeline(Connection connection) {
     this.connection = Objects.requireNonNull(connection, "connection must not be null");
-    head = new InternalContext(connection,this, "HEAD", new InternalHeadHandler());
-    tail = new InternalContext(connection,this, "TAIL", new InternalTailHandler());
+    head = new InternalContext(connection, this, "HEAD", new InternalHeadHandler());
+    tail = new InternalContext(connection, this, "TAIL", new InternalTailHandler());
     head.setNext(tail);
     tail.setPrev(head);
   }
@@ -42,7 +41,7 @@ public final class DefaultPipeline implements Pipeline {
       throw new IllegalArgumentException("Handler name already exists: " + name);
     }
 
-    final InternalContext newCtx = new InternalContext(connection,this, name, handler);
+    final InternalContext newCtx = new InternalContext(connection, this, name, handler);
     final InternalContext prev = tail.getPrev();
     prev.setNext(newCtx);
     newCtx.setPrev(prev);
@@ -66,8 +65,8 @@ public final class DefaultPipeline implements Pipeline {
       throw new IllegalArgumentException("Name must not be null or blank.");
     }
 
-    if (name.equalsIgnoreCase("HEAD") ||
-          name.equalsIgnoreCase("TAIL")) {
+    if (name.equalsIgnoreCase("HEAD")
+            || name.equalsIgnoreCase("TAIL")) {
       throw new IllegalArgumentException("Removal of head or tail not allowed.");
     }
 

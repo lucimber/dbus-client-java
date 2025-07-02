@@ -8,7 +8,14 @@ package com.lucimber.dbus.netty;
 import com.lucimber.dbus.connection.Connection;
 import com.lucimber.dbus.connection.InboundHandler;
 import com.lucimber.dbus.connection.Pipeline;
-import com.lucimber.dbus.message.*;
+import com.lucimber.dbus.message.InboundError;
+import com.lucimber.dbus.message.InboundMessage;
+import com.lucimber.dbus.message.InboundMethodCall;
+import com.lucimber.dbus.message.InboundMethodReturn;
+import com.lucimber.dbus.message.InboundSignal;
+import com.lucimber.dbus.message.OutboundError;
+import com.lucimber.dbus.message.OutboundMessage;
+import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.Signature;
@@ -19,9 +26,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.nio.channels.ClosedChannelException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +34,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Handles inbound and outbound messages and routes them to the bound connection and pipeline (not netty).
+ */
 public class AppLogicHandler extends ChannelDuplexHandler {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AppLogicHandler.class);
@@ -38,22 +47,22 @@ public class AppLogicHandler extends ChannelDuplexHandler {
   private final ConcurrentHashMap<UInt32, Promise<InboundMessage>> pendingMethodCalls;
   private final ArrayList<UInt32> pendingRoutedMethodCalls;
   private final ReentrantLock pendingRoutedMethodCallsLock;
-
-  private ChannelHandlerContext ctx;
   private final ExecutorService applicationTaskExecutor; // For offloading user code
   private final Connection connection;
+  private ChannelHandlerContext ctx;
 
   /**
    * Creates a new instance.
    *
    * @param applicationTaskExecutor The executor service to run application-level callbacks
    *                                (like signal handlers) on, to avoid blocking the Netty EventLoop.
-   *                                If null, a default will be attempted or tasks run on EventLoop (not recommended for blocking user code).
+   *                                If null, a default will be attempted or tasks run on EventLoop
+   *                                (not recommended for blocking user code).
    * @param connection              An active D-Bus connection.
    */
   public AppLogicHandler(ExecutorService applicationTaskExecutor, Connection connection) {
     this.applicationTaskExecutor = Objects.requireNonNull(applicationTaskExecutor,
-          "ApplicationTaskExecutor cannot be null. Provide one for offloading user code.");
+            "ApplicationTaskExecutor cannot be null. Provide one for offloading user code.");
     this.connection = Objects.requireNonNull(connection, "connection must not be null");
     pendingMethodCalls = new ConcurrentHashMap<>();
     pendingRoutedMethodCalls = new ArrayList<>();
@@ -71,7 +80,7 @@ public class AppLogicHandler extends ChannelDuplexHandler {
     if (evt == DBusChannelEvent.MANDATORY_NAME_ACQUIRED) {
       DBusString localBusName = ctx.channel().attr(DBusChannelAttribute.ASSIGNED_BUS_NAME).get();
       LOGGER.info("{} active with bus name: {}. Ready for DBus interactions.",
-            this.getClass().getSimpleName(), (localBusName != null ? localBusName : "unknown"));
+              this.getClass().getSimpleName(), (localBusName != null ? localBusName : "unknown"));
       // Client is now fully operational. Application can start making calls / expecting signals.
       connection.getPipeline().propagateConnectionActive();
     } else if (evt == DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED) {
@@ -92,8 +101,10 @@ public class AppLogicHandler extends ChannelDuplexHandler {
    * <p>
    * The returned {@code Future} structure works as follows:
    * <ul>
-   *   <li>The <strong>outer {@code Future}</strong> completes when the outbound message has been successfully written to the transport.</li>
-   *   <li>The <strong>inner {@code Future}</strong>, provided as the outer result, will be completed when the corresponding {@link InboundMessage} reply is received.</li>
+   *   <li>The <strong>outer {@code Future}</strong> completes when the outbound message has been
+   *   successfully written to the transport.</li>
+   *   <li>The <strong>inner {@code Future}</strong>, provided as the outer result, will be completed
+   *   when the corresponding {@link InboundMessage} reply is received.</li>
    * </ul>
    *
    * @param msg the outbound message to send (must have a preassigned unique serial number).
@@ -104,7 +115,7 @@ public class AppLogicHandler extends ChannelDuplexHandler {
   public Future<Future<InboundMessage>> writeMessage(OutboundMessage msg) {
     if (ctx == null || !ctx.channel().isActive()) {
       Promise<Future<InboundMessage>> promise = ctx != null
-            ? ctx.executor().newPromise() : GlobalEventExecutor.INSTANCE.newPromise();
+              ? ctx.executor().newPromise() : GlobalEventExecutor.INSTANCE.newPromise();
       var re = new IllegalStateException("Channel is not active or handler not properly initialized.");
       promise.setFailure(re);
       return promise;
@@ -160,7 +171,7 @@ public class AppLogicHandler extends ChannelDuplexHandler {
   public Future<Void> writeAndRouteResponse(OutboundMessage msg) {
     if (ctx == null || !ctx.channel().isActive()) {
       Promise<Void> promise = ctx != null
-            ? ctx.executor().newPromise() : GlobalEventExecutor.INSTANCE.newPromise();
+              ? ctx.executor().newPromise() : GlobalEventExecutor.INSTANCE.newPromise();
       var re = new IllegalStateException("Channel is not active or handler not properly initialized.");
       promise.setFailure(re);
       return promise;
@@ -201,15 +212,15 @@ public class AppLogicHandler extends ChannelDuplexHandler {
     } else if (msg instanceof InboundError error) {
       handleInboundReply(error, error.getReplySerial());
     } else if (msg instanceof InboundSignal signal) {
-      LOGGER.warn("Received InboundSignal. " +
-            "Client-side handling of signals not yet implemented: {}", signal);
+      LOGGER.warn("Received InboundSignal. "
+              + "Client-side handling of signals not yet implemented: {}", signal);
     } else if (msg instanceof InboundMethodCall methodCall) {
-      LOGGER.warn("Received InboundMethodCall. " +
-            "Client-side object exposure not yet implemented: {}", methodCall);
+      LOGGER.warn("Received InboundMethodCall. "
+              + "Client-side object exposure not yet implemented: {}", methodCall);
       if (methodCall.isReplyExpected()) {
         sendErrorReply(ctx, methodCall,
-              "org.freedesktop.DBus.Error.NotSupported",
-              "Method not supported by this client.");
+                "org.freedesktop.DBus.Error.NotSupported",
+                "Method not supported by this client.");
       }
     }
   }
@@ -258,7 +269,7 @@ public class AppLogicHandler extends ChannelDuplexHandler {
 
     // Destination for the error reply is the sender of the original request
     OutboundError errorReply = new OutboundError(replyErrorSerial, request.getSerial(), errorNameStr,
-          request.getSender(), signature, payload);
+            request.getSender(), signature, payload);
     ctx.writeAndFlush(errorReply).addListener(future -> {
       if (!future.isSuccess()) {
         LOGGER.error("Failed to send error reply for request serial {}", request.getSerial(), future.cause());

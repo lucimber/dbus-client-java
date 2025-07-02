@@ -5,28 +5,37 @@
 
 package com.lucimber.dbus.netty;
 
-import com.lucimber.dbus.encoder.*;
+import static java.nio.ByteOrder.BIG_ENDIAN;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
+
+import com.lucimber.dbus.encoder.ArrayEncoder;
+import com.lucimber.dbus.encoder.Encoder;
+import com.lucimber.dbus.encoder.EncoderResult;
+import com.lucimber.dbus.encoder.Int32Encoder;
+import com.lucimber.dbus.encoder.UInt32Encoder;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageType;
-import com.lucimber.dbus.type.*;
+import com.lucimber.dbus.type.DBusArray;
+import com.lucimber.dbus.type.DBusByte;
+import com.lucimber.dbus.type.Int32;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Struct;
+import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.Variant;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToByteEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Map;
-
-import static java.nio.ByteOrder.BIG_ENDIAN;
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 final class FrameEncoder extends MessageToByteEncoder<Frame> {
 
@@ -72,7 +81,7 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
   }
 
   private static EncoderResult<ByteBuffer> encodeHeaderFields(Map<HeaderField, Variant> fields,
-                                                           ByteOrder order, int offset) {
+                                                              ByteOrder order, int offset) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding header fields: " + fields);
     DBusArray<Struct> structs = new DBusArray<>(Signature.valueOf("a(yv)"));
     for (Map.Entry<HeaderField, Variant> entry : fields.entrySet()) {
@@ -88,13 +97,13 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
 
   private static EncoderResult<ByteBuffer> encodeBodyLength(int bodyLength, ByteOrder order, int offset) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding length of body: " + bodyLength);
-    Encoder<Int32, ByteBuffer> encoder = new Int32Encoder( order);
+    Encoder<Int32, ByteBuffer> encoder = new Int32Encoder(order);
     return encoder.encode(Int32.valueOf(bodyLength), offset);
   }
 
   private static EncoderResult<ByteBuffer> encodeSerial(ByteOrder order, UInt32 serial, int offset) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding serial number: " + serial);
-    Encoder<UInt32, ByteBuffer> encoder = new UInt32Encoder( order);
+    Encoder<UInt32, ByteBuffer> encoder = new UInt32Encoder(order);
     return encoder.encode(serial, offset);
   }
 
@@ -138,7 +147,7 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
       LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: " + msgBuffer.readableBytes());
       // Header fields
       EncoderResult<ByteBuffer> headerFieldsResult =
-            encodeHeaderFields(msg.getHeaderFields(), msg.getByteOrder(), byteCount);
+              encodeHeaderFields(msg.getHeaderFields(), msg.getByteOrder(), byteCount);
       byteCount += headerFieldsResult.getProducedBytes();
       msgBuffer.writeBytes(headerFieldsResult.getBuffer());
       LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: " + msgBuffer.readableBytes());
@@ -150,13 +159,13 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
         msgBuffer.writeZero(padding);
         LoggerUtils.trace(LOGGER, MARKER, () -> "Padding header with bytes: " + padding);
         LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: "
-              + msgBuffer.readableBytes());
+                + msgBuffer.readableBytes());
       }
       // Message body
       if (msg.getBody() != null) {
         msgBuffer.writeBytes(msg.getBody());
         LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: "
-              + msgBuffer.readableBytes());
+                + msgBuffer.readableBytes());
       }
       // Copy message
       out.writeBytes(msgBuffer);

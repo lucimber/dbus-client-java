@@ -58,15 +58,6 @@ public enum HeaderField {
   }
 
   /**
-   * Returns the byte code for this header field.
-   *
-   * @return the D-Bus header field code
-   */
-  public byte getCode() {
-    return code;
-  }
-
-  /**
    * Looks up a HeaderField by its byte code.
    *
    * @param code the byte code
@@ -80,5 +71,14 @@ public enum HeaderField {
       }
     }
     throw new IllegalArgumentException("Unknown D-Bus header field code: " + code);
+  }
+
+  /**
+   * Returns the byte code for this header field.
+   *
+   * @return the D-Bus header field code
+   */
+  public byte getCode() {
+    return code;
   }
 }

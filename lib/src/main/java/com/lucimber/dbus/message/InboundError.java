@@ -5,11 +5,10 @@
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.UInt32;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -32,10 +31,10 @@ public final class InboundError extends AbstractReply implements InboundMessage,
    * @param errorName   the name of the error
    */
   public InboundError(
-        UInt32 serial,
-        UInt32 replySerial,
-        DBusString sender,
-        DBusString errorName) {
+          UInt32 serial,
+          UInt32 replySerial,
+          DBusString sender,
+          DBusString errorName) {
     super(serial, replySerial);
     this.sender = Objects.requireNonNull(sender);
     this.errorName = Objects.requireNonNull(errorName);
@@ -52,12 +51,12 @@ public final class InboundError extends AbstractReply implements InboundMessage,
    * @param payload     optional; the message body
    */
   public InboundError(
-        UInt32 serial,
-        UInt32 replySerial,
-        DBusString sender,
-        DBusString errorName,
-        Signature signature,
-        List<? extends DBusType> payload) {
+          UInt32 serial,
+          UInt32 replySerial,
+          DBusString sender,
+          DBusString errorName,
+          Signature signature,
+          List<? extends DBusType> payload) {
     super(serial, replySerial, signature, payload);
     this.sender = Objects.requireNonNull(sender);
     this.errorName = Objects.requireNonNull(errorName);

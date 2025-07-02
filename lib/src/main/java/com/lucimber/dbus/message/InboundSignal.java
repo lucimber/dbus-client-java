@@ -5,8 +5,11 @@
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.*;
-
+import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.ObjectPath;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.UInt32;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,18 +25,18 @@ public final class InboundSignal extends AbstractSignal implements InboundMessag
   /**
    * Constructs a new instance with mandatory parameter.
    *
-   * @param serial    the serial number
-   * @param sender    the sender of this signal
-   * @param path      the object path
-   * @param iface the name of the D-Bus interface
-   * @param member    the name of this signal
+   * @param serial the serial number
+   * @param sender the sender of this signal
+   * @param path   the object path
+   * @param iface  the name of the D-Bus interface
+   * @param member the name of this signal
    */
   public InboundSignal(
-        UInt32 serial,
-        DBusString sender,
-        ObjectPath path,
-        DBusString iface,
-        DBusString member) {
+          UInt32 serial,
+          DBusString sender,
+          ObjectPath path,
+          DBusString iface,
+          DBusString member) {
     super(serial, path, iface, member);
     this.sender = Objects.requireNonNull(sender);
   }
@@ -44,19 +47,19 @@ public final class InboundSignal extends AbstractSignal implements InboundMessag
    * @param serial    the serial number
    * @param sender    the sender of this signal
    * @param path      the object path
-   * @param iface the name of the D-Bus interface
+   * @param iface     the name of the D-Bus interface
    * @param member    the name of this signal
    * @param signature optional; the signature of the message body
    * @param payload   optional; the message body
    */
   public InboundSignal(
-        UInt32 serial,
-        DBusString sender,
-        ObjectPath path,
-        DBusString iface,
-        DBusString member,
-        Signature signature,
-        List<? extends DBusType> payload) {
+          UInt32 serial,
+          DBusString sender,
+          ObjectPath path,
+          DBusString iface,
+          DBusString member,
+          Signature signature,
+          List<? extends DBusType> payload) {
     super(serial, path, iface, member, signature, payload);
     this.sender = Objects.requireNonNull(sender);
   }

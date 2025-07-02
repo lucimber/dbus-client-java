@@ -9,7 +9,6 @@ import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.Secur32.EXTENDED_NAME_FORMAT;
 import com.sun.jna.platform.win32.Secur32Util;
 import com.sun.jna.platform.win32.Win32Exception;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;

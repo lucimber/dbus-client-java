@@ -25,41 +25,41 @@ public abstract class AbstractInboundHandler implements InboundHandler {
 
   @Override
   public void handleInboundFailure(Context ctx, Throwable cause) {
-    getLogger().debug("Received a failure caused by an inbound message. " +
-          "No action was taken. " +
-          "Propagating the failure to the next component.");
+    getLogger().debug("Received a failure caused by an inbound message. "
+            + "No action was taken. "
+            + "Propagating the failure to the next component.");
     ctx.propagateInboundFailure(cause);
   }
 
   @Override
   public void handleInboundMessage(Context ctx, InboundMessage msg) {
-    getLogger().debug("Inbound message received. " +
-          "No handler at this stage processed it. " +
-          "Propagating toward the pipeline head.");
+    getLogger().debug("Inbound message received. "
+            + "No handler at this stage processed it. "
+            + "Propagating toward the pipeline head.");
     ctx.propagateInboundMessage(msg);
   }
 
   @Override
   public void handleUserEvent(Context ctx, Object evt) {
-    getLogger().debug("User-defined event received. " +
-          "No handler at this stage processed it. " +
-          "Propagating toward the pipeline tail.");
+    getLogger().debug("User-defined event received. "
+            + "No handler at this stage processed it. "
+            + "Propagating toward the pipeline tail.");
     ctx.propagateUserEvent(evt);
   }
 
   @Override
   public void onConnectionActive(Context ctx) {
-    getLogger().debug("Connection-active event received. " +
-          "No handler at this stage processed it. " +
-          "Propagating toward the pipeline tail.");
+    getLogger().debug("Connection-active event received. "
+            + "No handler at this stage processed it. "
+            + "Propagating toward the pipeline tail.");
     ctx.propagateConnectionActive();
   }
 
   @Override
   public void onConnectionInactive(Context ctx) {
-    getLogger().debug("Connection-inactive event received. " +
-          "No handler at this stage processed it. " +
-          "Propagating toward the pipeline tail.");
+    getLogger().debug("Connection-inactive event received. "
+            + "No handler at this stage processed it. "
+            + "Propagating toward the pipeline tail.");
     ctx.propagateConnectionInactive();
   }
 

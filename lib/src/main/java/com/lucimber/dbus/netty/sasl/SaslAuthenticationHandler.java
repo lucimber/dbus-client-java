@@ -10,26 +10,21 @@ import com.lucimber.dbus.connection.sasl.SaslMessage;
 import com.lucimber.dbus.netty.DBusChannelEvent;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
 
 public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SaslAuthenticationHandler.class);
-
-  private enum SaslState {
-    IDLE,
-    AWAITING_SERVER_MECHS,
-    NEGOTIATING,
-    AWAITING_BEGIN_CONFIRMATION,
-    AUTHENTICATED,
-    FAILED
-  }
-
-  private SaslState currentState = SaslState.IDLE;
   private final List<SaslMechanism> clientMechanismsPreference;
+  private SaslState currentState = SaslState.IDLE;
   private SaslMechanism currentMechanism;
   private List<String> serverSupportedMechanisms;
   private int currentMechanismAttemptIndex = 0;
@@ -37,8 +32,8 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
   public SaslAuthenticationHandler(List<SaslMechanism> preferredClientMechanisms) {
     Objects.requireNonNull(preferredClientMechanisms, "Client mechanisms list cannot be null.");
     this.clientMechanismsPreference = preferredClientMechanisms.isEmpty()
-          ? List.of(new ExternalSaslMechanism(), new CookieSaslMechanism(), new AnonymousSaslMechanism())
-          : new ArrayList<>(preferredClientMechanisms);
+            ? List.of(new ExternalSaslMechanism(), new CookieSaslMechanism(), new AnonymousSaslMechanism())
+            : new ArrayList<>(preferredClientMechanisms);
   }
 
   public SaslAuthenticationHandler() {
@@ -64,11 +59,14 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
       switch (currentState) {
         case AWAITING_SERVER_MECHS, NEGOTIATING -> handleSaslServerResponse(ctx, saslMessage);
         default -> {
-          LOGGER.warn("Received SASL command '{}' in unexpected state: {}.", saslMessage.getCommandName(), currentState);
+          LOGGER.warn("Received SASL command '{}' in unexpected state: {}.",
+                  saslMessage.getCommandName(), currentState);
           if (EnumSet.of(SaslState.AUTHENTICATED, SaslState.FAILED).contains(currentState)) {
-            LOGGER.warn("Ignoring SASL command '{}' as SASL state is already {}.", saslMessage.getCommandName(), currentState);
+            LOGGER.warn("Ignoring SASL command '{}' as SASL state is already {}.",
+                    saslMessage.getCommandName(), currentState);
           } else {
-            failAuthentication(ctx, "Unexpected SASL command '" + saslMessage.getCommandName() + "' in state " + currentState);
+            failAuthentication(ctx, "Unexpected SASL command '"
+                    + saslMessage.getCommandName() + "' in state " + currentState);
           }
         }
       }
@@ -113,17 +111,21 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
           return;
         }
         currentMechanism.processChallengeAsync(ctx, args).addListener(future -> {
-          if (!ctx.channel().isActive()) return;
+          if (!ctx.channel().isActive()) {
+            return;
+          }
           if (future.isSuccess()) {
             var responseHex = (String) future.getNow();
             if (responseHex != null) {
               SaslMessage dataMsg = new SaslMessage(SaslCommandName.DATA, responseHex);
               ctx.writeAndFlush(dataMsg);
             } else {
-              LOGGER.debug("Mechanism {} complete, awaiting server response.", currentMechanism.getName());
+              LOGGER.debug("Mechanism {} complete, awaiting server response.",
+                      currentMechanism.getName());
             }
           } else {
-            LOGGER.error("Failed to process challenge with mechanism {}", currentMechanism.getName(), future.cause());
+            LOGGER.error("Failed to process challenge with mechanism {}",
+                    currentMechanism.getName(), future.cause());
             SaslMessage cancelMsg = new SaslMessage(SaslCommandName.CANCEL, null);
             ctx.writeAndFlush(cancelMsg);
           }
@@ -136,8 +138,8 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
       }
       case AGREE_UNIX_FD -> LOGGER.info("Server agreed to UNIX FD passing.");
       default -> {
-        if (currentState == SaslState.AWAITING_SERVER_MECHS &&
-              command.name().matches("[A-Z0-9_]+([-A-Z0-9_]*[A-Z0-9_]+)?")) {
+        if (currentState == SaslState.AWAITING_SERVER_MECHS
+                && command.name().matches("[A-Z0-9_]+([-A-Z0-9_]*[A-Z0-9_]+)?")) {
           serverSupportedMechanisms = Arrays.asList(msg.toString().split(" "));
           LOGGER.debug("Server mechanisms: {}", serverSupportedMechanisms);
           currentMechanismAttemptIndex = 0;
@@ -163,7 +165,9 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
         try {
           currentMechanism.init(ctx);
           currentMechanism.getInitialResponseAsync(ctx).addListener(future -> {
-            if (!ctx.channel().isActive()) return;
+            if (!ctx.channel().isActive()) {
+              return;
+            }
             if (future.isSuccess()) {
               String initialResponse = (String) future.getNow();
               String value = initialResponse != null && !initialResponse.isEmpty() ? initialResponse : null;
@@ -175,7 +179,8 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
               ctx.writeAndFlush(authMsg);
               currentState = SaslState.NEGOTIATING;
             } else {
-              LOGGER.error("Failed to get initial response for {}: {}", candidate.getName(), future.cause().getMessage());
+              LOGGER.error("Failed to get initial response for {}: {}",
+                      candidate.getName(), future.cause().getMessage());
               tryNextMechanism(ctx);
             }
           });
@@ -189,7 +194,9 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
   }
 
   private void failAuthentication(ChannelHandlerContext ctx, String reason) {
-    if (currentState == SaslState.FAILED) return;
+    if (currentState == SaslState.FAILED) {
+      return;
+    }
     LOGGER.error("SASL Authentication Failed: {}", reason);
     currentState = SaslState.FAILED;
     if (currentMechanism != null) {
@@ -241,5 +248,14 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
     }
     LOGGER.error("Exception in SaslAuthenticationHandler. State: {}", currentState, cause);
     failAuthentication(ctx, "Exception caught: " + cause.getMessage());
+  }
+
+  private enum SaslState {
+    IDLE,
+    AWAITING_SERVER_MECHS,
+    NEGOTIATING,
+    AWAITING_BEGIN_CONFIRMATION,
+    AUTHENTICATED,
+    FAILED
   }
 }

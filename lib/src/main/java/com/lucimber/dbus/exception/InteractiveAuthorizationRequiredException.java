@@ -15,7 +15,7 @@ import com.lucimber.dbus.type.DBusString;
 public final class InteractiveAuthorizationRequiredException extends AbstractException {
 
   private static final DBusString ERROR_NAME =
-      DBusString.valueOf("org.freedesktop.DBus.Error.InteractiveAuthorizationRequired");
+          DBusString.valueOf("org.freedesktop.DBus.Error.InteractiveAuthorizationRequired");
 
   /**
    * Creates a new instance.

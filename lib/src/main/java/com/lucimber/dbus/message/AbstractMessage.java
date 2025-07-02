@@ -5,11 +5,14 @@
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.UInt32;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * An abstract implementation of message.
@@ -39,9 +42,9 @@ abstract class AbstractMessage implements Message {
    * @param payload   optional; the message body
    */
   AbstractMessage(
-        UInt32 serial,
-        Signature signature,
-        List<? extends DBusType> payload) {
+          UInt32 serial,
+          Signature signature,
+          List<? extends DBusType> payload) {
     this.serial = Objects.requireNonNull(serial);
     this.signature = signature;
     this.payload = (payload == null) ? Collections.emptyList() : new ArrayList<>(payload);

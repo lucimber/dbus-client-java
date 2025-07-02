@@ -5,17 +5,20 @@
 
 package com.lucimber.dbus.encoder;
 
-import com.lucimber.dbus.type.*;
+import com.lucimber.dbus.type.DBusBasicType;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.DictEntry;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
  * An encoder which encodes a key-value pair to the D-Bus marshalling format using ByteBuffer.
@@ -26,7 +29,7 @@ import java.util.Objects;
  * @see DictEntry
  */
 public final class DictEntryEncoder<KeyT extends DBusBasicType, ValueT extends DBusType>
-      implements Encoder<DictEntry<KeyT, ValueT>, ByteBuffer> {
+        implements Encoder<DictEntry<KeyT, ValueT>, ByteBuffer> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
@@ -64,14 +67,14 @@ public final class DictEntryEncoder<KeyT extends DBusBasicType, ValueT extends D
       KeyT key = entry.getKey();
       int keyOffset = offset + producedBytes;
       EncoderResult<ByteBuffer> keyResult = EncoderUtils.encode(key, keyOffset, order);
-      ByteBuffer keyBuffer = keyResult.getBuffer();
+      final ByteBuffer keyBuffer = keyResult.getBuffer();
       producedBytes += keyResult.getProducedBytes();
 
       // Encode value
       ValueT value = entry.getValue();
       int valueOffset = offset + producedBytes;
       EncoderResult<ByteBuffer> valueResult = EncoderUtils.encode(value, valueOffset, order);
-      ByteBuffer valueBuffer = valueResult.getBuffer();
+      final ByteBuffer valueBuffer = valueResult.getBuffer();
       producedBytes += valueResult.getProducedBytes();
 
       // Assemble final buffer

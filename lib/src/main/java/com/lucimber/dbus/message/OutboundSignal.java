@@ -5,8 +5,11 @@
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.*;
-
+import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.ObjectPath;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.UInt32;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,10 +31,10 @@ public final class OutboundSignal extends AbstractSignal implements OutboundMess
    * @param member the name of this signal
    */
   public OutboundSignal(
-        UInt32 serial,
-        ObjectPath path,
-        DBusString iface,
-        DBusString member) {
+          UInt32 serial,
+          ObjectPath path,
+          DBusString iface,
+          DBusString member) {
     super(serial, path, iface, member);
     this.dst = null;
   }
@@ -48,13 +51,13 @@ public final class OutboundSignal extends AbstractSignal implements OutboundMess
    * @param payload   optional; the message body
    */
   public OutboundSignal(
-        UInt32 serial,
-        ObjectPath path,
-        DBusString iface,
-        DBusString member,
-        DBusString dst,
-        Signature signature,
-        List<? extends DBusType> payload) {
+          UInt32 serial,
+          ObjectPath path,
+          DBusString iface,
+          DBusString member,
+          DBusString dst,
+          Signature signature,
+          List<? extends DBusType> payload) {
     super(serial, path, iface, member, signature, payload);
     this.dst = dst;
   }

@@ -5,11 +5,10 @@
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.UInt32;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -30,9 +29,9 @@ public final class InboundMethodReturn extends AbstractReply implements InboundM
    * @param sender      the origin of this method return
    */
   public InboundMethodReturn(
-        UInt32 serial,
-        UInt32 replySerial,
-        DBusString sender) {
+          UInt32 serial,
+          UInt32 replySerial,
+          DBusString sender) {
     super(serial, replySerial);
     this.sender = Objects.requireNonNull(sender);
   }
@@ -47,11 +46,11 @@ public final class InboundMethodReturn extends AbstractReply implements InboundM
    * @param payload     optional; the message body
    */
   public InboundMethodReturn(
-        UInt32 serial,
-        UInt32 replySerial,
-        DBusString sender,
-        Signature signature,
-        List<? extends DBusType> payload) {
+          UInt32 serial,
+          UInt32 replySerial,
+          DBusString sender,
+          Signature signature,
+          List<? extends DBusType> payload) {
     super(serial, replySerial, signature, payload);
     this.sender = Objects.requireNonNull(sender);
   }

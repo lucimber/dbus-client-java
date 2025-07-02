@@ -6,23 +6,34 @@
 package com.lucimber.dbus.netty;
 
 import com.lucimber.dbus.decoder.DecoderUtils;
-import com.lucimber.dbus.message.*;
-import com.lucimber.dbus.type.*;
+import com.lucimber.dbus.message.HeaderField;
+import com.lucimber.dbus.message.InboundError;
+import com.lucimber.dbus.message.InboundMessage;
+import com.lucimber.dbus.message.InboundMethodCall;
+import com.lucimber.dbus.message.InboundMethodReturn;
+import com.lucimber.dbus.message.InboundSignal;
+import com.lucimber.dbus.message.Message;
+import com.lucimber.dbus.message.MessageFlag;
+import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.ObjectPath;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.Variant;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.CorruptedFrameException;
 import io.netty.handler.codec.MessageToMessageDecoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
  * An inbound handler that decodes message frames into typed messages.
@@ -161,7 +172,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
       payload = decodeFrameBody(frame.getBody(), sig.get());
     }
     return new InboundError(serial, replySerial, sender, errorName.get(),
-          sig.orElse(null), payload);
+            sig.orElse(null), payload);
   }
 
   private static InboundMethodCall mapToMethodCall(Frame frame) {
@@ -179,7 +190,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
       payload = decodeFrameBody(frame.getBody(), sig.get());
     }
     return new InboundMethodCall(serial, sender, path, member, replyExpected,
-          iface.orElse(null), sig.orElse(null), payload);
+            iface.orElse(null), sig.orElse(null), payload);
   }
 
   private static InboundMethodReturn mapToMethodReturn(Frame frame) {
@@ -194,7 +205,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
       payload = decodeFrameBody(frame.getBody(), sig.get());
     }
     return new InboundMethodReturn(serial, replySerial, sender,
-          sig.orElse(null), payload);
+            sig.orElse(null), payload);
   }
 
   private static InboundSignal mapToSignal(Frame frame) {
@@ -215,7 +226,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
       payload = decodeFrameBody(frame.getBody(), sig.get());
     }
     return new InboundSignal(serial, sender, path, iface.get(), member,
-          sig.orElse(null), payload);
+            sig.orElse(null), payload);
   }
 
   private static List<DBusType> decodeFrameBody(ByteBuffer body, Signature sig) {

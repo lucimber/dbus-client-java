@@ -14,12 +14,11 @@ import com.lucimber.dbus.type.ObjectPath;
 import com.lucimber.dbus.type.UInt32;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicLong;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * After SASL authentication completes and the DBus message pipeline is configured,
@@ -42,12 +41,6 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
   private static final ObjectPath DBUS_OBJECT_PATH = ObjectPath.valueOf("/org/freedesktop/DBus");
   private static final DBusString DBUS_INTERFACE_NAME = DBusString.valueOf("org.freedesktop.DBus");
   private static final DBusString HELLO_METHOD_NAME = DBusString.valueOf("Hello");
-
-  private enum State {
-    IDLE,
-    AWAITING_HELLO_REPLY
-  }
-
   private State currentState = State.IDLE;
   private UInt32 helloCallSerial;
 
@@ -62,14 +55,14 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
       helloCallSerial = UInt32.valueOf((int) serialCounter.getAndIncrement());
 
       OutboundMethodCall helloCall = new OutboundMethodCall(
-            helloCallSerial,
-            DBUS_OBJECT_PATH,
-            HELLO_METHOD_NAME,
-            true, // replyExpected
-            DBUS_SERVICE_NAME, // destination
-            DBUS_INTERFACE_NAME, // interface
-            null, // signature (Hello takes no args)
-            null  // payload (Hello takes no args)
+              helloCallSerial,
+              DBUS_OBJECT_PATH,
+              HELLO_METHOD_NAME,
+              true, // replyExpected
+              DBUS_SERVICE_NAME, // destination
+              DBUS_INTERFACE_NAME, // interface
+              null, // signature (Hello takes no args)
+              null  // payload (Hello takes no args)
       );
 
       ctx.writeAndFlush(helloCall).addListener(future -> {
@@ -139,7 +132,7 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
 
   private void handleHelloError(ChannelHandlerContext ctx, InboundError error) {
     LOGGER.error("Received error reply for Hello call (serial {}): Name: {}, Message: {}",
-          helloCallSerial.getDelegate(), error.getErrorName(), error.getPayload());
+            helloCallSerial.getDelegate(), error.getErrorName(), error.getPayload());
     ctx.fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
   }
 
@@ -160,5 +153,10 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
     }
     // No need to remove self, pipeline is being torn down
     super.channelInactive(ctx);
+  }
+
+  private enum State {
+    IDLE,
+    AWAITING_HELLO_REPLY
   }
 }

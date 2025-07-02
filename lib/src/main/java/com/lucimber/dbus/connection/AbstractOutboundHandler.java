@@ -6,9 +6,8 @@
 package com.lucimber.dbus.connection;
 
 import com.lucimber.dbus.message.OutboundMessage;
-import org.slf4j.Logger;
-
 import java.util.concurrent.CompletableFuture;
+import org.slf4j.Logger;
 
 /**
  * A skeletal implementation of the {@link OutboundHandler} interface.
@@ -27,33 +26,33 @@ public abstract class AbstractOutboundHandler implements OutboundHandler {
 
   @Override
   public void handleOutboundMessage(Context ctx, OutboundMessage msg, CompletableFuture<Void> future) {
-    getLogger().debug("Outbound message received. " +
-          "No handler at this stage processed it. " +
-          "Propagating toward the pipeline head.");
+    getLogger().debug("Outbound message received. "
+            + "No handler at this stage processed it. "
+            + "Propagating toward the pipeline head.");
     ctx.propagateOutboundMessage(msg, future);
   }
 
   @Override
   public void handleUserEvent(Context ctx, Object evt) {
-    getLogger().debug("User-defined event received. " +
-          "No handler at this stage processed it. " +
-          "Propagating toward the pipeline tail.");
+    getLogger().debug("User-defined event received. "
+            + "No handler at this stage processed it. "
+            + "Propagating toward the pipeline tail.");
     ctx.propagateUserEvent(evt);
   }
 
   @Override
   public void onConnectionActive(Context ctx) {
-    getLogger().debug("Connection-active event received. " +
-          "No handler at this stage processed it. " +
-          "Propagating toward the pipeline tail.");
+    getLogger().debug("Connection-active event received. "
+            + "No handler at this stage processed it. "
+            + "Propagating toward the pipeline tail.");
     ctx.propagateConnectionActive();
   }
 
   @Override
   public void onConnectionInactive(Context ctx) {
-    getLogger().debug("Connection-inactive event received. " +
-          "No handler at this stage processed it. " +
-          "Propagating toward the pipeline tail.");
+    getLogger().debug("Connection-inactive event received. "
+            + "No handler at this stage processed it. "
+            + "Propagating toward the pipeline tail.");
     ctx.propagateConnectionInactive();
   }
 

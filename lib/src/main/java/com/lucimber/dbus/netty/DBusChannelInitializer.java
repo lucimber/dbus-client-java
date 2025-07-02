@@ -13,12 +13,11 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.util.concurrent.Promise;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class DBusChannelInitializer extends ChannelInitializer<Channel> {
 
@@ -49,7 +48,7 @@ final class DBusChannelInitializer extends ChannelInitializer<Channel> {
     p.addLast(InboundMessageDecoder.class.getSimpleName(), new InboundMessageDecoder());
     p.addLast(DBusMandatoryNameHandler.class.getSimpleName(), new DBusMandatoryNameHandler());
     p.addLast(ConnectionCompletionHandler.class.getSimpleName(),
-          new ConnectionCompletionHandler(connectPromise));
+            new ConnectionCompletionHandler(connectPromise));
   }
 
   private void addSaslRelatedHandlers(ChannelPipeline p) {

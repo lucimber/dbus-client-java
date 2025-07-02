@@ -5,8 +5,11 @@
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.*;
-
+import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.ObjectPath;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.UInt32;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,9 +33,9 @@ abstract class AbstractMethodCall extends AbstractMessage {
    * @param member the name of the method
    */
   AbstractMethodCall(
-        UInt32 serial,
-        ObjectPath path,
-        DBusString member) {
+          UInt32 serial,
+          ObjectPath path,
+          DBusString member) {
     super(serial);
     this.path = Objects.requireNonNull(path);
     this.member = Objects.requireNonNull(member);
@@ -50,12 +53,12 @@ abstract class AbstractMethodCall extends AbstractMessage {
    * @param payload   optional; the message body
    */
   AbstractMethodCall(
-        UInt32 serial,
-        ObjectPath path,
-        DBusString member,
-        DBusString iface,
-        Signature signature,
-        List<? extends DBusType> payload) {
+          UInt32 serial,
+          ObjectPath path,
+          DBusString member,
+          DBusString iface,
+          Signature signature,
+          List<? extends DBusType> payload) {
     super(serial, signature, payload);
     this.path = Objects.requireNonNull(path);
     this.member = Objects.requireNonNull(member);

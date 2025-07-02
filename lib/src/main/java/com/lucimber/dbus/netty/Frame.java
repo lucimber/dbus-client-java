@@ -10,7 +10,6 @@ import com.lucimber.dbus.message.MessageFlag;
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.type.UInt32;
 import com.lucimber.dbus.type.Variant;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;

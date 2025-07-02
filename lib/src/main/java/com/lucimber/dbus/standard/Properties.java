@@ -12,7 +12,6 @@ import com.lucimber.dbus.exception.UnknownPropertyException;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.Dict;
 import com.lucimber.dbus.type.Variant;
-
 import java.util.Optional;
 
 /**
@@ -33,11 +32,11 @@ public interface Properties {
    * @param propertyName  the name of the property
    * @return An {@link Optional} of {@link Variant}.
    * @throws UnknownInterfaceException If the interface is unknown to the implementation.
-   * @throws UnknownPropertyException If the property is unknown to the implementation.
-   * @throws AccessDeniedException If caller is not allowed to access the property.
+   * @throws UnknownPropertyException  If the property is unknown to the implementation.
+   * @throws AccessDeniedException     If caller is not allowed to access the property.
    */
   Optional<Variant> getProperty(DBusString interfaceName, DBusString propertyName)
-      throws UnknownInterfaceException, UnknownPropertyException, AccessDeniedException;
+          throws UnknownInterfaceException, UnknownPropertyException, AccessDeniedException;
 
   /**
    * Sets the value of a property.
@@ -46,12 +45,12 @@ public interface Properties {
    * @param propertyName  the name of the property
    * @param value         the value that should be assigned
    * @throws UnknownInterfaceException If the interface is unknown to the implementation.
-   * @throws UnknownPropertyException If the property is unknown to the implementation.
-   * @throws AccessDeniedException If caller is not allowed to access the property.
+   * @throws UnknownPropertyException  If the property is unknown to the implementation.
+   * @throws AccessDeniedException     If caller is not allowed to access the property.
    * @throws PropertyReadOnlyException If the property can only be read.
    */
   void setProperty(DBusString interfaceName, DBusString propertyName, Variant value)
-      throws UnknownInterfaceException, UnknownPropertyException, AccessDeniedException, PropertyReadOnlyException;
+          throws UnknownInterfaceException, UnknownPropertyException, AccessDeniedException, PropertyReadOnlyException;
 
   /**
    * Gets all properties. Properties, to which the caller has no access, are silently omitted from the result array.

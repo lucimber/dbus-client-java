@@ -8,7 +8,6 @@ package com.lucimber.dbus.connection;
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
 import com.lucimber.dbus.type.UInt32;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -29,7 +28,7 @@ public interface Connection extends AutoCloseable {
    * Initiates a connection to a D-Bus instance.
    *
    * @return a {@link CompletionStage} that completes when the connection is established,
-   *         or exceptionally if the attempt fails.
+   * or exceptionally if the attempt fails.
    */
   CompletionStage<Void> connect();
 
@@ -68,7 +67,7 @@ public interface Connection extends AutoCloseable {
    *
    * @param msg the outbound message to send.
    * @return a {@link CompletionStage} that completes with the corresponding inbound response message,
-   *         or fails exceptionally on error.
+   * or fails exceptionally on error.
    */
   CompletionStage<InboundMessage> sendRequest(OutboundMessage msg);
 

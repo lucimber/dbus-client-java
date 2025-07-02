@@ -7,10 +7,10 @@ package com.lucimber.dbus.netty.sasl;
 
 final class SaslUtil {
 
+  private static final char[] HEX_ARRAY_UPPER = "0123456789ABCDEF".toCharArray(); // DBus often uses uppercase hex
+
   private SaslUtil() {
   } // Static utility class
-
-  private static final char[] HEX_ARRAY_UPPER = "0123456789ABCDEF".toCharArray(); // DBus often uses uppercase hex
 
   public static String hexEncode(byte[] bytes) {
     if (bytes == null) {

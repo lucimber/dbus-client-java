@@ -6,7 +6,6 @@
 package com.lucimber.dbus.message;
 
 import com.lucimber.dbus.type.DBusString;
-
 import java.util.Optional;
 
 /**

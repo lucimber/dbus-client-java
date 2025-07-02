@@ -39,15 +39,6 @@ public enum MessageType {
   }
 
   /**
-   * Returns the byte code corresponding to this message type.
-   *
-   * @return the D-Bus message type code
-   */
-  public byte getCode() {
-    return code;
-  }
-
-  /**
    * Looks up a MessageType by its byte code.
    *
    * @param code the byte code from the wire
@@ -61,5 +52,14 @@ public enum MessageType {
       }
     }
     throw new IllegalArgumentException("Unknown D-Bus message type code: " + code);
+  }
+
+  /**
+   * Returns the byte code corresponding to this message type.
+   *
+   * @return the D-Bus message type code
+   */
+  public byte getCode() {
+    return code;
   }
 }

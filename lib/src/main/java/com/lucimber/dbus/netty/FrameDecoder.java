@@ -5,24 +5,31 @@
 
 package com.lucimber.dbus.netty;
 
-import com.lucimber.dbus.decoder.*;
+import com.lucimber.dbus.decoder.ArrayDecoder;
+import com.lucimber.dbus.decoder.Decoder;
+import com.lucimber.dbus.decoder.DecoderException;
+import com.lucimber.dbus.decoder.DecoderResult;
+import com.lucimber.dbus.decoder.UInt32Decoder;
 import com.lucimber.dbus.message.HeaderField;
-import com.lucimber.dbus.type.*;
+import com.lucimber.dbus.type.DBusArray;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Struct;
+import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.Variant;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.CorruptedFrameException;
 import io.netty.handler.codec.TooLongFrameException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
  * An inbound handler that decodes buffer into frame.
@@ -104,6 +111,8 @@ final class FrameDecoder extends ByteToMessageDecoder {
           offset = 0;
           decoderState = DecoderState.HEADER_PREAMBLE;
           break;
+        default:
+          throw new io.netty.handler.codec.DecoderException("Unknown state");
       }
     }
   }

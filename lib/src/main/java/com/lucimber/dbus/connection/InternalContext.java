@@ -7,11 +7,10 @@ package com.lucimber.dbus.connection;
 
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Internal implementation of {@link Context} used for doubly-linked pipeline structure.
@@ -38,12 +37,12 @@ final class InternalContext implements Context {
     return next;
   }
 
-  public InternalContext getPrev() {
-    return prev;
-  }
-
   public void setNext(InternalContext next) {
     this.next = next;
+  }
+
+  public InternalContext getPrev() {
+    return prev;
   }
 
   public void setPrev(InternalContext prev) {
@@ -73,15 +72,15 @@ final class InternalContext implements Context {
   @Override
   public void propagateConnectionActive() {
     if (isRemoved()) {
-      String msg = "Not propagating connection-active event, " +
-            "because this handler is removed from the pipeline.";
+      String msg = "Not propagating connection-active event, "
+              + "because this handler is removed from the pipeline.";
       throw new IllegalArgumentException(msg);
     }
 
     InternalContext ctx = getNext();
     if (ctx == null) {
-      LOGGER.debug("Connection-active event received, evaluated, and ceremonially ignored. " +
-            "It's now haunting /dev/null.");
+      LOGGER.debug("Connection-active event received, evaluated, and ceremonially ignored. "
+              + "It's now haunting /dev/null.");
     } else {
       ctx.onConnectionActive();
     }
@@ -90,15 +89,15 @@ final class InternalContext implements Context {
   @Override
   public void propagateConnectionInactive() {
     if (isRemoved()) {
-      String msg = "Not propagating connection-inactive event, " +
-            "because this handler is removed from the pipeline.";
+      String msg = "Not propagating connection-inactive event, "
+              + "because this handler is removed from the pipeline.";
       throw new IllegalArgumentException(msg);
     }
 
     InternalContext ctx = getNext();
     if (ctx == null) {
-      LOGGER.debug("Connection-inactive event received, evaluated, and ceremonially ignored. " +
-            "It's now haunting /dev/null.");
+      LOGGER.debug("Connection-inactive event received, evaluated, and ceremonially ignored. "
+              + "It's now haunting /dev/null.");
     } else {
       ctx.onConnectionInactive();
     }
@@ -107,15 +106,15 @@ final class InternalContext implements Context {
   @Override
   public void propagateInboundMessage(InboundMessage msg) {
     if (isRemoved()) {
-      String s = "Not propagating inbound message, " +
-            "because this handler is removed from the pipeline.";
+      String s = "Not propagating inbound message, "
+              + "because this handler is removed from the pipeline.";
       throw new IllegalArgumentException(s);
     }
 
     InternalContext ctx = getNext();
     if (ctx == null) {
-      LOGGER.warn("Inbound message received, evaluated, and ceremonially ignored. " +
-            "It's now haunting /dev/null.");
+      LOGGER.warn("Inbound message received, evaluated, and ceremonially ignored. "
+              + "It's now haunting /dev/null.");
     } else {
       ctx.handleInboundMessage(msg);
     }
@@ -124,15 +123,15 @@ final class InternalContext implements Context {
   @Override
   public void propagateOutboundMessage(OutboundMessage msg, CompletableFuture<Void> future) {
     if (isRemoved()) {
-      String s = "Not propagating outbound message, " +
-            "because this handler is removed from the pipeline.";
+      String s = "Not propagating outbound message, "
+              + "because this handler is removed from the pipeline.";
       throw new IllegalArgumentException(s);
     }
 
     InternalContext ctx = getPrev();
     if (ctx == null) {
-      throw new RuntimeException("Cannot propagate an outbound message any further on this pipeline. " +
-            "Please execute handleOutboundMessage on this context instead.");
+      throw new RuntimeException("Cannot propagate an outbound message any further on this pipeline. "
+              + "Please execute handleOutboundMessage on this context instead.");
     } else {
       ctx.handleOutboundMessage(msg, future);
     }
@@ -141,15 +140,15 @@ final class InternalContext implements Context {
   @Override
   public void propagateInboundFailure(Throwable cause) {
     if (isRemoved()) {
-      String msg = "Not propagating inbound failure, " +
-            "because this handler is removed from the pipeline.";
+      String msg = "Not propagating inbound failure, "
+              + "because this handler is removed from the pipeline.";
       throw new IllegalArgumentException(msg);
     }
 
     InternalContext ctx = getNext();
     if (ctx == null) {
-      LOGGER.warn("Inbound failure received, evaluated, and ceremonially ignored. " +
-            "It's now haunting /dev/null.");
+      LOGGER.warn("Inbound failure received, evaluated, and ceremonially ignored. "
+              + "It's now haunting /dev/null.");
     } else {
       ctx.handleInboundFailure(cause);
     }
@@ -158,15 +157,15 @@ final class InternalContext implements Context {
   @Override
   public void propagateUserEvent(Object evt) {
     if (isRemoved()) {
-      String msg = "Not propagating user-defined event, " +
-            "because this handler is removed from the pipeline.";
+      String msg = "Not propagating user-defined event, "
+              + "because this handler is removed from the pipeline.";
       throw new IllegalArgumentException(msg);
     }
 
     InternalContext ctx = getNext();
     if (ctx == null) {
-      LOGGER.debug("User-defined event received, evaluated, and ceremonially ignored. " +
-            "It's now haunting /dev/null.");
+      LOGGER.debug("User-defined event received, evaluated, and ceremonially ignored. "
+              + "It's now haunting /dev/null.");
     } else {
       ctx.handleUserEvent(evt);
     }
@@ -194,8 +193,8 @@ final class InternalContext implements Context {
       try {
         outboundHandler.handleOutboundMessage(this, msg, future);
       } catch (Throwable t) {
-        LOGGER.error("Outbound message event fumbled into chaos. " +
-              "Terminating the connection with prejudice.");
+        LOGGER.error("Outbound message event fumbled into chaos. "
+                + "Terminating the connection with prejudice.");
         try {
           pipeline.getConnection().close();
         } catch (Exception ignored) {
@@ -211,9 +210,9 @@ final class InternalContext implements Context {
       try {
         inboundHandler.handleInboundFailure(this, cause);
       } catch (Throwable t) {
-        LOGGER.error("Failure caused by inbound message event fumbled into chaos. " +
-              "Recovery was a nice idea. " +
-              "Terminating the connection with prejudice.");
+        LOGGER.error("Failure caused by inbound message event fumbled into chaos. "
+                + "Recovery was a nice idea. "
+                + "Terminating the connection with prejudice.");
         try {
           pipeline.getConnection().close();
         } catch (Exception ignored) {
@@ -228,8 +227,8 @@ final class InternalContext implements Context {
     try {
       handler.handleUserEvent(this, evt);
     } catch (Throwable t) {
-      LOGGER.error("User-defined event fumbled into chaos. " +
-            "Terminating the connection with prejudice.");
+      LOGGER.error("User-defined event fumbled into chaos. "
+              + "Terminating the connection with prejudice.");
       try {
         pipeline.getConnection().close();
       } catch (Exception ignored) {
@@ -241,8 +240,8 @@ final class InternalContext implements Context {
     try {
       handler.onConnectionActive(this);
     } catch (Throwable t) {
-      LOGGER.error("Connection-active event fumbled into chaos. " +
-            "Terminating the connection with prejudice.");
+      LOGGER.error("Connection-active event fumbled into chaos. "
+              + "Terminating the connection with prejudice.");
       try {
         pipeline.getConnection().close();
       } catch (Exception ignored) {
@@ -254,8 +253,8 @@ final class InternalContext implements Context {
     try {
       handler.onConnectionInactive(this);
     } catch (Throwable t) {
-      LOGGER.error("Connection-inactive event fumbled into chaos. " +
-            "Terminating the connection with prejudice.");
+      LOGGER.error("Connection-inactive event fumbled into chaos. "
+              + "Terminating the connection with prejudice.");
       try {
         pipeline.getConnection().close();
       } catch (Exception ignored) {

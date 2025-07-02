@@ -5,9 +5,9 @@
 
 package com.lucimber.dbus.type;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class UInt32Test {
 

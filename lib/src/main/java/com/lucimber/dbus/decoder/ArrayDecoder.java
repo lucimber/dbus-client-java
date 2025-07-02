@@ -5,16 +5,20 @@
 
 package com.lucimber.dbus.decoder;
 
-import com.lucimber.dbus.type.*;
+import com.lucimber.dbus.type.DBusArray;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Type;
+import com.lucimber.dbus.type.TypeUtils;
+import com.lucimber.dbus.type.UInt32;
 import com.lucimber.dbus.util.LoggerUtils;
+import java.lang.invoke.MethodHandles;
+import java.nio.ByteBuffer;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
-
-import java.lang.invoke.MethodHandles;
-import java.nio.ByteBuffer;
-import java.util.Objects;
 
 /**
  * A decoder which unmarshals an array from the byte stream format used by D-Bus.
@@ -82,7 +86,7 @@ public final class ArrayDecoder<ValueT extends DBusType> implements Decoder<Byte
       if (array.isEmpty()) {
         char c = elementSig.toString().charAt(0);
         Type type = TypeUtils.getTypeFromChar(c)
-              .orElseThrow(() -> new DecoderException("Cannot map char to alignment: " + c));
+                .orElseThrow(() -> new DecoderException("Cannot map char to alignment: " + c));
         int typeOffset = offset + consumedBytes;
         typePadding = DecoderUtils.skipPadding(buffer, typeOffset, type);
         consumedBytes += typePadding;

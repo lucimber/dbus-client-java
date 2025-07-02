@@ -9,14 +9,13 @@ import com.lucimber.dbus.type.DBusBoolean;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.UInt32;
 import com.lucimber.dbus.util.LoggerUtils;
+import java.lang.invoke.MethodHandles;
+import java.nio.ByteBuffer;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
-
-import java.lang.invoke.MethodHandles;
-import java.nio.ByteBuffer;
-import java.util.Objects;
 
 /**
  * A decoder which unmarshals a boolean from the byte stream format used by D-Bus.

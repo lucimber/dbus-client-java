@@ -5,14 +5,20 @@
 
 package com.lucimber.dbus.decoder;
 
-import com.lucimber.dbus.type.*;
+import com.lucimber.dbus.type.DBusBasicType;
+import com.lucimber.dbus.type.DBusContainerType;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Type;
+import com.lucimber.dbus.type.TypeCode;
+import com.lucimber.dbus.type.TypeUtils;
+import com.lucimber.dbus.type.UInt32;
 import com.lucimber.dbus.util.LoggerUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility methods used by the ByteBuffer-based implementations of the decoders.
@@ -53,7 +59,7 @@ public final class DecoderUtils {
     Objects.requireNonNull(length, "length must not be null");
     if (Integer.compareUnsigned(length.getDelegate(), MAX_ARRAY_LENGTH) > 0) {
       String msg = String.format("Array length (%s) exceeds maximum length (%s)",
-            length, Integer.toUnsignedString(MAX_ARRAY_LENGTH));
+              length, Integer.toUnsignedString(MAX_ARRAY_LENGTH));
       throw new DecoderException(msg);
     }
   }
@@ -72,7 +78,7 @@ public final class DecoderUtils {
   public static <R extends DBusType> DecoderResult<R> decode(Signature signature,
                                                              ByteBuffer buffer,
                                                              int offset)
-        throws DecoderException {
+          throws DecoderException {
     Objects.requireNonNull(signature, "signature must not be null");
     Objects.requireNonNull(buffer, "buffer must not be null");
     if (signature.isContainerType()) {
@@ -80,7 +86,7 @@ public final class DecoderUtils {
     } else {
       char c = signature.toString().charAt(0);
       TypeCode code = TypeUtils.getCodeFromChar(c)
-            .orElseThrow(() -> new DecoderException("Cannot map char to code: " + c));
+              .orElseThrow(() -> new DecoderException("Cannot map char to code: " + c));
       return (DecoderResult<R>) decodeBasicType(code, buffer, offset);
     }
   }
@@ -89,7 +95,7 @@ public final class DecoderUtils {
   public static <R extends DBusContainerType> DecoderResult<R> decodeContainerType(Signature signature,
                                                                                    ByteBuffer buffer,
                                                                                    int offset)
-        throws DecoderException {
+          throws DecoderException {
     if (signature.isArray()) {
       return (DecoderResult<R>) new ArrayDecoder<>(signature).decode(buffer, offset);
     } else if (signature.isDictionary()) {
@@ -109,7 +115,7 @@ public final class DecoderUtils {
   public static <R extends DBusBasicType> DecoderResult<R> decodeBasicType(TypeCode code,
                                                                            ByteBuffer buffer,
                                                                            int offset)
-        throws DecoderException {
+          throws DecoderException {
     return switch (code) {
       case BOOLEAN -> (DecoderResult<R>) new BooleanDecoder().decode(buffer, offset);
       case BYTE -> (DecoderResult<R>) new ByteDecoder().decode(buffer, offset);

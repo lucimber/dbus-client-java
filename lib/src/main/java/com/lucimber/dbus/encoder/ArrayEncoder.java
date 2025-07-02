@@ -5,19 +5,23 @@
 
 package com.lucimber.dbus.encoder;
 
-import com.lucimber.dbus.type.*;
+import com.lucimber.dbus.type.DBusArray;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Type;
+import com.lucimber.dbus.type.TypeUtils;
+import com.lucimber.dbus.type.UInt32;
 import com.lucimber.dbus.util.LoggerUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
  * An encoder which encodes an array to the D-Bus marshalling format using ByteBuffer.
@@ -65,7 +69,7 @@ public final class ArrayEncoder<E extends DBusType> implements Encoder<DBusArray
       // Determine element type and alignment
       char typeChar = signature.subContainer().toString().charAt(0);
       Type elementType = TypeUtils.getTypeFromChar(typeChar)
-            .orElseThrow(() -> new EncoderException("Cannot map char to type: " + typeChar));
+              .orElseThrow(() -> new EncoderException("Cannot map char to type: " + typeChar));
       int arraySizeBytes = 4;
       int typeOffset = offset + padding + arraySizeBytes;
       int typePadding = EncoderUtils.calculateAlignmentPadding(elementType.getAlignment(), typeOffset);
@@ -76,7 +80,7 @@ public final class ArrayEncoder<E extends DBusType> implements Encoder<DBusArray
       int elementsSize = 0;
       for (E element : array) {
         EncoderResult<ByteBuffer> result = EncoderUtils
-              .encode(element, entryOffsetBase + elementsSize, order);
+                .encode(element, entryOffsetBase + elementsSize, order);
         elementsSize += result.getProducedBytes();
         encodedElements.add(result.getBuffer());
       }
@@ -85,7 +89,7 @@ public final class ArrayEncoder<E extends DBusType> implements Encoder<DBusArray
       Encoder<UInt32, ByteBuffer> lengthEncoder = new UInt32Encoder(order);
       int lengthOffset = offset + padding;
       EncoderResult<ByteBuffer> lengthResult = lengthEncoder
-            .encode(UInt32.valueOf(elementsSize), lengthOffset);
+              .encode(UInt32.valueOf(elementsSize), lengthOffset);
       ByteBuffer lengthBuffer = lengthResult.getBuffer();
 
       // Compose the final buffer

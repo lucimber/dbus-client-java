@@ -5,10 +5,9 @@
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.UInt32;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -28,8 +27,8 @@ abstract class AbstractReply extends AbstractMessage implements Reply {
    * @param replySerial the reply serial number
    */
   AbstractReply(
-        UInt32 serial,
-        UInt32 replySerial) {
+          UInt32 serial,
+          UInt32 replySerial) {
     super(serial);
     this.replySerial = Objects.requireNonNull(replySerial);
   }
@@ -43,10 +42,10 @@ abstract class AbstractReply extends AbstractMessage implements Reply {
    * @param payload     optional; the message body
    */
   AbstractReply(
-        UInt32 serial,
-        UInt32 replySerial,
-        Signature signature,
-        List<? extends DBusType> payload) {
+          UInt32 serial,
+          UInt32 replySerial,
+          Signature signature,
+          List<? extends DBusType> payload) {
     super(serial, signature, payload);
     this.replySerial = Objects.requireNonNull(replySerial);
   }

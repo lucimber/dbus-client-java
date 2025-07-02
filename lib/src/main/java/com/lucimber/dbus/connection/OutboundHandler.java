@@ -6,7 +6,6 @@
 package com.lucimber.dbus.connection;
 
 import com.lucimber.dbus.message.OutboundMessage;
-
 import java.util.concurrent.CompletableFuture;
 
 /**

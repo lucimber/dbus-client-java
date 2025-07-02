@@ -9,17 +9,16 @@ import com.lucimber.dbus.netty.DBusChannelEvent;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
+import java.util.List;
+import java.util.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-
 public final class SaslCodec extends ChannelDuplexHandler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SaslCodec.class);
   static final String SASL_MSG_DECODER_NAME = "saslMessageDecoder";
   static final String SASL_MSG_ENCODER_NAME = "saslMessageEncoder";
+  private static final Logger LOGGER = LoggerFactory.getLogger(SaslCodec.class);
 
   @Override
   public void handlerAdded(ChannelHandlerContext ctx) {

@@ -5,8 +5,28 @@
 
 package com.lucimber.dbus.encoder;
 
-import com.lucimber.dbus.type.*;
-
+import com.lucimber.dbus.type.DBusArray;
+import com.lucimber.dbus.type.DBusBasicType;
+import com.lucimber.dbus.type.DBusBoolean;
+import com.lucimber.dbus.type.DBusByte;
+import com.lucimber.dbus.type.DBusContainerType;
+import com.lucimber.dbus.type.DBusDouble;
+import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Dict;
+import com.lucimber.dbus.type.DictEntry;
+import com.lucimber.dbus.type.Int16;
+import com.lucimber.dbus.type.Int32;
+import com.lucimber.dbus.type.Int64;
+import com.lucimber.dbus.type.ObjectPath;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Struct;
+import com.lucimber.dbus.type.TypeAlignment;
+import com.lucimber.dbus.type.UInt16;
+import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.UInt64;
+import com.lucimber.dbus.type.UnixFd;
+import com.lucimber.dbus.type.Variant;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Objects;
@@ -35,7 +55,7 @@ public final class EncoderUtils {
    * @throws EncoderException if the value cannot be encoded
    */
   public static EncoderResult<ByteBuffer> encode(DBusType value, int offset, ByteOrder order)
-        throws EncoderException {
+          throws EncoderException {
     Objects.requireNonNull(value, "value must not be null");
     if (value instanceof DBusContainerType container) {
       return encodeContainerType(container, offset, order);
@@ -47,7 +67,7 @@ public final class EncoderUtils {
   }
 
   private static EncoderResult<ByteBuffer> encodeBasicType(DBusBasicType value, int offset, ByteOrder order)
-        throws EncoderException {
+          throws EncoderException {
     if (value instanceof DBusBoolean b) {
       return new BooleanEncoder(order).encode(b, offset);
     } else if (value instanceof DBusByte b) {
@@ -80,27 +100,28 @@ public final class EncoderUtils {
   }
 
   @SuppressWarnings("unchecked")
-  private static EncoderResult<ByteBuffer> encodeContainerType(DBusContainerType value, int offset, ByteOrder order) throws EncoderException {
+  private static EncoderResult<ByteBuffer> encodeContainerType(DBusContainerType value, int offset,
+                                                               ByteOrder order) throws EncoderException {
     Signature signature = value.getSignature();
     if (signature.isArray()) {
       return new ArrayEncoder<>(
-            order,
-            signature
+              order,
+              signature
       ).encode((DBusArray<DBusType>) value, offset);
     } else if (signature.isDictionary()) {
       return new DictEncoder<>(
-            order,
-            signature
+              order,
+              signature
       ).encode((Dict<DBusBasicType, DBusType>) value, offset);
     } else if (signature.isDictionaryEntry()) {
       return new DictEntryEncoder<>(
-            order,
-            signature
+              order,
+              signature
       ).encode((DictEntry<DBusBasicType, DBusType>) value, offset);
     } else if (signature.isStruct()) {
       return new StructEncoder(
-            order,
-            signature
+              order,
+              signature
       ).encode((Struct) value, offset);
     } else if (signature.isVariant()) {
       return new VariantEncoder(order).encode((Variant) value, offset);

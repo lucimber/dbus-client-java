@@ -26,14 +26,16 @@ class ConnectionCompletionHandler extends ChannelInboundHandlerAdapter {
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
     if (evt == DBusChannelEvent.MANDATORY_NAME_ACQUIRED) {
       if (connectPromise.trySuccess(null)) {
-        LOGGER.debug("Connection process complete (mandatory name acquired). Fulfilled connect promise.");
+        LOGGER.debug("Connection process complete (mandatory name acquired). "
+                + "Fulfilled connect promise.");
       }
       ctx.pipeline().remove(this);
-    } else if (evt == DBusChannelEvent.SASL_AUTH_FAILED ||
-          evt == DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED) {
+    } else if (evt == DBusChannelEvent.SASL_AUTH_FAILED
+            || evt == DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED) {
       String failureReason = "DBus connection setup failed: " + evt;
       if (connectPromise.tryFailure(new RuntimeException(failureReason))) {
-        LOGGER.warn("Connection process failed at SASL or Mandatory Name stage. Failed connect promise.");
+        LOGGER.warn("Connection process failed at SASL or Mandatory Name stage. "
+                + "Failed connect promise.");
       }
       ctx.pipeline().remove(this);
     } else {
@@ -44,7 +46,8 @@ class ConnectionCompletionHandler extends ChannelInboundHandlerAdapter {
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
     if (connectPromise.tryFailure(new java.nio.channels.ClosedChannelException())) {
-      LOGGER.warn("Channel became inactive before connection process completed. Failing connect promise.");
+      LOGGER.warn("Channel became inactive before connection process completed. "
+              + "Failing connect promise.");
     }
     super.channelInactive(ctx);
   }

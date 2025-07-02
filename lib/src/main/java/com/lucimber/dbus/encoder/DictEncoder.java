@@ -5,17 +5,22 @@
 
 package com.lucimber.dbus.encoder;
 
-import com.lucimber.dbus.type.*;
+import com.lucimber.dbus.type.DBusBasicType;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Dict;
+import com.lucimber.dbus.type.DictEntry;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Type;
+import com.lucimber.dbus.type.UInt32;
 import com.lucimber.dbus.util.LoggerUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
  * An encoder which encodes a dictionary to the D-Bus marshalling format using ByteBuffer.
@@ -26,7 +31,7 @@ import java.util.Objects;
  * @see Dict
  */
 public final class DictEncoder<KeyT extends DBusBasicType, ValueT extends DBusType>
-      implements Encoder<Dict<KeyT, ValueT>, ByteBuffer> {
+        implements Encoder<Dict<KeyT, ValueT>, ByteBuffer> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
@@ -80,7 +85,7 @@ public final class DictEncoder<KeyT extends DBusBasicType, ValueT extends DBusTy
       int fullArrayLength = entryBytesTotal;
       Encoder<UInt32, ByteBuffer> lengthEncoder = new UInt32Encoder(order);
       EncoderResult<ByteBuffer> lengthResult = lengthEncoder
-            .encode(UInt32.valueOf(fullArrayLength), offset + padding);
+              .encode(UInt32.valueOf(fullArrayLength), offset + padding);
       ByteBuffer lengthBuffer = lengthResult.getBuffer();
 
       // Compose final buffer

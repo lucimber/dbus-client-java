@@ -8,17 +8,22 @@ package com.lucimber.dbus.netty;
 import com.lucimber.dbus.encoder.EncoderResult;
 import com.lucimber.dbus.encoder.EncoderResultImpl;
 import com.lucimber.dbus.encoder.EncoderUtils;
-import com.lucimber.dbus.message.*;
-import com.lucimber.dbus.type.*;
+import com.lucimber.dbus.message.HeaderField;
+import com.lucimber.dbus.message.MessageType;
+import com.lucimber.dbus.message.OutboundError;
+import com.lucimber.dbus.message.OutboundMessage;
+import com.lucimber.dbus.message.OutboundMethodCall;
+import com.lucimber.dbus.message.OutboundMethodReturn;
+import com.lucimber.dbus.message.OutboundSignal;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Type;
+import com.lucimber.dbus.type.TypeUtils;
+import com.lucimber.dbus.type.Variant;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToMessageEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -26,6 +31,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
  * Encodes {@link OutboundMessage}s to the D-Bus marshalling format.
@@ -194,7 +203,7 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     try {
       char c = signature.toString().charAt(0);
       Type signatureType = TypeUtils.getTypeFromChar(c)
-            .orElseThrow(() -> new Exception("can not map char to type: " + c));
+              .orElseThrow(() -> new Exception("can not map char to type: " + c));
       return signatureType.getCode() == object.getType().getCode();
     } catch (Exception ex) {
       LOGGER.warn("Object isn't matching with signature.", ex);

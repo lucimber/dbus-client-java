@@ -10,16 +10,15 @@ import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.Struct;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
  * A decoder which unmarshals a struct from the byte stream format used by D-Bus.
@@ -65,8 +64,8 @@ public final class StructDecoder implements Decoder<ByteBuffer, Struct> {
       List<DBusType> values = new ArrayList<>();
       Signature subSignature = signature.subContainer();
       List<Signature> components = (subSignature.getQuantity() == 1)
-            ? List.of(subSignature)
-            : subSignature.getChildren();
+              ? List.of(subSignature)
+              : subSignature.getChildren();
 
       for (Signature sig : components) {
         int fieldOffset = offset + consumedBytes;

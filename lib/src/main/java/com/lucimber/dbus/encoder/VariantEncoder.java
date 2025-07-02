@@ -5,17 +5,20 @@
 
 package com.lucimber.dbus.encoder;
 
-import com.lucimber.dbus.type.*;
+import com.lucimber.dbus.type.DBusBasicType;
+import com.lucimber.dbus.type.DBusContainerType;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Variant;
 import com.lucimber.dbus.util.LoggerUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
  * An encoder which encodes a variant to the D-Bus marshalling format using ByteBuffer.
@@ -57,14 +60,14 @@ public final class VariantEncoder implements Encoder<Variant, ByteBuffer> {
       Signature contentSignature = determineContentSignature(variant.getDelegate());
       Encoder<Signature, ByteBuffer> sigEncoder = new SignatureEncoder();
       EncoderResult<ByteBuffer> sigResult = sigEncoder.encode(contentSignature, offset);
-      ByteBuffer sigBuffer = sigResult.getBuffer();
+      final ByteBuffer sigBuffer = sigResult.getBuffer();
       producedBytes += sigResult.getProducedBytes();
 
       // Encode value
       DBusType value = variant.getDelegate();
       int valueOffset = offset + producedBytes;
       EncoderResult<ByteBuffer> valueResult = EncoderUtils.encode(value, valueOffset, order);
-      ByteBuffer valueBuffer = valueResult.getBuffer();
+      final ByteBuffer valueBuffer = valueResult.getBuffer();
       producedBytes += valueResult.getProducedBytes();
 
       // Combine buffers

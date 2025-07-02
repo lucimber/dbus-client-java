@@ -401,8 +401,8 @@ public final class Signature implements DBusBasicType {
   public Signature subContainer() {
     if (rootNode.children == null
             || !(rootNode.type == Type.ARRAY
-                         || rootNode.type == Type.DICT_ENTRY
-                         || rootNode.type == Type.STRUCT)) {
+            || rootNode.type == Type.DICT_ENTRY
+            || rootNode.type == Type.STRUCT)) {
       throw new IllegalArgumentException("Signature must describe an array, a dict-entry or a struct type.");
     }
     if (rootNode.children.size() == 1) {
@@ -429,9 +429,9 @@ public final class Signature implements DBusBasicType {
   public boolean isContainerType() {
     return rootNode.type != null
             && (rootNode.type == Type.ARRAY
-                        || rootNode.type == Type.DICT_ENTRY
-                        || rootNode.type == Type.STRUCT
-                        || rootNode.type == Type.VARIANT);
+            || rootNode.type == Type.DICT_ENTRY
+            || rootNode.type == Type.STRUCT
+            || rootNode.type == Type.VARIANT);
   }
 
   private static final class Node {
@@ -465,7 +465,7 @@ public final class Signature implements DBusBasicType {
       }
       final Node node = (Node) o;
       return type == node.type
-          && Objects.equals(children, node.children);
+              && Objects.equals(children, node.children);
     }
 
     @Override

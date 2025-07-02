@@ -6,7 +6,6 @@
 package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.DBusType;
-
 import java.util.Objects;
 
 /**

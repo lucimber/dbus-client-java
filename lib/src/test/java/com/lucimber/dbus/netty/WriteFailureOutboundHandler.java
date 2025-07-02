@@ -8,6 +8,7 @@ package com.lucimber.dbus.netty;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
+
 import java.util.Objects;
 
 final class WriteFailureOutboundHandler extends ChannelOutboundHandlerAdapter {

@@ -16,10 +16,10 @@ import java.util.Set;
 public final class SaslMessage {
 
   private static final Set<SaslCommandName> COMMANDS_WITHOUT_ARGS = EnumSet.of(
-        SaslCommandName.BEGIN,
-        SaslCommandName.CANCEL,
-        SaslCommandName.NEGOTIATE_UNIX_FD,
-        SaslCommandName.AGREE_UNIX_FD
+          SaslCommandName.BEGIN,
+          SaslCommandName.CANCEL,
+          SaslCommandName.NEGOTIATE_UNIX_FD,
+          SaslCommandName.AGREE_UNIX_FD
   );
 
   private final SaslCommandName commandName;
@@ -28,7 +28,7 @@ public final class SaslMessage {
   /**
    * Constructs a new {@code SaslMessage}.
    *
-   * @param commandName  the name of the command (not null)
+   * @param commandName the name of the command (not null)
    * @param commandArgs the optional args of the command (nullable)
    * @throws NullPointerException     if {@code commandName} is null
    * @throws IllegalArgumentException if {@code commandArgs} is blank or not allowed
@@ -69,7 +69,7 @@ public final class SaslMessage {
 
     if (COMMANDS_WITHOUT_ARGS.contains(commandName) && commandArgs != null) {
       throw new IllegalArgumentException(
-            "Command args must be null for command: " + commandName.name());
+              "Command args must be null for command: " + commandName.name());
     }
   }
 }

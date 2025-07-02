@@ -5,9 +5,6 @@
 
 package com.lucimber.dbus.netty;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.message.OutboundSignal;
 import com.lucimber.dbus.type.DBusString;
@@ -18,6 +15,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteOrder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class OutboundSignalHandlerTest {
 

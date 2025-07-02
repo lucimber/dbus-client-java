@@ -62,11 +62,9 @@ public final class Variant implements DBusContainerType {
 
   @Override
   public String toString() {
-    if (delegate instanceof DBusBasicType) {
-      final DBusBasicType basicType = (DBusBasicType) delegate;
+    if (delegate instanceof DBusBasicType basicType) {
       return String.format("v[%c]", basicType.getType().getCode().getChar());
-    } else if (delegate instanceof DBusContainerType) {
-      final DBusContainerType containerType = (DBusContainerType) delegate;
+    } else if (delegate instanceof DBusContainerType containerType) {
       return String.format("v[%s]", containerType.getSignature());
     } else {
       return "v[unknown type]";

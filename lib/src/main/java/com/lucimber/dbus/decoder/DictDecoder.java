@@ -5,17 +5,23 @@
 
 package com.lucimber.dbus.decoder;
 
-import com.lucimber.dbus.type.*;
+import com.lucimber.dbus.type.DBusBasicType;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Dict;
+import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.Type;
+import com.lucimber.dbus.type.TypeCode;
+import com.lucimber.dbus.type.TypeUtils;
+import com.lucimber.dbus.type.UInt32;
 import com.lucimber.dbus.util.LoggerUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
  * A decoder which unmarshals a dictionary from the byte stream format used by D-Bus.
@@ -24,7 +30,7 @@ import java.util.Objects;
  * @param <ValueT> The data type of the value.
  */
 public final class DictDecoder<KeyT extends DBusBasicType, ValueT extends DBusType>
-      implements Decoder<ByteBuffer, Dict<KeyT, ValueT>> {
+        implements Decoder<ByteBuffer, Dict<KeyT, ValueT>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
@@ -43,12 +49,12 @@ public final class DictDecoder<KeyT extends DBusBasicType, ValueT extends DBusTy
     List<Signature> children = keyValueSig.getChildren();
     char keyChar = children.get(0).toString().charAt(0);
     this.keyTypeCode = TypeUtils.getCodeFromChar(keyChar)
-          .orElseThrow(() -> new RuntimeException("Cannot map char to type code: " + keyChar));
+            .orElseThrow(() -> new RuntimeException("Cannot map char to type code: " + keyChar));
     this.valueSignature = children.get(1);
   }
 
   private static void logResult(Signature signature, int offset, int padding, int consumedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () ->{
+    LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "DICT: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
       return String.format(s, signature, offset, padding, consumedBytes);
     });
@@ -83,7 +89,7 @@ public final class DictDecoder<KeyT extends DBusBasicType, ValueT extends DBusTy
   }
 
   private DecoderResult<Dict<KeyT, ValueT>> decodeEntries(ByteBuffer buffer, int offset, UInt32 length)
-        throws DecoderException {
+          throws DecoderException {
     Dict<KeyT, ValueT> dict = new Dict<>(signature);
     int consumedBytes = 0;
 

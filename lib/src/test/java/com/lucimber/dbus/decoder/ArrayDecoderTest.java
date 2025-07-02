@@ -54,7 +54,7 @@ final class ArrayDecoderTest {
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeMessageHeader(ByteOrder byteOrder) {
     ByteBuffer buffer = allocateAligned(56, byteOrder);
-    buffer.putInt( 52);
+    buffer.putInt(52);
     buffer.put(new byte[4]); // struct padding
 
     // Struct 1 (y -> length=4, v -> "s" + "string")
@@ -63,7 +63,7 @@ final class ArrayDecoderTest {
     buffer.put((byte) 's');
     buffer.put((byte) 0);
     byte[] s1 = "io.lucimber.Error.UnitTest".getBytes(StandardCharsets.UTF_8);
-    buffer.putInt( s1.length);
+    buffer.putInt(s1.length);
     buffer.put(s1);
     buffer.put((byte) 0);
 
@@ -114,7 +114,7 @@ final class ArrayDecoderTest {
     buffer.putInt(0);
     buffer.putDouble(1.0);
     buffer.putDouble(2.0);
-    buffer.putDouble( 3.0);
+    buffer.putDouble(3.0);
     buffer.flip();
     ArrayDecoder<DBusDouble> decoder = new ArrayDecoder<>(signature);
     DecoderResult<DBusArray<DBusDouble>> result = decoder.decode(buffer, 0);
@@ -130,11 +130,11 @@ final class ArrayDecoderTest {
     ByteBuffer buffer = allocateAligned(96, byteOrder);
     buffer.putInt(92);
     for (int i = 0; i < 3; i++) {
-      buffer.putInt( 24);
+      buffer.putInt(24);
       if (i > 0) buffer.put(new byte[4]);
-      buffer.putDouble( 1.0);
-      buffer.putDouble( 2.0);
-      buffer.putDouble( 3.0);
+      buffer.putDouble(1.0);
+      buffer.putDouble(2.0);
+      buffer.putDouble(3.0);
     }
     buffer.flip();
     ArrayDecoder<DBusArray<DBusDouble>> decoder = new ArrayDecoder<>(signature);

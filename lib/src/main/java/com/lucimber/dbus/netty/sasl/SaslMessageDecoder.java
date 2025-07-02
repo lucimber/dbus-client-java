@@ -12,11 +12,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.DecoderException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Decoder: Accumulates ASCII bytes until CRLF, then maps to SaslMessage.
@@ -24,6 +23,19 @@ import java.util.List;
 public class SaslMessageDecoder extends ByteToMessageDecoder {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SaslMessageDecoder.class);
+
+  private static int findEndOfLine(ByteBuf buffer) {
+    LoggerUtils.trace(LOGGER, () -> "Finding end of line (CRLF) in buffer.");
+    final int start = buffer.readerIndex();
+    final int end = buffer.writerIndex();
+
+    for (int i = start; i < end - 1; i++) {
+      if (buffer.getByte(i) == '\r' && buffer.getByte(i + 1) == '\n') {
+        return i + 1; // return index of '\n'
+      }
+    }
+    return -1;
+  }
 
   @Override
   protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
@@ -41,19 +53,6 @@ public class SaslMessageDecoder extends ByteToMessageDecoder {
     lineBuf.release();
 
     out.add(mapToSaslMessage(line));
-  }
-
-  private static int findEndOfLine(ByteBuf buffer) {
-    LoggerUtils.trace(LOGGER, () -> "Finding end of line (CRLF) in buffer.");
-    final int start = buffer.readerIndex();
-    final int end = buffer.writerIndex();
-
-    for (int i = start; i < end - 1; i++) {
-      if (buffer.getByte(i) == '\r' && buffer.getByte(i + 1) == '\n') {
-        return i + 1; // return index of '\n'
-      }
-    }
-    return -1;
   }
 
   private SaslMessage mapToSaslMessage(String line) {

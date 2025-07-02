@@ -9,6 +9,7 @@ public class TestUtils {
   private TestUtils() {
     // Prevent instantiation
   }
+
   static Stream<Arguments> byteOrderProvider() {
     return Stream.of(
           Arguments.of(ByteOrder.BIG_ENDIAN),

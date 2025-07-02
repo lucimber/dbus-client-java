@@ -16,6 +16,7 @@ class AbstractOutboundHandlerTest {
 
   private static class TestOutboundHandler extends AbstractOutboundHandler {
     private final Logger logger = Mockito.mock(Logger.class);
+
     @Override
     Logger getLogger() {
       return logger;

@@ -12,7 +12,11 @@ import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
 import com.lucimber.dbus.type.UInt32;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollDomainSocketChannel;
 import io.netty.channel.epoll.EpollIoHandler;
@@ -24,14 +28,17 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.channel.unix.DomainSocketAddress;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.Promise;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Objects;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class NettyConnection implements Connection {
 
@@ -39,13 +46,11 @@ public final class NettyConnection implements Connection {
 
   private final EventLoopGroup workerGroup;
   private final ExecutorService applicationTaskExecutor;
-  private Channel channel;
-  private AppLogicHandler appLogicHandler;
-
   private final SocketAddress serverAddress;
   private final Class<? extends Channel> channelClass;
-
   private final Pipeline pipeline;
+  private Channel channel;
+  private AppLogicHandler appLogicHandler;
 
   public NettyConnection(SocketAddress serverAddress) {
     this.serverAddress = Objects.requireNonNull(serverAddress, "serverAddress must not be NULL");
@@ -59,8 +64,8 @@ public final class NettyConnection implements Connection {
         this.channelClass = KQueueDomainSocketChannel.class;
         LOGGER.info("Using KQueue transport for Unix Domain Socket.");
       } else {
-        throw new UnsupportedOperationException("Unix Domain Sockets require Epoll (Linux)" +
-              " or KQueue (macOS) native transport, but neither is available.");
+        throw new UnsupportedOperationException("Unix Domain Sockets require Epoll (Linux) "
+                + "or KQueue (macOS) native transport, but neither is available.");
       }
     } else if (serverAddress instanceof InetSocketAddress) {
       this.workerGroup = new MultiThreadIoEventLoopGroup(1, NioIoHandler.newFactory());
@@ -73,12 +78,12 @@ public final class NettyConnection implements Connection {
     this.pipeline = new DefaultPipeline(this);
 
     this.applicationTaskExecutor = Executors.newFixedThreadPool(
-          Math.max(2, Runtime.getRuntime().availableProcessors() / 2),
-          runnable -> {
-            Thread t = new Thread(runnable, "dbus-app-worker-" + System.identityHashCode(runnable));
-            t.setDaemon(true);
-            return t;
-          });
+            Math.max(2, Runtime.getRuntime().availableProcessors() / 2),
+            runnable -> {
+              Thread t = new Thread(runnable, "dbus-app-worker-" + System.identityHashCode(runnable));
+              t.setDaemon(true);
+              return t;
+            });
   }
 
   /**
@@ -133,8 +138,11 @@ public final class NettyConnection implements Connection {
         for (String param : params) {
           String[] kv = param.split("=");
           if (kv.length == 2) {
-            if ("host".equals(kv[0])) host = kv[1];
-            else if ("port".equals(kv[0])) port = Integer.parseInt(kv[1]);
+            if ("host".equals(kv[0])) {
+              host = kv[1];
+            } else if ("port".equals(kv[0])) {
+              port = Integer.parseInt(kv[1]);
+            }
           }
         }
         if (host != null && port != -1) {
@@ -144,8 +152,9 @@ public final class NettyConnection implements Connection {
         throw new IllegalArgumentException("Could not parse TCP DBUS_SESSION_BUS_ADDRESS: " + address, e);
       }
     }
-    throw new IllegalArgumentException("Unsupported DBUS_SESSION_BUS_ADDRESS format: " + address +
-          ". Only simple 'unix:path=' or 'tcp:host=...,port=...' currently supported.");
+    throw new IllegalArgumentException("Unsupported DBUS_SESSION_BUS_ADDRESS format: "
+            + address
+            + ". Only simple 'unix:path=' or 'tcp:host=...,port=...' currently supported.");
   }
 
   @Override
@@ -189,8 +198,9 @@ public final class NettyConnection implements Connection {
 
   @Override
   public boolean isConnected() {
-    return channel != null && channel.isActive() &&
-          channel.attr(DBusChannelAttribute.ASSIGNED_BUS_NAME).get() != null;
+    return channel != null
+            && channel.isActive()
+            && channel.attr(DBusChannelAttribute.ASSIGNED_BUS_NAME).get() != null;
   }
 
   @Override
