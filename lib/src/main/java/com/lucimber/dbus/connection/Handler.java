@@ -5,93 +5,54 @@
 
 package com.lucimber.dbus.connection;
 
-import com.lucimber.dbus.message.InboundMessage;
-import com.lucimber.dbus.message.OutboundMessage;
-
 /**
- * A handler is assigned to a pipeline and reacts to events that arise within this pipeline.
- *
- * @see Pipeline
- * @see HandlerContext
+ * A handler that can be attached to a {@link Pipeline} to intercept and respond to
+ * connection state changes and user-defined events.
+ * <p>
+ * Implementations of this interface are notified about lifecycle events and can perform
+ * processing based on their role in the pipeline.
  */
 public interface Handler {
 
   /**
-   * Processes the activation of the D-Bus connection
-   * or forwards it to the next receiver on the {@link Pipeline}.
-   * Gets called after the connection was established and the SASL authentication was successful
-   * and the mandatory D-Bus name has been acquired.
+   * Invoked when the connection associated with this context becomes active.
    *
-   * @param ctx the {@link HandlerContext} of this {@link Handler}
+   * @param ctx the {@link Context} this handler is bound to.
    */
-  default void onConnectionActive(HandlerContext ctx) {
-    ctx.passConnectionActiveEvent();
-  }
+  void onConnectionActive(Context ctx);
 
   /**
-   * Processes the inactivation of the D-Bus connection
-   * or forwards it to the next receiver on the {@link Pipeline}.
-   * Gets called after the connection was closed.
+   * Invoked when the connection associated with this context becomes inactive.
    *
-   * @param ctx the {@link HandlerContext} of this {@link Handler}
+   * @param ctx the {@link Context} this handler is bound to.
    */
-  default void onConnectionInactive(HandlerContext ctx) {
-    ctx.passConnectionInactiveEvent();
-  }
+  void onConnectionInactive(Context ctx);
 
   /**
-   * Processes an inbound message or propagates the message further up the pipeline,
-   * eventually reaching the last handler.
+   * Invoked when this handler is added to the pipeline.
+   * <p>
+   * This is typically the first lifecycle method called for a handler.
    *
-   * @param ctx the {@link HandlerContext} of this {@link Handler}
-   * @param msg the {@link InboundMessage}
-   * @throws Exception If an inbound message could not be processed correctly.
+   * @param ctx the {@link Context} this handler is bound to.
    */
-  default void onInboundMessage(HandlerContext ctx, InboundMessage msg) throws Exception {
-    ctx.passInboundMessage(msg);
-  }
+  void onHandlerAdded(Context ctx);
 
   /**
-   * Processes an outbound message or propagates the message further down the pipeline,
-   * eventually reaching the first handler.
+   * Invoked just before this handler is removed from the pipeline.
+   * <p>
+   * This allows the handler to perform any necessary cleanup.
    *
-   * @param ctx the {@link HandlerContext} of this {@link Handler}
-   * @param msg the {@link OutboundMessage}
-   * @throws Exception If an outbound message could not be processed correctly.
+   * @param ctx the {@link Context} this handler is bound to.
    */
-  default void onOutboundMessage(HandlerContext ctx, OutboundMessage msg) throws Exception {
-    ctx.passOutboundMessage(msg);
-  }
+  void onHandlerRemoved(Context ctx);
 
   /**
-   * Processes the user event or forwards it to the next receiver on the {@link Pipeline}.
+   * Invoked when a user-defined event is propagated through the pipeline.
+   * <p>
+   * Handlers can choose to react to or forward the event, depending on their logic.
    *
-   * @param ctx   the {@link HandlerContext} of this {@link Handler}
-   * @param event the user event
+   * @param ctx the {@link Context} this handler is bound to.
+   * @param evt the user-defined event to handle.
    */
-  default void onUserEvent(HandlerContext ctx, Object event) {
-    ctx.passUserEvent(event);
-  }
-
-  /**
-   * Processes the cause of an inbound failure or propagates the cause further up the pipeline,
-   * eventually reaching the last handler.
-   *
-   * @param ctx   the {@link HandlerContext} of this {@link Handler}
-   * @param cause the cause of the failure
-   */
-  default void onInboundFailure(HandlerContext ctx, Throwable cause) {
-    ctx.passInboundFailure(cause);
-  }
-
-  /**
-   * Processes the cause of an outbound failure or propagates the cause further up the pipeline,
-   * eventually reaching the last handler.
-   *
-   * @param ctx   the {@link HandlerContext} of this {@link Handler}
-   * @param cause the cause of the failure
-   */
-  default void onOutboundFailure(HandlerContext ctx, Throwable cause) {
-    ctx.passOutboundFailure(cause);
-  }
+  void handleUserEvent(Context ctx, Object evt);
 }

@@ -1,59 +1,46 @@
 /*
- * Copyright 2023 Lucimber UG
- * Subject to the Apache License 2.0
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.lucimber.dbus.connection;
 
 /**
- * In object-oriented design, the chain-of-responsibility pattern is a design pattern
- * consisting of a source of command objects and a series of processing objects.
- * Each processing object contains logic that defines the types of command objects that it can handle;
- * the rest are passed to the next processing object in the chain.
- * A mechanism also exists for adding new processing objects to the end of this chain.
+ * Represents an ordered chain of {@link Handler} instances associated with a {@link Connection}.
+ * <p>
+ * A {@code Pipeline} manages the flow of inbound and outbound events through the handler chain.
+ * Handlers can be dynamically added or removed, and events can be propagated through the pipeline.
  *
- * @see <a href="https://en.wikipedia.org/wiki/Chain-of-responsibility_pattern">Chain-of-responsibility pattern</a>
+ * @see Handler
+ * @see Connection
+ * @see InboundPropagator
+ * @see OutboundPropagator
  */
-public interface Pipeline extends InboundMessageInvoker, OutboundMessageInvoker,
-        ConnectionEventMediator, UserEventMediator {
+public interface Pipeline extends InboundPropagator, OutboundPropagator {
 
   /**
-   * Adds a handler in front of another handler to this pipeline.
+   * Appends a new {@link Handler} to the end of the pipeline.
    *
-   * @param nameOther the name of the other {@link Handler}
-   * @param name      the, unique to this pipeline, name of the {@link Handler}
-   * @param handler   the {@link Handler}
+   * @param name    a unique name used to identify the handler within the pipeline.
+   * @param handler the {@link Handler} instance to add.
+   * @return this {@code Pipeline} instance for method chaining.
+   * @throws IllegalArgumentException if a handler with the specified name already exists.
    */
-  void addBefore(String nameOther, String name, Handler handler);
+  Pipeline addLast(String name, Handler handler);
 
   /**
-   * Adds a handler to the end of this pipeline.
+   * Retrieves the {@link Connection} that this pipeline is bound to.
    *
-   * @param name    the, unique to this chain, name of the {@link Handler}
-   * @param handler the {@link Handler}
-   */
-  void addLast(String name, Handler handler);
-
-  /**
-   * Returns the connection that this pipeline is attached to.
-   *
-   * @return the {@link Connection}
+   * @return the associated {@link Connection} instance.
    */
   Connection getConnection();
 
   /**
-   * Removes a handler from this pipeline.
+   * Removes the {@link Handler} with the specified name from the pipeline.
    *
-   * @param name the, unique to this pipeline, name of the {@link Handler}
+   * @param name the unique name of the handler to remove.
+   * @return this {@code Pipeline} instance for method chaining.
+   * @throws IllegalArgumentException if no handler with the specified name exists in the pipeline.
    */
-  void remove(String name);
-
-  /**
-   * Replaces a handler with another handler on this pipeline.
-   *
-   * @param oldName the name of the old {@link Handler}
-   * @param newName the name of the new {@link Handler}
-   * @param handler the new {@link Handler}
-   */
-  void replace(String oldName, String newName, Handler handler);
+  Pipeline remove(String name);
 }

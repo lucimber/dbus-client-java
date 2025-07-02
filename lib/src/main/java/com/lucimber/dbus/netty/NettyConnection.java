@@ -6,9 +6,8 @@
 package com.lucimber.dbus.netty;
 
 import com.lucimber.dbus.connection.Connection;
+import com.lucimber.dbus.connection.DefaultPipeline;
 import com.lucimber.dbus.connection.Pipeline;
-import com.lucimber.dbus.connection.PipelineFactory;
-import com.lucimber.dbus.connection.impl.DefaultPipelineFactory;
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
 import com.lucimber.dbus.type.UInt32;
@@ -30,13 +29,12 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class NettyConnection implements Connection {
+public final class NettyConnection implements Connection {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(NettyConnection.class);
 
   private final EventLoopGroup workerGroup;
@@ -46,11 +44,11 @@ public class NettyConnection implements Connection {
 
   private final SocketAddress serverAddress;
   private final Class<? extends Channel> channelClass;
+
   private final Pipeline pipeline;
 
-
-  public NettyConnection(SocketAddress serverAddress, PipelineFactory pipelineFactory) {
-    this.serverAddress = serverAddress;
+  public NettyConnection(SocketAddress serverAddress) {
+    this.serverAddress = Objects.requireNonNull(serverAddress, "serverAddress must not be NULL");
     if (serverAddress instanceof DomainSocketAddress) {
       if (Epoll.isAvailable()) {
         this.workerGroup = new MultiThreadIoEventLoopGroup(1, EpollIoHandler.newFactory());
@@ -72,7 +70,7 @@ public class NettyConnection implements Connection {
       throw new IllegalArgumentException("Unsupported server address type: " + serverAddress.getClass());
     }
 
-    pipeline = pipelineFactory.create(this);
+    this.pipeline = new DefaultPipeline(this);
 
     this.applicationTaskExecutor = Executors.newFixedThreadPool(
           Math.max(2, Runtime.getRuntime().availableProcessors() / 2),
@@ -101,7 +99,7 @@ public class NettyConnection implements Connection {
       // Handle other address formats if necessary (e.g., abstract sockets, tcp)
       LOGGER.warn("DBUS_SYSTEM_BUS_ADDRESS format not fully parsed, using raw value: {}", path);
     }
-    return new NettyConnection(new DomainSocketAddress(path), new DefaultPipelineFactory());
+    return new NettyConnection(new DomainSocketAddress(path));
   }
 
   /**
@@ -125,7 +123,7 @@ public class NettyConnection implements Connection {
       if (commaIndex != -1) {
         path = path.substring(0, commaIndex);
       }
-      return new NettyConnection(new DomainSocketAddress(path), new DefaultPipelineFactory());
+      return new NettyConnection(new DomainSocketAddress(path));
     } else if (address.startsWith("tcp:host=")) {
       // Example: tcp:host=localhost,port=12345 or tcp:host=127.0.0.1,port=12345,family=ipv4
       try {
@@ -140,7 +138,7 @@ public class NettyConnection implements Connection {
           }
         }
         if (host != null && port != -1) {
-          return new NettyConnection(new InetSocketAddress(host, port), new DefaultPipelineFactory());
+          return new NettyConnection(new InetSocketAddress(host, port));
         }
       } catch (Exception e) {
         throw new IllegalArgumentException("Could not parse TCP DBUS_SESSION_BUS_ADDRESS: " + address, e);
@@ -240,13 +238,51 @@ public class NettyConnection implements Connection {
   }
 
   @Override
-  public CompletionStage<InboundMessage> sendMessage(OutboundMessage message) {
+  public CompletionStage<InboundMessage> sendRequest(OutboundMessage msg) {
     if (appLogicHandler == null || !isConnected()) {
       Promise<InboundMessage> failedPromise = workerGroup.next().newPromise();
-      failedPromise.setFailure(new IllegalStateException("Not connected to D-Bus."));
+      var re = new IllegalStateException("Not connected to D-Bus.");
+      failedPromise.setFailure(re);
       return NettyFutureConverter.toCompletionStage(failedPromise);
+    } else {
+      CompletableFuture<InboundMessage> returnFuture = new CompletableFuture<>();
+
+      appLogicHandler.writeMessage(msg).addListener(outerFuture -> {
+        if (!outerFuture.isSuccess()) {
+          returnFuture.completeExceptionally(outerFuture.cause());
+          return;
+        }
+
+        @SuppressWarnings("unchecked")
+        Future<InboundMessage> innerFuture = (Future<InboundMessage>) outerFuture.getNow();
+        innerFuture.addListener(inner -> {
+          if (inner.isSuccess()) {
+            returnFuture.complete((InboundMessage) inner.getNow());
+          } else {
+            returnFuture.completeExceptionally(inner.cause());
+          }
+        });
+      });
+
+      return returnFuture;
     }
-    Future<InboundMessage> future = appLogicHandler.sendMessage(message);
-    return NettyFutureConverter.toCompletionStage(future);
+  }
+
+  @Override
+  public void sendAndRouteResponse(OutboundMessage msg, CompletableFuture<Void> future) {
+    if (appLogicHandler == null || !isConnected()) {
+      var re = new IllegalStateException("Not connected to D-Bus.");
+      future.completeExceptionally(re);
+    } else {
+      appLogicHandler.writeAndRouteResponse(msg).addListener(f -> {
+        if (f.isSuccess()) {
+          future.complete(null);
+        } else if (f.cause() != null) {
+          future.completeExceptionally(f.cause());
+        } else if (f.isCancelled()) {
+          future.cancel(true);
+        }
+      });
+    }
   }
 }
