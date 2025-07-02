@@ -13,11 +13,10 @@ import org.slf4j.Logger;
 class AbstractInboundHandlerTest {
 
   private static class TestInboundHandler extends AbstractInboundHandler {
-    private final Logger logger = Mockito.mock(Logger.class);
 
     @Override
     Logger getLogger() {
-      return logger;
+      return Mockito.mock(Logger.class);
     }
   }
 

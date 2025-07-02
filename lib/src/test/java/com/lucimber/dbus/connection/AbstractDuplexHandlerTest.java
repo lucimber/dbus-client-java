@@ -16,11 +16,9 @@ import java.util.concurrent.CompletableFuture;
 class AbstractDuplexHandlerTest {
 
   private static class TestDuplexHandler extends AbstractDuplexHandler {
-    private final Logger logger = Mockito.mock(Logger.class);
-
     @Override
     Logger getLogger() {
-      return logger;
+      return  Mockito.mock(Logger.class);
     }
   }
 

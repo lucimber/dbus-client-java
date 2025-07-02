@@ -15,11 +15,10 @@ import java.util.concurrent.CompletableFuture;
 class AbstractOutboundHandlerTest {
 
   private static class TestOutboundHandler extends AbstractOutboundHandler {
-    private final Logger logger = Mockito.mock(Logger.class);
 
     @Override
     Logger getLogger() {
-      return logger;
+      return Mockito.mock(Logger.class);
     }
   }
 
