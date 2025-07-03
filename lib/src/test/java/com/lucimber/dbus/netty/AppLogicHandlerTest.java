@@ -37,16 +37,14 @@ class AppLogicHandlerTest {
 
   @Test
   void testSendMessageWithoutReply() {
-    OutboundMethodCall msg = new OutboundMethodCall(
-          UInt32.valueOf(1),
-          ObjectPath.valueOf("/object"),
-          DBusString.valueOf("Ping"),
-          false,
-          DBusString.valueOf("some.destination"),
-          DBusString.valueOf("org.example.Interface"),
-          null,
-          null
-    );
+    OutboundMethodCall msg = OutboundMethodCall.Builder
+            .create()
+            .withSerial(UInt32.valueOf(1))
+            .withPath(ObjectPath.valueOf("/object"))
+            .withMember(DBusString.valueOf("Ping"))
+            .withDestination(DBusString.valueOf("some.destination"))
+            .withInterface(DBusString.valueOf("org.example.Interface"))
+            .build();
 
     var outerFuture = handler.writeMessage(msg);
 
@@ -64,16 +62,15 @@ class AppLogicHandlerTest {
   void testSendMessageWithReplyAndReceiveReturn() {
     UInt32 serial = UInt32.valueOf(101);
     DBusString dst = DBusString.valueOf("some.dst");
-    OutboundMethodCall msg = new OutboundMethodCall(
-          serial,
-          ObjectPath.valueOf("/service"),
-          DBusString.valueOf("Echo"),
-          true,
-          dst,
-          DBusString.valueOf("org.example"),
-          null,
-          null
-    );
+    OutboundMethodCall msg = OutboundMethodCall.Builder
+            .create()
+            .withSerial(serial)
+            .withPath(ObjectPath.valueOf("/service"))
+            .withMember(DBusString.valueOf("Echo"))
+            .withReplyExpected(true)
+            .withDestination(dst)
+            .withInterface(DBusString.valueOf("org.example"))
+            .build();
 
     var future = handler.writeMessage(msg);
 
@@ -96,16 +93,15 @@ class AppLogicHandlerTest {
   void testSendMessageWithReplyAndReceiveError() {
     UInt32 serial = UInt32.valueOf(202);
     DBusString dst = DBusString.valueOf("some.destination");
-    OutboundMethodCall msg = new OutboundMethodCall(
-          serial,
-          ObjectPath.valueOf("/error"),
-          DBusString.valueOf("Fail"),
-          true,
-          dst,
-          DBusString.valueOf("org.example"),
-          null,
-          null
-    );
+    OutboundMethodCall msg = OutboundMethodCall.Builder
+            .create()
+            .withSerial(serial)
+            .withPath(ObjectPath.valueOf("/error"))
+            .withMember(DBusString.valueOf("Fail"))
+            .withReplyExpected(true)
+            .withDestination(dst)
+            .withInterface(DBusString.valueOf("org.example"))
+            .build();
 
     var future = handler.writeMessage(msg);
     channel.flushOutbound();
@@ -154,16 +150,15 @@ class AppLogicHandlerTest {
 
   @Test
   void testChannelInactiveFailsAllPending() {
-    OutboundMethodCall msg = new OutboundMethodCall(
-          UInt32.valueOf(99),
-          ObjectPath.valueOf("/fail"),
-          DBusString.valueOf("Call"),
-          true,
-          DBusString.valueOf("some.test.destination"),
-          DBusString.valueOf("org.test"),
-          null,
-          null
-    );
+    OutboundMethodCall msg = OutboundMethodCall.Builder
+            .create()
+            .withSerial(UInt32.valueOf(99))
+            .withPath(ObjectPath.valueOf("/fail"))
+            .withMember(DBusString.valueOf("Call"))
+            .withReplyExpected(true)
+            .withDestination(DBusString.valueOf("some.test.destination"))
+            .withInterface(DBusString.valueOf("org.test"))
+            .build();
 
     var future = handler.writeMessage(msg);
     channel.close();

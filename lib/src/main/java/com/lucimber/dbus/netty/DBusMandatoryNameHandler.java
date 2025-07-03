@@ -54,16 +54,15 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
       // D-Bus serial numbers are 32-bit unsigned and allowed to wrap around
       helloCallSerial = UInt32.valueOf((int) serialCounter.getAndIncrement());
 
-      OutboundMethodCall helloCall = new OutboundMethodCall(
-              helloCallSerial,
-              DBUS_OBJECT_PATH,
-              HELLO_METHOD_NAME,
-              true, // replyExpected
-              DBUS_SERVICE_NAME, // destination
-              DBUS_INTERFACE_NAME, // interface
-              null, // signature (Hello takes no args)
-              null  // payload (Hello takes no args)
-      );
+      OutboundMethodCall helloCall = OutboundMethodCall.Builder
+              .create()
+              .withSerial(helloCallSerial)
+              .withPath(DBUS_OBJECT_PATH)
+              .withMember(HELLO_METHOD_NAME)
+              .withReplyExpected(true)
+              .withDestination(DBUS_SERVICE_NAME)
+              .withInterface(DBUS_INTERFACE_NAME)
+              .build();
 
       ctx.writeAndFlush(helloCall).addListener(future -> {
         if (future.isSuccess()) {

@@ -29,14 +29,22 @@ final class OutboundMethodCallHandlerTest {
     UInt32 serial = UInt32.valueOf(1);
     ObjectPath path = ObjectPath.valueOf("/unit_test");
     DBusString member = DBusString.valueOf("UnitTest");
-    boolean replyExpected = false;
+    boolean replyExpected = true;
     DBusString dst = DBusString.valueOf("io.lucimber.test.destination");
     DBusString iface = DBusString.valueOf("io.lucimber.test");
     Signature sig = Signature.valueOf("s");
     List<DBusType> payload = new ArrayList<>();
     payload.add(DBusString.valueOf("testArg"));
-    OutboundMethodCall methodCall = new OutboundMethodCall(serial, path, member, replyExpected,
-          dst, iface, sig, payload);
+    OutboundMethodCall methodCall = OutboundMethodCall.Builder
+            .create()
+            .withSerial(serial)
+            .withPath(path)
+            .withMember(member)
+            .withReplyExpected(replyExpected)
+            .withDestination(dst)
+            .withInterface(iface)
+            .withBody(sig, payload)
+            .build();
 
     assertTrue(channel.writeOutbound(methodCall));
     assertTrue(channel.finish());
@@ -61,13 +69,16 @@ final class OutboundMethodCallHandlerTest {
     ObjectPath path = ObjectPath.valueOf("/org/freedesktop/DBus");
 
     DBusString member = DBusString.valueOf("Hello");
-    boolean replyExpected = false;
     DBusString dst = DBusString.valueOf("org.freedesktop.DBus");
     DBusString iface = DBusString.valueOf("org.freedesktop.DBus");
-    Signature sig = null;
-    List<DBusType> payload = null;
-    OutboundMethodCall methodCall = new OutboundMethodCall(serial, path, member, replyExpected,
-          dst, iface, sig, payload);
+    OutboundMethodCall methodCall = OutboundMethodCall.Builder
+            .create()
+            .withSerial(serial)
+            .withPath(path)
+            .withMember(member)
+            .withDestination(dst)
+            .withInterface(iface)
+            .build();
 
     assertTrue(channel.writeOutbound(methodCall));
     assertTrue(channel.finish());

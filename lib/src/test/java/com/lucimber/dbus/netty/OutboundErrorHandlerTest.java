@@ -33,9 +33,13 @@ final class OutboundErrorHandlerTest {
     UInt32 replySerial = UInt32.valueOf(1);
     DBusString errorName = DBusString.valueOf("io.lucimber.Error.TestError");
     DBusString dst = DBusString.valueOf("io.lucimber.test.destination");
-    Signature sig = null;
-    List<DBusType> payload = null;
-    OutboundError error = new OutboundError(serial, replySerial, errorName, dst, sig, payload);
+    OutboundError error = OutboundError.Builder
+            .create()
+            .withSerial(serial)
+            .withReplySerial(replySerial)
+            .withErrorName(errorName)
+            .withDestination(dst)
+            .build();
 
     assertTrue(channel.writeOutbound(error));
     assertTrue(channel.finish());
@@ -62,7 +66,14 @@ final class OutboundErrorHandlerTest {
     Signature sig = Signature.valueOf("s");
     List<DBusType> payload = new ArrayList<>();
     payload.add(DBusString.valueOf("Test error message."));
-    OutboundError error = new OutboundError(serial, replySerial, errorName, dst, sig, payload);
+    OutboundError error = OutboundError.Builder
+            .create()
+            .withSerial(serial)
+            .withReplySerial(replySerial)
+            .withErrorName(errorName)
+            .withDestination(dst)
+            .withBody(sig, payload)
+            .build();
 
     assertTrue(channel.writeOutbound(error));
     assertTrue(channel.finish());

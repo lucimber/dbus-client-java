@@ -263,13 +263,18 @@ public class AppLogicHandler extends ChannelDuplexHandler {
 
     AtomicLong serialCounter = ctx.channel().attr(DBusChannelAttribute.SERIAL_COUNTER).get();
     UInt32 replyErrorSerial = UInt32.valueOf((int) serialCounter.getAndIncrement());
-    DBusString errorNameStr = DBusString.valueOf(errorName);
-    List<DBusType> payload = List.of(DBusString.valueOf(errorMessage)); // Error message is often first arg
     Signature signature = Signature.valueOf("s");
+    List<DBusType> payload = List.of(DBusString.valueOf(errorMessage));
 
-    // Destination for the error reply is the sender of the original request
-    OutboundError errorReply = new OutboundError(replyErrorSerial, request.getSerial(), errorNameStr,
-            request.getSender(), signature, payload);
+    OutboundError errorReply = OutboundError.Builder
+            .create()
+            .withSerial(replyErrorSerial)
+            .withReplySerial(request.getSerial())
+            .withErrorName(DBusString.valueOf(errorName))
+            .withDestination(request.getSender())
+            .withBody(signature, payload)
+            .build();
+
     ctx.writeAndFlush(errorReply).addListener(future -> {
       if (!future.isSuccess()) {
         LOGGER.error("Failed to send error reply for request serial {}", request.getSerial(), future.cause());

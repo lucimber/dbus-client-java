@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Lucimber UG
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -21,23 +21,6 @@ import java.util.Optional;
 public final class OutboundSignal extends AbstractSignal implements OutboundMessage {
 
   private final DBusString dst;
-
-  /**
-   * Constructs a new instance with mandatory parameter.
-   *
-   * @param serial the serial number
-   * @param path   the object path
-   * @param iface  the name of the interface
-   * @param member the name of this signal
-   */
-  public OutboundSignal(
-          UInt32 serial,
-          ObjectPath path,
-          DBusString iface,
-          DBusString member) {
-    super(serial, path, iface, member);
-    this.dst = null;
-  }
 
   /**
    * Constructs a new instance with all parameter.
@@ -73,5 +56,95 @@ public final class OutboundSignal extends AbstractSignal implements OutboundMess
     var dst = getDestination().map(DBusString::toString).orElse("");
     var sig = getSignature().map(Signature::toString).orElse("");
     return String.format(s, dst, getSerial(), getObjectPath(), getInterfaceName(), getMember(), sig);
+  }
+
+  public static class Builder {
+    private UInt32 serial;
+    private ObjectPath path;
+    private DBusString iface;
+    private DBusString member;
+    private DBusString dst;
+    private Signature signature;
+    private List<? extends DBusType> payload;
+
+    private Builder() {
+    }
+
+    public static Builder create() {
+      return new Builder();
+    }
+
+    public Builder withSerial(UInt32 serial) {
+      this.serial = serial;
+      return this;
+    }
+
+    public Builder withObjectPath(ObjectPath path) {
+      this.path = path;
+      return this;
+    }
+
+    public Builder withInterface(DBusString iface) {
+      this.iface = iface;
+      return this;
+    }
+
+    public Builder withMember(DBusString member) {
+      this.member = member;
+      return this;
+    }
+
+    public Builder withDestination(DBusString dst) {
+      this.dst = dst;
+      return this;
+    }
+
+    public Builder withBody(Signature signature, List<? extends DBusType> payload) {
+      this.signature = signature;
+      this.payload = payload;
+      return this;
+    }
+
+    public OutboundSignal build() {
+      validate();
+      return new OutboundSignal(
+              serial,
+              path,
+              iface,
+              member,
+              dst,
+              signature,
+              payload
+      );
+    }
+
+    private void validate() {
+      if (serial == null) {
+        throw new InvalidMessageException("Serial must not be null.");
+      }
+      if (path == null) {
+        throw new InvalidMessageException("Object path must not be null.");
+      }
+      if (iface == null) {
+        throw new InvalidMessageException("Interface name must not be null.");
+      } else if (iface.getDelegate().isBlank()) {
+        throw new InvalidMessageException("Interface name must not be blank.");
+      }
+      if (member == null) {
+        throw new InvalidMessageException("Member name must not be null.");
+      } else if (member.getDelegate().isBlank()) {
+        throw new InvalidMessageException("Member name must not be blank.");
+      }
+      if (dst != null && dst.getDelegate().isBlank()) {
+        throw new InvalidMessageException("Destination must not be blank.");
+      }
+      if (signature == null && payload != null) {
+        throw new InvalidMessageException("Payload is present, but signature is missing "
+                + "– both must be set together or left null.");
+      } else if (signature != null && payload == null) {
+        throw new InvalidMessageException("Signature is present, but payload is missing "
+                + "– both must be set together or left null.");
+      }
+    }
   }
 }

@@ -24,22 +24,6 @@ public final class OutboundError extends AbstractReply implements OutboundMessag
   private final DBusString errorName;
 
   /**
-   * Constructs a new instance with mandatory parameter.
-   *
-   * @param serial      the serial number
-   * @param replySerial the reply serial number
-   * @param errorName   the name of this error
-   */
-  public OutboundError(
-          UInt32 serial,
-          UInt32 replySerial,
-          DBusString errorName) {
-    super(serial, replySerial);
-    this.errorName = Objects.requireNonNull(errorName);
-    this.dst = null;
-  }
-
-  /**
    * Constructs a new instance with all parameter.
    *
    * @param serial      the serial number
@@ -81,5 +65,83 @@ public final class OutboundError extends AbstractReply implements OutboundMessag
     var mappedDst = getDestination().map(DBusString::toString).orElse("");
     var sig = getSignature().map(Signature::toString).orElse("");
     return String.format(s, mappedDst, getSerial(), getReplySerial(), getErrorName(), sig);
+  }
+
+  public static class Builder {
+    private UInt32 serial;
+    private UInt32 replySerial;
+    private DBusString errorName;
+    private DBusString destination;
+    private Signature signature;
+    private List<? extends DBusType> payload;
+
+    private Builder() {
+    }
+
+    public static Builder create() {
+      return new Builder();
+    }
+
+    public Builder withSerial(UInt32 serial) {
+      this.serial = serial;
+      return this;
+    }
+
+    public Builder withReplySerial(UInt32 replySerial) {
+      this.replySerial = replySerial;
+      return this;
+    }
+
+    public Builder withErrorName(DBusString errorName) {
+      this.errorName = errorName;
+      return this;
+    }
+
+    public Builder withDestination(DBusString destination) {
+      this.destination = destination;
+      return this;
+    }
+
+    public Builder withBody(Signature signature, List<? extends DBusType> payload) {
+      this.signature = signature;
+      this.payload = payload;
+      return this;
+    }
+
+    public OutboundError build() {
+      validate();
+      return new OutboundError(
+              serial,
+              replySerial,
+              errorName,
+              destination,
+              signature,
+              payload
+      );
+    }
+
+    private void validate() {
+      if (serial == null) {
+        throw new InvalidMessageException("Serial must not be null.");
+      }
+      if (replySerial == null) {
+        throw new InvalidMessageException("Reply serial must not be null.");
+      }
+      if (errorName == null) {
+        throw new InvalidMessageException("Error name must not be null.");
+      } else if (errorName.getDelegate().isBlank()) {
+        throw new InvalidMessageException("Error name must not be blank.");
+      }
+      if (destination != null && destination.getDelegate().isBlank()) {
+        throw new InvalidMessageException("Destination must not be blank.");
+      }
+      if (signature == null && payload != null) {
+        throw new InvalidMessageException("Payload is present, but signature is missing "
+                + "– both must be set together or left null.");
+      } else if (signature != null && payload == null) {
+        throw new InvalidMessageException("Signature is present, but payload is missing "
+                + "– both must be set together or left null.");
+      }
+    }
   }
 }

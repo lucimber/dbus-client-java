@@ -5,21 +5,17 @@
 
 package com.lucimber.dbus.netty;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.message.OutboundMethodReturn;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.UInt32;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 import java.nio.ByteOrder;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class OutboundMethodReturnHandlerTest {
 
@@ -31,9 +27,12 @@ final class OutboundMethodReturnHandlerTest {
     UInt32 serial = UInt32.valueOf(2);
     UInt32 replySerial = UInt32.valueOf(1);
     DBusString dst = DBusString.valueOf("io.lucimber.test.destination");
-    Signature sig = null;
-    List<DBusType> payload = null;
-    OutboundMethodReturn methodReturn = new OutboundMethodReturn(serial, replySerial, dst, sig, payload);
+    OutboundMethodReturn methodReturn = OutboundMethodReturn.Builder
+            .create()
+            .withSerial(serial)
+            .withReplySerial(replySerial)
+            .withDestination(dst)
+            .build();
 
     assertTrue(channel.writeOutbound(methodReturn));
     assertTrue(channel.finish());
