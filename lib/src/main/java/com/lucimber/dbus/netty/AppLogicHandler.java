@@ -10,15 +10,10 @@ import com.lucimber.dbus.connection.InboundHandler;
 import com.lucimber.dbus.connection.Pipeline;
 import com.lucimber.dbus.message.InboundError;
 import com.lucimber.dbus.message.InboundMessage;
-import com.lucimber.dbus.message.InboundMethodCall;
 import com.lucimber.dbus.message.InboundMethodReturn;
-import com.lucimber.dbus.message.InboundSignal;
-import com.lucimber.dbus.message.OutboundError;
 import com.lucimber.dbus.message.OutboundMessage;
 import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.UInt32;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFuture;
@@ -27,13 +22,9 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
 import java.nio.channels.ClosedChannelException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +36,6 @@ public class AppLogicHandler extends ChannelDuplexHandler {
   private static final Logger LOGGER = LoggerFactory.getLogger(AppLogicHandler.class);
 
   private final ConcurrentHashMap<UInt32, Promise<InboundMessage>> pendingMethodCalls;
-  private final ArrayList<UInt32> pendingRoutedMethodCalls;
-  private final ReentrantLock pendingRoutedMethodCallsLock;
   private final ExecutorService applicationTaskExecutor; // For offloading user code
   private final Connection connection;
   private ChannelHandlerContext ctx;
@@ -65,8 +54,6 @@ public class AppLogicHandler extends ChannelDuplexHandler {
             "ApplicationTaskExecutor cannot be null. Provide one for offloading user code.");
     this.connection = Objects.requireNonNull(connection, "connection must not be null");
     pendingMethodCalls = new ConcurrentHashMap<>();
-    pendingRoutedMethodCalls = new ArrayList<>();
-    pendingRoutedMethodCallsLock = new ReentrantLock();
   }
 
   @Override
@@ -177,17 +164,6 @@ public class AppLogicHandler extends ChannelDuplexHandler {
       return promise;
     }
 
-    if (msg instanceof OutboundMethodCall methodCall) {
-      if (methodCall.isReplyExpected()) {
-        pendingRoutedMethodCallsLock.lock();
-        try {
-          pendingRoutedMethodCalls.add(msg.getSerial());
-        } finally {
-          pendingRoutedMethodCallsLock.unlock();
-        }
-      }
-    }
-
     return write(msg);
   }
 
@@ -199,29 +175,23 @@ public class AppLogicHandler extends ChannelDuplexHandler {
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) {
     if (msg instanceof InboundMessage inboundMessage) {
-      handleInboundMessage(ctx, inboundMessage);
+      handleInboundMessage(inboundMessage);
     } else {
       LOGGER.warn("Received unhandled message type: {}", msg.getClass().getName());
       ctx.fireChannelRead(msg);
     }
   }
 
-  private void handleInboundMessage(ChannelHandlerContext ctx, InboundMessage msg) {
+  private void handleInboundMessage(InboundMessage msg) {
     if (msg instanceof InboundMethodReturn methodReturn) {
       handleInboundReply(methodReturn, methodReturn.getReplySerial());
     } else if (msg instanceof InboundError error) {
       handleInboundReply(error, error.getReplySerial());
-    } else if (msg instanceof InboundSignal signal) {
-      LOGGER.warn("Received InboundSignal. "
-              + "Client-side handling of signals not yet implemented: {}", signal);
-    } else if (msg instanceof InboundMethodCall methodCall) {
-      LOGGER.warn("Received InboundMethodCall. "
-              + "Client-side object exposure not yet implemented: {}", methodCall);
-      if (methodCall.isReplyExpected()) {
-        sendErrorReply(ctx, methodCall,
-                "org.freedesktop.DBus.Error.NotSupported",
-                "Method not supported by this client.");
-      }
+    } else {
+      // Propagate inbound message to the connection's pipeline
+      // so that it will be handled there.
+      LOGGER.debug("Propagating inbound message to the connection's pipeline.");
+      connection.getPipeline().propagateInboundMessage(msg);
     }
   }
 
@@ -232,54 +202,20 @@ public class AppLogicHandler extends ChannelDuplexHandler {
       LOGGER.debug("Received method return for serial {}: {}", replySerial, msg);
     }
 
+    // Intercept inbound message if it's a reply to a pending method call,
+    // initiated by the writeMessage method.
     Promise<InboundMessage> promise = pendingMethodCalls.remove(replySerial);
     if (promise != null) {
-      // Normal completion path for sendRequest()
       promise.setSuccess(msg);
       return;
     }
 
-    boolean replyIsExpected;
-    pendingRoutedMethodCallsLock.lock();
-    try {
-      replyIsExpected = pendingRoutedMethodCalls.remove(replySerial);
-    } finally {
-      pendingRoutedMethodCallsLock.unlock();
-    }
-
-    if (replyIsExpected) {
-      LOGGER.debug("Forwarding reply with serial {} to the pipeline.", replySerial);
-      connection.getPipeline().propagateInboundMessage(msg);
-    } else {
-      LOGGER.warn("Received unsolicited reply with replySerial: {}. Message: {}", replySerial, msg);
-    }
-  }
-
-  private void sendErrorReply(ChannelHandlerContext ctx, InboundMethodCall request,
-                              String errorName, String errorMessage) {
-    if (!request.isReplyExpected()) {
-      return;
-    }
-
-    AtomicLong serialCounter = ctx.channel().attr(DBusChannelAttribute.SERIAL_COUNTER).get();
-    UInt32 replyErrorSerial = UInt32.valueOf((int) serialCounter.getAndIncrement());
-    Signature signature = Signature.valueOf("s");
-    List<DBusType> payload = List.of(DBusString.valueOf(errorMessage));
-
-    OutboundError errorReply = OutboundError.Builder
-            .create()
-            .withSerial(replyErrorSerial)
-            .withReplySerial(request.getSerial())
-            .withErrorName(DBusString.valueOf(errorName))
-            .withDestination(request.getSender())
-            .withBody(signature, payload)
-            .build();
-
-    ctx.writeAndFlush(errorReply).addListener(future -> {
-      if (!future.isSuccess()) {
-        LOGGER.error("Failed to send error reply for request serial {}", request.getSerial(), future.cause());
-      }
-    });
+    // If the inbound message wasn't intercepted above,
+    // we propagate it to the connection's pipeline
+    // so that it will be handled there.
+    LOGGER.debug("Propagating inbound reply to the connection's pipeline,"
+            + " since it wasn't intercepted.");
+    connection.getPipeline().propagateInboundMessage(msg);
   }
 
   @Override

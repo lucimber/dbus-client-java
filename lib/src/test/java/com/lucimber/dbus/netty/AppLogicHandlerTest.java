@@ -125,30 +125,6 @@ class AppLogicHandlerTest {
   }
 
   @Test
-  void testInboundMethodCallGetsErrorResponse() {
-    UInt32 serial = UInt32.valueOf(55);
-    InboundMethodCall call = new InboundMethodCall(
-          serial,
-          DBusString.valueOf("some.sender"),
-          ObjectPath.valueOf("/unsupported"),
-          DBusString.valueOf("Nope"),
-          true,
-          DBusString.valueOf("org.example"),
-          null,
-          null
-    );
-
-    channel.writeInbound(call);
-    channel.runPendingTasks();
-
-    Object outbound = channel.readOutbound();
-    assertInstanceOf(OutboundError.class, outbound);
-    OutboundError err = (OutboundError) outbound;
-    assertEquals(serial, err.getReplySerial());
-    assertEquals("org.freedesktop.DBus.Error.NotSupported", err.getErrorName().getDelegate());
-  }
-
-  @Test
   void testChannelInactiveFailsAllPending() {
     OutboundMethodCall msg = OutboundMethodCall.Builder
             .create()
