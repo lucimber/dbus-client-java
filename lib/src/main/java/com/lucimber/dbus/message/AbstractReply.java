@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Lucimber UG
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -16,7 +16,7 @@ import java.util.Objects;
  *
  * @since 1.0
  */
-abstract class AbstractReply extends AbstractMessage implements Reply {
+abstract class AbstractReply extends AbstractMessage {
 
   private final UInt32 replySerial;
 
@@ -50,7 +50,11 @@ abstract class AbstractReply extends AbstractMessage implements Reply {
     this.replySerial = Objects.requireNonNull(replySerial);
   }
 
-  @Override
+  /**
+   * Gets the serial number of the message this message is a reply to.
+   *
+   * @return The serial number as an {@link UInt32}.
+   */
   public UInt32 getReplySerial() {
     return replySerial;
   }

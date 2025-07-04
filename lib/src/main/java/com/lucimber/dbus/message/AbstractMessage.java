@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Lucimber UG
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
  * SPDX-License-Identifier: Apache-2.0
  */
 

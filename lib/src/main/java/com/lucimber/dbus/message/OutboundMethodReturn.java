@@ -17,7 +17,7 @@ import java.util.Optional;
  *
  * @since 1.0
  */
-public final class OutboundMethodReturn extends AbstractReply implements OutboundMessage, Reply {
+public final class OutboundMethodReturn extends AbstractReply implements OutboundReply {
 
   private final DBusString dst;
 

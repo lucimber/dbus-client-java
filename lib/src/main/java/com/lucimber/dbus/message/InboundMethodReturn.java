@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Lucimber UG
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -17,7 +17,7 @@ import java.util.Objects;
  *
  * @since 1.0
  */
-public final class InboundMethodReturn extends AbstractReply implements InboundMessage, Reply {
+public final class InboundMethodReturn extends AbstractReply implements InboundReply {
 
   private final DBusString sender;
 

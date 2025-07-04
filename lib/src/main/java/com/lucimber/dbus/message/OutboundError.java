@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Lucimber UG
+ * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -18,7 +18,7 @@ import java.util.Optional;
  *
  * @since 1.0
  */
-public final class OutboundError extends AbstractReply implements OutboundMessage, Reply {
+public final class OutboundError extends AbstractReply implements OutboundReply {
 
   private final DBusString dst;
   private final DBusString errorName;
