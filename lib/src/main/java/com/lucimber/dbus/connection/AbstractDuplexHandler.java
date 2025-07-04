@@ -88,5 +88,5 @@ public abstract class AbstractDuplexHandler implements InboundHandler, OutboundH
    *
    * @return the logger
    */
-  abstract Logger getLogger();
+  protected abstract Logger getLogger();
 }

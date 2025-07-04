@@ -17,7 +17,7 @@ class AbstractDuplexHandlerTest {
 
   private static class TestDuplexHandler extends AbstractDuplexHandler {
     @Override
-    Logger getLogger() {
+    protected Logger getLogger() {
       return  Mockito.mock(Logger.class);
     }
   }

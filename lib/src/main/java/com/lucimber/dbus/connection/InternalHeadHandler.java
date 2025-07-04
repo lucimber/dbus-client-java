@@ -20,7 +20,7 @@ final class InternalHeadHandler extends AbstractDuplexHandler implements Inbound
   }
 
   @Override
-  Logger getLogger() {
+  protected Logger getLogger() {
     return LOGGER;
   }
 }

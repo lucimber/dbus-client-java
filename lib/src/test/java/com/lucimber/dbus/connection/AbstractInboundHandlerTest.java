@@ -15,7 +15,7 @@ class AbstractInboundHandlerTest {
   private static class TestInboundHandler extends AbstractInboundHandler {
 
     @Override
-    Logger getLogger() {
+    protected Logger getLogger() {
       return Mockito.mock(Logger.class);
     }
   }

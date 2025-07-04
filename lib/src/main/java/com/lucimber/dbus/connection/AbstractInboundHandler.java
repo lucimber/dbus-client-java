@@ -78,5 +78,5 @@ public abstract class AbstractInboundHandler implements InboundHandler {
    *
    * @return the logger
    */
-  abstract Logger getLogger();
+  protected abstract Logger getLogger();
 }

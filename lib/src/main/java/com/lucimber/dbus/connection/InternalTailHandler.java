@@ -25,7 +25,7 @@ final class InternalTailHandler extends AbstractDuplexHandler implements Inbound
   private static final DBusString NOT_HANDLED_ERROR = DBusString.valueOf("org.freedesktop.DBus.Error.Failed");
 
   @Override
-  Logger getLogger() {
+  protected Logger getLogger() {
     return LOGGER;
   }
 
