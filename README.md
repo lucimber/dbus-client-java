@@ -52,78 +52,103 @@ to compile and test the code.
 
 ### Bootstrap a connection
 ```
-String userId = "1000";
-String cookiePath = "~/.dbus-keyrings/";
-String socketPath = "/var/run/dbus/system_bus_socket";
-ConnectionFactory factory = new UnixSocketConnectionFactory(userId, cookiePath, socketPath);
-PipelineInitializer initializer = pipeline ->
-    pipeline.addLast(EXAMPLE_HANDLER, new ExampleHandler());
-CompletionStage<Connection> connStage = factory.create(initializer);
+Connection connection = NettyConnection.newSystemBusConnection();
+Pipeline pipeline = connection.getPipeline();
+pipeline.addLast("EXAMPLE_HANDLER", new ExampleHandler());
+CompletionStage<Void> connectStage = connection.connect();
 ```
 
-### Make a method call
+### Make a simple method call
+This method is intended for simple request-response interactions where no additional
+pipeline-based processing is needed.
 ```
-UInt32 serial = pipeline.getConnection().getNextSerial();
-DBusString destination = DBusString.valueOf("org.bluez");
-ObjectPath path = ObjectPath.valueOf("/");
-DBusString name = DBusString.valueOf("GetManagedObjects");
-OutboundMethodCall msg = new OutboundMethodCall(serial, destination, path, name);
-DBusString iface = DBusString.valueOf("org.freedesktop.DBus.ObjectManager");
-msg.setInterfaceName(iface);
-pipeline.passOutboundMessage(msg);
+UInt32 serial = connection.getNextSerial();
+OutboundMethodCall msg = OutboundMethodCall.Builder
+    .create()
+    .withSerial(serial)
+    .withPath(ObjectPath.valueOf("/"))
+    .withMember(DBusString.valueOf("GetManagedObjects"))
+    .withDestination(DBusString.valueOf("org.bluez"))
+    .withInterface(DBusString.valueOf("org.freedesktop.DBus.ObjectManager"))
+    .withReplyExpected(true)
+    .build();
+CompletionStage<InboundMessage> reply = connection.sendRequest(msg);
 ```
 
-### Example Handler (D-Bus Peer)
+### Example Handler (D-Bus Peer) for complex messaging
 In this example, the handler implements the `org.freedesktop.DBus.Peer` interface,
 in order to respond to a ping request and/or to a request to return the machine-id.
+This method is intended for scenarios where custom or advanced processing of responses is needed,
+while keeping message transmission efficient.
 ```java
-public final class DbusPeerHandler implements Handler {
+public final class DbusPeerHandler extends AbstractInboundHandler implements InboundHandler {
   private static final DBusString INTERFACE = DBusString.valueOf("org.freedesktop.DBus.Peer");
   private final UUID machineId;
 
-  public DbusPeerHandler(final UUID machineId) {
+  public DbusPeerHandler(UUID machineId) {
     this.machineId = Objects.requireNonNull(machineId);
   }
 
-  private static void respondToPing(final HandlerContext ctx, final InboundMethodCall methodCall) {
-    final DBusString destination = methodCall.getSender();
-    final UInt32 serial = ctx.getPipeline().getConnection().getNextSerial();
-    final UInt32 replySerial = methodCall.getSerial();
-    final OutboundMethodReturn methodReturn = new OutboundMethodReturn(destination, serial, replySerial);
-    ctx.passOutboundMessage(methodReturn);
+  private static void respondToPing(Context ctx, InboundMethodCall methodCall) {
+    OutboundMethodReturn methodReturn = OutboundMethodReturn.Builder
+            .create()
+            .withSerial(ctx.getConnection().getNextSerial())
+            .withReplySerial(methodCall.getSerial())
+            .withDestination(methodCall.getSender())
+            .build();
+    
+    CompletableFuture<Void> writeFuture = new CompletableFuture<>();
+    writeFuture.exceptionally(t -> {
+      System.err.println("Couldn't respond to ping: " + t);
+      return null;
+    });
+    
+    ctx.propagateOutboundMessage(methodReturn, writeFuture);
   }
 
-  private void handleInboundMethodCall(final HandlerContext ctx, final InboundMethodCall methodCall) {
+  private void handleInboundMethodCall(Context ctx, InboundMethodCall methodCall) {
     if (methodCall.getInterfaceName().orElse(DBusString.valueOf("")).equals(INTERFACE)) {
-      if (methodCall.getName().equals(DBusString.valueOf("Ping"))) {
+      DBusString methodName = methodCall.getMember();
+      if (methodName.equals(DBusString.valueOf("Ping"))) {
         respondToPing(ctx, methodCall);
-      } else if (methodCall.getName().equals(DBusString.valueOf("GetMachineId"))) {
+      } else if (methodName.equals(DBusString.valueOf("GetMachineId"))) {
         respondWithMachineId(ctx, methodCall);
       } else {
-        ctx.passInboundMessage(methodCall);
+        ctx.propagateInboundMessage(methodCall);
       }
     } else {
-      ctx.passInboundMessage(methodCall);
+      ctx.propagateInboundMessage(methodCall);
     }
   }
 
-  private void respondWithMachineId(final HandlerContext ctx, final InboundMethodCall methodCall) {
-    final DBusString destination = methodCall.getSender();
-    final UInt32 serial = ctx.getPipeline().getConnection().getNextSerial();
-    final UInt32 replySerial = methodCall.getSerial();
-    final OutboundMethodReturn methodReturn = new OutboundMethodReturn(destination, serial, replySerial);
-    final List<DBusType> payload = new ArrayList<>();
+  private void respondWithMachineId(Context ctx, InboundMethodCall methodCall) {
+    Signature sig = Signature.valueOf("s");
+    List<DBusType> payload = new ArrayList<>();
     payload.add(DBusString.valueOf(machineId.toString()));
-    methodReturn.setPayload(payload);
-    ctx.passOutboundMessage(methodReturn);
+    
+    OutboundMethodReturn methodReturn = OutboundMethodReturn.Builder
+            .create()
+            .withSerial(ctx.getConnection().getNextSerial())
+            .withReplySerial(methodCall.getSerial())
+            .withDestination(methodCall.getSender())
+            .withBody(sig, payload)
+            .build();
+
+    CompletableFuture<Void> writeFuture = new CompletableFuture<>();
+    writeFuture.exceptionally(t -> {
+      System.err.println("Couldn't respond with machine ID: " + t);
+      return null;
+    });
+    
+    ctx.propagateOutboundMessage(methodReturn, writeFuture);
   }
 
   @Override
-  public void onInboundMessage(final HandlerContext ctx, final InboundMessage msg) {
+  public void handleInboundMessage(Context ctx, InboundMessage msg) {
     if (msg instanceof InboundMethodCall) {
       handleInboundMethodCall(ctx, (InboundMethodCall) msg);
     } else {
-      ctx.passInboundMessage(msg);
+      ctx.propagateInboundMessage(msg);
     }
   }
 }
@@ -163,7 +188,7 @@ a Signed-off-by line to commit messages.
     Signed-off-by: Peter Peterson <pp@example.org>
 
 ## License
-Copyright 2021 Lucimber UG
+Copyright 2021-2025 Lucimber UG
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
