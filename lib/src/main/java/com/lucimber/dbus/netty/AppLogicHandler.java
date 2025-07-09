@@ -21,10 +21,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
+import io.netty.util.concurrent.ScheduledFuture;
 import java.nio.channels.ClosedChannelException;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +37,12 @@ import org.slf4j.LoggerFactory;
 public class AppLogicHandler extends ChannelDuplexHandler {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AppLogicHandler.class);
+  private static final long DEFAULT_METHOD_CALL_TIMEOUT_MS = 30_000; // 30 seconds
 
-  private final ConcurrentHashMap<UInt32, Promise<InboundMessage>> pendingMethodCalls;
+  private final ConcurrentHashMap<UInt32, PendingMethodCall> pendingMethodCalls;
   private final ExecutorService applicationTaskExecutor; // For offloading user code
   private final Connection connection;
+  private final long methodCallTimeoutMs;
   private ChannelHandlerContext ctx;
 
   /**
@@ -50,9 +55,25 @@ public class AppLogicHandler extends ChannelDuplexHandler {
    * @param connection              An active D-Bus connection.
    */
   public AppLogicHandler(ExecutorService applicationTaskExecutor, Connection connection) {
+    this(applicationTaskExecutor, connection, DEFAULT_METHOD_CALL_TIMEOUT_MS);
+  }
+
+  /**
+   * Creates a new instance with custom timeout.
+   *
+   * @param applicationTaskExecutor The executor service to run application-level callbacks
+   *                                (like signal handlers) on, to avoid blocking the Netty EventLoop.
+   *                                If null, a default will be attempted or tasks run on EventLoop
+   *                                (not recommended for blocking user code).
+   * @param connection              An active D-Bus connection.
+   * @param methodCallTimeoutMs     Timeout in milliseconds for method calls before they are considered stale
+   *                                and removed from pending calls map.
+   */
+  public AppLogicHandler(ExecutorService applicationTaskExecutor, Connection connection, long methodCallTimeoutMs) {
     this.applicationTaskExecutor = Objects.requireNonNull(applicationTaskExecutor,
             "ApplicationTaskExecutor cannot be null. Provide one for offloading user code.");
     this.connection = Objects.requireNonNull(connection, "connection must not be null");
+    this.methodCallTimeoutMs = methodCallTimeoutMs > 0 ? methodCallTimeoutMs : DEFAULT_METHOD_CALL_TIMEOUT_MS;
     pendingMethodCalls = new ConcurrentHashMap<>();
   }
 
@@ -112,7 +133,16 @@ public class AppLogicHandler extends ChannelDuplexHandler {
 
     if (msg instanceof OutboundMethodCall methodCall) {
       if (methodCall.isReplyExpected()) {
-        pendingMethodCalls.put(msg.getSerial(), replyPromise);
+        ScheduledFuture<?> timeoutFuture = ctx.executor().schedule(() -> {
+          PendingMethodCall pendingCall = pendingMethodCalls.remove(msg.getSerial());
+          if (pendingCall != null && !pendingCall.promise().isDone()) {
+            LOGGER.warn("Method call with serial {} timed out after {}ms", msg.getSerial(), methodCallTimeoutMs);
+            pendingCall.promise().tryFailure(new TimeoutException(
+                    "Method call with serial " + msg.getSerial() + " timed out after " + methodCallTimeoutMs + "ms"));
+          }
+        }, methodCallTimeoutMs, TimeUnit.MILLISECONDS);
+        
+        pendingMethodCalls.put(msg.getSerial(), new PendingMethodCall(replyPromise, timeoutFuture));
       } else {
         replyPromise.trySuccess(null);
       }
@@ -124,10 +154,10 @@ public class AppLogicHandler extends ChannelDuplexHandler {
       if (f.isSuccess()) {
         returnFuture.trySuccess(replyPromise);
       } else if (f.cause() != null) {
-        pendingMethodCalls.remove(msg.getSerial());
+        cancelPendingMethodCall(msg.getSerial());
         returnFuture.tryFailure(f.cause());
       } else if (f.isCancelled()) {
-        pendingMethodCalls.remove(msg.getSerial());
+        cancelPendingMethodCall(msg.getSerial());
         if (returnFuture.isCancellable()) {
           returnFuture.cancel(true);
         } else {
@@ -204,9 +234,10 @@ public class AppLogicHandler extends ChannelDuplexHandler {
 
     // Intercept inbound message if it's a reply to a pending method call,
     // initiated by the writeMessage method.
-    Promise<InboundMessage> promise = pendingMethodCalls.remove(replySerial);
-    if (promise != null) {
-      promise.setSuccess(msg);
+    PendingMethodCall pendingCall = pendingMethodCalls.remove(replySerial);
+    if (pendingCall != null) {
+      pendingCall.timeoutFuture().cancel(false);
+      pendingCall.promise().setSuccess(msg);
       return;
     }
 
@@ -233,12 +264,26 @@ public class AppLogicHandler extends ChannelDuplexHandler {
     super.channelInactive(ctx);
   }
 
+  private void cancelPendingMethodCall(UInt32 serial) {
+    PendingMethodCall pendingCall = pendingMethodCalls.remove(serial);
+    if (pendingCall != null) {
+      pendingCall.timeoutFuture().cancel(false);
+    }
+  }
+
   private void failAllPendingCalls(Throwable cause) {
-    for (Promise<InboundMessage> promise : pendingMethodCalls.values()) {
-      if (!promise.isDone()) {
-        promise.tryFailure(cause);
+    for (PendingMethodCall pendingCall : pendingMethodCalls.values()) {
+      pendingCall.timeoutFuture().cancel(false);
+      if (!pendingCall.promise().isDone()) {
+        pendingCall.promise().tryFailure(cause);
       }
     }
     pendingMethodCalls.clear();
+  }
+
+  /**
+   * Record for tracking pending method calls with their timeout futures.
+   */
+  private record PendingMethodCall(Promise<InboundMessage> promise, ScheduledFuture<?> timeoutFuture) {
   }
 }

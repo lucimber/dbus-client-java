@@ -8,11 +8,15 @@ import com.lucimber.dbus.type.ObjectPath;
 import com.lucimber.dbus.type.UInt32;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.util.concurrent.Future;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.channels.ClosedChannelException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,6 +27,7 @@ class AppLogicHandlerTest {
   private AppLogicHandler handler;
   private Pipeline pipeline;
   private EmbeddedChannel channel;
+  private ExecutorService executorService;
 
   @BeforeEach
   void setUp() {
@@ -30,9 +35,23 @@ class AppLogicHandlerTest {
     pipeline = mock(Pipeline.class);
     when(connection.getPipeline()).thenReturn(pipeline);
 
-    handler = new AppLogicHandler(Executors.newSingleThreadExecutor(), connection);
+    executorService = Executors.newSingleThreadExecutor();
+    handler = new AppLogicHandler(executorService, connection);
     channel = new EmbeddedChannel(handler);
     channel.attr(DBusChannelAttribute.SERIAL_COUNTER).setIfAbsent(new AtomicLong(1));
+  }
+
+  @AfterEach
+  void tearDown() throws InterruptedException {
+    if (channel != null) {
+      channel.close();
+    }
+    if (executorService != null) {
+      executorService.shutdown();
+      if (!executorService.awaitTermination(1, TimeUnit.SECONDS)) {
+        executorService.shutdownNow();
+      }
+    }
   }
 
   @Test
@@ -152,5 +171,37 @@ class AppLogicHandlerTest {
     handler.userEventTriggered(channel.pipeline().context(handler), DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
     verify(pipeline).propagateConnectionInactive();
     assertFalse(channel.isActive());
+  }
+
+  @Test
+  void testMethodCallTimeout() throws InterruptedException {
+    // Use a short timeout for testing
+    executorService.shutdown();
+    executorService = Executors.newSingleThreadExecutor();
+    handler = new AppLogicHandler(executorService, mock(Connection.class), 100); // 100ms timeout
+    channel = new EmbeddedChannel(handler);
+    channel.attr(DBusChannelAttribute.SERIAL_COUNTER).setIfAbsent(new AtomicLong(1));
+
+    OutboundMethodCall msg = OutboundMethodCall.Builder
+            .create()
+            .withSerial(UInt32.valueOf(123))
+            .withPath(ObjectPath.valueOf("/timeout"))
+            .withMember(DBusString.valueOf("TimeoutMethod"))
+            .withReplyExpected(true)
+            .withDestination(DBusString.valueOf("some.destination"))
+            .withInterface(DBusString.valueOf("org.example"))
+            .build();
+
+    var future = handler.writeMessage(msg);
+    channel.runPendingTasks();
+    channel.flushOutbound();
+
+    // Wait for timeout to occur
+    Thread.sleep(150); // Wait longer than timeout
+    channel.runScheduledPendingTasks();
+
+    var replyFuture = future.getNow();
+    assertTrue(replyFuture.isDone(), "Reply future should be done after timeout");
+    assertInstanceOf(TimeoutException.class, replyFuture.cause(), "Should fail with TimeoutException");
   }
 }
