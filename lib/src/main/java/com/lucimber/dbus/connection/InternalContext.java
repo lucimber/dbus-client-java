@@ -130,7 +130,7 @@ final class InternalContext implements Context {
 
     InternalContext ctx = getPrev();
     if (ctx == null) {
-      throw new RuntimeException("Cannot propagate an outbound message any further on this pipeline. "
+      throw new IllegalStateException("Cannot propagate an outbound message any further on this pipeline. "
               + "Please execute handleOutboundMessage on this context instead.");
     } else {
       ctx.handleOutboundMessage(msg, future);
