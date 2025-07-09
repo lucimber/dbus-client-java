@@ -23,6 +23,7 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
 import io.netty.util.concurrent.ScheduledFuture;
 import java.nio.channels.ClosedChannelException;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -133,14 +134,19 @@ public class AppLogicHandler extends ChannelDuplexHandler {
 
     if (msg instanceof OutboundMethodCall methodCall) {
       if (methodCall.isReplyExpected()) {
+        // Use per-call timeout if specified, otherwise use connection default
+        long timeoutMs = methodCall.getTimeout()
+                .map(Duration::toMillis)
+                .orElse(methodCallTimeoutMs);
+        
         ScheduledFuture<?> timeoutFuture = ctx.executor().schedule(() -> {
           PendingMethodCall pendingCall = pendingMethodCalls.remove(msg.getSerial());
           if (pendingCall != null && !pendingCall.promise().isDone()) {
-            LOGGER.warn("Method call with serial {} timed out after {}ms", msg.getSerial(), methodCallTimeoutMs);
+            LOGGER.warn("Method call with serial {} timed out after {}ms", msg.getSerial(), timeoutMs);
             pendingCall.promise().tryFailure(new TimeoutException(
-                    "Method call with serial " + msg.getSerial() + " timed out after " + methodCallTimeoutMs + "ms"));
+                    "Method call with serial " + msg.getSerial() + " timed out after " + timeoutMs + "ms"));
           }
-        }, methodCallTimeoutMs, TimeUnit.MILLISECONDS);
+        }, timeoutMs, TimeUnit.MILLISECONDS);
         
         pendingMethodCalls.put(msg.getSerial(), new PendingMethodCall(replyPromise, timeoutFuture));
       } else {

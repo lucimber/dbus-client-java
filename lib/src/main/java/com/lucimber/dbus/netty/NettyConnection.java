@@ -6,6 +6,7 @@
 package com.lucimber.dbus.netty;
 
 import com.lucimber.dbus.connection.Connection;
+import com.lucimber.dbus.connection.ConnectionConfig;
 import com.lucimber.dbus.connection.DefaultPipeline;
 import com.lucimber.dbus.connection.Pipeline;
 import com.lucimber.dbus.message.InboundMessage;
@@ -49,11 +50,17 @@ public final class NettyConnection implements Connection {
   private final SocketAddress serverAddress;
   private final Class<? extends Channel> channelClass;
   private final Pipeline pipeline;
+  private final ConnectionConfig config;
   private Channel channel;
   private AppLogicHandler appLogicHandler;
 
   public NettyConnection(SocketAddress serverAddress) {
+    this(serverAddress, ConnectionConfig.defaultConfig());
+  }
+
+  public NettyConnection(SocketAddress serverAddress, ConnectionConfig config) {
     this.serverAddress = Objects.requireNonNull(serverAddress, "serverAddress must not be NULL");
+    this.config = Objects.requireNonNull(config, "config must not be NULL");
     if (serverAddress instanceof DomainSocketAddress) {
       if (Epoll.isAvailable()) {
         this.workerGroup = new MultiThreadIoEventLoopGroup(1, EpollIoHandler.newFactory());
@@ -94,6 +101,18 @@ public final class NettyConnection implements Connection {
    * @throws UnsupportedOperationException if native transport for UDS is not available.
    */
   public static NettyConnection newSystemBusConnection() {
+    return newSystemBusConnection(ConnectionConfig.defaultConfig());
+  }
+
+  /**
+   * Creates a connection for the standard system bus path with custom configuration.
+   * (Typically /var/run/dbus/system_bus_socket)
+   *
+   * @param config The connection configuration to use
+   * @return A new instance.
+   * @throws UnsupportedOperationException if native transport for UDS is not available.
+   */
+  public static NettyConnection newSystemBusConnection(ConnectionConfig config) {
     // Standard system bus path, can be overridden by DBUS_SYSTEM_BUS_ADDRESS env var
     String path = System.getenv("DBUS_SYSTEM_BUS_ADDRESS");
     if (path == null || path.isEmpty()) {
@@ -104,7 +123,7 @@ public final class NettyConnection implements Connection {
       // Handle other address formats if necessary (e.g., abstract sockets, tcp)
       LOGGER.warn("DBUS_SYSTEM_BUS_ADDRESS format not fully parsed, using raw value: {}", path);
     }
-    return new NettyConnection(new DomainSocketAddress(path));
+    return new NettyConnection(new DomainSocketAddress(path), config);
   }
 
   /**
@@ -115,6 +134,18 @@ public final class NettyConnection implements Connection {
    * @throws UnsupportedOperationException if native transport for UDS is not available or address not found.
    */
   public static NettyConnection newSessionBusConnection() {
+    return newSessionBusConnection(ConnectionConfig.defaultConfig());
+  }
+
+  /**
+   * Creates a connection for the standard session bus path with custom configuration.
+   * (Path is usually obtained from DBUS_SESSION_BUS_ADDRESS env var)
+   *
+   * @param config The connection configuration to use
+   * @return A new instance.
+   * @throws UnsupportedOperationException if native transport for UDS is not available or address not found.
+   */
+  public static NettyConnection newSessionBusConnection(ConnectionConfig config) {
     String address = System.getenv("DBUS_SESSION_BUS_ADDRESS");
     if (address == null || address.isEmpty()) {
       throw new IllegalStateException("DBUS_SESSION_BUS_ADDRESS environment variable not set.");
@@ -128,7 +159,7 @@ public final class NettyConnection implements Connection {
       if (commaIndex != -1) {
         path = path.substring(0, commaIndex);
       }
-      return new NettyConnection(new DomainSocketAddress(path));
+      return new NettyConnection(new DomainSocketAddress(path), config);
     } else if (address.startsWith("tcp:host=")) {
       // Example: tcp:host=localhost,port=12345 or tcp:host=127.0.0.1,port=12345,family=ipv4
       try {
@@ -146,7 +177,7 @@ public final class NettyConnection implements Connection {
           }
         }
         if (host != null && port != -1) {
-          return new NettyConnection(new InetSocketAddress(host, port));
+          return new NettyConnection(new InetSocketAddress(host, port), config);
         }
       } catch (Exception e) {
         throw new IllegalArgumentException("Could not parse TCP DBUS_SESSION_BUS_ADDRESS: " + address, e);
@@ -167,7 +198,7 @@ public final class NettyConnection implements Connection {
       alreadyConnectedPromise.setSuccess(null); // Or an error if preferred
       return NettyFutureConverter.toCompletionStage(alreadyConnectedPromise);
     }
-    this.appLogicHandler = new AppLogicHandler(applicationTaskExecutor, this);
+    this.appLogicHandler = new AppLogicHandler(applicationTaskExecutor, this, config.getMethodCallTimeoutMs());
 
     Promise<Void> connectPromise = workerGroup.next().newPromise();
 
@@ -294,5 +325,10 @@ public final class NettyConnection implements Connection {
         }
       });
     }
+  }
+
+  @Override
+  public ConnectionConfig getConfig() {
+    return config;
   }
 }

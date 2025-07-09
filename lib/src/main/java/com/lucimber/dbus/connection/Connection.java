@@ -86,4 +86,11 @@ public interface Connection extends AutoCloseable {
    * @param future the {@link CompletableFuture} to complete once the message is written or if an error occurs.
    */
   void sendAndRouteResponse(OutboundMessage msg, CompletableFuture<Void> future);
+
+  /**
+   * Retrieves the configuration for this connection.
+   *
+   * @return the {@link ConnectionConfig} instance used by this connection.
+   */
+  ConnectionConfig getConfig();
 }

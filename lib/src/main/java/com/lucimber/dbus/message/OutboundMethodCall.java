@@ -10,6 +10,7 @@ import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.ObjectPath;
 import com.lucimber.dbus.type.Signature;
 import com.lucimber.dbus.type.UInt32;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,7 @@ public final class OutboundMethodCall extends AbstractMethodCall implements Outb
 
   private final DBusString dst;
   private final boolean replyExpected;
+  private final Duration timeout;
 
   /**
    * Constructs a new instance with all parameter.
@@ -45,9 +47,37 @@ public final class OutboundMethodCall extends AbstractMethodCall implements Outb
           DBusString iface,
           Signature signature,
           List<? extends DBusType> payload) {
+    this(serial, path, member, replyExpected, dst, iface, signature, payload, null);
+  }
+
+  /**
+   * Constructs a new instance with all parameter including timeout.
+   * Please use the builder instead.
+   *
+   * @param serial        the serial number
+   * @param path          the object path
+   * @param member        the name of the method
+   * @param replyExpected states if reply is expected
+   * @param dst           optional; the destination of this method call
+   * @param iface         optional; the name of the interface
+   * @param signature     optional; the signature of the message body
+   * @param payload       optional; the message body
+   * @param timeout       optional; timeout override for this specific call
+   */
+  public OutboundMethodCall(
+          UInt32 serial,
+          ObjectPath path,
+          DBusString member,
+          boolean replyExpected,
+          DBusString dst,
+          DBusString iface,
+          Signature signature,
+          List<? extends DBusType> payload,
+          Duration timeout) {
     super(serial, path, member, iface, signature, payload);
     this.dst = dst;
     this.replyExpected = replyExpected;
+    this.timeout = timeout;
   }
 
   @Override
@@ -62,6 +92,15 @@ public final class OutboundMethodCall extends AbstractMethodCall implements Outb
    */
   public boolean isReplyExpected() {
     return replyExpected;
+  }
+
+  /**
+   * Gets the timeout override for this method call.
+   *
+   * @return the timeout duration, or empty if no override is specified
+   */
+  public Optional<Duration> getTimeout() {
+    return Optional.ofNullable(timeout);
   }
 
   @Override
@@ -83,6 +122,7 @@ public final class OutboundMethodCall extends AbstractMethodCall implements Outb
     private boolean replyExpected;
     private Signature signature;
     private List<? extends DBusType> payload;
+    private Duration timeout;
 
     private Builder() {
       replyExpected = false;
@@ -128,6 +168,21 @@ public final class OutboundMethodCall extends AbstractMethodCall implements Outb
       return this;
     }
 
+    /**
+     * Sets a timeout override for this specific method call.
+     *
+     * @param timeout The timeout duration (must be positive)
+     * @return This builder instance
+     * @throws IllegalArgumentException if timeout is null or not positive
+     */
+    public Builder withTimeout(Duration timeout) {
+      if (timeout != null && (timeout.isNegative() || timeout.isZero())) {
+        throw new IllegalArgumentException("Timeout must be positive");
+      }
+      this.timeout = timeout;
+      return this;
+    }
+
     public OutboundMethodCall build() {
       validate();
       return new OutboundMethodCall(
@@ -138,7 +193,8 @@ public final class OutboundMethodCall extends AbstractMethodCall implements Outb
               destination,
               iface,
               signature,
-              payload
+              payload,
+              timeout
       );
     }
 

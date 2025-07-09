@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.channels.ClosedChannelException;
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -203,5 +204,43 @@ class AppLogicHandlerTest {
     var replyFuture = future.getNow();
     assertTrue(replyFuture.isDone(), "Reply future should be done after timeout");
     assertInstanceOf(TimeoutException.class, replyFuture.cause(), "Should fail with TimeoutException");
+  }
+
+  @Test
+  void testPerCallTimeoutOverride() throws InterruptedException {
+    // Shutdown existing executor and create new handler with short default timeout  
+    executorService.shutdown();
+    executorService = Executors.newSingleThreadExecutor();
+    handler = new AppLogicHandler(executorService, mock(Connection.class), 5000); // 5s default
+    channel = new EmbeddedChannel(handler);
+    channel.attr(DBusChannelAttribute.SERIAL_COUNTER).setIfAbsent(new AtomicLong(1));
+
+    // Create message with shorter per-call timeout override
+    OutboundMethodCall msg = OutboundMethodCall.Builder
+            .create()
+            .withSerial(UInt32.valueOf(456))
+            .withPath(ObjectPath.valueOf("/override"))
+            .withMember(DBusString.valueOf("FastTimeout"))
+            .withReplyExpected(true)
+            .withDestination(DBusString.valueOf("some.destination"))
+            .withInterface(DBusString.valueOf("org.example"))
+            .withTimeout(Duration.ofMillis(50)) // Override with 50ms timeout
+            .build();
+
+    var future = handler.writeMessage(msg);
+    channel.runPendingTasks();
+    channel.flushOutbound();
+
+    // Wait for timeout to occur (should happen in 50ms, not 5000ms)
+    Thread.sleep(100); // Wait longer than the override timeout
+    channel.runScheduledPendingTasks();
+
+    var replyFuture = future.getNow();
+    assertTrue(replyFuture.isDone(), "Reply future should be done after per-call timeout");
+    assertInstanceOf(TimeoutException.class, replyFuture.cause(), "Should fail with TimeoutException from override");
+    
+    // Verify the timeout message mentions the override timeout value
+    String errorMessage = replyFuture.cause().getMessage();
+    assertTrue(errorMessage.contains("50"), "Error message should mention the override timeout duration");
   }
 }
