@@ -9,6 +9,7 @@ import com.lucimber.dbus.connection.Connection;
 import com.lucimber.dbus.connection.ConnectionConfig;
 import com.lucimber.dbus.connection.ConnectionEventListener;
 import com.lucimber.dbus.connection.ConnectionHealthHandler;
+import com.lucimber.dbus.connection.ConnectionReconnectHandler;
 import com.lucimber.dbus.connection.ConnectionState;
 import com.lucimber.dbus.connection.DefaultPipeline;
 import com.lucimber.dbus.connection.Pipeline;
@@ -57,6 +58,7 @@ public final class NettyConnection implements Connection {
   private Channel channel;
   private AppLogicHandler appLogicHandler;
   private ConnectionHealthHandler healthHandler;
+  private ConnectionReconnectHandler reconnectHandler;
 
   public NettyConnection(SocketAddress serverAddress) {
     this(serverAddress, ConnectionConfig.defaultConfig());
@@ -204,6 +206,12 @@ public final class NettyConnection implements Connection {
     }
     this.appLogicHandler = new AppLogicHandler(applicationTaskExecutor, this, config.getMethodCallTimeoutMs());
     this.healthHandler = new ConnectionHealthHandler(config);
+    this.reconnectHandler = new ConnectionReconnectHandler(config);
+    
+    // Add reconnect handler to pipeline if auto-reconnect is enabled
+    if (config.isAutoReconnectEnabled()) {
+      this.pipeline.addLast("reconnect-handler", reconnectHandler);
+    }
     
     // Add health handler to pipeline if health monitoring is enabled
     if (config.isHealthCheckEnabled()) {
@@ -248,7 +256,12 @@ public final class NettyConnection implements Connection {
   public void close() {
     LOGGER.info("Closing DBus connection to {}...", serverAddress);
     
-    // Shutdown health handler first
+    // Shutdown reconnect handler first
+    if (reconnectHandler != null) {
+      reconnectHandler.shutdown();
+    }
+    
+    // Shutdown health handler
     if (healthHandler != null) {
       healthHandler.shutdown();
     }
@@ -384,5 +397,27 @@ public final class NettyConnection implements Connection {
       return healthHandler.triggerHealthCheck();
     }
     return CompletableFuture.completedFuture(null);
+  }
+
+  @Override
+  public int getReconnectAttemptCount() {
+    if (reconnectHandler != null) {
+      return reconnectHandler.getAttemptCount();
+    }
+    return 0;
+  }
+
+  @Override
+  public void cancelReconnection() {
+    if (reconnectHandler != null) {
+      reconnectHandler.cancelReconnection();
+    }
+  }
+
+  @Override
+  public void resetReconnectionState() {
+    if (reconnectHandler != null) {
+      reconnectHandler.reset();
+    }
   }
 }

@@ -121,4 +121,21 @@ public interface Connection extends AutoCloseable {
    * @return a {@link CompletableFuture} that completes when the health check is triggered
    */
   CompletableFuture<Void> triggerHealthCheck();
+
+  /**
+   * Gets the current number of reconnection attempts.
+   *
+   * @return the current reconnection attempt count
+   */
+  int getReconnectAttemptCount();
+
+  /**
+   * Cancels any pending reconnection attempts.
+   */
+  void cancelReconnection();
+
+  /**
+   * Resets the reconnection state, clearing attempt count and timers.
+   */
+  void resetReconnectionState();
 }
