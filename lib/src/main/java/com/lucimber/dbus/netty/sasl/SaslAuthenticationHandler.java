@@ -186,6 +186,7 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
           });
         } catch (SaslMechanismException e) {
           LOGGER.warn("Initialization failed for {}: {}", candidate.getName(), e.getMessage());
+          tryNextMechanism(ctx);
         }
       }
     } else {

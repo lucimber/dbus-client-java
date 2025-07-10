@@ -27,6 +27,12 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.mockito:mockito-core:5.8.0")
+    
+    // Integration and Performance Testing
+    testImplementation(platform("org.testcontainers:testcontainers-bom:1.20.4"))
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:postgresql") // For general container support
+    testImplementation("org.awaitility:awaitility:4.2.2")
 }
 
 repositories {
@@ -42,8 +48,52 @@ java {
 }
 
 tasks.named<Test>("test") {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags("integration", "performance", "chaos")
+    }
     finalizedBy(tasks.jacocoTestReport)
+}
+
+// Integration tests
+tasks.register<Test>("integrationTest") {
+    useJUnitPlatform {
+        includeTags("integration")
+    }
+    group = "verification"
+    description = "Runs integration tests"
+    
+    systemProperty("testcontainers.reuse.enable", "true")
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
+}
+
+// Performance tests
+tasks.register<Test>("performanceTest") {
+    useJUnitPlatform {
+        includeTags("performance")
+    }
+    group = "verification"
+    description = "Runs performance benchmark tests"
+    
+    // Allocate more memory for performance tests
+    maxHeapSize = "2g"
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
+}
+
+// Chaos engineering tests
+tasks.register<Test>("chaosTest") {
+    useJUnitPlatform {
+        includeTags("chaos")
+    }
+    group = "verification"
+    description = "Runs chaos engineering tests"
+    
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
 }
 
 tasks.named<JavaCompile>("compileJava") {
