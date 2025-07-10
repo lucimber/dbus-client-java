@@ -226,12 +226,14 @@ public class DBusPerformanceBenchmark {
   }
 
   @Test
+  @SuppressWarnings("PMD.DoNotCallGarbageCollectionExplicitly")
   void benchmarkMemoryUsage() throws Exception {
     LOGGER.info("Starting memory usage benchmark");
 
     Runtime runtime = Runtime.getRuntime();
     
     // Force garbage collection and measure baseline
+    // Note: Explicit GC is necessary for reliable memory benchmarking
     System.gc();
     Thread.sleep(1000);
     long baselineMemory = runtime.totalMemory() - runtime.freeMemory();
@@ -239,6 +241,7 @@ public class DBusPerformanceBenchmark {
     // Perform operations and measure memory
     performMethodCalls(1000, false);
     
+    // Note: Explicit GC is necessary for reliable memory benchmarking
     System.gc();
     Thread.sleep(1000);
     long afterOperationsMemory = runtime.totalMemory() - runtime.freeMemory();
