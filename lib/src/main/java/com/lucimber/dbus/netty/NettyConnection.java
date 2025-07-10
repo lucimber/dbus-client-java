@@ -7,6 +7,9 @@ package com.lucimber.dbus.netty;
 
 import com.lucimber.dbus.connection.Connection;
 import com.lucimber.dbus.connection.ConnectionConfig;
+import com.lucimber.dbus.connection.ConnectionEventListener;
+import com.lucimber.dbus.connection.ConnectionHealthHandler;
+import com.lucimber.dbus.connection.ConnectionState;
 import com.lucimber.dbus.connection.DefaultPipeline;
 import com.lucimber.dbus.connection.Pipeline;
 import com.lucimber.dbus.message.InboundMessage;
@@ -53,6 +56,7 @@ public final class NettyConnection implements Connection {
   private final ConnectionConfig config;
   private Channel channel;
   private AppLogicHandler appLogicHandler;
+  private ConnectionHealthHandler healthHandler;
 
   public NettyConnection(SocketAddress serverAddress) {
     this(serverAddress, ConnectionConfig.defaultConfig());
@@ -199,6 +203,12 @@ public final class NettyConnection implements Connection {
       return NettyFutureConverter.toCompletionStage(alreadyConnectedPromise);
     }
     this.appLogicHandler = new AppLogicHandler(applicationTaskExecutor, this, config.getMethodCallTimeoutMs());
+    this.healthHandler = new ConnectionHealthHandler(config);
+    
+    // Add health handler to pipeline if health monitoring is enabled
+    if (config.isHealthCheckEnabled()) {
+      this.pipeline.addLast("health-monitor", healthHandler);
+    }
 
     Promise<Void> connectPromise = workerGroup.next().newPromise();
 
@@ -237,6 +247,12 @@ public final class NettyConnection implements Connection {
   @Override
   public void close() {
     LOGGER.info("Closing DBus connection to {}...", serverAddress);
+    
+    // Shutdown health handler first
+    if (healthHandler != null) {
+      healthHandler.shutdown();
+    }
+    
     if (channel != null) {
       channel.close().awaitUninterruptibly(5, TimeUnit.SECONDS);
     }
@@ -330,5 +346,43 @@ public final class NettyConnection implements Connection {
   @Override
   public ConnectionConfig getConfig() {
     return config;
+  }
+
+  @Override
+  public ConnectionState getState() {
+    if (healthHandler != null) {
+      return healthHandler.getCurrentState();
+    }
+    
+    // Fallback to basic state detection if health handler is not available
+    if (isConnected()) {
+      return ConnectionState.CONNECTED;
+    } else if (channel != null && channel.isActive()) {
+      return ConnectionState.AUTHENTICATING;
+    } else {
+      return ConnectionState.DISCONNECTED;
+    }
+  }
+
+  @Override
+  public void addConnectionEventListener(ConnectionEventListener listener) {
+    if (healthHandler != null) {
+      healthHandler.addConnectionEventListener(listener);
+    }
+  }
+
+  @Override
+  public void removeConnectionEventListener(ConnectionEventListener listener) {
+    if (healthHandler != null) {
+      healthHandler.removeConnectionEventListener(listener);
+    }
+  }
+
+  @Override
+  public CompletableFuture<Void> triggerHealthCheck() {
+    if (healthHandler != null) {
+      return healthHandler.triggerHealthCheck();
+    }
+    return CompletableFuture.completedFuture(null);
   }
 }

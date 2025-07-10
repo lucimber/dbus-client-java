@@ -93,4 +93,32 @@ public interface Connection extends AutoCloseable {
    * @return the {@link ConnectionConfig} instance used by this connection.
    */
   ConnectionConfig getConfig();
+
+  /**
+   * Gets the current connection state.
+   *
+   * @return the current {@link ConnectionState}
+   */
+  ConnectionState getState();
+
+  /**
+   * Adds a connection event listener to receive notifications about connection events.
+   *
+   * @param listener the listener to add
+   */
+  void addConnectionEventListener(ConnectionEventListener listener);
+
+  /**
+   * Removes a connection event listener.
+   *
+   * @param listener the listener to remove
+   */
+  void removeConnectionEventListener(ConnectionEventListener listener);
+
+  /**
+   * Manually triggers a health check if health monitoring is enabled.
+   *
+   * @return a {@link CompletableFuture} that completes when the health check is triggered
+   */
+  CompletableFuture<Void> triggerHealthCheck();
 }

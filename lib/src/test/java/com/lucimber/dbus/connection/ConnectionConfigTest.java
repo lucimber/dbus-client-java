@@ -91,5 +91,81 @@ class ConnectionConfigTest {
     assertTrue(str.contains("ConnectionConfig"));
     assertTrue(str.contains("methodCallTimeout"));
     assertTrue(str.contains("connectTimeout"));
+    assertTrue(str.contains("healthCheckEnabled"));
+    assertTrue(str.contains("autoReconnectEnabled"));
+  }
+
+  @Test
+  void testHealthCheckConfiguration() {
+    ConnectionConfig config = ConnectionConfig.builder()
+            .withHealthCheckEnabled(true)
+            .withHealthCheckInterval(Duration.ofSeconds(20))
+            .withHealthCheckTimeout(Duration.ofSeconds(3))
+            .build();
+
+    assertTrue(config.isHealthCheckEnabled());
+    assertEquals(Duration.ofSeconds(20), config.getHealthCheckInterval());
+    assertEquals(Duration.ofSeconds(3), config.getHealthCheckTimeout());
+  }
+
+  @Test
+  void testAutoReconnectConfiguration() {
+    ConnectionConfig config = ConnectionConfig.builder()
+            .withAutoReconnectEnabled(true)
+            .withReconnectInitialDelay(Duration.ofSeconds(2))
+            .withReconnectMaxDelay(Duration.ofMinutes(10))
+            .withReconnectBackoffMultiplier(1.5)
+            .withMaxReconnectAttempts(5)
+            .build();
+
+    assertTrue(config.isAutoReconnectEnabled());
+    assertEquals(Duration.ofSeconds(2), config.getReconnectInitialDelay());
+    assertEquals(Duration.ofMinutes(10), config.getReconnectMaxDelay());
+    assertEquals(1.5, config.getReconnectBackoffMultiplier());
+    assertEquals(5, config.getMaxReconnectAttempts());
+  }
+
+  @Test
+  void testDefaultHealthAndReconnectSettings() {
+    ConnectionConfig config = ConnectionConfig.defaultConfig();
+    
+    // Health check defaults
+    assertTrue(config.isHealthCheckEnabled());
+    assertEquals(Duration.ofSeconds(30), config.getHealthCheckInterval());
+    assertEquals(Duration.ofSeconds(5), config.getHealthCheckTimeout());
+    
+    // Auto-reconnect defaults
+    assertTrue(config.isAutoReconnectEnabled());
+    assertEquals(Duration.ofSeconds(1), config.getReconnectInitialDelay());
+    assertEquals(Duration.ofMinutes(5), config.getReconnectMaxDelay());
+    assertEquals(2.0, config.getReconnectBackoffMultiplier());
+    assertEquals(10, config.getMaxReconnectAttempts());
+  }
+
+  @Test
+  void testHealthCheckValidation() {
+    assertThrows(IllegalArgumentException.class, () ->
+            ConnectionConfig.builder().withHealthCheckInterval(Duration.ZERO));
+    
+    assertThrows(IllegalArgumentException.class, () ->
+            ConnectionConfig.builder().withHealthCheckTimeout(Duration.ofSeconds(-1)));
+    
+    assertThrows(NullPointerException.class, () ->
+            ConnectionConfig.builder().withHealthCheckInterval(null));
+  }
+
+  @Test
+  void testReconnectValidation() {
+    assertThrows(IllegalArgumentException.class, () ->
+            ConnectionConfig.builder().withReconnectInitialDelay(Duration.ZERO));
+    
+    assertThrows(IllegalArgumentException.class, () ->
+            ConnectionConfig.builder().withReconnectMaxDelay(Duration.ofSeconds(-1)));
+    
+    assertThrows(IllegalArgumentException.class, () ->
+            ConnectionConfig.builder().withReconnectBackoffMultiplier(0.5));
+    
+    assertThrows(IllegalArgumentException.class, () ->
+            ConnectionConfig.builder().withMaxReconnectAttempts(-1));
   }
 }
