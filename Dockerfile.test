@@ -142,12 +142,50 @@ echo
 # Set environment for tests
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/tmp/dbus-test-socket"
 
+# Verify D-Bus daemon is working before running tests
+echo "Testing D-Bus daemon connectivity..."
+# Test Unix socket connection
+if [ -S /tmp/dbus-test-socket ]; then
+    echo "✓ Unix socket exists: /tmp/dbus-test-socket"
+    # Test if we can connect to D-Bus via Unix socket
+    if DBUS_SESSION_BUS_ADDRESS="unix:path=/tmp/dbus-test-socket" dbus-send --session --dest=org.freedesktop.DBus --type=method_call --print-reply /org/freedesktop/DBus org.freedesktop.DBus.ListNames 2>/dev/null | grep -q "array"; then
+        echo "✓ D-Bus Unix socket connection successful"
+    else
+        echo "❌ D-Bus Unix socket connection failed"
+    fi
+else
+    echo "❌ Unix socket not found: /tmp/dbus-test-socket"
+fi
+
+# Test TCP connection
+if netcat -z 127.0.0.1 12345; then
+    echo "✓ TCP port 12345 is listening"
+    # Test if we can connect to D-Bus via TCP
+    if DBUS_SESSION_BUS_ADDRESS="tcp:host=127.0.0.1,port=12345" dbus-send --session --dest=org.freedesktop.DBus --type=method_call --print-reply /org/freedesktop/DBus org.freedesktop.DBus.ListNames 2>/dev/null | grep -q "array"; then
+        echo "✓ D-Bus TCP connection successful"
+    else
+        echo "❌ D-Bus TCP connection failed"
+    fi
+else
+    echo "❌ TCP port 12345 not listening"
+fi
+
+echo ""
+echo "D-Bus daemon process info:"
+ps aux | grep dbus | grep -v grep || echo "No D-Bus processes found"
+echo ""
+
+# Check system architecture and libraries
+echo "System architecture and libraries:"
+uname -a
+echo "Available network libraries:"
+ldd /usr/lib/jvm/java-17-openjdk-arm64/bin/java 2>/dev/null | grep -E "(libc|libpthread|libdl)" | head -3 || echo "Could not check system libraries"
+
 # Run the integration tests 
 echo "Running integration tests..."
 cd /app
 export GRADLE_USER_HOME=/root/.gradle
 # Ensure UTF-8 encoding for test execution and JVM
-# Don't use --quiet so we can see test failures
 ./gradlew integrationTest \
     -Dfile.encoding=UTF-8 \
     -Dconsole.encoding=UTF-8 \
@@ -210,6 +248,36 @@ echo "=== Test Results Summary ==="
 echo
 echo "=== D-Bus Process Status ==="
 ps aux | grep dbus | grep -v grep || echo "No D-Bus processes found"
+
+# Show detailed test failure information
+if [ "$TEST_FAILED" = true ]; then
+    echo
+    echo "=== Detailed Test Failure Analysis ==="
+    
+    # Try to extract more details from test report files
+    if [ -d lib/build/reports/tests/integrationTest/classes ]; then
+        for html_file in lib/build/reports/tests/integrationTest/classes/*.html; do
+            if [ -f "$html_file" ] && grep -q "FAILED" "$html_file"; then
+                echo "Extracting failure details from: $(basename "$html_file")"
+                # Extract the test failure content
+                grep -A 30 -B 5 "FAILED\|Exception\|Error" "$html_file" | sed 's/<[^>]*>//g' | sed 's/&[^;]*;//g' | grep -v "^$" | head -20
+                echo "---"
+            fi
+        done
+    fi
+    
+    # Also check for any log files that might contain more details
+    if [ -d lib/build/test-results/integrationTest ]; then
+        echo "Test result XML files:"
+        for xml_file in lib/build/test-results/integrationTest/*.xml; do
+            if [ -f "$xml_file" ]; then
+                echo "Content of $(basename "$xml_file"):"
+                grep -A 10 -B 2 "failure\|error" "$xml_file" | head -15
+                echo "---"
+            fi
+        done
+    fi
+fi
 
 # Exit with proper code based on actual test results
 echo

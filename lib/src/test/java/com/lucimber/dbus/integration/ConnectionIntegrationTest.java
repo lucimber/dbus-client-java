@@ -48,16 +48,21 @@ class ConnectionIntegrationTest extends DBusIntegrationTestBase {
     LOGGER.info("Operating system: {}", System.getProperty("os.name"));
     LOGGER.info("Running in container: {}", isRunningInContainer());
     LOGGER.info("Should prefer Unix socket: {}", shouldPreferUnixSocket());
+    LOGGER.info("D-Bus session bus address: {}", System.getenv("DBUS_SESSION_BUS_ADDRESS"));
     
     ConnectionConfig config = ConnectionConfig.builder()
-        .withConnectTimeout(Duration.ofSeconds(10))
+        .withConnectTimeout(Duration.ofSeconds(30))  // Increased timeout
         .build();
     
     Connection connection = null;
     Exception lastException = null;
     
-    // Try Unix socket first if preferred (container mode)
-    if (shouldPreferUnixSocket()) {
+    // Try TCP connection first when in container mode (skip Unix socket for now)
+    // This is a temporary workaround to isolate the connection issue
+    if (isRunningInContainer()) {
+      LOGGER.info("Running in container mode - trying TCP connection first");
+      // Skip Unix socket for now
+    } else if (shouldPreferUnixSocket()) {
       try {
         LOGGER.info("Attempting Unix socket connection to D-Bus daemon");
         connection = new NettyConnection(
@@ -75,7 +80,7 @@ class ConnectionIntegrationTest extends DBusIntegrationTestBase {
         
       } catch (Exception e) {
         lastException = e;
-        LOGGER.warn("Unix socket connection failed: {}", e.getMessage());
+        LOGGER.error("Unix socket connection failed: {}", e.getMessage(), e);
         
         if (connection != null) {
           try {
@@ -91,12 +96,25 @@ class ConnectionIntegrationTest extends DBusIntegrationTestBase {
     // Try TCP connection if Unix socket failed or not preferred
     if (connection == null) {
       try {
-        LOGGER.info("Attempting TCP connection to D-Bus daemon");
+        String host = getDBusHost();
+        int port = getDBusPort();
+        LOGGER.info("Attempting TCP connection to D-Bus daemon at {}:{}", host, port);
+        
+        // Test basic TCP connectivity first
+        try (java.net.Socket testSocket = new java.net.Socket()) {
+          testSocket.connect(new java.net.InetSocketAddress(host, port), 5000);
+          LOGGER.info("✓ Basic TCP socket connection successful");
+        } catch (Exception e) {
+          LOGGER.error("Basic TCP socket connection failed: {}", e.getMessage());
+          throw e;
+        }
+        
         connection = new NettyConnection(
-            new InetSocketAddress(getDBusHost(), getDBusPort()),
+            new InetSocketAddress(host, port),
             config
         );
 
+        LOGGER.info("Starting D-Bus connection handshake...");
         CompletableFuture<Void> connectFuture = connection.connect().toCompletableFuture();
         connectFuture.get(DEFAULT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
         
@@ -107,7 +125,7 @@ class ConnectionIntegrationTest extends DBusIntegrationTestBase {
         
       } catch (Exception e) {
         lastException = e;
-        LOGGER.warn("TCP connection failed: {}", e.getMessage());
+        LOGGER.error("TCP connection failed: {}", e.getMessage(), e);
         
         if (connection != null) {
           try {

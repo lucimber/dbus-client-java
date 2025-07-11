@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Set root logger level to INFO to reduce noise -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+    <!-- Enable debug logging for D-Bus client library -->
+    <logger name="com.lucimber.dbus" level="DEBUG" />
+    
+    <!-- Enable debug logging for Netty if needed -->
+    <logger name="io.netty" level="DEBUG" />
+    
+    <!-- Enable debug logging for integration tests -->
+    <logger name="com.lucimber.dbus.integration" level="DEBUG" />
+</configuration>
