@@ -8,3 +8,46 @@
 # Gradle
 .gradle
 build
+
+# Java compiled files
+*.class
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Log files
+*.log
+
+# JUnit test reports
+/test-results/
+/test-output/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# NetBeans
+nbproject/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# VS Code
+.vscode/
+
+# Backup files
+*.bak
+*.backup
+
+# OS generated files
+Thumbs.db
+*.swp
+*.swo
+
+# Test files (temporary)
+Test.java
+Test.class
