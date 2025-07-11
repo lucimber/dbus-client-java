@@ -138,6 +138,10 @@ tasks.named<JavaCompile>("compileJava") {
     options.encoding = "UTF-8"
 }
 
+tasks.named<JavaCompile>("compileTestJava") {
+    options.encoding = "UTF-8"
+}
+
 tasks.named<Javadoc>("javadoc") {
     options.windowTitle = project.name
     options.encoding = "UTF-8"

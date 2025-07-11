@@ -4,22 +4,42 @@
 # Stage 1: Build the Java application
 FROM gradle:8.14.2-jdk17 AS builder
 
+# Set encoding environment variables for consistent Java compilation
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+
 WORKDIR /app
 COPY . .
 
 # Build the project and prepare test classes - skip expensive static analysis tasks
-RUN gradle compileJava compileTestJava -x checkstyleMain -x checkstyleTest -x pmdMain -x pmdTest -x jacocoTestReport -x jacocoTestCoverageVerification --no-daemon
+# The -Dfile.encoding=UTF-8 ensures consistent encoding regardless of system defaults
+RUN gradle compileJava compileTestJava \
+    -Dfile.encoding=UTF-8 \
+    -x checkstyleMain -x checkstyleTest \
+    -x pmdMain -x pmdTest \
+    -x jacocoTestReport -x jacocoTestCoverageVerification \
+    --no-daemon
 
 # Stage 2: Test execution environment
 FROM ubuntu:22.04
 
-# Install required packages
+# Install required packages and configure locale
 RUN apt-get update && apt-get install -y \
     openjdk-17-jdk-headless \
     dbus \
     dbus-x11 \
     netcat-openbsd \
+    locales \
     && rm -rf /var/lib/apt/lists/*
+
+# Configure UTF-8 locale to fix Java compilation encoding issues
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
+
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 # Create test user with specific UID for consistent EXTERNAL auth
 RUN useradd -u 1000 -m -s /bin/bash testuser
@@ -126,7 +146,11 @@ export DBUS_SESSION_BUS_ADDRESS="unix:path=/tmp/dbus-test-socket"
 echo "Running integration tests..."
 cd /app
 export GRADLE_USER_HOME=/root/.gradle
-./gradlew integrationTest --no-daemon --quiet --console=plain
+# Ensure UTF-8 encoding for test execution and JVM
+./gradlew integrationTest \
+    -Dfile.encoding=UTF-8 \
+    -Dconsole.encoding=UTF-8 \
+    --no-daemon --quiet --console=plain
 
 # Display test results
 echo
