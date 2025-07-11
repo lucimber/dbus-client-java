@@ -24,7 +24,6 @@ import java.time.Duration;
  * Base class for D-Bus integration tests that provides D-Bus test environment.
  * Supports both Testcontainers (external) and in-container (local D-Bus daemon) execution.
  */
-@Testcontainers
 public abstract class DBusIntegrationTestBase {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DBusIntegrationTestBase.class);
@@ -35,27 +34,40 @@ public abstract class DBusIntegrationTestBase {
   // Detect if running inside a container with local D-Bus daemon
   private static final boolean IS_RUNNING_IN_CONTAINER = detectContainerEnvironment();
 
-  @Container
-  protected static final GenericContainer<?> dbusContainer = new GenericContainer<>(
-      new ImageFromDockerfile()
-          .withDockerfileFromBuilder(builder -> 
-              builder
-                  .from("ubuntu:22.04")
-                  .run("apt-get update && apt-get install -y dbus dbus-x11 netcat-openbsd && rm -rf /var/lib/apt/lists/*")
-                  .run("mkdir -p /etc/dbus-1/session.d")
-                  .run("mkdir -p /tmp && chmod 777 /tmp")
-                  .run("mkdir -p /shared-dbus-cookies && chmod 755 /shared-dbus-cookies")
-                  .copy("dbus-test.conf", "/etc/dbus-1/session.conf")
-                  .copy("start-dbus.sh", "/start-dbus.sh")
-                  .run("chmod +x /start-dbus.sh")
-                  .expose(DBUS_PORT)
-                  .cmd("/start-dbus.sh")
-                  .build())
-          .withFileFromString("dbus-test.conf", createDBusConfig())
-          .withFileFromString("start-dbus.sh", createStartScript())
-  )
-  .withExposedPorts(DBUS_PORT)
-  .waitingFor(Wait.forLogMessage(".*D-Bus daemon ready.*", 1).withStartupTimeout(Duration.ofSeconds(60)));
+  // Only initialize container if not running in container mode
+  protected static final GenericContainer<?> dbusContainer = IS_RUNNING_IN_CONTAINER ? null : createTestContainer();
+  
+  @BeforeAll
+  static void startTestInfrastructure() {
+    if (!IS_RUNNING_IN_CONTAINER && dbusContainer != null) {
+      // Start the container manually since we can't use @Testcontainers annotation conditionally
+      dbusContainer.start();
+      LOGGER.info("D-Bus container started at {}:{}", dbusContainer.getHost(), dbusContainer.getMappedPort(DBUS_PORT));
+    }
+  }
+  
+  private static GenericContainer<?> createTestContainer() {
+    return new GenericContainer<>(
+        new ImageFromDockerfile()
+            .withDockerfileFromBuilder(builder -> 
+                builder
+                    .from("ubuntu:22.04")
+                    .run("apt-get update && apt-get install -y dbus dbus-x11 netcat-openbsd && rm -rf /var/lib/apt/lists/*")
+                    .run("mkdir -p /etc/dbus-1/session.d")
+                    .run("mkdir -p /tmp && chmod 777 /tmp")
+                    .run("mkdir -p /shared-dbus-cookies && chmod 755 /shared-dbus-cookies")
+                    .copy("dbus-test.conf", "/etc/dbus-1/session.conf")
+                    .copy("start-dbus.sh", "/start-dbus.sh")
+                    .run("chmod +x /start-dbus.sh")
+                    .expose(DBUS_PORT)
+                    .cmd("/start-dbus.sh")
+                    .build())
+            .withFileFromString("dbus-test.conf", createDBusConfig())
+            .withFileFromString("start-dbus.sh", createStartScript())
+    )
+    .withExposedPorts(DBUS_PORT)
+    .waitingFor(Wait.forLogMessage(".*D-Bus daemon ready.*", 1).withStartupTimeout(Duration.ofSeconds(60)));
+  }
 
   @BeforeEach
   void logTestStart(TestInfo testInfo) {
@@ -80,6 +92,9 @@ public abstract class DBusIntegrationTestBase {
     if (IS_RUNNING_IN_CONTAINER) {
       return "127.0.0.1"; // Local connection within container
     }
+    if (dbusContainer == null) {
+      throw new IllegalStateException("D-Bus container not initialized");
+    }
     return dbusContainer.getHost();
   }
 
@@ -89,6 +104,9 @@ public abstract class DBusIntegrationTestBase {
   protected static int getDBusPort() {
     if (IS_RUNNING_IN_CONTAINER) {
       return DBUS_PORT; // Direct port within container
+    }
+    if (dbusContainer == null) {
+      throw new IllegalStateException("D-Bus container not initialized");
     }
     return dbusContainer.getMappedPort(DBUS_PORT);
   }
@@ -284,6 +302,12 @@ public abstract class DBusIntegrationTestBase {
    * Executes a command in the D-Bus container using Testcontainers.
    */
   protected static String execInContainer(String... command) throws IOException, InterruptedException {
+    if (IS_RUNNING_IN_CONTAINER) {
+      throw new UnsupportedOperationException("execInContainer not supported when running inside container");
+    }
+    if (dbusContainer == null) {
+      throw new IllegalStateException("D-Bus container not initialized");
+    }
     try {
       var result = dbusContainer.execInContainer(command);
       if (result.getExitCode() != 0) {

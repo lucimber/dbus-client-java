@@ -147,20 +147,50 @@ echo "Running integration tests..."
 cd /app
 export GRADLE_USER_HOME=/root/.gradle
 # Ensure UTF-8 encoding for test execution and JVM
+# Don't use --quiet so we can see test failures
 ./gradlew integrationTest \
     -Dfile.encoding=UTF-8 \
     -Dconsole.encoding=UTF-8 \
-    --no-daemon --quiet --console=plain
+    --no-daemon --console=plain
 
 # Since integrationTest task has ignoreFailures=true, we need to check actual test results
 # Check if test report exists and parse it for failures
 TEST_FAILED=false
+FAILURE_DETAILS=""
+
 if [ -f lib/build/reports/tests/integrationTest/index.html ]; then
     echo "✓ Test report generated: lib/build/reports/tests/integrationTest/index.html"
     
     # Check for test failures in the HTML report
     if grep -q "failures.*[1-9]" lib/build/reports/tests/integrationTest/index.html; then
         TEST_FAILED=true
+        
+        # Extract failure count and details
+        FAILURE_COUNT=$(grep -o "failures.*[0-9]" lib/build/reports/tests/integrationTest/index.html | grep -o "[0-9]")
+        echo "⚠️  Found $FAILURE_COUNT test failure(s)"
+        
+        # Try to find specific failed test information
+        if [ -d lib/build/reports/tests/integrationTest/classes ]; then
+            echo ""
+            echo "=== Failed Test Details ==="
+            for html_file in lib/build/reports/tests/integrationTest/classes/*.html; do
+                if [ -f "$html_file" ] && grep -q "failures" "$html_file"; then
+                    # Extract class name from filename
+                    class_name=$(basename "$html_file" .html)
+                    echo "❌ Failed: $class_name"
+                    
+                    # Try to extract failure message from the HTML
+                    if grep -q "testBasicConnectionLifecycle" "$html_file"; then
+                        echo "   Test: testBasicConnectionLifecycle()"
+                        # Extract failure reason if possible
+                        failure_text=$(grep -A 20 "failure" "$html_file" | head -5 | sed 's/<[^>]*>//g' | sed 's/&[^;]*;//g' | grep -v "^$" | head -2)
+                        if [ -n "$failure_text" ]; then
+                            echo "   Reason: $failure_text"
+                        fi
+                    fi
+                fi
+            done
+        fi
     fi
     
     # Also check for 0% success rate as additional indicator
@@ -172,9 +202,9 @@ else
     TEST_FAILED=true
 fi
 
-# Display test results
+# Display test results summary
 echo
-echo "=== Test Results ==="
+echo "=== Test Results Summary ==="
 
 # Keep D-Bus logs available for debugging
 echo
@@ -184,7 +214,11 @@ ps aux | grep dbus | grep -v grep || echo "No D-Bus processes found"
 # Exit with proper code based on actual test results
 echo
 if [ "$TEST_FAILED" = true ]; then
-    echo "❌ Integration tests failed - see output above for details"
+    echo "❌ Integration tests failed"
+    if [ -n "$FAILURE_DETAILS" ]; then
+        echo "   $FAILURE_DETAILS"
+    fi
+    echo "📋 Check the detailed output above for specific failure information"
     exit 1
 else
     echo "✅ All integration tests passed successfully!"

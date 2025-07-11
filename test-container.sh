@@ -66,8 +66,8 @@ else
     docker run --rm --name dbus-integration-test-run dbus-integration-test > "$TEMP_OUTPUT" 2>&1
     CONTAINER_EXIT_CODE=$?
     
-    # Show filtered output
-    grep -E "(=== D-Bus Integration Test|✓|❌|ERROR|FAILED|BUILD)" "$TEMP_OUTPUT"
+    # Show filtered output with more test details
+    grep -E "(=== D-Bus Integration Test|✓|❌|ERROR|FAILED|BUILD|Test:|Found [0-9]+ test|Running integration tests|testBasic|ConnectionIntegrationTest)" "$TEMP_OUTPUT"
     
     # Clean up temp file
     rm "$TEMP_OUTPUT"
