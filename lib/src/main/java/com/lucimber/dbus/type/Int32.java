@@ -82,6 +82,6 @@ public final class Int32 extends Number implements Comparable<Int32>, DBusBasicT
 
   @Override
   public int compareTo(final Int32 o) {
-    return delegate - o.delegate;
+    return Integer.compare(delegate, o.delegate);
   }
 }

@@ -72,12 +72,26 @@ public final class UInt64 extends Number implements Comparable<UInt64>, DBusBasi
 
   @Override
   public float floatValue() {
-    return delegate;
+    // Handle unsigned long to float conversion
+    if (delegate >= 0) {
+      return (float) delegate;
+    } else {
+      // For negative values in the signed representation, 
+      // we need to add 2^64 to get the unsigned value
+      return (float) (delegate + Math.pow(2, 64));
+    }
   }
 
   @Override
   public double doubleValue() {
-    return delegate;
+    // Handle unsigned long to double conversion
+    if (delegate >= 0) {
+      return (double) delegate;
+    } else {
+      // For negative values in the signed representation, 
+      // we need to add 2^64 to get the unsigned value
+      return (double) (delegate + Math.pow(2, 64));
+    }
   }
 
   @Override

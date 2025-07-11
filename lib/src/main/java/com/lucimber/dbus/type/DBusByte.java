@@ -57,7 +57,7 @@ public final class DBusByte extends Number implements Comparable<DBusByte>, DBus
 
   @Override
   public String toString() {
-    return Integer.toUnsignedString(delegate);
+    return Integer.toString(Byte.toUnsignedInt(delegate));
   }
 
   @Override
@@ -72,12 +72,12 @@ public final class DBusByte extends Number implements Comparable<DBusByte>, DBus
 
   @Override
   public float floatValue() {
-    return delegate;
+    return Byte.toUnsignedInt(delegate);
   }
 
   @Override
   public double doubleValue() {
-    return delegate;
+    return Byte.toUnsignedInt(delegate);
   }
 
   @Override
