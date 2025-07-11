@@ -47,7 +47,7 @@ public final class UInt16 extends Number implements Comparable<UInt16>, DBusBasi
 
   @Override
   public String toString() {
-    return Integer.toUnsignedString(delegate);
+    return Integer.toString(Short.toUnsignedInt(delegate));
   }
 
   @Override
@@ -72,12 +72,12 @@ public final class UInt16 extends Number implements Comparable<UInt16>, DBusBasi
 
   @Override
   public float floatValue() {
-    return delegate;
+    return Short.toUnsignedInt(delegate);
   }
 
   @Override
   public double doubleValue() {
-    return delegate;
+    return Short.toUnsignedInt(delegate);
   }
 
   @Override

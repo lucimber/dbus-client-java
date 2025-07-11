@@ -82,6 +82,6 @@ public final class Int16 extends Number implements Comparable<Int16>, DBusBasicT
 
   @Override
   public int compareTo(final Int16 o) {
-    return Short.toUnsignedInt(delegate) - Short.toUnsignedInt(o.delegate);
+    return Short.compare(delegate, o.delegate);
   }
 }
