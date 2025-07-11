@@ -218,4 +218,96 @@ final class ArrayEncoderTest {
     ByteBuffer buffer = result.getBuffer();
     assertEquals(numOfBytes, buffer.remaining(), READABLE_BYTES);
   }
+
+  @ParameterizedTest
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
+  void encodeIntegerArrayWithMultipleOffsets(ByteOrder byteOrder) {
+    DBusSignature signature = DBusSignature.valueOf("ai");
+    DBusArray<DBusInt32> array = new DBusArray<>(signature);
+    array.add(DBusInt32.valueOf(1));
+    array.add(DBusInt32.valueOf(2));
+    array.add(DBusInt32.valueOf(3));
+    Encoder<DBusArray<DBusInt32>, ByteBuffer> encoder =
+          new ArrayEncoder<>(byteOrder, signature);
+    
+    // Test with offset 0 (no padding needed)
+    EncoderResult<ByteBuffer> result0 = encoder.encode(array, 0);
+    int expectedBytes0 = 16; // 4 array length + 3*4 element bytes
+    assertEquals(expectedBytes0, result0.getProducedBytes(), "Offset 0: " + PRODUCED_BYTES);
+    
+    // Test with offset 1 (requires 3 bytes padding to reach 4-byte boundary)
+    EncoderResult<ByteBuffer> result1 = encoder.encode(array, 1);
+    int expectedBytes1 = 19; // 3 padding + 4 array length + 3*4 element bytes
+    assertEquals(expectedBytes1, result1.getProducedBytes(), "Offset 1: " + PRODUCED_BYTES);
+    
+    // Test with offset 2 (requires 2 bytes padding to reach 4-byte boundary)
+    EncoderResult<ByteBuffer> result2 = encoder.encode(array, 2);
+    int expectedBytes2 = 18; // 2 padding + 4 array length + 3*4 element bytes
+    assertEquals(expectedBytes2, result2.getProducedBytes(), "Offset 2: " + PRODUCED_BYTES);
+    
+    // Test with offset 3 (requires 1 byte padding to reach 4-byte boundary)
+    EncoderResult<ByteBuffer> result3 = encoder.encode(array, 3);
+    int expectedBytes3 = 17; // 1 padding + 4 array length + 3*4 element bytes
+    assertEquals(expectedBytes3, result3.getProducedBytes(), "Offset 3: " + PRODUCED_BYTES);
+    
+    // Test with offset 4 (no padding needed, already at 4-byte boundary)
+    EncoderResult<ByteBuffer> result4 = encoder.encode(array, 4);
+    int expectedBytes4 = 16; // 0 padding + 4 array length + 3*4 element bytes
+    assertEquals(expectedBytes4, result4.getProducedBytes(), "Offset 4: " + PRODUCED_BYTES);
+  }
+
+  @ParameterizedTest
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
+  void encodeDoubleArrayWithMultipleOffsets(ByteOrder byteOrder) {
+    DBusSignature signature = DBusSignature.valueOf("ad");
+    DBusArray<DBusDouble> array = new DBusArray<>(signature);
+    array.add(DBusDouble.valueOf(1.5));
+    array.add(DBusDouble.valueOf(2.5));
+    Encoder<DBusArray<DBusDouble>, ByteBuffer> encoder =
+          new ArrayEncoder<>(byteOrder, signature);
+    
+    // Test with various offsets - doubles require 8-byte alignment
+    for (int offset = 0; offset < 16; offset++) {
+      EncoderResult<ByteBuffer> result = encoder.encode(array, offset);
+      
+      // Calculate expected padding to reach 8-byte boundary for array content
+      int paddingToArrayLength = (4 - (offset % 4)) % 4;
+      int arrayContentOffset = offset + paddingToArrayLength + 4; // after padding + array length
+      int paddingToDoubleAlignment = (8 - (arrayContentOffset % 8)) % 8;
+      
+      int expectedBytes = paddingToArrayLength + 4 + paddingToDoubleAlignment + 2 * 8;
+      
+      assertEquals(expectedBytes, result.getProducedBytes(), 
+                   "Offset " + offset + ": " + PRODUCED_BYTES);
+      
+      ByteBuffer buffer = result.getBuffer();
+      assertEquals(expectedBytes, buffer.remaining(), 
+                   "Offset " + offset + ": " + READABLE_BYTES);
+    }
+  }
+
+  @ParameterizedTest
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
+  void encodeEmptyArrayWithMultipleOffsets(ByteOrder byteOrder) {
+    DBusSignature signature = DBusSignature.valueOf("ai");
+    DBusArray<DBusInt32> array = new DBusArray<>(signature);
+    Encoder<DBusArray<DBusInt32>, ByteBuffer> encoder =
+          new ArrayEncoder<>(byteOrder, signature);
+    
+    // Test with various offsets for empty array
+    for (int offset = 0; offset < 8; offset++) {
+      EncoderResult<ByteBuffer> result = encoder.encode(array, offset);
+      
+      // Calculate expected padding to reach 4-byte boundary
+      int paddingNeeded = (4 - (offset % 4)) % 4;
+      int expectedBytes = paddingNeeded + 4; // padding + array length (0)
+      
+      assertEquals(expectedBytes, result.getProducedBytes(), 
+                   "Offset " + offset + ": " + PRODUCED_BYTES);
+      
+      ByteBuffer buffer = result.getBuffer();
+      assertEquals(expectedBytes, buffer.remaining(), 
+                   "Offset " + offset + ": " + READABLE_BYTES);
+    }
+  }
 }

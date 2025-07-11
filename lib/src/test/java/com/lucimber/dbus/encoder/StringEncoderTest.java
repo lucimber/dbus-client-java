@@ -134,4 +134,64 @@ final class StringEncoderTest {
     // Trailing NUL byte
     assertEquals((byte) 0x00, buffer.get(), "Trailing NUL byte");
   }
+
+  @ParameterizedTest
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
+  void encodeStringWithMultipleOffsets(ByteOrder byteOrder) {
+    Encoder<DBusString, ByteBuffer> encoder = new StringEncoder(byteOrder);
+    DBusString dbusString = DBusString.valueOf("test");
+    
+    // Test with offset 1 (requires 3 bytes padding to reach 4-byte boundary)
+    EncoderResult<ByteBuffer> result1 = encoder.encode(dbusString, 1);
+    int expectedBytes1 = 12; // 3 padding + 4 length + 4 content + 1 NUL
+    assertEquals(expectedBytes1, result1.getProducedBytes(), "Offset 1: " + PRODUCED_BYTES);
+    
+    // Test with offset 2 (requires 2 bytes padding to reach 4-byte boundary)
+    EncoderResult<ByteBuffer> result2 = encoder.encode(dbusString, 2);
+    int expectedBytes2 = 11; // 2 padding + 4 length + 4 content + 1 NUL
+    assertEquals(expectedBytes2, result2.getProducedBytes(), "Offset 2: " + PRODUCED_BYTES);
+    
+    // Test with offset 3 (requires 1 byte padding to reach 4-byte boundary)
+    EncoderResult<ByteBuffer> result3 = encoder.encode(dbusString, 3);
+    int expectedBytes3 = 10; // 1 padding + 4 length + 4 content + 1 NUL
+    assertEquals(expectedBytes3, result3.getProducedBytes(), "Offset 3: " + PRODUCED_BYTES);
+    
+    // Test with offset 4 (no padding needed, already at 4-byte boundary)
+    EncoderResult<ByteBuffer> result4 = encoder.encode(dbusString, 4);
+    int expectedBytes4 = 9; // 0 padding + 4 length + 4 content + 1 NUL
+    assertEquals(expectedBytes4, result4.getProducedBytes(), "Offset 4: " + PRODUCED_BYTES);
+    
+    // Test with offset 7 (requires 1 byte padding to reach 4-byte boundary)
+    EncoderResult<ByteBuffer> result7 = encoder.encode(dbusString, 7);
+    int expectedBytes7 = 10; // 1 padding + 4 length + 4 content + 1 NUL
+    assertEquals(expectedBytes7, result7.getProducedBytes(), "Offset 7: " + PRODUCED_BYTES);
+    
+    // Test with offset 8 (no padding needed, already at 4-byte boundary)
+    EncoderResult<ByteBuffer> result8 = encoder.encode(dbusString, 8);
+    int expectedBytes8 = 9; // 0 padding + 4 length + 4 content + 1 NUL
+    assertEquals(expectedBytes8, result8.getProducedBytes(), "Offset 8: " + PRODUCED_BYTES);
+  }
+
+  @ParameterizedTest
+  @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
+  void encodeEmptyStringWithMultipleOffsets(ByteOrder byteOrder) {
+    Encoder<DBusString, ByteBuffer> encoder = new StringEncoder(byteOrder);
+    DBusString emptyString = DBusString.valueOf("");
+    
+    // Test with various offsets for empty string
+    for (int offset = 0; offset < 8; offset++) {
+      EncoderResult<ByteBuffer> result = encoder.encode(emptyString, offset);
+      
+      // Calculate expected padding to reach 4-byte boundary
+      int paddingNeeded = (4 - (offset % 4)) % 4;
+      int expectedBytes = paddingNeeded + 4 + 1; // padding + length + NUL
+      
+      assertEquals(expectedBytes, result.getProducedBytes(), 
+                   "Offset " + offset + ": " + PRODUCED_BYTES);
+      
+      ByteBuffer buffer = result.getBuffer();
+      assertEquals(expectedBytes, buffer.remaining(), 
+                   "Offset " + offset + ": " + READABLE_BYTES);
+    }
+  }
 }
