@@ -26,14 +26,14 @@ import java.util.stream.Stream;
 public final class DBusArray<ElementT extends DBusType> implements List<ElementT>, DBusContainerType {
 
   private final ArrayList<ElementT> delegate;
-  private final Signature signature;
+  private final DBusSignature signature;
 
   /**
    * Constructs a new instance.
    *
-   * @param signature a {@link Signature}; must describe an array
+   * @param signature a {@link DBusSignature}; must describe an array
    */
-  public DBusArray(final Signature signature) {
+  public DBusArray(final DBusSignature signature) {
     this.signature = Objects.requireNonNull(signature);
     if (!signature.isArray()) {
       throw new IllegalArgumentException("signature must describe an array");
@@ -168,7 +168,7 @@ public final class DBusArray<ElementT extends DBusType> implements List<ElementT
   }
 
   @Override
-  public Signature getSignature() {
+  public DBusSignature getSignature() {
     return signature;
   }
 

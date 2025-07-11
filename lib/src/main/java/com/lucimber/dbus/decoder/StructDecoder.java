@@ -6,8 +6,8 @@
 package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.Struct;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusStruct;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
@@ -24,28 +24,28 @@ import org.slf4j.MarkerFactory;
  * A decoder which unmarshals a struct from the byte stream format used by D-Bus.
  *
  * @see Decoder
- * @see Struct
+ * @see DBusStruct
  */
-public final class StructDecoder implements Decoder<ByteBuffer, Struct> {
+public final class StructDecoder implements Decoder<ByteBuffer, DBusStruct> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
 
-  private final Signature signature;
+  private final DBusSignature signature;
 
   /**
    * Creates a new instance with mandatory parameters.
    *
-   * @param signature a {@link Signature}; must describe a struct
+   * @param signature a {@link DBusSignature}; must describe a struct
    */
-  public StructDecoder(Signature signature) {
+  public StructDecoder(DBusSignature signature) {
     this.signature = Objects.requireNonNull(signature, "signature must not be null");
     if (!signature.isStruct()) {
       throw new IllegalArgumentException("signature must describe a struct");
     }
   }
 
-  private static void logResult(Signature signature, int offset, int padding, int consumedBytes) {
+  private static void logResult(DBusSignature signature, int offset, int padding, int consumedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "STRUCT: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
       return String.format(s, signature, offset, padding, consumedBytes);
@@ -53,7 +53,7 @@ public final class StructDecoder implements Decoder<ByteBuffer, Struct> {
   }
 
   @Override
-  public DecoderResult<Struct> decode(ByteBuffer buffer, int offset) throws DecoderException {
+  public DecoderResult<DBusStruct> decode(ByteBuffer buffer, int offset) throws DecoderException {
     Objects.requireNonNull(buffer, "buffer must not be null");
     try {
       // Skip alignment padding
@@ -62,20 +62,20 @@ public final class StructDecoder implements Decoder<ByteBuffer, Struct> {
 
       // Decode fields
       List<DBusType> values = new ArrayList<>();
-      Signature subSignature = signature.subContainer();
-      List<Signature> components = (subSignature.getQuantity() == 1)
+      DBusSignature subSignature = signature.subContainer();
+      List<DBusSignature> components = (subSignature.getQuantity() == 1)
               ? List.of(subSignature)
               : subSignature.getChildren();
 
-      for (Signature sig : components) {
+      for (DBusSignature sig : components) {
         int fieldOffset = offset + consumedBytes;
         DecoderResult<? extends DBusType> result = DecoderUtils.decode(sig, buffer, fieldOffset);
         values.add(result.getValue());
         consumedBytes += result.getConsumedBytes();
       }
 
-      Struct struct = new Struct(signature, values);
-      DecoderResult<Struct> result = new DecoderResultImpl<>(consumedBytes, struct);
+      DBusStruct struct = new DBusStruct(signature, values);
+      DecoderResult<DBusStruct> result = new DecoderResultImpl<>(consumedBytes, struct);
       logResult(signature, offset, padding, result.getConsumedBytes());
 
       return result;

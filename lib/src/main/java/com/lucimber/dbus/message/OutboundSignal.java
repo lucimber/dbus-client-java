@@ -7,9 +7,9 @@ package com.lucimber.dbus.message;
 
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusUInt32;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,12 +34,12 @@ public final class OutboundSignal extends AbstractSignal implements OutboundMess
    * @param payload   optional; the message body
    */
   public OutboundSignal(
-          UInt32 serial,
-          ObjectPath path,
+          DBusUInt32 serial,
+          DBusObjectPath path,
           DBusString iface,
           DBusString member,
           DBusString dst,
-          Signature signature,
+          DBusSignature signature,
           List<? extends DBusType> payload) {
     super(serial, path, iface, member, signature, payload);
     this.dst = dst;
@@ -54,17 +54,17 @@ public final class OutboundSignal extends AbstractSignal implements OutboundMess
   public String toString() {
     var s = "OutboundSignal{dst='%s', serial='%s', path='%s', iface='%s', member='%s', sig='%s'}";
     var dst = getDestination().map(DBusString::toString).orElse("");
-    var sig = getSignature().map(Signature::toString).orElse("");
+    var sig = getSignature().map(DBusSignature::toString).orElse("");
     return String.format(s, dst, getSerial(), getObjectPath(), getInterfaceName(), getMember(), sig);
   }
 
   public static class Builder {
-    private UInt32 serial;
-    private ObjectPath path;
+    private DBusUInt32 serial;
+    private DBusObjectPath path;
     private DBusString iface;
     private DBusString member;
     private DBusString dst;
-    private Signature signature;
+    private DBusSignature signature;
     private List<? extends DBusType> payload;
 
     private Builder() {
@@ -74,12 +74,12 @@ public final class OutboundSignal extends AbstractSignal implements OutboundMess
       return new Builder();
     }
 
-    public Builder withSerial(UInt32 serial) {
+    public Builder withSerial(DBusUInt32 serial) {
       this.serial = serial;
       return this;
     }
 
-    public Builder withObjectPath(ObjectPath path) {
+    public Builder withObjectPath(DBusObjectPath path) {
       this.path = path;
       return this;
     }
@@ -99,7 +99,7 @@ public final class OutboundSignal extends AbstractSignal implements OutboundMess
       return this;
     }
 
-    public Builder withBody(Signature signature, List<? extends DBusType> payload) {
+    public Builder withBody(DBusSignature signature, List<? extends DBusType> payload) {
       this.signature = signature;
       this.payload = payload;
       return this;

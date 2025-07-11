@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-final class Int16Test {
+final class DBusInt16Test {
 
     @Test
     void createWithMinValue() {
         short min = Short.MIN_VALUE; // -32768
-        Int16 int16 = Int16.valueOf(min);
+        DBusInt16 int16 = DBusInt16.valueOf(min);
         
         assertEquals(min, int16.shortValue());
         assertEquals(min, int16.getDelegate());
@@ -24,7 +24,7 @@ final class Int16Test {
     @Test
     void createWithMaxValue() {
         short max = Short.MAX_VALUE; // 32767
-        Int16 int16 = Int16.valueOf(max);
+        DBusInt16 int16 = DBusInt16.valueOf(max);
         
         assertEquals(max, int16.shortValue());
         assertEquals(max, int16.getDelegate());
@@ -34,7 +34,7 @@ final class Int16Test {
     @Test
     void createWithZero() {
         short zero = 0;
-        Int16 int16 = Int16.valueOf(zero);
+        DBusInt16 int16 = DBusInt16.valueOf(zero);
         
         assertEquals(zero, int16.shortValue());
         assertEquals(zero, int16.getDelegate());
@@ -44,7 +44,7 @@ final class Int16Test {
     @Test
     void createWithPositiveValue() {
         short positive = 12345;
-        Int16 int16 = Int16.valueOf(positive);
+        DBusInt16 int16 = DBusInt16.valueOf(positive);
         
         assertEquals(positive, int16.shortValue());
         assertEquals(positive, int16.getDelegate());
@@ -54,7 +54,7 @@ final class Int16Test {
     @Test
     void createWithNegativeValue() {
         short negative = -12345;
-        Int16 int16 = Int16.valueOf(negative);
+        DBusInt16 int16 = DBusInt16.valueOf(negative);
         
         assertEquals(negative, int16.shortValue());
         assertEquals(negative, int16.getDelegate());
@@ -63,9 +63,9 @@ final class Int16Test {
 
     @Test
     void testEquals() {
-        Int16 int1 = Int16.valueOf((short) 123);
-        Int16 int2 = Int16.valueOf((short) 123);
-        Int16 int3 = Int16.valueOf((short) 456);
+        DBusInt16 int1 = DBusInt16.valueOf((short) 123);
+        DBusInt16 int2 = DBusInt16.valueOf((short) 123);
+        DBusInt16 int3 = DBusInt16.valueOf((short) 456);
         
         assertEquals(int1, int2);
         assertNotEquals(int1, int3);
@@ -78,9 +78,9 @@ final class Int16Test {
 
     @Test
     void testHashCode() {
-        Int16 int1 = Int16.valueOf((short) 123);
-        Int16 int2 = Int16.valueOf((short) 123);
-        Int16 int3 = Int16.valueOf((short) 456);
+        DBusInt16 int1 = DBusInt16.valueOf((short) 123);
+        DBusInt16 int2 = DBusInt16.valueOf((short) 123);
+        DBusInt16 int3 = DBusInt16.valueOf((short) 456);
         
         assertEquals(int1.hashCode(), int2.hashCode());
         assertNotEquals(int1.hashCode(), int3.hashCode());
@@ -88,19 +88,19 @@ final class Int16Test {
 
     @Test
     void testToString() {
-        assertEquals("123", Int16.valueOf((short) 123).toString());
-        assertEquals("-123", Int16.valueOf((short) -123).toString());
-        assertEquals("0", Int16.valueOf((short) 0).toString());
-        assertEquals("32767", Int16.valueOf(Short.MAX_VALUE).toString());
-        assertEquals("-32768", Int16.valueOf(Short.MIN_VALUE).toString());
+        assertEquals("123", DBusInt16.valueOf((short) 123).toString());
+        assertEquals("-123", DBusInt16.valueOf((short) -123).toString());
+        assertEquals("0", DBusInt16.valueOf((short) 0).toString());
+        assertEquals("32767", DBusInt16.valueOf(Short.MAX_VALUE).toString());
+        assertEquals("-32768", DBusInt16.valueOf(Short.MIN_VALUE).toString());
     }
 
     @Test
     void testCompareTo() {
-        Int16 small = Int16.valueOf((short) 10);
-        Int16 medium = Int16.valueOf((short) 20);
-        Int16 large = Int16.valueOf((short) 30);
-        Int16 duplicate = Int16.valueOf((short) 20);
+        DBusInt16 small = DBusInt16.valueOf((short) 10);
+        DBusInt16 medium = DBusInt16.valueOf((short) 20);
+        DBusInt16 large = DBusInt16.valueOf((short) 30);
+        DBusInt16 duplicate = DBusInt16.valueOf((short) 20);
         
         assertTrue(small.compareTo(medium) < 0);
         assertTrue(medium.compareTo(large) < 0);
@@ -112,9 +112,9 @@ final class Int16Test {
 
     @Test
     void testCompareToWithExtremeValues() {
-        Int16 min = Int16.valueOf(Short.MIN_VALUE);
-        Int16 max = Int16.valueOf(Short.MAX_VALUE);
-        Int16 zero = Int16.valueOf((short) 0);
+        DBusInt16 min = DBusInt16.valueOf(Short.MIN_VALUE);
+        DBusInt16 max = DBusInt16.valueOf(Short.MAX_VALUE);
+        DBusInt16 zero = DBusInt16.valueOf((short) 0);
         
         assertTrue(min.compareTo(max) < 0);
         assertTrue(max.compareTo(min) > 0);
@@ -126,7 +126,7 @@ final class Int16Test {
 
     @Test
     void testNumberMethods() {
-        Int16 int16 = Int16.valueOf((short) 12345);
+        DBusInt16 int16 = DBusInt16.valueOf((short) 12345);
         
         assertEquals(12345, int16.intValue());
         assertEquals(12345L, int16.longValue());
@@ -138,7 +138,7 @@ final class Int16Test {
 
     @Test
     void testNumberMethodsWithNegativeValues() {
-        Int16 int16 = Int16.valueOf((short) -12345);
+        DBusInt16 int16 = DBusInt16.valueOf((short) -12345);
         
         assertEquals(-12345, int16.intValue());
         assertEquals(-12345L, int16.longValue());
@@ -151,14 +151,14 @@ final class Int16Test {
     @Test
     void testNumberMethodsWithExtremeValues() {
         // Test with MIN_VALUE
-        Int16 min = Int16.valueOf(Short.MIN_VALUE);
+        DBusInt16 min = DBusInt16.valueOf(Short.MIN_VALUE);
         assertEquals(Short.MIN_VALUE, min.intValue());
         assertEquals((long) Short.MIN_VALUE, min.longValue());
         assertEquals((float) Short.MIN_VALUE, min.floatValue(), 0.0f);
         assertEquals((double) Short.MIN_VALUE, min.doubleValue(), 0.0);
         
         // Test with MAX_VALUE
-        Int16 max = Int16.valueOf(Short.MAX_VALUE);
+        DBusInt16 max = DBusInt16.valueOf(Short.MAX_VALUE);
         assertEquals(Short.MAX_VALUE, max.intValue());
         assertEquals((long) Short.MAX_VALUE, max.longValue());
         assertEquals((float) Short.MAX_VALUE, max.floatValue(), 0.0f);
@@ -168,7 +168,7 @@ final class Int16Test {
     @Test
     void testGetDelegate() {
         short value = 12345;
-        Int16 int16 = Int16.valueOf(value);
+        DBusInt16 int16 = DBusInt16.valueOf(value);
         
         assertEquals(Short.valueOf(value), int16.getDelegate());
         assertEquals(value, int16.getDelegate().shortValue());
@@ -176,18 +176,18 @@ final class Int16Test {
 
     @Test
     void testGetType() {
-        assertEquals(Type.INT16, Int16.valueOf((short) 0).getType());
-        assertEquals(Type.INT16, Int16.valueOf(Short.MIN_VALUE).getType());
-        assertEquals(Type.INT16, Int16.valueOf(Short.MAX_VALUE).getType());
+        assertEquals(Type.INT16, DBusInt16.valueOf((short) 0).getType());
+        assertEquals(Type.INT16, DBusInt16.valueOf(Short.MIN_VALUE).getType());
+        assertEquals(Type.INT16, DBusInt16.valueOf(Short.MAX_VALUE).getType());
     }
 
     @Test
     void testBoundaryValues() {
         // Test values at the boundary
-        Int16 minValue = Int16.valueOf(Short.MIN_VALUE);
-        Int16 maxValue = Int16.valueOf(Short.MAX_VALUE);
-        Int16 minPlusOne = Int16.valueOf((short) (Short.MIN_VALUE + 1));
-        Int16 maxMinusOne = Int16.valueOf((short) (Short.MAX_VALUE - 1));
+        DBusInt16 minValue = DBusInt16.valueOf(Short.MIN_VALUE);
+        DBusInt16 maxValue = DBusInt16.valueOf(Short.MAX_VALUE);
+        DBusInt16 minPlusOne = DBusInt16.valueOf((short) (Short.MIN_VALUE + 1));
+        DBusInt16 maxMinusOne = DBusInt16.valueOf((short) (Short.MAX_VALUE - 1));
         
         assertEquals(Short.MIN_VALUE, minValue.shortValue());
         assertEquals(Short.MAX_VALUE, maxValue.shortValue());
@@ -201,7 +201,7 @@ final class Int16Test {
     @Test
     void testImmutability() {
         short original = 12345;
-        Int16 int16 = Int16.valueOf(original);
+        DBusInt16 int16 = DBusInt16.valueOf(original);
         
         // Verify the delegate is the expected value
         assertEquals(original, int16.getDelegate().shortValue());
@@ -214,9 +214,9 @@ final class Int16Test {
 
     @Test
     void testCompareToIsConsistentWithEquals() {
-        Int16 int1 = Int16.valueOf((short) 123);
-        Int16 int2 = Int16.valueOf((short) 123);
-        Int16 int3 = Int16.valueOf((short) 456);
+        DBusInt16 int1 = DBusInt16.valueOf((short) 123);
+        DBusInt16 int2 = DBusInt16.valueOf((short) 123);
+        DBusInt16 int3 = DBusInt16.valueOf((short) 456);
         
         // If compareTo returns 0, equals should return true
         assertEquals(0, int1.compareTo(int2));

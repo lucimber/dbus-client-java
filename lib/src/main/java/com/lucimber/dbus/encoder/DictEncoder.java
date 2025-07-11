@@ -7,11 +7,11 @@ package com.lucimber.dbus.encoder;
 
 import com.lucimber.dbus.type.DBusBasicType;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Dict;
-import com.lucimber.dbus.type.DictEntry;
-import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.DBusDict;
+import com.lucimber.dbus.type.DBusDictEntry;
+import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.Type;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -28,16 +28,16 @@ import org.slf4j.MarkerFactory;
  * @param <KeyT>   The data type of the key.
  * @param <ValueT> The data type of the value.
  * @see Encoder
- * @see Dict
+ * @see DBusDict
  */
 public final class DictEncoder<KeyT extends DBusBasicType, ValueT extends DBusType>
-        implements Encoder<Dict<KeyT, ValueT>, ByteBuffer> {
+        implements Encoder<DBusDict<KeyT, ValueT>, ByteBuffer> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
 
   private final ByteOrder order;
-  private final Signature signature;
+  private final DBusSignature signature;
 
   /**
    * Constructs a new instance.
@@ -45,12 +45,12 @@ public final class DictEncoder<KeyT extends DBusBasicType, ValueT extends DBusTy
    * @param order     The byte order of the produced bytes.
    * @param signature The full signature of the dictionary.
    */
-  public DictEncoder(ByteOrder order, Signature signature) {
+  public DictEncoder(ByteOrder order, DBusSignature signature) {
     this.order = Objects.requireNonNull(order, "order must not be null");
     this.signature = Objects.requireNonNull(signature, "signature must not be null");
   }
 
-  private static void logResult(Signature signature, int offset, int padding, int producedBytes) {
+  private static void logResult(DBusSignature signature, int offset, int padding, int producedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "DICT: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
       return String.format(s, signature, offset, padding, producedBytes);
@@ -58,7 +58,7 @@ public final class DictEncoder<KeyT extends DBusBasicType, ValueT extends DBusTy
   }
 
   @Override
-  public EncoderResult<ByteBuffer> encode(Dict<KeyT, ValueT> dict, int offset) throws EncoderException {
+  public EncoderResult<ByteBuffer> encode(DBusDict<KeyT, ValueT> dict, int offset) throws EncoderException {
     Objects.requireNonNull(dict, "dict must not be null");
     try {
       int padding = EncoderUtils.calculateAlignmentPadding(Type.ARRAY.getAlignment(), offset);
@@ -73,7 +73,7 @@ public final class DictEncoder<KeyT extends DBusBasicType, ValueT extends DBusTy
       int typePadding = EncoderUtils.calculateAlignmentPadding(Type.DICT_ENTRY.getAlignment(), entryOffsetBase);
       int entryBytesTotal = 0;
 
-      for (DictEntry<KeyT, ValueT> entry : dict.dictionaryEntrySet()) {
+      for (DBusDictEntry<KeyT, ValueT> entry : dict.dictionaryEntrySet()) {
         int entryOffset = entryOffsetBase + typePadding + entryBytesTotal;
         EncoderResult<ByteBuffer> encoded = entryEncoder.encode(entry, entryOffset);
         encodedEntries[entryIndex] = encoded.getBuffer();
@@ -83,9 +83,9 @@ public final class DictEncoder<KeyT extends DBusBasicType, ValueT extends DBusTy
 
       // Encode the size field
       int fullArrayLength = entryBytesTotal;
-      Encoder<UInt32, ByteBuffer> lengthEncoder = new UInt32Encoder(order);
+      Encoder<DBusUInt32, ByteBuffer> lengthEncoder = new UInt32Encoder(order);
       EncoderResult<ByteBuffer> lengthResult = lengthEncoder
-              .encode(UInt32.valueOf(fullArrayLength), offset + padding);
+              .encode(DBusUInt32.valueOf(fullArrayLength), offset + padding);
       ByteBuffer lengthBuffer = lengthResult.getBuffer();
 
       // Compose final buffer

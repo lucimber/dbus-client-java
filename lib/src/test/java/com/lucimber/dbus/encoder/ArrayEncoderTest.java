@@ -22,9 +22,9 @@ final class ArrayEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeEmptyShortArray(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("an");
-    DBusArray<Int16> array = new DBusArray<>(signature);
-    Encoder<DBusArray<Int16>, ByteBuffer> encoder =
+    DBusSignature signature = DBusSignature.valueOf("an");
+    DBusArray<DBusInt16> array = new DBusArray<>(signature);
+    Encoder<DBusArray<DBusInt16>, ByteBuffer> encoder =
           new ArrayEncoder<>(byteOrder, signature);
     EncoderResult<ByteBuffer> result = encoder.encode(array, 0);
     int numOfBytes = 4;
@@ -36,7 +36,7 @@ final class ArrayEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeEmptyBooleanArray(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("ab");
+    DBusSignature signature = DBusSignature.valueOf("ab");
     DBusArray<DBusBoolean> array = new DBusArray<>(signature);
     Encoder<DBusArray<DBusBoolean>, ByteBuffer> encoder =
           new ArrayEncoder<>(byteOrder, signature);
@@ -50,9 +50,9 @@ final class ArrayEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeEmptyLongArray(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("ax");
-    DBusArray<Int64> array = new DBusArray<>(signature);
-    Encoder<DBusArray<Int64>, ByteBuffer> encoder =
+    DBusSignature signature = DBusSignature.valueOf("ax");
+    DBusArray<DBusInt64> array = new DBusArray<>(signature);
+    Encoder<DBusArray<DBusInt64>, ByteBuffer> encoder =
           new ArrayEncoder<>(byteOrder, signature);
     EncoderResult<ByteBuffer> result = encoder.encode(array, 0);
     int expectedBytes = 8;
@@ -64,7 +64,7 @@ final class ArrayEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeBooleanArray(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("ab");
+    DBusSignature signature = DBusSignature.valueOf("ab");
     DBusArray<DBusBoolean> array = new DBusArray<>(signature);
     array.add(DBusBoolean.valueOf(true));
     array.add(DBusBoolean.valueOf(false));
@@ -81,7 +81,7 @@ final class ArrayEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeByteArray(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("ay");
+    DBusSignature signature = DBusSignature.valueOf("ay");
     DBusArray<DBusByte> array = new DBusArray<>(signature);
     byte one = 0x01;
     array.add(DBusByte.valueOf(one));
@@ -105,7 +105,7 @@ final class ArrayEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeDoubleArray(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("ad");
+    DBusSignature signature = DBusSignature.valueOf("ad");
     DBusArray<DBusDouble> array = new DBusArray<>(signature);
     array.add(DBusDouble.valueOf(Double.MIN_VALUE));
     array.add(DBusDouble.valueOf(Double.MAX_VALUE));
@@ -123,13 +123,13 @@ final class ArrayEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeIntegerArray(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("ai");
-    DBusArray<Int32> array = new DBusArray<>(signature);
-    array.add(Int32.valueOf(Integer.MIN_VALUE));
-    array.add(Int32.valueOf(Integer.MAX_VALUE));
-    array.add(Int32.valueOf(Integer.MIN_VALUE));
-    array.add(Int32.valueOf(Integer.MAX_VALUE));
-    Encoder<DBusArray<Int32>, ByteBuffer> encoder =
+    DBusSignature signature = DBusSignature.valueOf("ai");
+    DBusArray<DBusInt32> array = new DBusArray<>(signature);
+    array.add(DBusInt32.valueOf(Integer.MIN_VALUE));
+    array.add(DBusInt32.valueOf(Integer.MAX_VALUE));
+    array.add(DBusInt32.valueOf(Integer.MIN_VALUE));
+    array.add(DBusInt32.valueOf(Integer.MAX_VALUE));
+    Encoder<DBusArray<DBusInt32>, ByteBuffer> encoder =
           new ArrayEncoder<>(byteOrder, signature);
     EncoderResult<ByteBuffer> result = encoder.encode(array, 0);
     int numOfBytes = 20;
@@ -141,11 +141,11 @@ final class ArrayEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeLongArray(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("at");
-    DBusArray<UInt64> array = new DBusArray<>(signature);
-    array.add(UInt64.valueOf(Long.MIN_VALUE));
-    array.add(UInt64.valueOf(Long.MAX_VALUE));
-    Encoder<DBusArray<UInt64>, ByteBuffer> encoder =
+    DBusSignature signature = DBusSignature.valueOf("at");
+    DBusArray<DBusUInt64> array = new DBusArray<>(signature);
+    array.add(DBusUInt64.valueOf(Long.MIN_VALUE));
+    array.add(DBusUInt64.valueOf(Long.MAX_VALUE));
+    Encoder<DBusArray<DBusUInt64>, ByteBuffer> encoder =
           new ArrayEncoder<>(byteOrder, signature);
     EncoderResult<ByteBuffer> result = encoder.encode(array, 0);
     int numOfBytes = 24;
@@ -157,12 +157,12 @@ final class ArrayEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeObjectPathArray(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("ao");
-    DBusArray<ObjectPath> array = new DBusArray<>(signature);
-    array.add(ObjectPath.valueOf("/abc1")); // 4 SIZE + 5 CHARS + 1 NUL + 2 PADDING = 12
-    array.add(ObjectPath.valueOf("/def23")); // 4 SIZE + 6 CHARS + 1 NUL + 1 PADDING = 12
-    array.add(ObjectPath.valueOf("/_9h")); // 4 SIZE + 4 CHARS + 1 NUL + 0 PADDING = 9
-    Encoder<DBusArray<ObjectPath>, ByteBuffer> encoder = new ArrayEncoder<>(byteOrder, signature);
+    DBusSignature signature = DBusSignature.valueOf("ao");
+    DBusArray<DBusObjectPath> array = new DBusArray<>(signature);
+    array.add(DBusObjectPath.valueOf("/abc1")); // 4 SIZE + 5 CHARS + 1 NUL + 2 PADDING = 12
+    array.add(DBusObjectPath.valueOf("/def23")); // 4 SIZE + 6 CHARS + 1 NUL + 1 PADDING = 12
+    array.add(DBusObjectPath.valueOf("/_9h")); // 4 SIZE + 4 CHARS + 1 NUL + 0 PADDING = 9
+    Encoder<DBusArray<DBusObjectPath>, ByteBuffer> encoder = new ArrayEncoder<>(byteOrder, signature);
     EncoderResult<ByteBuffer> result = encoder.encode(array, 0);
     int numOfBytes = 37;
     assertEquals(numOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
@@ -173,11 +173,11 @@ final class ArrayEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeShortArray(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("aq");
-    DBusArray<UInt16> array = new DBusArray<>(signature);
-    array.add(UInt16.valueOf(Short.MIN_VALUE));
-    array.add(UInt16.valueOf(Short.MAX_VALUE));
-    Encoder<DBusArray<UInt16>, ByteBuffer> encoder = new ArrayEncoder<>(byteOrder, signature);
+    DBusSignature signature = DBusSignature.valueOf("aq");
+    DBusArray<DBusUInt16> array = new DBusArray<>(signature);
+    array.add(DBusUInt16.valueOf(Short.MIN_VALUE));
+    array.add(DBusUInt16.valueOf(Short.MAX_VALUE));
+    Encoder<DBusArray<DBusUInt16>, ByteBuffer> encoder = new ArrayEncoder<>(byteOrder, signature);
     EncoderResult<ByteBuffer> result = encoder.encode(array, 0);
     int numOfBytes = 8;
     assertEquals(numOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
@@ -188,12 +188,12 @@ final class ArrayEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSignatureArray(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("ag");
-    DBusArray<Signature> array = new DBusArray<>(signature);
-    array.add(Signature.valueOf("(id)")); // 1 SIZE + 4 CHARS + 1 NUL = 6
-    array.add(Signature.valueOf("ayv")); // 1 SIZE + 3 CHARS + 1 NUL = 5
-    array.add(Signature.valueOf("ba{yi}v")); // 1 SIZE + 7 CHARS + 1 NUL = 9
-    Encoder<DBusArray<Signature>, ByteBuffer> encoder =
+    DBusSignature signature = DBusSignature.valueOf("ag");
+    DBusArray<DBusSignature> array = new DBusArray<>(signature);
+    array.add(DBusSignature.valueOf("(id)")); // 1 SIZE + 4 CHARS + 1 NUL = 6
+    array.add(DBusSignature.valueOf("ayv")); // 1 SIZE + 3 CHARS + 1 NUL = 5
+    array.add(DBusSignature.valueOf("ba{yi}v")); // 1 SIZE + 7 CHARS + 1 NUL = 9
+    Encoder<DBusArray<DBusSignature>, ByteBuffer> encoder =
           new ArrayEncoder<>(byteOrder, signature);
     EncoderResult<ByteBuffer> result = encoder.encode(array, 0);
     int numOfBytes = 24;
@@ -205,7 +205,7 @@ final class ArrayEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeStringArray(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("as");
+    DBusSignature signature = DBusSignature.valueOf("as");
     DBusArray<DBusString> array = new DBusArray<>(signature);
     array.add(DBusString.valueOf("abc1")); // 4 SIZE + 4 CHARS + 1 NUL + 3 PADDING = 12
     array.add(DBusString.valueOf("def23")); // 4 SIZE + 5 CHARS + 1 NUL + 2 PADDING = 12

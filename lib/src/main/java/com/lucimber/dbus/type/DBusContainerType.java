@@ -20,9 +20,9 @@ public interface DBusContainerType extends DBusType {
    * Gets the signature of this container type.
    * The returned signature describes the container and its content.
    *
-   * @return a {@link Signature}
+   * @return a {@link DBusSignature}
    */
-  Signature getSignature();
+  DBusSignature getSignature();
 
   /**
    * Gets the wrapped value of this container type.

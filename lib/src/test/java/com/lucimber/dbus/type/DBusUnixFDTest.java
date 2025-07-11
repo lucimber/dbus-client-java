@@ -11,11 +11,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-final class UnixFdTest {
+final class DBusUnixFDTest {
 
     @Test
     void createUnixFdWithZero() {
-        UnixFd unixFd = UnixFd.valueOf(0);
+        DBusUnixFD unixFd = DBusUnixFD.valueOf(0);
         
         assertEquals(0, unixFd.getDelegate().intValue());
         assertEquals(Type.UNIX_FD, unixFd.getType());
@@ -25,7 +25,7 @@ final class UnixFdTest {
     @Test
     void createUnixFdWithPositiveValue() {
         int value = 42;
-        UnixFd unixFd = UnixFd.valueOf(value);
+        DBusUnixFD unixFd = DBusUnixFD.valueOf(value);
         
         assertEquals(value, unixFd.getDelegate().intValue());
         assertEquals(Type.UNIX_FD, unixFd.getType());
@@ -36,7 +36,7 @@ final class UnixFdTest {
     void createUnixFdWithLargeUnsignedValue() {
         // Test with a value that would be negative in signed representation
         int value = -1; // Represents 4294967295 in unsigned
-        UnixFd unixFd = UnixFd.valueOf(value);
+        DBusUnixFD unixFd = DBusUnixFD.valueOf(value);
         
         assertEquals(value, unixFd.getDelegate().intValue());
         assertEquals(Type.UNIX_FD, unixFd.getType());
@@ -49,7 +49,7 @@ final class UnixFdTest {
         int[] commonFds = {0, 1, 2, 3, 4, 5, 10, 20, 100, 255, 256, 1024};
         
         for (int fd : commonFds) {
-            UnixFd unixFd = UnixFd.valueOf(fd);
+            DBusUnixFD unixFd = DBusUnixFD.valueOf(fd);
             assertEquals(fd, unixFd.getDelegate().intValue());
             assertEquals(Type.UNIX_FD, unixFd.getType());
             assertEquals(Integer.toUnsignedString(fd), unixFd.toString());
@@ -60,7 +60,7 @@ final class UnixFdTest {
     @ValueSource(ints = {0, 1, 2, 3, 42, 100, 255, 256, 1024, 65535, 65536, 
                         Integer.MAX_VALUE, -1, -100, Integer.MIN_VALUE})
     void createUnixFdWithVariousValues(int value) {
-        UnixFd unixFd = UnixFd.valueOf(value);
+        DBusUnixFD unixFd = DBusUnixFD.valueOf(value);
         
         assertEquals(value, unixFd.getDelegate().intValue());
         assertEquals(Type.UNIX_FD, unixFd.getType());
@@ -69,9 +69,9 @@ final class UnixFdTest {
 
     @Test
     void testEquals() {
-        UnixFd fd1 = UnixFd.valueOf(42);
-        UnixFd fd2 = UnixFd.valueOf(42);
-        UnixFd fd3 = UnixFd.valueOf(43);
+        DBusUnixFD fd1 = DBusUnixFD.valueOf(42);
+        DBusUnixFD fd2 = DBusUnixFD.valueOf(42);
+        DBusUnixFD fd3 = DBusUnixFD.valueOf(43);
         
         assertEquals(fd1, fd2);
         assertNotEquals(fd1, fd3);
@@ -84,9 +84,9 @@ final class UnixFdTest {
 
     @Test
     void testEqualsWithUnsignedValues() {
-        UnixFd fd1 = UnixFd.valueOf(-1); // Max unsigned value
-        UnixFd fd2 = UnixFd.valueOf(-1);
-        UnixFd fd3 = UnixFd.valueOf(-2);
+        DBusUnixFD fd1 = DBusUnixFD.valueOf(-1); // Max unsigned value
+        DBusUnixFD fd2 = DBusUnixFD.valueOf(-1);
+        DBusUnixFD fd3 = DBusUnixFD.valueOf(-2);
         
         assertEquals(fd1, fd2);
         assertNotEquals(fd1, fd3);
@@ -94,9 +94,9 @@ final class UnixFdTest {
 
     @Test
     void testHashCode() {
-        UnixFd fd1 = UnixFd.valueOf(42);
-        UnixFd fd2 = UnixFd.valueOf(42);
-        UnixFd fd3 = UnixFd.valueOf(43);
+        DBusUnixFD fd1 = DBusUnixFD.valueOf(42);
+        DBusUnixFD fd2 = DBusUnixFD.valueOf(42);
+        DBusUnixFD fd3 = DBusUnixFD.valueOf(43);
         
         assertEquals(fd1.hashCode(), fd2.hashCode());
         assertNotEquals(fd1.hashCode(), fd3.hashCode());
@@ -104,19 +104,19 @@ final class UnixFdTest {
 
     @Test
     void testToString() {
-        assertEquals("0", UnixFd.valueOf(0).toString());
-        assertEquals("1", UnixFd.valueOf(1).toString());
-        assertEquals("2", UnixFd.valueOf(2).toString());
-        assertEquals("42", UnixFd.valueOf(42).toString());
-        assertEquals("2147483647", UnixFd.valueOf(Integer.MAX_VALUE).toString());
-        assertEquals("4294967295", UnixFd.valueOf(-1).toString()); // Max unsigned
-        assertEquals("2147483648", UnixFd.valueOf(Integer.MIN_VALUE).toString()); // 2^31 unsigned
+        assertEquals("0", DBusUnixFD.valueOf(0).toString());
+        assertEquals("1", DBusUnixFD.valueOf(1).toString());
+        assertEquals("2", DBusUnixFD.valueOf(2).toString());
+        assertEquals("42", DBusUnixFD.valueOf(42).toString());
+        assertEquals("2147483647", DBusUnixFD.valueOf(Integer.MAX_VALUE).toString());
+        assertEquals("4294967295", DBusUnixFD.valueOf(-1).toString()); // Max unsigned
+        assertEquals("2147483648", DBusUnixFD.valueOf(Integer.MIN_VALUE).toString()); // 2^31 unsigned
     }
 
     @Test
     void testGetDelegate() {
         int value = 42;
-        UnixFd unixFd = UnixFd.valueOf(value);
+        DBusUnixFD unixFd = DBusUnixFD.valueOf(value);
         
         assertEquals(Integer.valueOf(value), unixFd.getDelegate());
         assertEquals(value, unixFd.getDelegate().intValue());
@@ -124,20 +124,20 @@ final class UnixFdTest {
 
     @Test
     void testGetType() {
-        assertEquals(Type.UNIX_FD, UnixFd.valueOf(0).getType());
-        assertEquals(Type.UNIX_FD, UnixFd.valueOf(1).getType());
-        assertEquals(Type.UNIX_FD, UnixFd.valueOf(2).getType());
-        assertEquals(Type.UNIX_FD, UnixFd.valueOf(Integer.MAX_VALUE).getType());
-        assertEquals(Type.UNIX_FD, UnixFd.valueOf(Integer.MIN_VALUE).getType());
-        assertEquals(Type.UNIX_FD, UnixFd.valueOf(-1).getType());
+        assertEquals(Type.UNIX_FD, DBusUnixFD.valueOf(0).getType());
+        assertEquals(Type.UNIX_FD, DBusUnixFD.valueOf(1).getType());
+        assertEquals(Type.UNIX_FD, DBusUnixFD.valueOf(2).getType());
+        assertEquals(Type.UNIX_FD, DBusUnixFD.valueOf(Integer.MAX_VALUE).getType());
+        assertEquals(Type.UNIX_FD, DBusUnixFD.valueOf(Integer.MIN_VALUE).getType());
+        assertEquals(Type.UNIX_FD, DBusUnixFD.valueOf(-1).getType());
     }
 
     @Test
     void testStandardFileDescriptors() {
         // Test standard file descriptors
-        UnixFd stdin = UnixFd.valueOf(0);
-        UnixFd stdout = UnixFd.valueOf(1);
-        UnixFd stderr = UnixFd.valueOf(2);
+        DBusUnixFD stdin = DBusUnixFD.valueOf(0);
+        DBusUnixFD stdout = DBusUnixFD.valueOf(1);
+        DBusUnixFD stderr = DBusUnixFD.valueOf(2);
         
         assertEquals(0, stdin.getDelegate().intValue());
         assertEquals(1, stdout.getDelegate().intValue());
@@ -155,12 +155,12 @@ final class UnixFdTest {
     @Test
     void testBoundaryValues() {
         // Test values at unsigned 32-bit boundaries
-        UnixFd zero = UnixFd.valueOf(0);
-        UnixFd one = UnixFd.valueOf(1);
-        UnixFd signedMax = UnixFd.valueOf(Integer.MAX_VALUE);
-        UnixFd signedMaxPlusOne = UnixFd.valueOf(Integer.MIN_VALUE); // 2^31
-        UnixFd unsignedMaxMinusOne = UnixFd.valueOf(-2);
-        UnixFd unsignedMax = UnixFd.valueOf(-1);
+        DBusUnixFD zero = DBusUnixFD.valueOf(0);
+        DBusUnixFD one = DBusUnixFD.valueOf(1);
+        DBusUnixFD signedMax = DBusUnixFD.valueOf(Integer.MAX_VALUE);
+        DBusUnixFD signedMaxPlusOne = DBusUnixFD.valueOf(Integer.MIN_VALUE); // 2^31
+        DBusUnixFD unsignedMaxMinusOne = DBusUnixFD.valueOf(-2);
+        DBusUnixFD unsignedMax = DBusUnixFD.valueOf(-1);
         
         assertEquals(0, zero.getDelegate().intValue());
         assertEquals(1, one.getDelegate().intValue());
@@ -180,7 +180,7 @@ final class UnixFdTest {
     @Test
     void testImmutability() {
         int original = 42;
-        UnixFd unixFd = UnixFd.valueOf(original);
+        DBusUnixFD unixFd = DBusUnixFD.valueOf(original);
         
         // Verify the delegate is the expected value
         assertEquals(original, unixFd.getDelegate().intValue());
@@ -196,8 +196,8 @@ final class UnixFdTest {
         // Per D-Bus specification: UNIX_FD is a 32-bit unsigned integer representing a file descriptor
         
         // Test that full range of 32-bit unsigned integers is supported
-        UnixFd minValue = UnixFd.valueOf(0);
-        UnixFd maxValue = UnixFd.valueOf(-1); // 4294967295 (2^32 - 1)
+        DBusUnixFD minValue = DBusUnixFD.valueOf(0);
+        DBusUnixFD maxValue = DBusUnixFD.valueOf(-1); // 4294967295 (2^32 - 1)
         
         assertEquals(0, minValue.getDelegate().intValue());
         assertEquals(-1, maxValue.getDelegate().intValue()); // Raw signed representation
@@ -207,16 +207,16 @@ final class UnixFdTest {
         assertEquals(Type.UNIX_FD, maxValue.getType());
         
         // Test common file descriptor values
-        UnixFd[] commonFds = {
-            UnixFd.valueOf(0),   // stdin
-            UnixFd.valueOf(1),   // stdout
-            UnixFd.valueOf(2),   // stderr
-            UnixFd.valueOf(3),   // first user fd
-            UnixFd.valueOf(255), // common upper limit for some systems
-            UnixFd.valueOf(1024) // common ulimit value
+        DBusUnixFD[] commonFds = {
+            DBusUnixFD.valueOf(0),   // stdin
+            DBusUnixFD.valueOf(1),   // stdout
+            DBusUnixFD.valueOf(2),   // stderr
+            DBusUnixFD.valueOf(3),   // first user fd
+            DBusUnixFD.valueOf(255), // common upper limit for some systems
+            DBusUnixFD.valueOf(1024) // common ulimit value
         };
         
-        for (UnixFd fd : commonFds) {
+        for (DBusUnixFD fd : commonFds) {
             assertEquals(Type.UNIX_FD, fd.getType());
             assertNotNull(fd.toString());
             assertNotNull(fd.getDelegate());
@@ -226,11 +226,11 @@ final class UnixFdTest {
     @Test
     void testUnsignedIntegerBehavior() {
         // Test that unsigned integer behavior is correct for toString()
-        UnixFd zero = UnixFd.valueOf(0);
-        UnixFd small = UnixFd.valueOf(1000);
-        UnixFd large = UnixFd.valueOf(Integer.MAX_VALUE);
-        UnixFd veryLarge = UnixFd.valueOf(Integer.MIN_VALUE); // 2^31 unsigned
-        UnixFd maximum = UnixFd.valueOf(-1); // Max unsigned
+        DBusUnixFD zero = DBusUnixFD.valueOf(0);
+        DBusUnixFD small = DBusUnixFD.valueOf(1000);
+        DBusUnixFD large = DBusUnixFD.valueOf(Integer.MAX_VALUE);
+        DBusUnixFD veryLarge = DBusUnixFD.valueOf(Integer.MIN_VALUE); // 2^31 unsigned
+        DBusUnixFD maximum = DBusUnixFD.valueOf(-1); // Max unsigned
         
         // Test string representations
         assertEquals("0", zero.toString());
@@ -257,7 +257,7 @@ final class UnixFdTest {
         };
         
         for (int value : powerOfTwoBoundaries) {
-            UnixFd unixFd = UnixFd.valueOf(value);
+            DBusUnixFD unixFd = DBusUnixFD.valueOf(value);
             assertEquals(value, unixFd.getDelegate().intValue());
             assertEquals(Type.UNIX_FD, unixFd.getType());
             assertEquals(Integer.toUnsignedString(value), unixFd.toString());
@@ -274,7 +274,7 @@ final class UnixFdTest {
         };
         
         for (int value : commonValues) {
-            UnixFd unixFd = UnixFd.valueOf(value);
+            DBusUnixFD unixFd = DBusUnixFD.valueOf(value);
             assertEquals(value, unixFd.getDelegate().intValue());
             assertEquals(Integer.toUnsignedString(value), unixFd.toString());
             assertEquals(Type.UNIX_FD, unixFd.getType());
@@ -290,7 +290,7 @@ final class UnixFdTest {
         };
         
         for (int value : negativeValues) {
-            UnixFd unixFd = UnixFd.valueOf(value);
+            DBusUnixFD unixFd = DBusUnixFD.valueOf(value);
             assertEquals(value, unixFd.getDelegate().intValue());
             assertEquals(Integer.toUnsignedString(value), unixFd.toString());
             assertEquals(Type.UNIX_FD, unixFd.getType());
@@ -308,14 +308,14 @@ final class UnixFdTest {
         
         // Test typical file descriptor range (0-1023 is common on many systems)
         for (int fd = 0; fd <= 1023; fd++) {
-            UnixFd unixFd = UnixFd.valueOf(fd);
+            DBusUnixFD unixFd = DBusUnixFD.valueOf(fd);
             assertEquals(fd, unixFd.getDelegate().intValue());
             assertEquals(Integer.toString(fd), unixFd.toString());
             assertEquals(Type.UNIX_FD, unixFd.getType());
         }
         
         // Test that large values are still valid (though may not be practical)
-        UnixFd largeFd = UnixFd.valueOf(1000000);
+        DBusUnixFD largeFd = DBusUnixFD.valueOf(1000000);
         assertEquals(1000000, largeFd.getDelegate().intValue());
         assertEquals("1000000", largeFd.toString());
         assertEquals(Type.UNIX_FD, largeFd.getType());
@@ -324,17 +324,17 @@ final class UnixFdTest {
     @Test
     void testHashCodeConsistency() {
         // Test that hash codes are consistent with equals
-        UnixFd fd1 = UnixFd.valueOf(42);
-        UnixFd fd2 = UnixFd.valueOf(42);
-        UnixFd fd3 = UnixFd.valueOf(43);
+        DBusUnixFD fd1 = DBusUnixFD.valueOf(42);
+        DBusUnixFD fd2 = DBusUnixFD.valueOf(42);
+        DBusUnixFD fd3 = DBusUnixFD.valueOf(43);
         
         assertEquals(fd1.hashCode(), fd2.hashCode());
         assertNotEquals(fd1.hashCode(), fd3.hashCode());
         
         // Test with unsigned values
-        UnixFd maxFd1 = UnixFd.valueOf(-1);
-        UnixFd maxFd2 = UnixFd.valueOf(-1);
-        UnixFd almostMaxFd = UnixFd.valueOf(-2);
+        DBusUnixFD maxFd1 = DBusUnixFD.valueOf(-1);
+        DBusUnixFD maxFd2 = DBusUnixFD.valueOf(-1);
+        DBusUnixFD almostMaxFd = DBusUnixFD.valueOf(-2);
         
         assertEquals(maxFd1.hashCode(), maxFd2.hashCode());
         assertNotEquals(maxFd1.hashCode(), almostMaxFd.hashCode());
@@ -349,7 +349,7 @@ final class UnixFdTest {
         };
         
         for (int value : testValues) {
-            UnixFd unixFd = UnixFd.valueOf(value);
+            DBusUnixFD unixFd = DBusUnixFD.valueOf(value);
             String expected = Integer.toUnsignedString(value);
             assertEquals(expected, unixFd.toString());
         }

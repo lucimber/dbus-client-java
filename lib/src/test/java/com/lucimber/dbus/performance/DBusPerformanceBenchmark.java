@@ -11,7 +11,7 @@ import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.netty.NettyConnection;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
+import com.lucimber.dbus.type.DBusObjectPath;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -329,7 +329,7 @@ public class DBusPerformanceBenchmark {
   private OutboundMethodCall createTestMethodCall() {
     return OutboundMethodCall.Builder
         .create()
-        .withPath(ObjectPath.valueOf("/org/freedesktop/DBus"))
+        .withPath(DBusObjectPath.valueOf("/org/freedesktop/DBus"))
         .withMember(DBusString.valueOf("GetId"))
         .withDestination(DBusString.valueOf("org.freedesktop.DBus"))
         .withInterface(DBusString.valueOf("org.freedesktop.DBus"))

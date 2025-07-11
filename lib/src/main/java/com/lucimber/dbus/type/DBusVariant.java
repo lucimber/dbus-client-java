@@ -15,16 +15,16 @@ import java.util.Objects;
  * @see <a href="https://pythonhosted.org/txdbus/dbus_overview.html">DBus Overview (Key Components)</a>
  * @see DBusContainerType
  */
-public final class Variant implements DBusContainerType {
+public final class DBusVariant implements DBusContainerType {
 
   private final DBusType delegate;
 
-  private Variant(final DBusType delegate) {
+  private DBusVariant(final DBusType delegate) {
     this.delegate = Objects.requireNonNull(delegate);
   }
 
-  public static Variant valueOf(final DBusType value) {
-    return new Variant(value);
+  public static DBusVariant valueOf(final DBusType value) {
+    return new DBusVariant(value);
   }
 
   @Override
@@ -38,9 +38,9 @@ public final class Variant implements DBusContainerType {
   }
 
   @Override
-  public Signature getSignature() {
+  public DBusSignature getSignature() {
     final String s = String.valueOf(Type.VARIANT.getCode().getChar());
-    return Signature.valueOf(s);
+    return DBusSignature.valueOf(s);
   }
 
   @Override
@@ -51,7 +51,7 @@ public final class Variant implements DBusContainerType {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final Variant variant = (Variant) o;
+    final DBusVariant variant = (DBusVariant) o;
     return Objects.equals(delegate, variant.delegate);
   }
 

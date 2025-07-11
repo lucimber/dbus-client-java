@@ -6,8 +6,8 @@
 package com.lucimber.dbus.type;
 
 /**
- * A {@link RuntimeException} that gets thrown by {@link ObjectPath},
- * if a marshalled {@link ObjectPath} cannot be parsed.
+ * A {@link RuntimeException} that gets thrown by {@link DBusObjectPath},
+ * if a marshalled {@link DBusObjectPath} cannot be parsed.
  */
 public class ObjectPathException extends RuntimeException {
   /**

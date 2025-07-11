@@ -7,12 +7,12 @@ package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.DBusBasicType;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Dict;
-import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.DBusDict;
+import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeCode;
 import com.lucimber.dbus.type.TypeUtils;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -30,30 +30,30 @@ import org.slf4j.MarkerFactory;
  * @param <ValueT> The data type of the value.
  */
 public final class DictDecoder<KeyT extends DBusBasicType, ValueT extends DBusType>
-        implements Decoder<ByteBuffer, Dict<KeyT, ValueT>> {
+        implements Decoder<ByteBuffer, DBusDict<KeyT, ValueT>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
 
   private final TypeCode keyTypeCode;
-  private final Signature signature;
-  private final Signature valueSignature;
+  private final DBusSignature signature;
+  private final DBusSignature valueSignature;
 
-  public DictDecoder(Signature signature) {
+  public DictDecoder(DBusSignature signature) {
     this.signature = Objects.requireNonNull(signature, "signature must not be null");
     if (!signature.isDictionary()) {
       throw new IllegalArgumentException("Signature must describe a dictionary.");
     }
 
-    Signature keyValueSig = signature.subContainer().subContainer();
-    List<Signature> children = keyValueSig.getChildren();
+    DBusSignature keyValueSig = signature.subContainer().subContainer();
+    List<DBusSignature> children = keyValueSig.getChildren();
     char keyChar = children.get(0).toString().charAt(0);
     this.keyTypeCode = TypeUtils.getCodeFromChar(keyChar)
             .orElseThrow(() -> new RuntimeException("Cannot map char to type code: " + keyChar));
     this.valueSignature = children.get(1);
   }
 
-  private static void logResult(Signature signature, int offset, int padding, int consumedBytes) {
+  private static void logResult(DBusSignature signature, int offset, int padding, int consumedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "DICT: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
       return String.format(s, signature, offset, padding, consumedBytes);
@@ -61,7 +61,7 @@ public final class DictDecoder<KeyT extends DBusBasicType, ValueT extends DBusTy
   }
 
   @Override
-  public DecoderResult<Dict<KeyT, ValueT>> decode(ByteBuffer buffer, int offset) throws DecoderException {
+  public DecoderResult<DBusDict<KeyT, ValueT>> decode(ByteBuffer buffer, int offset) throws DecoderException {
     Objects.requireNonNull(buffer, "buffer must not be null");
     try {
       int consumedBytes = 0;
@@ -70,16 +70,16 @@ public final class DictDecoder<KeyT extends DBusBasicType, ValueT extends DBusTy
       consumedBytes += arrayPadding;
 
       int lengthOffset = offset + consumedBytes;
-      DecoderResult<UInt32> lengthResult = DecoderUtils.decodeBasicType(TypeCode.UINT32, buffer, lengthOffset);
-      UInt32 length = lengthResult.getValue();
+      DecoderResult<DBusUInt32> lengthResult = DecoderUtils.decodeBasicType(TypeCode.UINT32, buffer, lengthOffset);
+      DBusUInt32 length = lengthResult.getValue();
       DecoderUtils.verifyArrayLength(length);
       consumedBytes += lengthResult.getConsumedBytes();
 
       int entriesOffset = offset + consumedBytes;
-      DecoderResult<Dict<KeyT, ValueT>> entriesResult = decodeEntries(buffer, entriesOffset, length);
+      DecoderResult<DBusDict<KeyT, ValueT>> entriesResult = decodeEntries(buffer, entriesOffset, length);
       consumedBytes += entriesResult.getConsumedBytes();
 
-      DecoderResult<Dict<KeyT, ValueT>> finalResult = new DecoderResultImpl<>(consumedBytes, entriesResult.getValue());
+      DecoderResult<DBusDict<KeyT, ValueT>> finalResult = new DecoderResultImpl<>(consumedBytes, entriesResult.getValue());
       logResult(signature, offset, arrayPadding, consumedBytes);
 
       return finalResult;
@@ -88,9 +88,9 @@ public final class DictDecoder<KeyT extends DBusBasicType, ValueT extends DBusTy
     }
   }
 
-  private DecoderResult<Dict<KeyT, ValueT>> decodeEntries(ByteBuffer buffer, int offset, UInt32 length)
+  private DecoderResult<DBusDict<KeyT, ValueT>> decodeEntries(ByteBuffer buffer, int offset, DBusUInt32 length)
           throws DecoderException {
-    Dict<KeyT, ValueT> dict = new Dict<>(signature);
+    DBusDict<KeyT, ValueT> dict = new DBusDict<>(signature);
     int consumedBytes = 0;
 
     if (length.getDelegate() == 0) {

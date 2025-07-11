@@ -7,8 +7,8 @@ package com.lucimber.dbus.message;
 
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusUInt32;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,8 +29,8 @@ public final class InboundMethodReturn extends AbstractReply implements InboundR
    * @param sender      the origin of this method return
    */
   public InboundMethodReturn(
-          UInt32 serial,
-          UInt32 replySerial,
+          DBusUInt32 serial,
+          DBusUInt32 replySerial,
           DBusString sender) {
     super(serial, replySerial);
     this.sender = Objects.requireNonNull(sender);
@@ -46,10 +46,10 @@ public final class InboundMethodReturn extends AbstractReply implements InboundR
    * @param payload     optional; the message body
    */
   public InboundMethodReturn(
-          UInt32 serial,
-          UInt32 replySerial,
+          DBusUInt32 serial,
+          DBusUInt32 replySerial,
           DBusString sender,
-          Signature signature,
+          DBusSignature signature,
           List<? extends DBusType> payload) {
     super(serial, replySerial, signature, payload);
     this.sender = Objects.requireNonNull(sender);
@@ -63,7 +63,7 @@ public final class InboundMethodReturn extends AbstractReply implements InboundR
   @Override
   public String toString() {
     var s = "InboundMethodReturn{sender='%s', serial='%s', replySerial='%s', sig='%s'}";
-    var sig = getSignature().map(Signature::toString).orElse("");
+    var sig = getSignature().map(DBusSignature::toString).orElse("");
     return String.format(s, sender, getSerial(), getReplySerial(), sig);
   }
 }

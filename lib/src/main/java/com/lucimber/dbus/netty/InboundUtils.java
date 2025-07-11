@@ -11,8 +11,8 @@ import com.lucimber.dbus.message.MessageFlag;
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.type.DBusByte;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Struct;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.DBusStruct;
+import com.lucimber.dbus.type.DBusVariant;
 import io.netty.buffer.ByteBuf;
 import java.nio.ByteOrder;
 import java.util.HashMap;
@@ -73,13 +73,13 @@ final class InboundUtils {
     return flags;
   }
 
-  static Map<HeaderField, Variant> mapHeaderFields(List<Struct> headerFields) {
-    Map<HeaderField, Variant> map = new HashMap<>();
-    for (Struct struct : headerFields) {
+  static Map<HeaderField, DBusVariant> mapHeaderFields(List<DBusStruct> headerFields) {
+    Map<HeaderField, DBusVariant> map = new HashMap<>();
+    for (DBusStruct struct : headerFields) {
       List<DBusType> structList = struct.getDelegate();
       DBusByte dbusByte = (DBusByte) structList.get(0);
       HeaderField headerField = HeaderField.fromCode(dbusByte.getDelegate());
-      Variant variant = (Variant) structList.get(1);
+      DBusVariant variant = (DBusVariant) structList.get(1);
       map.put(headerField, variant);
     }
     return map;

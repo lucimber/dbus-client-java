@@ -57,18 +57,18 @@ final class FrameDecoderTest {
       buffer.writeIntLE(serial);
     }
     // Header fields
-    final Signature signature = Signature.valueOf("a(yv)");
-    final DBusArray<Struct> array = new DBusArray<>(signature);
-    final Signature structSignature = signature.subContainer();
+    final DBusSignature signature = DBusSignature.valueOf("a(yv)");
+    final DBusArray<DBusStruct> array = new DBusArray<>(signature);
+    final DBusSignature structSignature = signature.subContainer();
     final DBusString errorName = DBusString.valueOf("io.lucimber.Error.UnitTest");
-    final Variant errorNameVariant = Variant.valueOf(errorName);
-    final Struct errorStruct = new Struct(structSignature, DBusByte.valueOf((byte) 4), errorNameVariant);
+    final DBusVariant errorNameVariant = DBusVariant.valueOf(errorName);
+    final DBusStruct errorStruct = new DBusStruct(structSignature, DBusByte.valueOf((byte) 4), errorNameVariant);
     array.add(errorStruct);
-    final UInt32 replySerial = UInt32.valueOf(1);
-    final Variant replySerialVariant = Variant.valueOf(replySerial);
-    final Struct replySerialStruct = new Struct(structSignature, DBusByte.valueOf((byte) 5), replySerialVariant);
+    final DBusUInt32 replySerial = DBusUInt32.valueOf(1);
+    final DBusVariant replySerialVariant = DBusVariant.valueOf(replySerial);
+    final DBusStruct replySerialStruct = new DBusStruct(structSignature, DBusByte.valueOf((byte) 5), replySerialVariant);
     array.add(replySerialStruct);
-    final Encoder<DBusArray<Struct>, ByteBuffer> headerEncoder =
+    final Encoder<DBusArray<DBusStruct>, ByteBuffer> headerEncoder =
           new ArrayEncoder<>(byteOrder, signature);
     final EncoderResult<ByteBuffer> headerResult = headerEncoder.encode(array, 12);
     buffer.writeBytes(headerResult.getBuffer());
@@ -114,22 +114,22 @@ final class FrameDecoderTest {
       buffer.writeIntLE(serial);
     }
     // Header fields
-    final Signature signature = Signature.valueOf("a(yv)");
-    final DBusArray<Struct> structList = new DBusArray<>(signature);
-    final Signature structSignature = signature.subContainer();
+    final DBusSignature signature = DBusSignature.valueOf("a(yv)");
+    final DBusArray<DBusStruct> structList = new DBusArray<>(signature);
+    final DBusSignature structSignature = signature.subContainer();
     final DBusString methodName = DBusString.valueOf("MethodCall");
-    final Variant memberVariant = Variant.valueOf(methodName);
-    final Struct memberStruct = new Struct(structSignature, DBusByte.valueOf((byte) 3), memberVariant);
+    final DBusVariant memberVariant = DBusVariant.valueOf(methodName);
+    final DBusStruct memberStruct = new DBusStruct(structSignature, DBusByte.valueOf((byte) 3), memberVariant);
     structList.add(memberStruct);
     final DBusString interfaceName = DBusString.valueOf("io.lucimber.dbus1");
-    final Variant interfaceVariant = Variant.valueOf(interfaceName);
-    final Struct interfaceStruct = new Struct(structSignature, DBusByte.valueOf((byte) 2), interfaceVariant);
+    final DBusVariant interfaceVariant = DBusVariant.valueOf(interfaceName);
+    final DBusStruct interfaceStruct = new DBusStruct(structSignature, DBusByte.valueOf((byte) 2), interfaceVariant);
     structList.add(interfaceStruct);
-    final ObjectPath path = ObjectPath.valueOf("/");
-    final Variant pathVariant = Variant.valueOf(path);
-    final Struct pathStruct = new Struct(structSignature, DBusByte.valueOf((byte) 1), pathVariant);
+    final DBusObjectPath path = DBusObjectPath.valueOf("/");
+    final DBusVariant pathVariant = DBusVariant.valueOf(path);
+    final DBusStruct pathStruct = new DBusStruct(structSignature, DBusByte.valueOf((byte) 1), pathVariant);
     structList.add(pathStruct);
-    final Encoder<DBusArray<Struct>, ByteBuffer> headerEncoder =
+    final Encoder<DBusArray<DBusStruct>, ByteBuffer> headerEncoder =
           new ArrayEncoder<>(byteOrder, signature);
     final EncoderResult<ByteBuffer> headerResult = headerEncoder.encode(structList, 12);
     buffer.writeBytes(headerResult.getBuffer());
@@ -175,14 +175,14 @@ final class FrameDecoderTest {
       buffer.writeIntLE(serial);
     }
     // Header fields
-    final Signature signature = Signature.valueOf("a(yv)");
-    final DBusArray<Struct> array = new DBusArray<>(signature);
-    final Signature structSignature = signature.subContainer();
-    final UInt32 replySerial = UInt32.valueOf(1);
-    final Variant replySerialVariant = Variant.valueOf(replySerial);
-    final Struct replySerialStruct = new Struct(structSignature, DBusByte.valueOf((byte) 5), replySerialVariant);
+    final DBusSignature signature = DBusSignature.valueOf("a(yv)");
+    final DBusArray<DBusStruct> array = new DBusArray<>(signature);
+    final DBusSignature structSignature = signature.subContainer();
+    final DBusUInt32 replySerial = DBusUInt32.valueOf(1);
+    final DBusVariant replySerialVariant = DBusVariant.valueOf(replySerial);
+    final DBusStruct replySerialStruct = new DBusStruct(structSignature, DBusByte.valueOf((byte) 5), replySerialVariant);
     array.add(replySerialStruct);
-    final Encoder<DBusArray<Struct>, ByteBuffer> headerEncoder =
+    final Encoder<DBusArray<DBusStruct>, ByteBuffer> headerEncoder =
           new ArrayEncoder<>(byteOrder, signature);
     final EncoderResult<ByteBuffer> headerResult = headerEncoder.encode(array, 12);
     buffer.writeBytes(headerResult.getBuffer());
@@ -228,22 +228,22 @@ final class FrameDecoderTest {
       buffer.writeIntLE(serial);
     }
     // Header fields
-    final Signature signature = Signature.valueOf("a(yv)");
-    final DBusArray<Struct> array = new DBusArray<>(signature);
-    final Signature structSignature = signature.subContainer();
+    final DBusSignature signature = DBusSignature.valueOf("a(yv)");
+    final DBusArray<DBusStruct> array = new DBusArray<>(signature);
+    final DBusSignature structSignature = signature.subContainer();
     final DBusString signalName = DBusString.valueOf("TestSignal");
-    final Variant memberVariant = Variant.valueOf(signalName);
-    final Struct memberStruct = new Struct(structSignature, DBusByte.valueOf((byte) 3), memberVariant);
+    final DBusVariant memberVariant = DBusVariant.valueOf(signalName);
+    final DBusStruct memberStruct = new DBusStruct(structSignature, DBusByte.valueOf((byte) 3), memberVariant);
     array.add(memberStruct);
     final DBusString interfaceName = DBusString.valueOf("io.lucimber.dbus1");
-    final Variant interfaceVariant = Variant.valueOf(interfaceName);
-    final Struct interfaceStruct = new Struct(structSignature, DBusByte.valueOf((byte) 2), interfaceVariant);
+    final DBusVariant interfaceVariant = DBusVariant.valueOf(interfaceName);
+    final DBusStruct interfaceStruct = new DBusStruct(structSignature, DBusByte.valueOf((byte) 2), interfaceVariant);
     array.add(interfaceStruct);
-    final ObjectPath path = ObjectPath.valueOf("/");
-    final Variant pathVariant = Variant.valueOf(path);
-    final Struct pathStruct = new Struct(structSignature, DBusByte.valueOf((byte) 1), pathVariant);
+    final DBusObjectPath path = DBusObjectPath.valueOf("/");
+    final DBusVariant pathVariant = DBusVariant.valueOf(path);
+    final DBusStruct pathStruct = new DBusStruct(structSignature, DBusByte.valueOf((byte) 1), pathVariant);
     array.add(pathStruct);
-    final Encoder<DBusArray<Struct>, ByteBuffer> headerEncoder =
+    final Encoder<DBusArray<DBusStruct>, ByteBuffer> headerEncoder =
           new ArrayEncoder<>(byteOrder, signature);
     final EncoderResult<ByteBuffer> headerResult = headerEncoder.encode(array, 12);
     buffer.writeBytes(headerResult.getBuffer());

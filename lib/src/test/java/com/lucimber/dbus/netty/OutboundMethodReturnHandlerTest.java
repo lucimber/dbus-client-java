@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.message.OutboundMethodReturn;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,8 +24,8 @@ final class OutboundMethodReturnHandlerTest {
     OutboundMessageEncoder handler = new OutboundMessageEncoder();
     EmbeddedChannel channel = new EmbeddedChannel(handler);
 
-    UInt32 serial = UInt32.valueOf(2);
-    UInt32 replySerial = UInt32.valueOf(1);
+    DBusUInt32 serial = DBusUInt32.valueOf(2);
+    DBusUInt32 replySerial = DBusUInt32.valueOf(1);
     DBusString dst = DBusString.valueOf("io.lucimber.test.destination");
     OutboundMethodReturn methodReturn = OutboundMethodReturn.Builder
             .create()

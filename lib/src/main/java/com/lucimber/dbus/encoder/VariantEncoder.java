@@ -8,8 +8,8 @@ package com.lucimber.dbus.encoder;
 import com.lucimber.dbus.type.DBusBasicType;
 import com.lucimber.dbus.type.DBusContainerType;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusVariant;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -24,9 +24,9 @@ import org.slf4j.MarkerFactory;
  * An encoder which encodes a variant to the D-Bus marshalling format using ByteBuffer.
  *
  * @see Encoder
- * @see Variant
+ * @see DBusVariant
  */
-public final class VariantEncoder implements Encoder<Variant, ByteBuffer> {
+public final class VariantEncoder implements Encoder<DBusVariant, ByteBuffer> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
@@ -42,7 +42,7 @@ public final class VariantEncoder implements Encoder<Variant, ByteBuffer> {
     this.order = Objects.requireNonNull(order, "order must not be null");
   }
 
-  private static void logResult(Variant value, int offset, int producedBytes) {
+  private static void logResult(DBusVariant value, int offset, int producedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "VARIANT: %s; Offset: %d; Padding: %d, Produced bytes: %d;";
       return String.format(s, value, offset, 0, producedBytes);
@@ -50,15 +50,15 @@ public final class VariantEncoder implements Encoder<Variant, ByteBuffer> {
   }
 
   @Override
-  public EncoderResult<ByteBuffer> encode(Variant variant, int offset) throws EncoderException {
+  public EncoderResult<ByteBuffer> encode(DBusVariant variant, int offset) throws EncoderException {
     Objects.requireNonNull(variant, "variant must not be null");
     try {
       int producedBytes = 0;
       ByteBuffer output;
 
       // Encode signature
-      Signature contentSignature = determineContentSignature(variant.getDelegate());
-      Encoder<Signature, ByteBuffer> sigEncoder = new SignatureEncoder();
+      DBusSignature contentSignature = determineContentSignature(variant.getDelegate());
+      Encoder<DBusSignature, ByteBuffer> sigEncoder = new SignatureEncoder();
       EncoderResult<ByteBuffer> sigResult = sigEncoder.encode(contentSignature, offset);
       final ByteBuffer sigBuffer = sigResult.getBuffer();
       producedBytes += sigResult.getProducedBytes();
@@ -85,9 +85,9 @@ public final class VariantEncoder implements Encoder<Variant, ByteBuffer> {
     }
   }
 
-  private Signature determineContentSignature(DBusType content) throws Exception {
+  private DBusSignature determineContentSignature(DBusType content) throws Exception {
     if (content instanceof DBusBasicType) {
-      return Signature.valueOf(String.valueOf(content.getType().getCode().getChar()));
+      return DBusSignature.valueOf(String.valueOf(content.getType().getCode().getChar()));
     } else if (content instanceof DBusContainerType containerType) {
       return containerType.getSignature();
     } else {

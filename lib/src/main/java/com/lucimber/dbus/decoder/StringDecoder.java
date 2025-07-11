@@ -7,7 +7,7 @@ package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.Type;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -46,7 +46,7 @@ public final class StringDecoder implements Decoder<ByteBuffer, DBusString> {
       consumedBytes += padding;
 
       int lengthOffset = offset + consumedBytes;
-      DecoderResult<UInt32> lengthResult = new UInt32Decoder().decode(buffer, lengthOffset);
+      DecoderResult<DBusUInt32> lengthResult = new UInt32Decoder().decode(buffer, lengthOffset);
       consumedBytes += lengthResult.getConsumedBytes();
       int length = lengthResult.getValue().intValue();
 

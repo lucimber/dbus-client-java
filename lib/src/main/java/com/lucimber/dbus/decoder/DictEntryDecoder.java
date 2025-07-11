@@ -7,8 +7,8 @@ package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.DBusBasicType;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.DictEntry;
-import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.DBusDictEntry;
+import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeCode;
 import com.lucimber.dbus.type.TypeUtils;
@@ -29,21 +29,21 @@ import org.slf4j.MarkerFactory;
  * @param <ValueT> The data type of the value.
  */
 public final class DictEntryDecoder<KeyT extends DBusBasicType, ValueT extends DBusType>
-        implements Decoder<ByteBuffer, DictEntry<KeyT, ValueT>> {
+        implements Decoder<ByteBuffer, DBusDictEntry<KeyT, ValueT>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
 
-  private final Signature signature;
+  private final DBusSignature signature;
 
   /**
    * Creates a new instance with mandatory parameters.
    *
    * @param signature the signature of the dict-entry
    */
-  public DictEntryDecoder(Signature signature) {
+  public DictEntryDecoder(DBusSignature signature) {
     this.signature = Objects.requireNonNull(signature, "signature must not be null");
-    List<Signature> children = signature.getChildren();
+    List<DBusSignature> children = signature.getChildren();
     if (children.size() != 2) {
       throw new DecoderException("Signature must consist of two single complete types.");
     }
@@ -55,7 +55,7 @@ public final class DictEntryDecoder<KeyT extends DBusBasicType, ValueT extends D
     }
   }
 
-  private static void logResult(Signature signature, int offset, int padding, int consumedBytes) {
+  private static void logResult(DBusSignature signature, int offset, int padding, int consumedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "DICT_ENTRY: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
       return String.format(s, signature, offset, padding, consumedBytes);
@@ -63,7 +63,7 @@ public final class DictEntryDecoder<KeyT extends DBusBasicType, ValueT extends D
   }
 
   @Override
-  public DecoderResult<DictEntry<KeyT, ValueT>> decode(ByteBuffer buffer, int offset) throws DecoderException {
+  public DecoderResult<DBusDictEntry<KeyT, ValueT>> decode(ByteBuffer buffer, int offset) throws DecoderException {
     Objects.requireNonNull(buffer, "buffer must not be null");
     try {
       int consumedBytes = 0;
@@ -72,7 +72,7 @@ public final class DictEntryDecoder<KeyT extends DBusBasicType, ValueT extends D
       buffer.position(buffer.position() + padding);
       consumedBytes += padding;
 
-      List<Signature> children = signature.getChildren();
+      List<DBusSignature> children = signature.getChildren();
       String keySigStr = children.get(0).toString();
       char keyChar = keySigStr.charAt(0);
       TypeCode keyCode = TypeUtils.getCodeFromChar(keyChar)
@@ -86,8 +86,8 @@ public final class DictEntryDecoder<KeyT extends DBusBasicType, ValueT extends D
               .decode(children.get(1), buffer, offset + consumedBytes);
       consumedBytes += valueResult.getConsumedBytes();
 
-      DictEntry<KeyT, ValueT> entry = new DictEntry<>(signature, keyResult.getValue(), valueResult.getValue());
-      DecoderResult<DictEntry<KeyT, ValueT>> result = new DecoderResultImpl<>(consumedBytes, entry);
+      DBusDictEntry<KeyT, ValueT> entry = new DBusDictEntry<>(signature, keyResult.getValue(), valueResult.getValue());
+      DecoderResult<DBusDictEntry<KeyT, ValueT>> result = new DecoderResultImpl<>(consumedBytes, entry);
 
       logResult(signature, offset, padding, consumedBytes);
       return result;

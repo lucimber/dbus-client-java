@@ -7,8 +7,8 @@ package com.lucimber.dbus.message;
 
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusUInt32;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,8 +31,8 @@ public final class InboundError extends AbstractReply implements InboundReply {
    * @param errorName   the name of the error
    */
   public InboundError(
-          UInt32 serial,
-          UInt32 replySerial,
+          DBusUInt32 serial,
+          DBusUInt32 replySerial,
           DBusString sender,
           DBusString errorName) {
     super(serial, replySerial);
@@ -51,11 +51,11 @@ public final class InboundError extends AbstractReply implements InboundReply {
    * @param payload     optional; the message body
    */
   public InboundError(
-          UInt32 serial,
-          UInt32 replySerial,
+          DBusUInt32 serial,
+          DBusUInt32 replySerial,
           DBusString sender,
           DBusString errorName,
-          Signature signature,
+          DBusSignature signature,
           List<? extends DBusType> payload) {
     super(serial, replySerial, signature, payload);
     this.sender = Objects.requireNonNull(sender);
@@ -79,7 +79,7 @@ public final class InboundError extends AbstractReply implements InboundReply {
   @Override
   public String toString() {
     var s = "InboundError{sender='%s', serial='%s', replySerial='%s', name='%s', sig='%s'}";
-    var sig = getSignature().map(Signature::toString).orElse("");
+    var sig = getSignature().map(DBusSignature::toString).orElse("");
     return String.format(s, sender, getSerial(), getReplySerial(), errorName, sig);
   }
 }

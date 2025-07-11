@@ -4,8 +4,8 @@ import com.lucimber.dbus.connection.Connection;
 import com.lucimber.dbus.connection.Pipeline;
 import com.lucimber.dbus.message.*;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusUInt32;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.util.concurrent.Future;
 import org.junit.jupiter.api.AfterEach;
@@ -59,8 +59,8 @@ class AppLogicHandlerTest {
   void testSendMessageWithoutReply() {
     OutboundMethodCall msg = OutboundMethodCall.Builder
             .create()
-            .withSerial(UInt32.valueOf(1))
-            .withPath(ObjectPath.valueOf("/object"))
+            .withSerial(DBusUInt32.valueOf(1))
+            .withPath(DBusObjectPath.valueOf("/object"))
             .withMember(DBusString.valueOf("Ping"))
             .withDestination(DBusString.valueOf("some.destination"))
             .withInterface(DBusString.valueOf("org.example.Interface"))
@@ -80,12 +80,12 @@ class AppLogicHandlerTest {
 
   @Test
   void testSendMessageWithReplyAndReceiveReturn() {
-    UInt32 serial = UInt32.valueOf(101);
+    DBusUInt32 serial = DBusUInt32.valueOf(101);
     DBusString dst = DBusString.valueOf("some.dst");
     OutboundMethodCall msg = OutboundMethodCall.Builder
             .create()
             .withSerial(serial)
-            .withPath(ObjectPath.valueOf("/service"))
+            .withPath(DBusObjectPath.valueOf("/service"))
             .withMember(DBusString.valueOf("Echo"))
             .withReplyExpected(true)
             .withDestination(dst)
@@ -99,7 +99,7 @@ class AppLogicHandlerTest {
 
     // Simulate reply
     InboundMethodReturn reply = new InboundMethodReturn(
-          UInt32.valueOf(5), serial, dst, null, null);
+          DBusUInt32.valueOf(5), serial, dst, null, null);
     channel.writeInbound(reply);
 
     var replyFuture = future.getNow();
@@ -111,12 +111,12 @@ class AppLogicHandlerTest {
 
   @Test
   void testSendMessageWithReplyAndReceiveError() {
-    UInt32 serial = UInt32.valueOf(202);
+    DBusUInt32 serial = DBusUInt32.valueOf(202);
     DBusString dst = DBusString.valueOf("some.destination");
     OutboundMethodCall msg = OutboundMethodCall.Builder
             .create()
             .withSerial(serial)
-            .withPath(ObjectPath.valueOf("/error"))
+            .withPath(DBusObjectPath.valueOf("/error"))
             .withMember(DBusString.valueOf("Fail"))
             .withReplyExpected(true)
             .withDestination(dst)
@@ -127,8 +127,8 @@ class AppLogicHandlerTest {
     channel.flushOutbound();
 
     InboundError error = new InboundError(
-          UInt32.valueOf(5),
-          UInt32.valueOf(202),
+          DBusUInt32.valueOf(5),
+          DBusUInt32.valueOf(202),
           dst,
           DBusString.valueOf("org.freedesktop.DBus.Error.Failed"),
           null,
@@ -148,8 +148,8 @@ class AppLogicHandlerTest {
   void testChannelInactiveFailsAllPending() {
     OutboundMethodCall msg = OutboundMethodCall.Builder
             .create()
-            .withSerial(UInt32.valueOf(99))
-            .withPath(ObjectPath.valueOf("/fail"))
+            .withSerial(DBusUInt32.valueOf(99))
+            .withPath(DBusObjectPath.valueOf("/fail"))
             .withMember(DBusString.valueOf("Call"))
             .withReplyExpected(true)
             .withDestination(DBusString.valueOf("some.test.destination"))
@@ -185,8 +185,8 @@ class AppLogicHandlerTest {
 
     OutboundMethodCall msg = OutboundMethodCall.Builder
             .create()
-            .withSerial(UInt32.valueOf(123))
-            .withPath(ObjectPath.valueOf("/timeout"))
+            .withSerial(DBusUInt32.valueOf(123))
+            .withPath(DBusObjectPath.valueOf("/timeout"))
             .withMember(DBusString.valueOf("TimeoutMethod"))
             .withReplyExpected(true)
             .withDestination(DBusString.valueOf("some.destination"))
@@ -218,8 +218,8 @@ class AppLogicHandlerTest {
     // Create message with shorter per-call timeout override
     OutboundMethodCall msg = OutboundMethodCall.Builder
             .create()
-            .withSerial(UInt32.valueOf(456))
-            .withPath(ObjectPath.valueOf("/override"))
+            .withSerial(DBusUInt32.valueOf(456))
+            .withPath(DBusObjectPath.valueOf("/override"))
             .withMember(DBusString.valueOf("FastTimeout"))
             .withReplyExpected(true)
             .withDestination(DBusString.valueOf("some.destination"))

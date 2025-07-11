@@ -6,7 +6,7 @@
 package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.TypeCode;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.DBusVariant;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -36,8 +36,8 @@ final class VariantDecoderTest {
     buffer.put((byte) 0x7F); // Byte.MAX_VALUE
     buffer.flip();
 
-    Decoder<ByteBuffer, Variant> decoder = new VariantDecoder();
-    DecoderResult<Variant> result = decoder.decode(buffer, 0);
+    Decoder<ByteBuffer, DBusVariant> decoder = new VariantDecoder();
+    DecoderResult<DBusVariant> result = decoder.decode(buffer, 0);
 
     assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
@@ -62,8 +62,8 @@ final class VariantDecoderTest {
     }
     buffer.flip();
 
-    Decoder<ByteBuffer, Variant> decoder = new VariantDecoder();
-    DecoderResult<Variant> result = decoder.decode(buffer, 0);
+    Decoder<ByteBuffer, DBusVariant> decoder = new VariantDecoder();
+    DecoderResult<DBusVariant> result = decoder.decode(buffer, 0);
 
     assertEquals(16, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
@@ -85,8 +85,8 @@ final class VariantDecoderTest {
     }
     buffer.flip();
 
-    Decoder<ByteBuffer, Variant> decoder = new VariantDecoder();
-    DecoderResult<Variant> result = decoder.decode(buffer, 0);
+    Decoder<ByteBuffer, DBusVariant> decoder = new VariantDecoder();
+    DecoderResult<DBusVariant> result = decoder.decode(buffer, 0);
 
     assertEquals(8, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
@@ -109,7 +109,7 @@ final class VariantDecoderTest {
     }
     buffer.flip();
 
-    Decoder<ByteBuffer, Variant> decoder = new VariantDecoder();
+    Decoder<ByteBuffer, DBusVariant> decoder = new VariantDecoder();
     assertThrows(DecoderException.class, () -> decoder.decode(buffer, 0));
   }
 }

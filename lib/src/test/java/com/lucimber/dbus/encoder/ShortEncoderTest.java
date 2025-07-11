@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.encoder;
 
-import com.lucimber.dbus.type.Int16;
+import com.lucimber.dbus.type.DBusInt16;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -23,8 +23,8 @@ final class ShortEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSignedShortMaxValue(ByteOrder byteOrder) {
-    Encoder<Int16, ByteBuffer> encoder = new Int16Encoder(byteOrder);
-    Int16 int16 = Int16.valueOf(Short.MAX_VALUE);
+    Encoder<DBusInt16, ByteBuffer> encoder = new Int16Encoder(byteOrder);
+    DBusInt16 int16 = DBusInt16.valueOf(Short.MAX_VALUE);
     EncoderResult<ByteBuffer> result = encoder.encode(int16, 0);
     int expectedNumOfBytes = 2;
     assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
@@ -46,8 +46,8 @@ final class ShortEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSignedShortMaxValueWithOffset(ByteOrder byteOrder) {
-    Encoder<Int16, ByteBuffer> encoder = new Int16Encoder(byteOrder);
-    Int16 int16 = Int16.valueOf(Short.MAX_VALUE);
+    Encoder<DBusInt16, ByteBuffer> encoder = new Int16Encoder(byteOrder);
+    DBusInt16 int16 = DBusInt16.valueOf(Short.MAX_VALUE);
     int offset = 5;
     EncoderResult<ByteBuffer> result = encoder.encode(int16, offset);
     int expectedNumOfBytes = 3;
@@ -70,8 +70,8 @@ final class ShortEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSignedShortMinValue(ByteOrder byteOrder) {
-    Encoder<Int16, ByteBuffer> encoder = new Int16Encoder(byteOrder);
-    Int16 int16 = Int16.valueOf(Short.MIN_VALUE);
+    Encoder<DBusInt16, ByteBuffer> encoder = new Int16Encoder(byteOrder);
+    DBusInt16 int16 = DBusInt16.valueOf(Short.MIN_VALUE);
     EncoderResult<ByteBuffer> result = encoder.encode(int16, 0);
     int expectedNumOfBytes = 2;
     assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
@@ -93,8 +93,8 @@ final class ShortEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSignedShortMinValueWithOffset(ByteOrder byteOrder) {
-    Encoder<Int16, ByteBuffer> encoder = new Int16Encoder(byteOrder);
-    Int16 int16 = Int16.valueOf(Short.MIN_VALUE);
+    Encoder<DBusInt16, ByteBuffer> encoder = new Int16Encoder(byteOrder);
+    DBusInt16 int16 = DBusInt16.valueOf(Short.MIN_VALUE);
     int offset = 5;
     EncoderResult<ByteBuffer> result = encoder.encode(int16, offset);
     int expectedNumOfBytes = 3;

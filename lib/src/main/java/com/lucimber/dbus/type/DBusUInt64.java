@@ -10,11 +10,11 @@ import java.util.Objects;
 /**
  * Maps an unsigned {@link Long} to its D-Bus equivalent of UINT64.
  */
-public final class UInt64 extends Number implements Comparable<UInt64>, DBusBasicType {
+public final class DBusUInt64 extends Number implements Comparable<DBusUInt64>, DBusBasicType {
 
   private final long delegate;
 
-  private UInt64(final long delegate) {
+  private DBusUInt64(final long delegate) {
     this.delegate = delegate;
   }
 
@@ -24,8 +24,8 @@ public final class UInt64 extends Number implements Comparable<UInt64>, DBusBasi
    * @param value the long value
    * @return a new instance
    */
-  public static UInt64 valueOf(final long value) {
-    return new UInt64(value);
+  public static DBusUInt64 valueOf(final long value) {
+    return new DBusUInt64(value);
   }
 
   @Override
@@ -36,7 +36,7 @@ public final class UInt64 extends Number implements Comparable<UInt64>, DBusBasi
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final UInt64 that = (UInt64) o;
+    final DBusUInt64 that = (DBusUInt64) o;
     return delegate == that.delegate;
   }
 
@@ -95,7 +95,7 @@ public final class UInt64 extends Number implements Comparable<UInt64>, DBusBasi
   }
 
   @Override
-  public int compareTo(final UInt64 o) {
+  public int compareTo(final DBusUInt64 o) {
     return Long.compareUnsigned(delegate, o.delegate);
   }
 }

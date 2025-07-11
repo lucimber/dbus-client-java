@@ -8,8 +8,8 @@ package com.lucimber.dbus.netty;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.UInt32;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.DBusUInt32;
+import com.lucimber.dbus.type.DBusVariant;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.Test;
@@ -26,17 +26,17 @@ final class FrameEncoderMethodReturnTest {
   @Test
   void encodeSuccessfully() {
     final DBusString destination = DBusString.valueOf("io.lucimber.test.destination");
-    final UInt32 serialNumber = UInt32.valueOf(2);
-    final UInt32 replySerialNumber = UInt32.valueOf(1);
+    final DBusUInt32 serialNumber = DBusUInt32.valueOf(2);
+    final DBusUInt32 replySerialNumber = DBusUInt32.valueOf(1);
     final Frame frame = new Frame();
     frame.setSerial(serialNumber);
     frame.setByteOrder(ByteOrder.BIG_ENDIAN);
     frame.setProtocolVersion(1);
     frame.setType(MessageType.METHOD_RETURN);
-    final Map<HeaderField, Variant> headerFields = new HashMap<>();
-    final Variant replySerialVariant = Variant.valueOf(replySerialNumber);
+    final Map<HeaderField, DBusVariant> headerFields = new HashMap<>();
+    final DBusVariant replySerialVariant = DBusVariant.valueOf(replySerialNumber);
     headerFields.put(HeaderField.REPLY_SERIAL, replySerialVariant);
-    final Variant destinationVariant = Variant.valueOf(destination);
+    final DBusVariant destinationVariant = DBusVariant.valueOf(destination);
     headerFields.put(HeaderField.DESTINATION, destinationVariant);
     frame.setHeaderFields(headerFields);
     final FrameEncoder handler = new FrameEncoder();

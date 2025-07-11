@@ -11,8 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.message.OutboundSignal;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusUInt32;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -22,9 +22,9 @@ final class OutboundSignalHandlerTest {
 
   @Test
   void encodeSuccessfully() {
-    UInt32 serialNumber = UInt32.valueOf(1);
+    DBusUInt32 serialNumber = DBusUInt32.valueOf(1);
     DBusString interfaceName = DBusString.valueOf("io.lucimber.dbus1");
-    ObjectPath path = ObjectPath.valueOf("/test");
+    DBusObjectPath path = DBusObjectPath.valueOf("/test");
     DBusString signalName = DBusString.valueOf("UnitTest");
     OutboundSignal signal = OutboundSignal.Builder
             .create()

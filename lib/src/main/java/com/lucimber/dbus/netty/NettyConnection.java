@@ -15,7 +15,7 @@ import com.lucimber.dbus.connection.DefaultPipeline;
 import com.lucimber.dbus.connection.Pipeline;
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -290,7 +290,7 @@ public final class NettyConnection implements Connection {
   }
 
   @Override
-  public UInt32 getNextSerial() {
+  public DBusUInt32 getNextSerial() {
     if (channel == null || !channel.isActive()) {
       throw new IllegalStateException("Cannot get next serial, channel is not active.");
     }
@@ -299,7 +299,7 @@ public final class NettyConnection implements Connection {
       throw new IllegalStateException("Serial counter not initialized on channel.");
     }
     // D-Bus serial numbers are 32-bit unsigned and allowed to wrap around
-    return UInt32.valueOf((int) serialCounter.getAndIncrement());
+    return DBusUInt32.valueOf((int) serialCounter.getAndIncrement());
   }
 
   @Override

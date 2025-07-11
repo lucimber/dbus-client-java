@@ -19,24 +19,24 @@ import java.util.stream.Collectors;
  * @param <KeyT>   The key's data type.
  * @param <ValueT> The value's data type.
  */
-public final class Dict<KeyT extends DBusBasicType, ValueT extends DBusType>
+public final class DBusDict<KeyT extends DBusBasicType, ValueT extends DBusType>
         implements Map<KeyT, ValueT>, DBusContainerType {
 
   private final HashMap<KeyT, ValueT> delegate;
-  private final Signature signature;
+  private final DBusSignature signature;
 
   /**
    * Constructs a new instance.
    *
-   * @param signature a {@link Signature}; must describe a dictionary
+   * @param signature a {@link DBusSignature}; must describe a dictionary
    */
-  public Dict(final Signature signature) {
+  public DBusDict(final DBusSignature signature) {
     this.signature = Objects.requireNonNull(signature);
     if (!signature.isDictionary()) {
       throw new IllegalArgumentException("Signature must describe a dictionary.");
     }
-    final Signature subSignature = signature.subContainer().subContainer();
-    final List<Signature> singleTypes = subSignature.getChildren();
+    final DBusSignature subSignature = signature.subContainer().subContainer();
+    final List<DBusSignature> singleTypes = subSignature.getChildren();
     if (singleTypes.get(0).isContainerType()) {
       throw new IllegalArgumentException("Key must be a basic D-Bus type.");
     }
@@ -49,15 +49,15 @@ public final class Dict<KeyT extends DBusBasicType, ValueT extends DBusType>
   /**
    * Constructs a new instance from another.
    *
-   * @param other a {@link Dict}
+   * @param other a {@link DBusDict}
    */
-  public Dict(final Dict<KeyT, ValueT> other) {
+  public DBusDict(final DBusDict<KeyT, ValueT> other) {
     delegate = new HashMap<>(other.delegate);
     signature = other.signature;
   }
 
   @Override
-  public Signature getSignature() {
+  public DBusSignature getSignature() {
     return signature;
   }
 
@@ -136,10 +136,10 @@ public final class Dict<KeyT extends DBusBasicType, ValueT extends DBusType>
    *
    * @return a set
    */
-  public Set<DictEntry<KeyT, ValueT>> dictionaryEntrySet() {
-    final Signature subSig = signature.subContainer();
+  public Set<DBusDictEntry<KeyT, ValueT>> dictionaryEntrySet() {
+    final DBusSignature subSig = signature.subContainer();
     return delegate.entrySet().stream()
-            .map(e -> new DictEntry<>(subSig, e.getKey(), e.getValue()))
+            .map(e -> new DBusDictEntry<>(subSig, e.getKey(), e.getValue()))
             .collect(Collectors.toSet());
   }
 

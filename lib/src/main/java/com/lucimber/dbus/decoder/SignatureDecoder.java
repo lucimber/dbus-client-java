@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.decoder;
 
-import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
@@ -21,14 +21,14 @@ import org.slf4j.MarkerFactory;
  * A decoder which unmarshals a signature from the byte stream format used by D-Bus.
  *
  * @see Decoder
- * @see Signature
+ * @see DBusSignature
  */
-public final class SignatureDecoder implements Decoder<ByteBuffer, Signature> {
+public final class SignatureDecoder implements Decoder<ByteBuffer, DBusSignature> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
 
-  private static void logResult(Signature value, int offset, int padding, int consumedBytes) {
+  private static void logResult(DBusSignature value, int offset, int padding, int consumedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "SIGNATURE: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
       return String.format(s, value, offset, padding, consumedBytes);
@@ -36,7 +36,7 @@ public final class SignatureDecoder implements Decoder<ByteBuffer, Signature> {
   }
 
   @Override
-  public DecoderResult<Signature> decode(ByteBuffer buffer, int offset) throws DecoderException {
+  public DecoderResult<DBusSignature> decode(ByteBuffer buffer, int offset) throws DecoderException {
     Objects.requireNonNull(buffer, "buffer must not be null");
     try {
       int consumedBytes = 0;
@@ -62,8 +62,8 @@ public final class SignatureDecoder implements Decoder<ByteBuffer, Signature> {
       }
 
       String sigStr = new String(bytes, StandardCharsets.UTF_8);
-      Signature signature = Signature.valueOf(sigStr);
-      DecoderResult<Signature> result = new DecoderResultImpl<>(consumedBytes, signature);
+      DBusSignature signature = DBusSignature.valueOf(sigStr);
+      DecoderResult<DBusSignature> result = new DecoderResultImpl<>(consumedBytes, signature);
       logResult(signature, offset, padding, consumedBytes);
 
       return result;

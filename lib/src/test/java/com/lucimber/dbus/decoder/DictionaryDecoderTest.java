@@ -6,9 +6,9 @@
 package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.DBusByte;
-import com.lucimber.dbus.type.Dict;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.DBusDict;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusVariant;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -28,7 +28,7 @@ final class DictionaryDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeDictionary(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf(ARRAY_OF_ENTRIES);
+    DBusSignature signature = DBusSignature.valueOf(ARRAY_OF_ENTRIES);
     String rawSig = "i";
     byte[] sigBytes = rawSig.getBytes(StandardCharsets.UTF_8);
 
@@ -55,12 +55,12 @@ final class DictionaryDecoderTest {
 
     buffer.flip();
 
-    DictDecoder<DBusByte, Variant> decoder = new DictDecoder<>(signature);
-    DecoderResult<Dict<DBusByte, Variant>> result = decoder.decode(buffer, 0);
+    DictDecoder<DBusByte, DBusVariant> decoder = new DictDecoder<>(signature);
+    DecoderResult<DBusDict<DBusByte, DBusVariant>> result = decoder.decode(buffer, 0);
 
     assertEquals(bufferSize, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    Dict<DBusByte, Variant> dict = result.getValue();
+    DBusDict<DBusByte, DBusVariant> dict = result.getValue();
     assertEquals(1, dict.size());
     assertTrue(dict.containsKey(DBusByte.valueOf((byte) 0x7F)));
   }
@@ -68,7 +68,7 @@ final class DictionaryDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeEmptyDictionary(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf(ARRAY_OF_ENTRIES);
+    DBusSignature signature = DBusSignature.valueOf(ARRAY_OF_ENTRIES);
     int bufferSize = 4 + 4;
     ByteBuffer buffer = ByteBuffer.allocate(bufferSize).order(byteOrder);
 
@@ -76,12 +76,12 @@ final class DictionaryDecoderTest {
     buffer.putInt(0);      // padding for DICT_ENTRY alignment
     buffer.flip();
 
-    DictDecoder<DBusByte, Variant> decoder = new DictDecoder<>(signature);
-    DecoderResult<Dict<DBusByte, Variant>> result = decoder.decode(buffer, 0);
+    DictDecoder<DBusByte, DBusVariant> decoder = new DictDecoder<>(signature);
+    DecoderResult<DBusDict<DBusByte, DBusVariant>> result = decoder.decode(buffer, 0);
 
     assertEquals(bufferSize, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    Dict<DBusByte, Variant> dict = result.getValue();
+    DBusDict<DBusByte, DBusVariant> dict = result.getValue();
     assertTrue(dict.isEmpty());
   }
 }

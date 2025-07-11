@@ -7,8 +7,8 @@ package com.lucimber.dbus.message;
 
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusUInt32;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,11 +34,11 @@ public final class OutboundError extends AbstractReply implements OutboundReply 
    * @param payload     optional; the message body
    */
   public OutboundError(
-          UInt32 serial,
-          UInt32 replySerial,
+          DBusUInt32 serial,
+          DBusUInt32 replySerial,
           DBusString errorName,
           DBusString dst,
-          Signature signature,
+          DBusSignature signature,
           List<? extends DBusType> payload) {
     super(serial, replySerial, signature, payload);
     this.errorName = Objects.requireNonNull(errorName);
@@ -63,16 +63,16 @@ public final class OutboundError extends AbstractReply implements OutboundReply 
   public String toString() {
     var s = "OutboundError{destination='%s', serial='%s', replySerial='%s', name='%s', sig='%s'}";
     var mappedDst = getDestination().map(DBusString::toString).orElse("");
-    var sig = getSignature().map(Signature::toString).orElse("");
+    var sig = getSignature().map(DBusSignature::toString).orElse("");
     return String.format(s, mappedDst, getSerial(), getReplySerial(), getErrorName(), sig);
   }
 
   public static class Builder {
-    private UInt32 serial;
-    private UInt32 replySerial;
+    private DBusUInt32 serial;
+    private DBusUInt32 replySerial;
     private DBusString errorName;
     private DBusString destination;
-    private Signature signature;
+    private DBusSignature signature;
     private List<? extends DBusType> payload;
 
     private Builder() {
@@ -82,12 +82,12 @@ public final class OutboundError extends AbstractReply implements OutboundReply 
       return new Builder();
     }
 
-    public Builder withSerial(UInt32 serial) {
+    public Builder withSerial(DBusUInt32 serial) {
       this.serial = serial;
       return this;
     }
 
-    public Builder withReplySerial(UInt32 replySerial) {
+    public Builder withReplySerial(DBusUInt32 replySerial) {
       this.replySerial = replySerial;
       return this;
     }
@@ -102,7 +102,7 @@ public final class OutboundError extends AbstractReply implements OutboundReply 
       return this;
     }
 
-    public Builder withBody(Signature signature, List<? extends DBusType> payload) {
+    public Builder withBody(DBusSignature signature, List<? extends DBusType> payload) {
       this.signature = signature;
       this.payload = payload;
       return this;

@@ -5,8 +5,8 @@
 
 package com.lucimber.dbus.decoder;
 
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.Struct;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusStruct;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -29,7 +29,7 @@ final class StructDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeFirstComplexSignature(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf(FIRST_COMPLEX_SIGNATURE);
+    DBusSignature signature = DBusSignature.valueOf(FIRST_COMPLEX_SIGNATURE);
     ByteBuffer buffer = ByteBuffer.allocate(32).order(byteOrder);
     // Array of bytes
     buffer.putInt(5);
@@ -44,11 +44,11 @@ final class StructDecoderTest {
     buffer.flip();
 
     StructDecoder decoder = new StructDecoder(signature);
-    DecoderResult<Struct> result = decoder.decode(buffer, 0);
+    DecoderResult<DBusStruct> result = decoder.decode(buffer, 0);
 
     assertEquals(buffer.limit(), result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    Struct struct = result.getValue();
+    DBusStruct struct = result.getValue();
     assertEquals(FIRST_COMPLEX_SIGNATURE, struct.getSignature().getDelegate(), "Signature");
     assertEquals(2, struct.getDelegate().size(), "Elements in struct");
   }
@@ -56,17 +56,17 @@ final class StructDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeStructOfOneByte(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf(ONE_BYTE_SIGNATURE);
+    DBusSignature signature = DBusSignature.valueOf(ONE_BYTE_SIGNATURE);
     ByteBuffer buffer = ByteBuffer.allocate(1).order(byteOrder);
     buffer.put((byte) 0x7F);
     buffer.flip();
 
     StructDecoder decoder = new StructDecoder(signature);
-    DecoderResult<Struct> result = decoder.decode(buffer, 0);
+    DecoderResult<DBusStruct> result = decoder.decode(buffer, 0);
 
     assertEquals(1, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    Struct struct = result.getValue();
+    DBusStruct struct = result.getValue();
     assertEquals(ONE_BYTE_SIGNATURE, struct.getSignature().getDelegate(), "Signature");
     assertEquals(1, struct.getDelegate().size(), "Elements in struct");
   }
@@ -74,18 +74,18 @@ final class StructDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeStructOfTwoBytes(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf(TWO_BYTES_SIGNATURE);
+    DBusSignature signature = DBusSignature.valueOf(TWO_BYTES_SIGNATURE);
     ByteBuffer buffer = ByteBuffer.allocate(2).order(byteOrder);
     buffer.put(Byte.MAX_VALUE);
     buffer.put(Byte.MIN_VALUE);
     buffer.flip();
 
     StructDecoder decoder = new StructDecoder(signature);
-    DecoderResult<Struct> result = decoder.decode(buffer, 0);
+    DecoderResult<DBusStruct> result = decoder.decode(buffer, 0);
 
     assertEquals(2, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    Struct struct = result.getValue();
+    DBusStruct struct = result.getValue();
     assertEquals(TWO_BYTES_SIGNATURE, struct.getSignature().getDelegate(), "Signature");
     assertEquals(2, struct.getDelegate().size(), "Elements in struct");
   }
@@ -93,7 +93,7 @@ final class StructDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeStructOfOneDouble(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf(ONE_DOUBLE_SIGNATURE);
+    DBusSignature signature = DBusSignature.valueOf(ONE_DOUBLE_SIGNATURE);
     ByteBuffer buffer = ByteBuffer.allocate(8).order(byteOrder);
     long rawBits = Double.doubleToRawLongBits(Double.MAX_VALUE);
     if (byteOrder == ByteOrder.BIG_ENDIAN) {
@@ -104,11 +104,11 @@ final class StructDecoderTest {
     buffer.flip();
 
     StructDecoder decoder = new StructDecoder(signature);
-    DecoderResult<Struct> result = decoder.decode(buffer, 0);
+    DecoderResult<DBusStruct> result = decoder.decode(buffer, 0);
 
     assertEquals(8, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    Struct struct = result.getValue();
+    DBusStruct struct = result.getValue();
     assertEquals(ONE_DOUBLE_SIGNATURE, struct.getSignature().getDelegate(), "Signature");
     assertEquals(1, struct.getDelegate().size(), "Elements in struct");
   }
@@ -116,17 +116,17 @@ final class StructDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodingStructOfOneInteger(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf(ONE_INTEGER_SIGNATURE);
+    DBusSignature signature = DBusSignature.valueOf(ONE_INTEGER_SIGNATURE);
     ByteBuffer buffer = ByteBuffer.allocate(4).order(byteOrder);
     buffer.putInt(Integer.MAX_VALUE);
     buffer.flip();
 
     StructDecoder decoder = new StructDecoder(signature);
-    DecoderResult<Struct> result = decoder.decode(buffer, 0);
+    DecoderResult<DBusStruct> result = decoder.decode(buffer, 0);
 
     assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    Struct struct = result.getValue();
+    DBusStruct struct = result.getValue();
     assertEquals(ONE_INTEGER_SIGNATURE, struct.getSignature().getDelegate(), "Signature");
     assertEquals(1, struct.getDelegate().size(), "Elements in struct");
   }

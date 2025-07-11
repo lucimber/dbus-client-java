@@ -15,7 +15,7 @@ import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.netty.NettyConnection;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
+import com.lucimber.dbus.type.DBusObjectPath;
 import io.netty.channel.unix.DomainSocketAddress;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import io.netty.channel.unix.DomainSocketAddress;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -206,7 +205,7 @@ class ConnectionIntegrationTest extends DBusIntegrationTestBase {
       // Create a method call to the D-Bus daemon itself
       OutboundMethodCall methodCall = OutboundMethodCall.Builder
           .create()
-          .withPath(ObjectPath.valueOf("/org/freedesktop/DBus"))
+          .withPath(DBusObjectPath.valueOf("/org/freedesktop/DBus"))
           .withMember(DBusString.valueOf("ListNames"))
           .withDestination(DBusString.valueOf("org.freedesktop.DBus"))
           .withInterface(DBusString.valueOf("org.freedesktop.DBus"))

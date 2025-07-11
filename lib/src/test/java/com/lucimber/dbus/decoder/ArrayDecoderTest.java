@@ -37,7 +37,7 @@ final class ArrayDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeArrayOfBytes(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf(ARRAY_OF_BYTES);
+    DBusSignature signature = DBusSignature.valueOf(ARRAY_OF_BYTES);
     byte[] items = {0x01, 0x02, 0x03, 0x04, 0x05};
     ByteBuffer buffer = allocateAligned(4 + items.length, byteOrder);
     buffer.putInt(items.length);
@@ -77,9 +77,9 @@ final class ArrayDecoderTest {
     buffer.putInt(7);
 
     buffer.flip();
-    Signature signature = Signature.valueOf(HEADER_SIGNATURE);
-    ArrayDecoder<Struct> decoder = new ArrayDecoder<>(signature);
-    DecoderResult<DBusArray<Struct>> result = decoder.decode(buffer, 0);
+    DBusSignature signature = DBusSignature.valueOf(HEADER_SIGNATURE);
+    ArrayDecoder<DBusStruct> decoder = new ArrayDecoder<>(signature);
+    DecoderResult<DBusArray<DBusStruct>> result = decoder.decode(buffer, 0);
     assertEquals(56, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
     assertEquals(2, result.getValue().size(), ASSERT_SIZE_OF_ARRAY);
@@ -88,7 +88,7 @@ final class ArrayDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeArrayOfArrays(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf(ARRAY_OF_BYTE_ARRAYS);
+    DBusSignature signature = DBusSignature.valueOf(ARRAY_OF_BYTE_ARRAYS);
     ByteBuffer buffer = allocateAligned(26, byteOrder);
     buffer.putInt(22);
     for (int i = 0; i < 3; i++) {
@@ -108,7 +108,7 @@ final class ArrayDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeArrayOfDoubles(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf(ARRAY_OF_DOUBLES);
+    DBusSignature signature = DBusSignature.valueOf(ARRAY_OF_DOUBLES);
     ByteBuffer buffer = allocateAligned(32, byteOrder);
     buffer.putInt(24);
     buffer.putInt(0);
@@ -126,7 +126,7 @@ final class ArrayDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeArrayOfDoubleArrays(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf(ARRAY_OF_DOUBLE_ARRAYS);
+    DBusSignature signature = DBusSignature.valueOf(ARRAY_OF_DOUBLE_ARRAYS);
     ByteBuffer buffer = allocateAligned(96, byteOrder);
     buffer.putInt(92);
     for (int i = 0; i < 3; i++) {
@@ -148,7 +148,7 @@ final class ArrayDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeArrayOfSignedShorts(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf(ARRAY_OF_SIGNED_SHORTS);
+    DBusSignature signature = DBusSignature.valueOf(ARRAY_OF_SIGNED_SHORTS);
     ByteBuffer buffer = allocateAligned(12, byteOrder);
 
     buffer.putInt(8);
@@ -157,8 +157,8 @@ final class ArrayDecoderTest {
     }
     buffer.flip();
 
-    ArrayDecoder<Int16> decoder = new ArrayDecoder<>(signature);
-    DecoderResult<DBusArray<Int16>> result = decoder.decode(buffer, 0);
+    ArrayDecoder<DBusInt16> decoder = new ArrayDecoder<>(signature);
+    DecoderResult<DBusArray<DBusInt16>> result = decoder.decode(buffer, 0);
 
     assertEquals(12, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
@@ -168,7 +168,7 @@ final class ArrayDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeArrayOfStrings(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf(ARRAY_OF_STRINGS);
+    DBusSignature signature = DBusSignature.valueOf(ARRAY_OF_STRINGS);
     String[] strings = {"abc1", "def2"};
     ByteBuffer content = allocateAligned(100, byteOrder);
 
@@ -196,15 +196,15 @@ final class ArrayDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeEmptyArrayOfSignedLongs(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf(ARRAY_OF_SIGNED_LONGS);
+    DBusSignature signature = DBusSignature.valueOf(ARRAY_OF_SIGNED_LONGS);
     ByteBuffer buffer = allocateAligned(8, byteOrder);
 
     buffer.putInt(0);
     buffer.putInt(0); // padding
     buffer.flip();
 
-    ArrayDecoder<Int64> decoder = new ArrayDecoder<>(signature);
-    DecoderResult<DBusArray<Int64>> result = decoder.decode(buffer, 0);
+    ArrayDecoder<DBusInt64> decoder = new ArrayDecoder<>(signature);
+    DecoderResult<DBusArray<DBusInt64>> result = decoder.decode(buffer, 0);
     assertEquals(8, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
     assertTrue(result.getValue().isEmpty(), ASSERT_SIZE_OF_ARRAY);

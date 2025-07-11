@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.decoder;
 
-import com.lucimber.dbus.type.Int16;
+import com.lucimber.dbus.type.DBusInt16;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
@@ -20,15 +20,15 @@ import org.slf4j.MarkerFactory;
  * A decoder which unmarshals a short from the byte stream format used by D-Bus.
  *
  * @see Decoder
- * @see Int16
+ * @see DBusInt16
  */
-public final class Int16Decoder implements Decoder<ByteBuffer, Int16> {
+public final class Int16Decoder implements Decoder<ByteBuffer, DBusInt16> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
   private static final int TYPE_BYTES = 2;
 
-  private static void logResult(Int16 value, int offset, int padding, int consumedBytes) {
+  private static void logResult(DBusInt16 value, int offset, int padding, int consumedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "INT16: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
       return String.format(s, value, offset, padding, consumedBytes);
@@ -36,7 +36,7 @@ public final class Int16Decoder implements Decoder<ByteBuffer, Int16> {
   }
 
   @Override
-  public DecoderResult<Int16> decode(ByteBuffer buffer, int offset) throws DecoderException {
+  public DecoderResult<DBusInt16> decode(ByteBuffer buffer, int offset) throws DecoderException {
     Objects.requireNonNull(buffer, "buffer must not be null");
     try {
       int consumedBytes = 0;
@@ -47,8 +47,8 @@ public final class Int16Decoder implements Decoder<ByteBuffer, Int16> {
       short rawValue = buffer.getShort();
       consumedBytes += TYPE_BYTES;
 
-      Int16 value = Int16.valueOf(rawValue);
-      DecoderResult<Int16> result = new DecoderResultImpl<>(consumedBytes, value);
+      DBusInt16 value = DBusInt16.valueOf(rawValue);
+      DecoderResult<DBusInt16> result = new DecoderResultImpl<>(consumedBytes, value);
       logResult(value, offset, padding, consumedBytes);
 
       return result;

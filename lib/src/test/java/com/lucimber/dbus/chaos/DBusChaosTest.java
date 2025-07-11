@@ -7,7 +7,6 @@ package com.lucimber.dbus.chaos;
 
 import com.lucimber.dbus.connection.Connection;
 import com.lucimber.dbus.connection.ConnectionConfig;
-import com.lucimber.dbus.connection.ConnectionEvent;
 import com.lucimber.dbus.connection.ConnectionEventListener;
 import com.lucimber.dbus.connection.ConnectionEventType;
 import com.lucimber.dbus.connection.ConnectionState;
@@ -15,7 +14,7 @@ import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.netty.NettyConnection;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
+import com.lucimber.dbus.type.DBusObjectPath;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
@@ -354,7 +353,7 @@ public class DBusChaosTest {
   private OutboundMethodCall createTestMethodCall() {
     return OutboundMethodCall.Builder
         .create()
-        .withPath(ObjectPath.valueOf("/org/freedesktop/DBus"))
+        .withPath(DBusObjectPath.valueOf("/org/freedesktop/DBus"))
         .withMember(DBusString.valueOf("GetId"))
         .withDestination(DBusString.valueOf("org.freedesktop.DBus"))
         .withInterface(DBusString.valueOf("org.freedesktop.DBus"))

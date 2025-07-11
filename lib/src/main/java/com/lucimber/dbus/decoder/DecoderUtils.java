@@ -8,11 +8,11 @@ package com.lucimber.dbus.decoder;
 import com.lucimber.dbus.type.DBusBasicType;
 import com.lucimber.dbus.type.DBusContainerType;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeCode;
 import com.lucimber.dbus.type.TypeUtils;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -54,7 +54,7 @@ public final class DecoderUtils {
     }
   }
 
-  public static void verifyArrayLength(UInt32 length) {
+  public static void verifyArrayLength(DBusUInt32 length) {
     LoggerUtils.trace(LOGGER, () -> "Verifying length of D-Bus array.");
     Objects.requireNonNull(length, "length must not be null");
     if (Integer.compareUnsigned(length.getDelegate(), MAX_ARRAY_LENGTH) > 0) {
@@ -75,7 +75,7 @@ public final class DecoderUtils {
    * @throws DecoderException If the expected data type could not be decoded from the buffer.
    */
   @SuppressWarnings("unchecked")
-  public static <R extends DBusType> DecoderResult<R> decode(Signature signature,
+  public static <R extends DBusType> DecoderResult<R> decode(DBusSignature signature,
                                                              ByteBuffer buffer,
                                                              int offset)
           throws DecoderException {
@@ -92,7 +92,7 @@ public final class DecoderUtils {
   }
 
   @SuppressWarnings("unchecked")
-  public static <R extends DBusContainerType> DecoderResult<R> decodeContainerType(Signature signature,
+  public static <R extends DBusContainerType> DecoderResult<R> decodeContainerType(DBusSignature signature,
                                                                                    ByteBuffer buffer,
                                                                                    int offset)
           throws DecoderException {

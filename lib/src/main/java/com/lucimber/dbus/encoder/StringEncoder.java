@@ -7,7 +7,7 @@ package com.lucimber.dbus.encoder;
 
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.Type;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -58,10 +58,10 @@ public final class StringEncoder implements Encoder<DBusString, ByteBuffer> {
 
       // Convert string to UTF-8 bytes
       byte[] stringBytes = value.getDelegate().getBytes(StandardCharsets.UTF_8);
-      UInt32 length = UInt32.valueOf(stringBytes.length);
+      DBusUInt32 length = DBusUInt32.valueOf(stringBytes.length);
 
       // Encode the length using UInt32Encoder
-      Encoder<UInt32, ByteBuffer> lengthEncoder = new UInt32Encoder(order);
+      Encoder<DBusUInt32, ByteBuffer> lengthEncoder = new UInt32Encoder(order);
       EncoderResult<ByteBuffer> lengthResult = lengthEncoder.encode(length, offset + padding);
       ByteBuffer lengthBuffer = lengthResult.getBuffer();
 

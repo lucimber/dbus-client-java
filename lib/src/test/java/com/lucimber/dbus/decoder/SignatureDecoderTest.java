@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.decoder;
 
-import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.DBusSignature;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -34,7 +34,7 @@ final class SignatureDecoderTest {
     buffer.flip();
 
     SignatureDecoder decoder = new SignatureDecoder();
-    DecoderResult<Signature> result = decoder.decode(buffer, 0);
+    DecoderResult<DBusSignature> result = decoder.decode(buffer, 0);
 
     assertEquals(buffer.limit(), result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
@@ -52,7 +52,7 @@ final class SignatureDecoderTest {
     buffer.flip();
 
     SignatureDecoder decoder = new SignatureDecoder();
-    DecoderResult<Signature> result = decoder.decode(buffer, 0);
+    DecoderResult<DBusSignature> result = decoder.decode(buffer, 0);
 
     assertEquals(buffer.limit(), result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);

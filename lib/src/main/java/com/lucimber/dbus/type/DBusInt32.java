@@ -8,24 +8,34 @@ package com.lucimber.dbus.type;
 import java.util.Objects;
 
 /**
- * Maps an unsigned {@link Integer} to its D-Bus equivalent of UINT32.
+ * Maps an {@link Integer} to its D-Bus equivalent of INT32.
  */
-public final class UInt32 extends Number implements Comparable<UInt32>, DBusBasicType {
+public final class DBusInt32 extends Number implements Comparable<DBusInt32>, DBusBasicType {
 
   private final int delegate;
 
-  private UInt32(final int delegate) {
+  private DBusInt32(final int delegate) {
     this.delegate = delegate;
   }
 
   /**
-   * Constructs a new D-Bus UIN32 from its Java counterpart.
+   * Constructs a new D-Bus INT32 from its Java counterpart.
    *
    * @param value the integer value
    * @return a new instance
    */
-  public static UInt32 valueOf(final int value) {
-    return new UInt32(value);
+  public static DBusInt32 valueOf(final int value) {
+    return new DBusInt32(value);
+  }
+
+  @Override
+  public Type getType() {
+    return Type.INT32;
+  }
+
+  @Override
+  public Integer getDelegate() {
+    return delegate;
   }
 
   @Override
@@ -36,7 +46,7 @@ public final class UInt32 extends Number implements Comparable<UInt32>, DBusBasi
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final UInt32 that = (UInt32) o;
+    final DBusInt32 that = (DBusInt32) o;
     return delegate == that.delegate;
   }
 
@@ -47,17 +57,7 @@ public final class UInt32 extends Number implements Comparable<UInt32>, DBusBasi
 
   @Override
   public String toString() {
-    return Integer.toUnsignedString(delegate);
-  }
-
-  @Override
-  public Type getType() {
-    return Type.UINT32;
-  }
-
-  @Override
-  public Integer getDelegate() {
-    return delegate;
+    return Integer.toString(delegate);
   }
 
   @Override
@@ -67,7 +67,7 @@ public final class UInt32 extends Number implements Comparable<UInt32>, DBusBasi
 
   @Override
   public long longValue() {
-    return Integer.toUnsignedLong(delegate);
+    return delegate;
   }
 
   @Override
@@ -81,7 +81,7 @@ public final class UInt32 extends Number implements Comparable<UInt32>, DBusBasi
   }
 
   @Override
-  public int compareTo(final UInt32 o) {
-    return Integer.compareUnsigned(delegate, o.delegate);
+  public int compareTo(final DBusInt32 o) {
+    return Integer.compare(delegate, o.delegate);
   }
 }

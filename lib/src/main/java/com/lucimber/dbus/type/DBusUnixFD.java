@@ -10,11 +10,11 @@ import java.util.Objects;
 /**
  * Maps an unsigned {@link Integer} to its D-Bus equivalent of UNIX_FD.
  */
-public final class UnixFd implements DBusBasicType {
+public final class DBusUnixFD implements DBusBasicType {
 
   private final int delegate;
 
-  private UnixFd(final int delegate) {
+  private DBusUnixFD(final int delegate) {
     this.delegate = delegate;
   }
 
@@ -24,8 +24,8 @@ public final class UnixFd implements DBusBasicType {
    * @param value the integer value
    * @return a new instance
    */
-  public static UnixFd valueOf(final int value) {
-    return new UnixFd(value);
+  public static DBusUnixFD valueOf(final int value) {
+    return new DBusUnixFD(value);
   }
 
   @Override
@@ -36,7 +36,7 @@ public final class UnixFd implements DBusBasicType {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final UnixFd that = (UnixFd) o;
+    final DBusUnixFD that = (DBusUnixFD) o;
     return delegate == that.delegate;
   }
 

@@ -8,33 +8,33 @@ package com.lucimber.dbus.type;
 import java.util.Objects;
 
 /**
- * Maps an {@link Integer} to its D-Bus equivalent of INT32.
+ * Maps a {@link Long} to its D-Bus equivalent of INT64.
  */
-public final class Int32 extends Number implements Comparable<Int32>, DBusBasicType {
+public final class DBusInt64 extends Number implements Comparable<DBusInt64>, DBusBasicType {
 
-  private final int delegate;
+  private final long delegate;
 
-  private Int32(final int delegate) {
+  private DBusInt64(final long delegate) {
     this.delegate = delegate;
   }
 
   /**
-   * Constructs a new D-Bus INT32 from its Java counterpart.
+   * Constructs a new D-Bus INT64 from its Java counterpart.
    *
-   * @param value the integer value
+   * @param value the long value
    * @return a new instance
    */
-  public static Int32 valueOf(final int value) {
-    return new Int32(value);
+  public static DBusInt64 valueOf(final long value) {
+    return new DBusInt64(value);
   }
 
   @Override
   public Type getType() {
-    return Type.INT32;
+    return Type.INT64;
   }
 
   @Override
-  public Integer getDelegate() {
+  public Long getDelegate() {
     return delegate;
   }
 
@@ -46,8 +46,8 @@ public final class Int32 extends Number implements Comparable<Int32>, DBusBasicT
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final Int32 that = (Int32) o;
-    return delegate == that.delegate;
+    final DBusInt64 int64 = (DBusInt64) o;
+    return delegate == int64.delegate;
   }
 
   @Override
@@ -57,12 +57,12 @@ public final class Int32 extends Number implements Comparable<Int32>, DBusBasicT
 
   @Override
   public String toString() {
-    return Integer.toString(delegate);
+    return Long.toString(delegate);
   }
 
   @Override
   public int intValue() {
-    return delegate;
+    return (int) delegate;
   }
 
   @Override
@@ -81,7 +81,7 @@ public final class Int32 extends Number implements Comparable<Int32>, DBusBasicT
   }
 
   @Override
-  public int compareTo(final Int32 o) {
-    return Integer.compare(delegate, o.delegate);
+  public int compareTo(final DBusInt64 o) {
+    return Long.compare(delegate, o.delegate);
   }
 }

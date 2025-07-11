@@ -6,8 +6,8 @@
 package com.lucimber.dbus.message;
 
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusUInt32;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,9 +22,9 @@ public interface Message {
   /**
    * Gets the serial number of this D-Bus message.
    *
-   * @return an {@link UInt32}
+   * @return an {@link DBusUInt32}
    */
-  UInt32 getSerial();
+  DBusUInt32 getSerial();
 
   /**
    * Gets the payload of this D-Bus message.
@@ -36,7 +36,7 @@ public interface Message {
   /**
    * Gets the signature of the payload.
    *
-   * @return an {@link Optional} of {@link Signature}
+   * @return an {@link Optional} of {@link DBusSignature}
    */
-  Optional<Signature> getSignature();
+  Optional<DBusSignature> getSignature();
 }

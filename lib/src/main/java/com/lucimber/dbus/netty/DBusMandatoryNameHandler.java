@@ -10,8 +10,8 @@ import com.lucimber.dbus.message.InboundMethodReturn;
 import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusUInt32;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import java.util.List;
@@ -38,11 +38,11 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
   private static final Logger LOGGER = LoggerFactory.getLogger(DBusMandatoryNameHandler.class);
 
   private static final DBusString DBUS_SERVICE_NAME = DBusString.valueOf("org.freedesktop.DBus");
-  private static final ObjectPath DBUS_OBJECT_PATH = ObjectPath.valueOf("/org/freedesktop/DBus");
+  private static final DBusObjectPath DBUS_OBJECT_PATH = DBusObjectPath.valueOf("/org/freedesktop/DBus");
   private static final DBusString DBUS_INTERFACE_NAME = DBusString.valueOf("org.freedesktop.DBus");
   private static final DBusString HELLO_METHOD_NAME = DBusString.valueOf("Hello");
   private State currentState = State.IDLE;
-  private UInt32 helloCallSerial;
+  private DBusUInt32 helloCallSerial;
 
   @Override
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
@@ -52,7 +52,7 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
 
       AtomicLong serialCounter = ctx.channel().attr(DBusChannelAttribute.SERIAL_COUNTER).get();
       // D-Bus serial numbers are 32-bit unsigned and allowed to wrap around
-      helloCallSerial = UInt32.valueOf((int) serialCounter.getAndIncrement());
+      helloCallSerial = DBusUInt32.valueOf((int) serialCounter.getAndIncrement());
 
       OutboundMethodCall helloCall = OutboundMethodCall.Builder
               .create()

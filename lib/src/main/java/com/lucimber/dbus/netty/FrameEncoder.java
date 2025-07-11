@@ -17,11 +17,11 @@ import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.type.DBusArray;
 import com.lucimber.dbus.type.DBusByte;
-import com.lucimber.dbus.type.Int32;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.Struct;
-import com.lucimber.dbus.type.UInt32;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.DBusInt32;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusStruct;
+import com.lucimber.dbus.type.DBusUInt32;
+import com.lucimber.dbus.type.DBusVariant;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -80,30 +80,30 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
     buffer.writeByte(version);
   }
 
-  private static EncoderResult<ByteBuffer> encodeHeaderFields(Map<HeaderField, Variant> fields,
+  private static EncoderResult<ByteBuffer> encodeHeaderFields(Map<HeaderField, DBusVariant> fields,
                                                               ByteOrder order, int offset) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding header fields: " + fields);
-    DBusArray<Struct> structs = new DBusArray<>(Signature.valueOf("a(yv)"));
-    for (Map.Entry<HeaderField, Variant> entry : fields.entrySet()) {
+    DBusArray<DBusStruct> structs = new DBusArray<>(DBusSignature.valueOf("a(yv)"));
+    for (Map.Entry<HeaderField, DBusVariant> entry : fields.entrySet()) {
       DBusByte dbusByte = DBusByte.valueOf(entry.getKey().getCode());
-      Signature signature = Signature.valueOf("(yv)");
-      Struct struct = new Struct(signature, dbusByte, entry.getValue());
+      DBusSignature signature = DBusSignature.valueOf("(yv)");
+      DBusStruct struct = new DBusStruct(signature, dbusByte, entry.getValue());
       structs.add(struct);
     }
-    Signature signature = Signature.valueOf("a(yv)");
-    Encoder<DBusArray<Struct>, ByteBuffer> encoder = new ArrayEncoder<>(order, signature);
+    DBusSignature signature = DBusSignature.valueOf("a(yv)");
+    Encoder<DBusArray<DBusStruct>, ByteBuffer> encoder = new ArrayEncoder<>(order, signature);
     return encoder.encode(structs, offset);
   }
 
   private static EncoderResult<ByteBuffer> encodeBodyLength(int bodyLength, ByteOrder order, int offset) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding length of body: " + bodyLength);
-    Encoder<Int32, ByteBuffer> encoder = new Int32Encoder(order);
-    return encoder.encode(Int32.valueOf(bodyLength), offset);
+    Encoder<DBusInt32, ByteBuffer> encoder = new Int32Encoder(order);
+    return encoder.encode(DBusInt32.valueOf(bodyLength), offset);
   }
 
-  private static EncoderResult<ByteBuffer> encodeSerial(ByteOrder order, UInt32 serial, int offset) {
+  private static EncoderResult<ByteBuffer> encodeSerial(ByteOrder order, DBusUInt32 serial, int offset) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding serial number: " + serial);
-    Encoder<UInt32, ByteBuffer> encoder = new UInt32Encoder(order);
+    Encoder<DBusUInt32, ByteBuffer> encoder = new UInt32Encoder(order);
     return encoder.encode(serial, offset);
   }
 

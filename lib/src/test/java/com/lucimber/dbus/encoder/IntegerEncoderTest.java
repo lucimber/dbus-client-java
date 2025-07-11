@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.encoder;
 
-import com.lucimber.dbus.type.Int32;
+import com.lucimber.dbus.type.DBusInt32;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -21,8 +21,8 @@ final class IntegerEncoderTest {
 
   @Test
   void encodeSignedIntegerMinValueOnBigEndian() {
-    Encoder<Int32, ByteBuffer> encoder = new Int32Encoder(ByteOrder.BIG_ENDIAN);
-    Int32 int32 = Int32.valueOf(-2147483648);
+    Encoder<DBusInt32, ByteBuffer> encoder = new Int32Encoder(ByteOrder.BIG_ENDIAN);
+    DBusInt32 int32 = DBusInt32.valueOf(-2147483648);
     EncoderResult<ByteBuffer> result = encoder.encode(int32, 0);
     int expectedNumOfBytes = 4;
     assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
@@ -36,8 +36,8 @@ final class IntegerEncoderTest {
 
   @Test
   void encodeSignedIntegerMinValueWithOffsetOnBigEndian() {
-    Encoder<Int32, ByteBuffer> encoder = new Int32Encoder(ByteOrder.BIG_ENDIAN);
-    Int32 int32 = Int32.valueOf(-2147483648);
+    Encoder<DBusInt32, ByteBuffer> encoder = new Int32Encoder(ByteOrder.BIG_ENDIAN);
+    DBusInt32 int32 = DBusInt32.valueOf(-2147483648);
     int offset = 5;
     EncoderResult<ByteBuffer> result = encoder.encode(int32, offset);
     int expectedNumOfBytes = 7;
@@ -52,8 +52,8 @@ final class IntegerEncoderTest {
 
   @Test
   void encodeSignedIntegerMinValueOnLittleEndian() {
-    Encoder<Int32, ByteBuffer> encoder = new Int32Encoder(ByteOrder.LITTLE_ENDIAN);
-    Int32 int32 = Int32.valueOf(-2147483648);
+    Encoder<DBusInt32, ByteBuffer> encoder = new Int32Encoder(ByteOrder.LITTLE_ENDIAN);
+    DBusInt32 int32 = DBusInt32.valueOf(-2147483648);
     EncoderResult<ByteBuffer> result = encoder.encode(int32, 0);
     int expectedNumOfBytes = 4;
     assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
@@ -67,8 +67,8 @@ final class IntegerEncoderTest {
 
   @Test
   void encodeSignedIntegerMinValueWithOffsetOnLittleEndian() {
-    Encoder<Int32, ByteBuffer> encoder = new Int32Encoder(ByteOrder.LITTLE_ENDIAN);
-    Int32 int32 = Int32.valueOf(-2147483648);
+    Encoder<DBusInt32, ByteBuffer> encoder = new Int32Encoder(ByteOrder.LITTLE_ENDIAN);
+    DBusInt32 int32 = DBusInt32.valueOf(-2147483648);
     int offset = 5;
     EncoderResult<ByteBuffer> result = encoder.encode(int32, offset);
     int expectedNumOfBytes = 7;

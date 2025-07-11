@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-final class SignatureTest {
+final class DBusSignatureTest {
 
   private static final String ARRAY_SEQUENCE = "a{ib}";
   private static final String COMPLEX_SEQUENCE = "aya(vt)ib(i((dq)u))";
@@ -20,7 +20,7 @@ final class SignatureTest {
 
   @Test
   public void succeedWithParsingSimpleSequence() throws SignatureException {
-    final Signature signature = Signature.valueOf(SIMPLE_SEQUENCE);
+    final DBusSignature signature = DBusSignature.valueOf(SIMPLE_SEQUENCE);
     final int expectedQuantity = 5;
     assertEquals(expectedQuantity, signature.getQuantity());
     assertEquals(SIMPLE_SEQUENCE, signature.toString());
@@ -28,7 +28,7 @@ final class SignatureTest {
 
   @Test
   public void succeedWithParsingModerateSequence() throws SignatureException {
-    final Signature signature = Signature.valueOf(MODERATE_SEQUENCE);
+    final DBusSignature signature = DBusSignature.valueOf(MODERATE_SEQUENCE);
     final int expectedQuantity = 4;
     assertEquals(expectedQuantity, signature.getQuantity());
     assertEquals(MODERATE_SEQUENCE, signature.toString());
@@ -36,7 +36,7 @@ final class SignatureTest {
 
   @Test
   public void succeedWithParsingComplexSequence() throws SignatureException {
-    final Signature signature = Signature.valueOf(COMPLEX_SEQUENCE);
+    final DBusSignature signature = DBusSignature.valueOf(COMPLEX_SEQUENCE);
     final int expectedQuantity = 5;
     assertEquals(expectedQuantity, signature.getQuantity());
     assertEquals(COMPLEX_SEQUENCE, signature.toString());
@@ -44,7 +44,7 @@ final class SignatureTest {
 
   @Test
   public void succeedWithParsingComplexSequence2() throws SignatureException {
-    final Signature signature = Signature.valueOf(COMPLEX_SEQUENCE_2);
+    final DBusSignature signature = DBusSignature.valueOf(COMPLEX_SEQUENCE_2);
     final int expectedQuantity = 5;
     assertEquals(expectedQuantity, signature.getQuantity());
     assertEquals(COMPLEX_SEQUENCE_2, signature.toString());
@@ -52,7 +52,7 @@ final class SignatureTest {
 
   @Test
   public void succeedWithParsingStructSequence() throws SignatureException {
-    final Signature signature = Signature.valueOf(STRUCT_SEQUENCE);
+    final DBusSignature signature = DBusSignature.valueOf(STRUCT_SEQUENCE);
     final int expectedQuantity = 1;
     assertEquals(expectedQuantity, signature.getQuantity());
     assertEquals(STRUCT_SEQUENCE, signature.toString());
@@ -60,20 +60,20 @@ final class SignatureTest {
 
   @Test
   public void succeedWithParsingDictionary() throws SignatureException {
-    final Signature signature = Signature.valueOf(ARRAY_SEQUENCE);
+    final DBusSignature signature = DBusSignature.valueOf(ARRAY_SEQUENCE);
     final int expectedQuantity = 1;
     assertEquals(expectedQuantity, signature.getQuantity());
     assertEquals(ARRAY_SEQUENCE, signature.toString());
-    final Signature subSignature = signature.subContainer();
+    final DBusSignature subSignature = signature.subContainer();
     assertEquals("{ib}", subSignature.toString());
-    final Signature subSubSig = subSignature.subContainer();
+    final DBusSignature subSubSig = subSignature.subContainer();
     assertEquals("ib", subSubSig.toString());
   }
 
   @Test
   public void equalsAndHashCode() {
-    final Signature a = Signature.valueOf("a{oa{sa{sv}}}");
-    final Signature b = Signature.valueOf("a{oa{sa{sv}}}");
+    final DBusSignature a = DBusSignature.valueOf("a{oa{sa{sv}}}");
+    final DBusSignature b = DBusSignature.valueOf("a{oa{sa{sv}}}");
     assertEquals(a, b);
     assertEquals(a.hashCode(), b.hashCode());
   }
@@ -81,38 +81,38 @@ final class SignatureTest {
   @Test
   public void failDueToEmptyStruct() {
     final String sequence = "so()";
-    assertThrows(SignatureException.class, () -> Signature.valueOf(sequence));
+    assertThrows(SignatureException.class, () -> DBusSignature.valueOf(sequence));
   }
 
   @Test
   public void failDueToEmptyDictEntry() {
     final String sequence = "a{}";
-    assertThrows(SignatureException.class, () -> Signature.valueOf(sequence));
+    assertThrows(SignatureException.class, () -> DBusSignature.valueOf(sequence));
   }
 
   @Test
   public void failDueToMisplacedDictEntry() {
     final String sequence = "n{}t";
-    assertThrows(SignatureException.class, () -> Signature.valueOf(sequence));
+    assertThrows(SignatureException.class, () -> DBusSignature.valueOf(sequence));
   }
 
   @Test
   public void testInvalidSignatures() {
     // Test various invalid signature combinations
-    assertThrows(Exception.class, () -> Signature.valueOf("a"));     // Array without element type
-    assertThrows(Exception.class, () -> Signature.valueOf("("));     // Unclosed struct
-    assertThrows(Exception.class, () -> Signature.valueOf(")"));     // Unopened struct
-    assertThrows(Exception.class, () -> Signature.valueOf("(("));    // Nested unclosed struct
-    assertThrows(Exception.class, () -> Signature.valueOf("(i"));    // Unclosed struct with element
-    assertThrows(Exception.class, () -> Signature.valueOf("i)"));    // Unopened struct with element
-    assertThrows(Exception.class, () -> Signature.valueOf("{"));     // Unclosed dict entry
-    assertThrows(Exception.class, () -> Signature.valueOf("}"));     // Unopened dict entry
-    assertThrows(Exception.class, () -> Signature.valueOf("{{"));    // Nested unclosed dict entry
-    assertThrows(Exception.class, () -> Signature.valueOf("{i"));    // Unclosed dict entry with key
-    assertThrows(Exception.class, () -> Signature.valueOf("i}"));    // Unopened dict entry with key
-    assertThrows(Exception.class, () -> Signature.valueOf("a{i}"));  // Dict entry with one element
-    assertThrows(Exception.class, () -> Signature.valueOf("a{iii}")); // Dict entry with three elements
-    assertThrows(Exception.class, () -> Signature.valueOf("X"));     // Invalid type code
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("a"));     // Array without element type
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("("));     // Unclosed struct
+    assertThrows(Exception.class, () -> DBusSignature.valueOf(")"));     // Unopened struct
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("(("));    // Nested unclosed struct
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("(i"));    // Unclosed struct with element
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("i)"));    // Unopened struct with element
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("{"));     // Unclosed dict entry
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("}"));     // Unopened dict entry
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("{{"));    // Nested unclosed dict entry
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("{i"));    // Unclosed dict entry with key
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("i}"));    // Unopened dict entry with key
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("a{i}"));  // Dict entry with one element
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("a{iii}")); // Dict entry with three elements
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("X"));     // Invalid type code
   }
 
   @Test
@@ -122,7 +122,7 @@ final class SignatureTest {
     
     for (String type : basicTypes) {
       assertDoesNotThrow(() -> {
-        Signature sig = Signature.valueOf(type);
+        DBusSignature sig = DBusSignature.valueOf(type);
         assertEquals(1, sig.getQuantity());
         assertEquals(type, sig.toString());
       });
@@ -136,7 +136,7 @@ final class SignatureTest {
     
     for (String type : arrayTypes) {
       assertDoesNotThrow(() -> {
-        Signature sig = Signature.valueOf(type);
+        DBusSignature sig = DBusSignature.valueOf(type);
         assertEquals(1, sig.getQuantity());
         assertEquals(type, sig.toString());
       });
@@ -150,7 +150,7 @@ final class SignatureTest {
     
     for (String type : structTypes) {
       assertDoesNotThrow(() -> {
-        Signature sig = Signature.valueOf(type);
+        DBusSignature sig = DBusSignature.valueOf(type);
         assertEquals(1, sig.getQuantity());
         assertEquals(type, sig.toString());
       });
@@ -164,7 +164,7 @@ final class SignatureTest {
     
     for (String type : dictTypes) {
       assertDoesNotThrow(() -> {
-        Signature sig = Signature.valueOf(type);
+        DBusSignature sig = DBusSignature.valueOf(type);
         assertEquals(1, sig.getQuantity());
         assertEquals(type, sig.toString());
       });
@@ -187,7 +187,7 @@ final class SignatureTest {
     
     for (String type : complexTypes) {
       assertDoesNotThrow(() -> {
-        Signature sig = Signature.valueOf(type);
+        DBusSignature sig = DBusSignature.valueOf(type);
         assertEquals(1, sig.getQuantity());
         assertEquals(type, sig.toString());
       });
@@ -209,7 +209,7 @@ final class SignatureTest {
     
     for (String type : multiTypes) {
       assertDoesNotThrow(() -> {
-        Signature sig = Signature.valueOf(type);
+        DBusSignature sig = DBusSignature.valueOf(type);
         assertTrue(sig.getQuantity() > 1);
         assertEquals(type, sig.toString());
       });
@@ -221,7 +221,7 @@ final class SignatureTest {
     // Test empty signature - note: implementation may not support empty signatures
     // This test checks the actual behavior
     try {
-      Signature sig = Signature.valueOf("");
+      DBusSignature sig = DBusSignature.valueOf("");
       assertEquals(0, sig.getQuantity());
       assertEquals("", sig.toString());
     } catch (SignatureException e) {
@@ -233,15 +233,15 @@ final class SignatureTest {
   @Test
   public void testSubContainer() {
     // Test subContainer method with various container types
-    Signature arrayDict = Signature.valueOf("a{sv}");
-    Signature dictSub = arrayDict.subContainer();
+    DBusSignature arrayDict = DBusSignature.valueOf("a{sv}");
+    DBusSignature dictSub = arrayDict.subContainer();
     assertEquals("{sv}", dictSub.toString());
     
-    Signature dictEntrySub = dictSub.subContainer();
+    DBusSignature dictEntrySub = dictSub.subContainer();
     assertEquals("sv", dictEntrySub.toString());
     
-    Signature structSig = Signature.valueOf("(a{sv}is)");
-    Signature structSub = structSig.subContainer();
+    DBusSignature structSig = DBusSignature.valueOf("(a{sv}is)");
+    DBusSignature structSub = structSig.subContainer();
     assertEquals("a{sv}is", structSub.toString());
   }
 
@@ -255,7 +255,7 @@ final class SignatureTest {
     String longSignature = longSig.toString();
     
     assertDoesNotThrow(() -> {
-      Signature sig = Signature.valueOf(longSignature);
+      DBusSignature sig = DBusSignature.valueOf(longSignature);
       assertEquals(100, sig.getQuantity());
       assertEquals(longSignature, sig.toString());
     });
@@ -265,7 +265,7 @@ final class SignatureTest {
   public void testSignatureImmutability() {
     // Test that signatures are immutable
     String original = "a{sv}";
-    Signature sig = Signature.valueOf(original);
+    DBusSignature sig = DBusSignature.valueOf(original);
     
     // Getting toString multiple times should return the same value
     assertEquals(sig.toString(), sig.toString());
@@ -277,30 +277,30 @@ final class SignatureTest {
   @Test
   public void testNullSignature() {
     // Test null signature
-    assertThrows(NullPointerException.class, () -> Signature.valueOf(null));
+    assertThrows(NullPointerException.class, () -> DBusSignature.valueOf(null));
   }
 
   @Test
   public void testWhitespaceSignature() {
     // Test signature with whitespace (should fail)
-    assertThrows(Exception.class, () -> Signature.valueOf(" "));
-    assertThrows(Exception.class, () -> Signature.valueOf("i s"));
-    assertThrows(Exception.class, () -> Signature.valueOf("i\t"));
-    assertThrows(Exception.class, () -> Signature.valueOf("\ni"));
+    assertThrows(Exception.class, () -> DBusSignature.valueOf(" "));
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("i s"));
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("i\t"));
+    assertThrows(Exception.class, () -> DBusSignature.valueOf("\ni"));
   }
 
   @Test
   public void testDictEntryKeyRestrictions() {
     // Test that dict entry keys must be basic types
     // Valid basic type keys
-    assertDoesNotThrow(() -> Signature.valueOf("a{ss}"));  // string key
-    assertDoesNotThrow(() -> Signature.valueOf("a{is}"));  // int key
-    assertDoesNotThrow(() -> Signature.valueOf("a{os}"));  // object path key
+    assertDoesNotThrow(() -> DBusSignature.valueOf("a{ss}"));  // string key
+    assertDoesNotThrow(() -> DBusSignature.valueOf("a{is}"));  // int key
+    assertDoesNotThrow(() -> DBusSignature.valueOf("a{os}"));  // object path key
     
     // Invalid non-basic type keys (should fail)
-    assertThrows(SignatureException.class, () -> Signature.valueOf("a{(ii)s}"));  // struct key
-    assertThrows(SignatureException.class, () -> Signature.valueOf("a{a{sv}s}"));  // array key
-    assertThrows(SignatureException.class, () -> Signature.valueOf("a{vs}"));      // variant key
+    assertThrows(SignatureException.class, () -> DBusSignature.valueOf("a{(ii)s}"));  // struct key
+    assertThrows(SignatureException.class, () -> DBusSignature.valueOf("a{a{sv}s}"));  // array key
+    assertThrows(SignatureException.class, () -> DBusSignature.valueOf("a{vs}"));      // variant key
   }
 
   @Test
@@ -317,7 +317,7 @@ final class SignatureTest {
     
     for (String structure : deepStructures) {
       assertDoesNotThrow(() -> {
-        Signature sig = Signature.valueOf(structure);
+        DBusSignature sig = DBusSignature.valueOf(structure);
         assertEquals(1, sig.getQuantity());
         assertEquals(structure, sig.toString());
       });
@@ -338,14 +338,14 @@ final class SignatureTest {
     
     // Test that implementation can handle long signatures
     assertDoesNotThrow(() -> {
-      Signature sig = Signature.valueOf(maxLengthSignature);
+      DBusSignature sig = DBusSignature.valueOf(maxLengthSignature);
       assertEquals(255, sig.getQuantity());
       assertEquals(maxLengthSignature, sig.toString());
     });
     
     // Test signature that exceeds 255 characters (should fail per D-Bus specification)
     String tooLongSignature = maxLengthSignature + "i";
-    assertThrows(SignatureException.class, () -> Signature.valueOf(tooLongSignature));
+    assertThrows(SignatureException.class, () -> DBusSignature.valueOf(tooLongSignature));
   }
 
   @Test
@@ -362,7 +362,7 @@ final class SignatureTest {
     String maxArrayNesting = arrayNesting.toString();
     
     assertDoesNotThrow(() -> {
-      Signature sig = Signature.valueOf(maxArrayNesting);
+      DBusSignature sig = DBusSignature.valueOf(maxArrayNesting);
       assertEquals(1, sig.getQuantity());
       assertEquals(maxArrayNesting, sig.toString());
     });
@@ -379,7 +379,7 @@ final class SignatureTest {
     String maxStructNesting = structNesting.toString();
     
     assertDoesNotThrow(() -> {
-      Signature sig = Signature.valueOf(maxStructNesting);
+      DBusSignature sig = DBusSignature.valueOf(maxStructNesting);
       assertEquals(1, sig.getQuantity());
       assertEquals(maxStructNesting, sig.toString());
     });
@@ -399,7 +399,7 @@ final class SignatureTest {
     String maxCombined = maxCombinedNesting.toString();
     
     assertDoesNotThrow(() -> {
-      Signature sig = Signature.valueOf(maxCombined);
+      DBusSignature sig = DBusSignature.valueOf(maxCombined);
       assertEquals(1, sig.getQuantity());
       assertEquals(maxCombined, sig.toString());
     });
@@ -419,7 +419,7 @@ final class SignatureTest {
     
     // Implementation may not enforce this limit
     assertDoesNotThrow(() -> {
-      Signature sig = Signature.valueOf(excessiveArrayNesting.toString());
+      DBusSignature sig = DBusSignature.valueOf(excessiveArrayNesting.toString());
       assertEquals(1, sig.getQuantity());
       assertEquals(excessiveArrayNesting.toString(), sig.toString());
     });
@@ -436,7 +436,7 @@ final class SignatureTest {
     
     // Implementation may not enforce this limit
     assertDoesNotThrow(() -> {
-      Signature sig = Signature.valueOf(excessiveStructNesting.toString());
+      DBusSignature sig = DBusSignature.valueOf(excessiveStructNesting.toString());
       assertEquals(1, sig.getQuantity());
       assertEquals(excessiveStructNesting.toString(), sig.toString());
     });
@@ -452,7 +452,7 @@ final class SignatureTest {
     for (String keyType : validBasicKeyTypes) {
       String dictSignature = "a{" + keyType + "s}";
       assertDoesNotThrow(() -> {
-        Signature sig = Signature.valueOf(dictSignature);
+        DBusSignature sig = DBusSignature.valueOf(dictSignature);
         assertEquals(1, sig.getQuantity());
         assertEquals(dictSignature, sig.toString());
       });
@@ -464,7 +464,7 @@ final class SignatureTest {
     for (String keyType : invalidKeyTypes) {
       String dictSignature = "a{" + keyType + "s}";
       assertThrows(SignatureException.class, () -> 
-        Signature.valueOf(dictSignature));
+        DBusSignature.valueOf(dictSignature));
     }
   }
 
@@ -486,7 +486,7 @@ final class SignatureTest {
     
     // This should be valid as the variant signature is separate from message depth
     assertDoesNotThrow(() -> {
-      Signature sig = Signature.valueOf(variantSignature);
+      DBusSignature sig = DBusSignature.valueOf(variantSignature);
       assertEquals(1, sig.getQuantity());
       assertEquals(variantSignature, sig.toString());
     });
@@ -501,7 +501,7 @@ final class SignatureTest {
     
     for (String basicType : validBasicTypes) {
       assertDoesNotThrow(() -> {
-        Signature sig = Signature.valueOf(basicType);
+        DBusSignature sig = DBusSignature.valueOf(basicType);
         assertEquals(1, sig.getQuantity());
         assertEquals(basicType, sig.toString());
       });
@@ -512,7 +512,7 @@ final class SignatureTest {
     
     for (String reservedType : reservedTypes) {
       assertThrows(IllegalArgumentException.class, () -> 
-        Signature.valueOf(reservedType));
+        DBusSignature.valueOf(reservedType));
     }
   }
 
@@ -521,24 +521,24 @@ final class SignatureTest {
     // Test structural validation of signatures
     
     // Test that arrays must have element types
-    assertThrows(SignatureException.class, () -> Signature.valueOf("a"));
+    assertThrows(SignatureException.class, () -> DBusSignature.valueOf("a"));
     
     // Test that structs must be properly closed
-    assertThrows(SignatureException.class, () -> Signature.valueOf("(ii"));
-    assertThrows(SignatureException.class, () -> Signature.valueOf("ii)"));
+    assertThrows(SignatureException.class, () -> DBusSignature.valueOf("(ii"));
+    assertThrows(SignatureException.class, () -> DBusSignature.valueOf("ii)"));
     
     // Test that dict entries must be properly closed
-    assertThrows(SignatureException.class, () -> Signature.valueOf("a{is"));
+    assertThrows(SignatureException.class, () -> DBusSignature.valueOf("a{is"));
     // Note: This particular case may not be detected by the current implementation
-    assertDoesNotThrow(() -> Signature.valueOf("a{is}s"));
+    assertDoesNotThrow(() -> DBusSignature.valueOf("a{is}s"));
     
     // Test that dict entries must have exactly two types
-    assertThrows(SignatureException.class, () -> Signature.valueOf("a{i}"));
-    assertThrows(SignatureException.class, () -> Signature.valueOf("a{iss}"));
+    assertThrows(SignatureException.class, () -> DBusSignature.valueOf("a{i}"));
+    assertThrows(SignatureException.class, () -> DBusSignature.valueOf("a{iss}"));
     
     // Test that dict entries can only appear as array elements
     // Note: Implementation behavior with dict entries
-    assertDoesNotThrow(() -> Signature.valueOf("{is}"));
-    assertDoesNotThrow(() -> Signature.valueOf("i{is}s"));
+    assertDoesNotThrow(() -> DBusSignature.valueOf("{is}"));
+    assertDoesNotThrow(() -> DBusSignature.valueOf("i{is}s"));
   }
 }

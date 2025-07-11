@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.encoder;
 
-import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.DBusSignature;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -24,8 +24,8 @@ final class SignatureEncoderTest {
 
   @Test
   void encodeValidSignature() {
-    Signature signature = Signature.valueOf(VALID_SIGNATURE);
-    Encoder<Signature, ByteBuffer> encoder = new SignatureEncoder();
+    DBusSignature signature = DBusSignature.valueOf(VALID_SIGNATURE);
+    Encoder<DBusSignature, ByteBuffer> encoder = new SignatureEncoder();
     EncoderResult<ByteBuffer> result = encoder.encode(signature, 0);
     int expectedBytes = 7;
     assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
@@ -38,8 +38,8 @@ final class SignatureEncoderTest {
 
   @Test
   void encodeValidComplexSignature() {
-    Signature signature = Signature.valueOf(COMPLEX_VALID_SIGNATURE);
-    Encoder<Signature, ByteBuffer> encoder = new SignatureEncoder();
+    DBusSignature signature = DBusSignature.valueOf(COMPLEX_VALID_SIGNATURE);
+    Encoder<DBusSignature, ByteBuffer> encoder = new SignatureEncoder();
     EncoderResult<ByteBuffer> result = encoder.encode(signature, 0);
     int expectedBytes = 30;
     assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
@@ -52,18 +52,18 @@ final class SignatureEncoderTest {
 
   @Test
   void failDueToInvalidChar() {
-    Encoder<Signature, ByteBuffer> encoder = new SignatureEncoder();
+    Encoder<DBusSignature, ByteBuffer> encoder = new SignatureEncoder();
     assertThrows(Exception.class, () -> {
-      Signature signature = Signature.valueOf(INVALID_CHAR_SIGNATURE);
+      DBusSignature signature = DBusSignature.valueOf(INVALID_CHAR_SIGNATURE);
       encoder.encode(signature, 0);
     });
   }
 
   @Test
   void failDueToInvalidBracketCount() {
-    Encoder<Signature, ByteBuffer> encoder = new SignatureEncoder();
+    Encoder<DBusSignature, ByteBuffer> encoder = new SignatureEncoder();
     assertThrows(Exception.class, () -> {
-      Signature signature = Signature.valueOf(INVALID_BRACKET_SIGNATURE);
+      DBusSignature signature = DBusSignature.valueOf(INVALID_BRACKET_SIGNATURE);
       encoder.encode(signature, 0);
     });
   }

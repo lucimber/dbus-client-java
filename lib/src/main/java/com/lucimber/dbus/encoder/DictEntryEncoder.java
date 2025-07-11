@@ -7,8 +7,8 @@ package com.lucimber.dbus.encoder;
 
 import com.lucimber.dbus.type.DBusBasicType;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.DictEntry;
-import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.DBusDictEntry;
+import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
@@ -26,16 +26,16 @@ import org.slf4j.MarkerFactory;
  * @param <KeyT>   The data type of the key.
  * @param <ValueT> The data type of the value.
  * @see Encoder
- * @see DictEntry
+ * @see DBusDictEntry
  */
 public final class DictEntryEncoder<KeyT extends DBusBasicType, ValueT extends DBusType>
-        implements Encoder<DictEntry<KeyT, ValueT>, ByteBuffer> {
+        implements Encoder<DBusDictEntry<KeyT, ValueT>, ByteBuffer> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
 
   private final ByteOrder order;
-  private final Signature signature;
+  private final DBusSignature signature;
 
   /**
    * Constructs a new instance with mandatory parameters.
@@ -43,12 +43,12 @@ public final class DictEntryEncoder<KeyT extends DBusBasicType, ValueT extends D
    * @param order     The byte order of the produced bytes.
    * @param signature The signature of the dictionary entry.
    */
-  public DictEntryEncoder(ByteOrder order, Signature signature) {
+  public DictEntryEncoder(ByteOrder order, DBusSignature signature) {
     this.order = Objects.requireNonNull(order, "order must not be null");
     this.signature = Objects.requireNonNull(signature, "signature must not be null");
   }
 
-  private static void logResult(Signature signature, int offset, int padding, int producedBytes) {
+  private static void logResult(DBusSignature signature, int offset, int padding, int producedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "DICT_ENTRY: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
       return String.format(s, signature, offset, padding, producedBytes);
@@ -56,7 +56,7 @@ public final class DictEntryEncoder<KeyT extends DBusBasicType, ValueT extends D
   }
 
   @Override
-  public EncoderResult<ByteBuffer> encode(DictEntry<KeyT, ValueT> entry, int offset) throws EncoderException {
+  public EncoderResult<ByteBuffer> encode(DBusDictEntry<KeyT, ValueT> entry, int offset) throws EncoderException {
     Objects.requireNonNull(entry, "entry must not be null");
     try {
       int producedBytes = 0;

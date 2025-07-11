@@ -4,9 +4,9 @@ import com.lucimber.dbus.message.InboundError;
 import com.lucimber.dbus.message.InboundMethodReturn;
 import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusUInt32;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -40,7 +40,7 @@ class DBusMandatoryNameHandlerTest {
     assertInstanceOf(com.lucimber.dbus.message.OutboundMethodCall.class, outbound);
 
     OutboundMethodCall helloCall = (OutboundMethodCall) outbound;
-    assertEquals(ObjectPath.valueOf("/org/freedesktop/DBus"), helloCall.getObjectPath());
+    assertEquals(DBusObjectPath.valueOf("/org/freedesktop/DBus"), helloCall.getObjectPath());
     assertEquals(DBusString.valueOf("Hello"), helloCall.getMember());
   }
 
@@ -48,14 +48,14 @@ class DBusMandatoryNameHandlerTest {
   void testHelloReplyTriggersNameAcquiredEvent() {
     channel.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
     OutboundMethodCall sent = channel.readOutbound();
-    UInt32 sentSerial = sent.getSerial();
+    DBusUInt32 sentSerial = sent.getSerial();
 
     DBusString name = DBusString.valueOf(":1.101");
     InboundMethodReturn reply = new InboundMethodReturn(
-          UInt32.valueOf(0),
+          DBusUInt32.valueOf(0),
           sentSerial,
           SENDER,
-          Signature.valueOf("s"), // signature
+          DBusSignature.valueOf("s"), // signature
           List.of(name)
     );
 
@@ -70,10 +70,10 @@ class DBusMandatoryNameHandlerTest {
   void testHelloReplyWithNoPayloadTriggersFailure() {
     channel.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
     OutboundMethodCall sent = channel.readOutbound();
-    UInt32 sentSerial = sent.getSerial();
+    DBusUInt32 sentSerial = sent.getSerial();
 
     InboundMethodReturn reply = new InboundMethodReturn(
-          UInt32.valueOf(0),
+          DBusUInt32.valueOf(0),
           sentSerial,
           SENDER
     );
@@ -90,7 +90,7 @@ class DBusMandatoryNameHandlerTest {
   void testHelloErrorTriggersFailure() {
     channel.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
     OutboundMethodCall sent = channel.readOutbound();
-    UInt32 sentSerial = sent.getSerial();
+    DBusUInt32 sentSerial = sent.getSerial();
 
     List<Object> userEvents = new ArrayList<>();
     channel.pipeline().addLast(new ChannelInboundHandlerAdapter() {
@@ -101,7 +101,7 @@ class DBusMandatoryNameHandlerTest {
     });
 
     InboundError error = new InboundError(
-          UInt32.valueOf(0),
+          DBusUInt32.valueOf(0),
           sentSerial,
           SENDER,
           DBusString.valueOf("org.freedesktop.DBus.Error.Failed")

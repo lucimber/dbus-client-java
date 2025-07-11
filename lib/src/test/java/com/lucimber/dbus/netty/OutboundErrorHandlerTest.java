@@ -9,8 +9,8 @@ import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.message.OutboundError;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusUInt32;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -29,8 +29,8 @@ final class OutboundErrorHandlerTest {
     OutboundMessageEncoder handler = new OutboundMessageEncoder();
     EmbeddedChannel channel = new EmbeddedChannel(handler);
 
-    UInt32 serial = UInt32.valueOf(2);
-    UInt32 replySerial = UInt32.valueOf(1);
+    DBusUInt32 serial = DBusUInt32.valueOf(2);
+    DBusUInt32 replySerial = DBusUInt32.valueOf(1);
     DBusString errorName = DBusString.valueOf("io.lucimber.Error.TestError");
     DBusString dst = DBusString.valueOf("io.lucimber.test.destination");
     OutboundError error = OutboundError.Builder
@@ -59,11 +59,11 @@ final class OutboundErrorHandlerTest {
     OutboundMessageEncoder handler = new OutboundMessageEncoder();
     EmbeddedChannel channel = new EmbeddedChannel(handler);
 
-    UInt32 serial = UInt32.valueOf(2);
-    UInt32 replySerial = UInt32.valueOf(1);
+    DBusUInt32 serial = DBusUInt32.valueOf(2);
+    DBusUInt32 replySerial = DBusUInt32.valueOf(1);
     DBusString errorName = DBusString.valueOf("io.lucimber.Error.TestError");
     DBusString dst = DBusString.valueOf("io.lucimber.test.destination");
-    Signature sig = Signature.valueOf("s");
+    DBusSignature sig = DBusSignature.valueOf("s");
     List<DBusType> payload = new ArrayList<>();
     payload.add(DBusString.valueOf("Test error message."));
     OutboundError error = OutboundError.Builder

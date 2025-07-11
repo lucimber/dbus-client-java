@@ -8,9 +8,9 @@ package com.lucimber.dbus.netty;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.UInt32;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusUInt32;
+import com.lucimber.dbus.type.DBusVariant;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.Test;
@@ -26,9 +26,9 @@ final class FrameEncoderSignalTest {
 
   @Test
   void encodeSuccessfully() {
-    final UInt32 serialNumber = UInt32.valueOf(1);
+    final DBusUInt32 serialNumber = DBusUInt32.valueOf(1);
     final DBusString destination = DBusString.valueOf("io.lucimber.test.destination");
-    final ObjectPath path = ObjectPath.valueOf("/test");
+    final DBusObjectPath path = DBusObjectPath.valueOf("/test");
     final DBusString interfaceName = DBusString.valueOf("io.lucimber.dbus1");
     final DBusString signalName = DBusString.valueOf("UnitTest");
     final ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
@@ -37,14 +37,14 @@ final class FrameEncoderSignalTest {
     frame.setByteOrder(byteOrder);
     frame.setProtocolVersion(1);
     frame.setType(MessageType.SIGNAL);
-    final Map<HeaderField, Variant> headerFields = new HashMap<>();
-    final Variant destinationVariant = Variant.valueOf(destination);
+    final Map<HeaderField, DBusVariant> headerFields = new HashMap<>();
+    final DBusVariant destinationVariant = DBusVariant.valueOf(destination);
     headerFields.put(HeaderField.DESTINATION, destinationVariant);
-    final Variant pathVariant = Variant.valueOf(path);
+    final DBusVariant pathVariant = DBusVariant.valueOf(path);
     headerFields.put(HeaderField.PATH, pathVariant);
-    final Variant interfaceVariant = Variant.valueOf(interfaceName);
+    final DBusVariant interfaceVariant = DBusVariant.valueOf(interfaceName);
     headerFields.put(HeaderField.INTERFACE, interfaceVariant);
-    final Variant memberVariant = Variant.valueOf(signalName);
+    final DBusVariant memberVariant = DBusVariant.valueOf(signalName);
     headerFields.put(HeaderField.MEMBER, memberVariant);
     frame.setHeaderFields(headerFields);
     final FrameEncoder handler = new FrameEncoder();

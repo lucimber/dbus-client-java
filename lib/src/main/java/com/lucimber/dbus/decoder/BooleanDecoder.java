@@ -7,7 +7,7 @@ package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.DBusBoolean;
 import com.lucimber.dbus.type.Type;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -47,7 +47,7 @@ public final class BooleanDecoder implements Decoder<ByteBuffer, DBusBoolean> {
 
       // Decode the UInt32 value that encodes the boolean
       UInt32Decoder decoder = new UInt32Decoder();
-      DecoderResult<UInt32> rawResult = decoder.decode(buffer, offset + padding);
+      DecoderResult<DBusUInt32> rawResult = decoder.decode(buffer, offset + padding);
       consumedBytes += rawResult.getConsumedBytes();
 
       int value = rawResult.getValue().getDelegate();

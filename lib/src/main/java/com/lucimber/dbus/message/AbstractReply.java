@@ -6,8 +6,8 @@
 package com.lucimber.dbus.message;
 
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusUInt32;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,7 +18,7 @@ import java.util.Objects;
  */
 abstract class AbstractReply extends AbstractMessage {
 
-  private final UInt32 replySerial;
+  private final DBusUInt32 replySerial;
 
   /**
    * Constructs a new instance with mandatory parameter.
@@ -27,8 +27,8 @@ abstract class AbstractReply extends AbstractMessage {
    * @param replySerial the reply serial number
    */
   AbstractReply(
-          UInt32 serial,
-          UInt32 replySerial) {
+          DBusUInt32 serial,
+          DBusUInt32 replySerial) {
     super(serial);
     this.replySerial = Objects.requireNonNull(replySerial);
   }
@@ -42,9 +42,9 @@ abstract class AbstractReply extends AbstractMessage {
    * @param payload     optional; the message body
    */
   AbstractReply(
-          UInt32 serial,
-          UInt32 replySerial,
-          Signature signature,
+          DBusUInt32 serial,
+          DBusUInt32 replySerial,
+          DBusSignature signature,
           List<? extends DBusType> payload) {
     super(serial, signature, payload);
     this.replySerial = Objects.requireNonNull(replySerial);
@@ -53,16 +53,16 @@ abstract class AbstractReply extends AbstractMessage {
   /**
    * Gets the serial number of the message this message is a reply to.
    *
-   * @return The serial number as an {@link UInt32}.
+   * @return The serial number as an {@link DBusUInt32}.
    */
-  public UInt32 getReplySerial() {
+  public DBusUInt32 getReplySerial() {
     return replySerial;
   }
 
   @Override
   public String toString() {
     var s = "AbstractReply{serial='%s', replySerial='%s', sig='%s'}";
-    var sig = getSignature().map(Signature::toString).orElse("");
+    var sig = getSignature().map(DBusSignature::toString).orElse("");
     return String.format(s, getSerial(), replySerial, sig);
   }
 }

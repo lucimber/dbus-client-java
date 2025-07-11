@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-final class UInt16Test {
+final class DBusUInt16Test {
 
     @Test
     void createWithMinValue() {
         short min = 0;
-        UInt16 uint16 = UInt16.valueOf(min);
+        DBusUInt16 uint16 = DBusUInt16.valueOf(min);
         
         assertEquals(min, uint16.intValue());
         assertEquals(Type.UINT16, uint16.getType());
@@ -23,7 +23,7 @@ final class UInt16Test {
     @Test
     void createWithMaxValue() {
         short max = (short) 65535; // 2^16 - 1, will be -1 when cast to signed short
-        UInt16 uint16 = UInt16.valueOf(max);
+        DBusUInt16 uint16 = DBusUInt16.valueOf(max);
         
         assertEquals(65535, uint16.intValue()); // Should return unsigned value
         assertEquals(Type.UINT16, uint16.getType());
@@ -32,7 +32,7 @@ final class UInt16Test {
     @Test
     void createWithMidValue() {
         short mid = (short) 32768; // 2^15, will be -32768 when cast to signed short
-        UInt16 uint16 = UInt16.valueOf(mid);
+        DBusUInt16 uint16 = DBusUInt16.valueOf(mid);
         
         assertEquals(32768, uint16.intValue()); // Should return unsigned value
         assertEquals(Type.UINT16, uint16.getType());
@@ -41,7 +41,7 @@ final class UInt16Test {
     @Test
     void createWithTypicalValue() {
         short typical = 12345;
-        UInt16 uint16 = UInt16.valueOf(typical);
+        DBusUInt16 uint16 = DBusUInt16.valueOf(typical);
         
         assertEquals(typical, uint16.intValue());
         assertEquals(Type.UINT16, uint16.getType());
@@ -50,7 +50,7 @@ final class UInt16Test {
     @Test
     void testSignedToUnsignedConversion() {
         // Test conversion from signed short to unsigned representation
-        UInt16 uint16 = UInt16.valueOf((short) 0x8000); // 32768 in unsigned, -32768 in signed
+        DBusUInt16 uint16 = DBusUInt16.valueOf((short) 0x8000); // 32768 in unsigned, -32768 in signed
         
         assertEquals(32768, uint16.intValue());
         assertEquals(-32768, uint16.shortValue()); // When cast to signed short
@@ -60,7 +60,7 @@ final class UInt16Test {
 
     @Test
     void testMaxUnsignedValue() {
-        UInt16 uint16 = UInt16.valueOf((short) 0xFFFF); // 65535 in unsigned, -1 in signed
+        DBusUInt16 uint16 = DBusUInt16.valueOf((short) 0xFFFF); // 65535 in unsigned, -1 in signed
         
         assertEquals(65535, uint16.intValue());
         assertEquals(-1, uint16.shortValue()); // When cast to signed short
@@ -71,9 +71,9 @@ final class UInt16Test {
 
     @Test
     void testEquals() {
-        UInt16 uint1 = UInt16.valueOf((short) 123);
-        UInt16 uint2 = UInt16.valueOf((short) 123);
-        UInt16 uint3 = UInt16.valueOf((short) 456);
+        DBusUInt16 uint1 = DBusUInt16.valueOf((short) 123);
+        DBusUInt16 uint2 = DBusUInt16.valueOf((short) 123);
+        DBusUInt16 uint3 = DBusUInt16.valueOf((short) 456);
         
         assertEquals(uint1, uint2);
         assertNotEquals(uint1, uint3);
@@ -86,9 +86,9 @@ final class UInt16Test {
 
     @Test
     void testHashCode() {
-        UInt16 uint1 = UInt16.valueOf((short) 123);
-        UInt16 uint2 = UInt16.valueOf((short) 123);
-        UInt16 uint3 = UInt16.valueOf((short) 456);
+        DBusUInt16 uint1 = DBusUInt16.valueOf((short) 123);
+        DBusUInt16 uint2 = DBusUInt16.valueOf((short) 123);
+        DBusUInt16 uint3 = DBusUInt16.valueOf((short) 456);
         
         assertEquals(uint1.hashCode(), uint2.hashCode());
         assertNotEquals(uint1.hashCode(), uint3.hashCode());
@@ -96,18 +96,18 @@ final class UInt16Test {
 
     @Test
     void testToString() {
-        assertEquals("123", UInt16.valueOf((short) 123).toString());
-        assertEquals("0", UInt16.valueOf((short) 0).toString());
-        assertEquals("65535", UInt16.valueOf((short) 65535).toString());
-        assertEquals("32768", UInt16.valueOf((short) 32768).toString());
+        assertEquals("123", DBusUInt16.valueOf((short) 123).toString());
+        assertEquals("0", DBusUInt16.valueOf((short) 0).toString());
+        assertEquals("65535", DBusUInt16.valueOf((short) 65535).toString());
+        assertEquals("32768", DBusUInt16.valueOf((short) 32768).toString());
     }
 
     @Test
     void testCompareTo() {
-        UInt16 small = UInt16.valueOf((short) 10);
-        UInt16 medium = UInt16.valueOf((short) 20);
-        UInt16 large = UInt16.valueOf((short) 30);
-        UInt16 duplicate = UInt16.valueOf((short) 20);
+        DBusUInt16 small = DBusUInt16.valueOf((short) 10);
+        DBusUInt16 medium = DBusUInt16.valueOf((short) 20);
+        DBusUInt16 large = DBusUInt16.valueOf((short) 30);
+        DBusUInt16 duplicate = DBusUInt16.valueOf((short) 20);
         
         assertTrue(small.compareTo(medium) < 0);
         assertTrue(medium.compareTo(large) < 0);
@@ -119,9 +119,9 @@ final class UInt16Test {
 
     @Test
     void testCompareToWithExtremeValues() {
-        UInt16 min = UInt16.valueOf((short) 0);
-        UInt16 max = UInt16.valueOf((short) 65535);
-        UInt16 mid = UInt16.valueOf((short) 32768);
+        DBusUInt16 min = DBusUInt16.valueOf((short) 0);
+        DBusUInt16 max = DBusUInt16.valueOf((short) 65535);
+        DBusUInt16 mid = DBusUInt16.valueOf((short) 32768);
         
         assertTrue(min.compareTo(max) < 0);
         assertTrue(max.compareTo(min) > 0);
@@ -133,7 +133,7 @@ final class UInt16Test {
 
     @Test
     void testNumberMethods() {
-        UInt16 uint16 = UInt16.valueOf((short) 12345);
+        DBusUInt16 uint16 = DBusUInt16.valueOf((short) 12345);
         
         assertEquals(12345, uint16.intValue());
         assertEquals(12345L, uint16.longValue());
@@ -146,7 +146,7 @@ final class UInt16Test {
     @Test
     void testNumberMethodsWithLargeValues() {
         // Test with value that's positive in unsigned but negative in signed
-        UInt16 uint16 = UInt16.valueOf((short) 40000); // Larger than Short.MAX_VALUE
+        DBusUInt16 uint16 = DBusUInt16.valueOf((short) 40000); // Larger than Short.MAX_VALUE
         
         assertEquals(40000, uint16.intValue());
         assertEquals(40000L, uint16.longValue());
@@ -158,14 +158,14 @@ final class UInt16Test {
     @Test
     void testNumberMethodsWithExtremeValues() {
         // Test with MIN_VALUE (0)
-        UInt16 min = UInt16.valueOf((short) 0);
+        DBusUInt16 min = DBusUInt16.valueOf((short) 0);
         assertEquals(0, min.intValue());
         assertEquals(0L, min.longValue());
         assertEquals(0.0f, min.floatValue(), 0.0f);
         assertEquals(0.0, min.doubleValue(), 0.0);
         
         // Test with MAX_VALUE (65535)
-        UInt16 max = UInt16.valueOf((short) 65535);
+        DBusUInt16 max = DBusUInt16.valueOf((short) 65535);
         assertEquals(65535, max.intValue());
         assertEquals(65535L, max.longValue());
         assertEquals(65535.0f, max.floatValue(), 0.0f);
@@ -175,7 +175,7 @@ final class UInt16Test {
     @Test
     void testGetDelegate() {
         short value = 12345;
-        UInt16 uint16 = UInt16.valueOf(value);
+        DBusUInt16 uint16 = DBusUInt16.valueOf(value);
         
         assertEquals(Short.valueOf(value), uint16.getDelegate());
         assertEquals(value, uint16.getDelegate().shortValue());
@@ -183,19 +183,19 @@ final class UInt16Test {
 
     @Test
     void testGetType() {
-        assertEquals(Type.UINT16, UInt16.valueOf((short) 0).getType());
-        assertEquals(Type.UINT16, UInt16.valueOf((short) 65535).getType());
-        assertEquals(Type.UINT16, UInt16.valueOf((short) 32768).getType());
+        assertEquals(Type.UINT16, DBusUInt16.valueOf((short) 0).getType());
+        assertEquals(Type.UINT16, DBusUInt16.valueOf((short) 65535).getType());
+        assertEquals(Type.UINT16, DBusUInt16.valueOf((short) 32768).getType());
     }
 
     @Test
     void testBoundaryValues() {
         // Test values at the boundary
-        UInt16 minValue = UInt16.valueOf((short) 0);
-        UInt16 maxValue = UInt16.valueOf((short) 65535);
-        UInt16 minPlusOne = UInt16.valueOf((short) 1);
-        UInt16 maxMinusOne = UInt16.valueOf((short) 65534);
-        UInt16 signedBoundary = UInt16.valueOf((short) 32768); // Where signed short becomes negative
+        DBusUInt16 minValue = DBusUInt16.valueOf((short) 0);
+        DBusUInt16 maxValue = DBusUInt16.valueOf((short) 65535);
+        DBusUInt16 minPlusOne = DBusUInt16.valueOf((short) 1);
+        DBusUInt16 maxMinusOne = DBusUInt16.valueOf((short) 65534);
+        DBusUInt16 signedBoundary = DBusUInt16.valueOf((short) 32768); // Where signed short becomes negative
         
         assertEquals(0, minValue.intValue());
         assertEquals(65535, maxValue.intValue());
@@ -212,8 +212,8 @@ final class UInt16Test {
     @Test
     void testSignedShortBoundaryBehavior() {
         // Test behavior at the signed short boundary
-        UInt16 maxSigned = UInt16.valueOf((short) 32767); // Short.MAX_VALUE
-        UInt16 minUnsigned = UInt16.valueOf((short) 32768); // Where short becomes negative
+        DBusUInt16 maxSigned = DBusUInt16.valueOf((short) 32767); // Short.MAX_VALUE
+        DBusUInt16 minUnsigned = DBusUInt16.valueOf((short) 32768); // Where short becomes negative
         
         assertEquals(32767, maxSigned.intValue());
         assertEquals(32767, maxSigned.shortValue());
@@ -227,7 +227,7 @@ final class UInt16Test {
     @Test
     void testImmutability() {
         short original = 12345;
-        UInt16 uint16 = UInt16.valueOf(original);
+        DBusUInt16 uint16 = DBusUInt16.valueOf(original);
         
         // Verify the delegate is the expected value
         assertEquals(original, uint16.getDelegate().shortValue());
@@ -240,9 +240,9 @@ final class UInt16Test {
 
     @Test
     void testCompareToIsConsistentWithEquals() {
-        UInt16 uint1 = UInt16.valueOf((short) 123);
-        UInt16 uint2 = UInt16.valueOf((short) 123);
-        UInt16 uint3 = UInt16.valueOf((short) 456);
+        DBusUInt16 uint1 = DBusUInt16.valueOf((short) 123);
+        DBusUInt16 uint2 = DBusUInt16.valueOf((short) 123);
+        DBusUInt16 uint3 = DBusUInt16.valueOf((short) 456);
         
         // If compareTo returns 0, equals should return true
         assertEquals(0, uint1.compareTo(uint2));
@@ -256,9 +256,9 @@ final class UInt16Test {
     @Test
     void testUnsignedComparisonLogic() {
         // Test that comparison works correctly for unsigned values
-        UInt16 large1 = UInt16.valueOf((short) 40000); // > Short.MAX_VALUE
-        UInt16 large2 = UInt16.valueOf((short) 50000); // > Short.MAX_VALUE
-        UInt16 small = UInt16.valueOf((short) 1000);   // < Short.MAX_VALUE
+        DBusUInt16 large1 = DBusUInt16.valueOf((short) 40000); // > Short.MAX_VALUE
+        DBusUInt16 large2 = DBusUInt16.valueOf((short) 50000); // > Short.MAX_VALUE
+        DBusUInt16 small = DBusUInt16.valueOf((short) 1000);   // < Short.MAX_VALUE
         
         assertTrue(small.compareTo(large1) < 0);
         assertTrue(large1.compareTo(large2) < 0);

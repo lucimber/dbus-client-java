@@ -7,10 +7,10 @@ package com.lucimber.dbus.encoder;
 
 import com.lucimber.dbus.type.DBusArray;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeUtils;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -36,7 +36,7 @@ public final class ArrayEncoder<E extends DBusType> implements Encoder<DBusArray
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
 
   private final ByteOrder order;
-  private final Signature signature;
+  private final DBusSignature signature;
 
   /**
    * Constructs a new instance.
@@ -44,7 +44,7 @@ public final class ArrayEncoder<E extends DBusType> implements Encoder<DBusArray
    * @param order     the byte order of the produced bytes
    * @param signature the array signature (must be an array)
    */
-  public ArrayEncoder(ByteOrder order, Signature signature) {
+  public ArrayEncoder(ByteOrder order, DBusSignature signature) {
     this.order = Objects.requireNonNull(order, "order must not be null");
     this.signature = Objects.requireNonNull(signature, "signature must not be null");
     if (!signature.isArray()) {
@@ -52,7 +52,7 @@ public final class ArrayEncoder<E extends DBusType> implements Encoder<DBusArray
     }
   }
 
-  private static void logResult(Signature signature, int offset, int padding, int producedBytes) {
+  private static void logResult(DBusSignature signature, int offset, int padding, int producedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "ARRAY: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
       return String.format(s, signature, offset, padding, producedBytes);
@@ -86,10 +86,10 @@ public final class ArrayEncoder<E extends DBusType> implements Encoder<DBusArray
       }
 
       // Encode the length prefix
-      Encoder<UInt32, ByteBuffer> lengthEncoder = new UInt32Encoder(order);
+      Encoder<DBusUInt32, ByteBuffer> lengthEncoder = new UInt32Encoder(order);
       int lengthOffset = offset + padding;
       EncoderResult<ByteBuffer> lengthResult = lengthEncoder
-              .encode(UInt32.valueOf(elementsSize), lengthOffset);
+              .encode(DBusUInt32.valueOf(elementsSize), lengthOffset);
       ByteBuffer lengthBuffer = lengthResult.getBuffer();
 
       // Compose the final buffer

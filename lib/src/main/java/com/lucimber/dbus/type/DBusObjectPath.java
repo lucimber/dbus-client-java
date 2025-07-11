@@ -22,27 +22,27 @@ import java.util.regex.Pattern;
  *
  * @see <a href="https://pythonhosted.org/txdbus/dbus_overview.html">DBus Overview (Key Components)</a>
  */
-public final class ObjectPath implements DBusBasicType {
+public final class DBusObjectPath implements DBusBasicType {
 
   private static final Pattern PATTERN = Pattern.compile("^/|(/[a-zA-Z0-9_]+)+$");
   private final String delegate;
 
-  private ObjectPath(final CharSequence sequence) {
+  private DBusObjectPath(final CharSequence sequence) {
     this.delegate = sequence.toString();
   }
 
   /**
-   * Constructs a new {@link ObjectPath} instance by parsing a {@link CharSequence}.
+   * Constructs a new {@link DBusObjectPath} instance by parsing a {@link CharSequence}.
    *
    * @param sequence The sequence composed of a valid object path.
-   * @return A new instance of {@link ObjectPath}.
+   * @return A new instance of {@link DBusObjectPath}.
    * @throws ObjectPathException If the given {@link CharSequence} is not well formed.
    */
-  public static ObjectPath valueOf(final CharSequence sequence) throws ObjectPathException {
+  public static DBusObjectPath valueOf(final CharSequence sequence) throws ObjectPathException {
     Objects.requireNonNull(sequence, "sequence must not be null");
     final Matcher matcher = PATTERN.matcher(sequence);
     if (matcher.matches()) {
-      return new ObjectPath(sequence);
+      return new DBusObjectPath(sequence);
     } else {
       throw new ObjectPathException("invalid object path");
     }
@@ -65,7 +65,7 @@ public final class ObjectPath implements DBusBasicType {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final ObjectPath path = (ObjectPath) o;
+    final DBusObjectPath path = (DBusObjectPath) o;
     return delegate.equals(path.delegate);
   }
 
@@ -85,7 +85,7 @@ public final class ObjectPath implements DBusBasicType {
    * @param prefix the prefix
    * @return {@code true} if the object path represented by the argument is a prefix; {@code false} otherwise.
    */
-  public boolean startsWith(final ObjectPath prefix) {
+  public boolean startsWith(final DBusObjectPath prefix) {
     return delegate.startsWith(prefix.delegate);
   }
 
@@ -95,7 +95,7 @@ public final class ObjectPath implements DBusBasicType {
    * @param suffix the suffix
    * @return {@code true} if the object path represented by the argument is a suffix; {@code false} otherwise.
    */
-  public boolean endsWith(final ObjectPath suffix) {
+  public boolean endsWith(final DBusObjectPath suffix) {
     return delegate.endsWith(suffix.delegate);
   }
 

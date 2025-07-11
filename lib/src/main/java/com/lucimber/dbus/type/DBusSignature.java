@@ -21,23 +21,23 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://pythonhosted.org/txdbus/dbus_overview.html">DBus Overview (Key Components)</a>
  */
-public final class Signature implements DBusBasicType {
+public final class DBusSignature implements DBusBasicType {
 
   private static final short MAX_SIGNATURE_LENGTH = 255;
   private final Node rootNode;
 
-  private Signature(final Node rootNode) {
+  private DBusSignature(final Node rootNode) {
     this.rootNode = Objects.requireNonNull(rootNode);
   }
 
   /**
-   * Constructs a new {@link Signature} instance by parsing a {@link CharSequence}.
+   * Constructs a new {@link DBusSignature} instance by parsing a {@link CharSequence}.
    *
    * @param sequence The sequence composed of one or multiple single complete types.
-   * @return A new instance of {@link Signature}.
+   * @return A new instance of {@link DBusSignature}.
    * @throws SignatureException If the given {@link CharSequence} is not well-formed.
    */
-  public static Signature valueOf(final CharSequence sequence) throws SignatureException {
+  public static DBusSignature valueOf(final CharSequence sequence) throws SignatureException {
     Objects.requireNonNull(sequence, "sequence must not be null");
     if (sequence.length() == 0) {
       throw new SignatureException("sequence must not be empty");
@@ -59,7 +59,7 @@ public final class Signature implements DBusBasicType {
     return quantity;
   }
 
-  private static Signature parse(final TypeCode[] codes) {
+  private static DBusSignature parse(final TypeCode[] codes) {
     ensureBracketBalance(codes);
     final Node rootNode = new Node();
     Node node = rootNode;
@@ -93,7 +93,7 @@ public final class Signature implements DBusBasicType {
         rootNode.children.add(deepClone(subChild, rootNode));
       }
     }
-    return new Signature(rootNode);
+    return new DBusSignature(rootNode);
   }
 
   private static void ensureBracketBalance(final TypeCode[] codes) {
@@ -286,12 +286,12 @@ public final class Signature implements DBusBasicType {
    * Gets a list of signatures that are a subset of this signature.
    * Each signature describes a single complete type.
    *
-   * @return a {@link List} of {@link Signature}s
+   * @return a {@link List} of {@link DBusSignature}s
    */
-  public List<Signature> getChildren() {
+  public List<DBusSignature> getChildren() {
     return rootNode.children == null ? Collections.emptyList() : rootNode.children.stream()
             .map(child -> deepClone(child, null))
-            .map(Signature::new)
+            .map(DBusSignature::new)
             .collect(Collectors.toList());
   }
 
@@ -329,7 +329,7 @@ public final class Signature implements DBusBasicType {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final Signature signature = (Signature) o;
+    final DBusSignature signature = (DBusSignature) o;
     return Objects.equals(rootNode, signature.rootNode);
   }
 
@@ -395,10 +395,10 @@ public final class Signature implements DBusBasicType {
    * Returns a new signature without the enclosing container description.
    * The signature must describe an array, a dict-entry or a struct type.
    *
-   * @return a {@link Signature}
+   * @return a {@link DBusSignature}
    * @throws IllegalArgumentException If the signature does not describe an array, a dict-entry or a struct type.
    */
-  public Signature subContainer() {
+  public DBusSignature subContainer() {
     if (rootNode.children == null
             || !(rootNode.type == Type.ARRAY
             || rootNode.type == Type.DICT_ENTRY
@@ -407,7 +407,7 @@ public final class Signature implements DBusBasicType {
     }
     if (rootNode.children.size() == 1) {
       final Node clonedChild = deepClone(rootNode.children.get(0), null);
-      return new Signature(clonedChild);
+      return new DBusSignature(clonedChild);
     } else {
       final Node subRootNode = new Node();
       subRootNode.children = new ArrayList<>();
@@ -415,7 +415,7 @@ public final class Signature implements DBusBasicType {
         final Node clonedChild = deepClone(child, subRootNode);
         subRootNode.children.add(clonedChild);
       }
-      return new Signature(subRootNode);
+      return new DBusSignature(subRootNode);
     }
   }
 

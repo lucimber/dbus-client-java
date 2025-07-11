@@ -6,7 +6,7 @@
 package com.lucimber.dbus.encoder;
 
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
+import com.lucimber.dbus.type.DBusObjectPath;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -107,7 +107,7 @@ final class StringEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeStringOfObjectPath(ByteOrder byteOrder) {
-    ObjectPath objectPath = ObjectPath.valueOf("/abc/d1/e_f");
+    DBusObjectPath objectPath = DBusObjectPath.valueOf("/abc/d1/e_f");
     DBusString rawPath = DBusString.valueOf(objectPath.getWrappedValue().toString());
     Encoder<DBusString, ByteBuffer> encoder = new StringEncoder(byteOrder);
     EncoderResult<ByteBuffer> result = encoder.encode(rawPath, 0);

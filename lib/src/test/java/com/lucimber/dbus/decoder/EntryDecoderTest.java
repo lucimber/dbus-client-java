@@ -44,7 +44,7 @@ final class EntryDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeDictEntry(ByteOrder byteOrder) throws DecoderException, SignatureException {
-    Signature signature = Signature.valueOf(VALID_BYTE_VARIANT);
+    DBusSignature signature = DBusSignature.valueOf(VALID_BYTE_VARIANT);
     String variantSignature = "i";
     byte[] sigBytes = variantSignature.getBytes(StandardCharsets.UTF_8);
 
@@ -59,26 +59,26 @@ final class EntryDecoderTest {
 
     buffer.flip();
 
-    DictEntryDecoder<DBusByte, Variant> decoder = new DictEntryDecoder<>(signature);
-    DecoderResult<DictEntry<DBusByte, Variant>> result = decoder.decode(buffer, 0);
+    DictEntryDecoder<DBusByte, DBusVariant> decoder = new DictEntryDecoder<>(signature);
+    DecoderResult<DBusDictEntry<DBusByte, DBusVariant>> result = decoder.decode(buffer, 0);
 
     assertEquals(buffer.limit(), result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
 
-    DictEntry<DBusByte, Variant> entry = result.getValue();
+    DBusDictEntry<DBusByte, DBusVariant> entry = result.getValue();
     assertEquals(Byte.MAX_VALUE, entry.getKey().getDelegate());
-    Int32 int32 = (Int32) entry.getValue().getDelegate();
+    DBusInt32 int32 = (DBusInt32) entry.getValue().getDelegate();
     assertEquals(Integer.MAX_VALUE, int32.getDelegate());
   }
 
   @ParameterizedTest
   @MethodSource("createInvalidKeySignatures")
   void failDueToInvalidKey(ByteOrder byteOrder, String rawSignature) throws SignatureException {
-    Signature signature = Signature.valueOf(rawSignature);
+    DBusSignature signature = DBusSignature.valueOf(rawSignature);
     ByteBuffer buffer = ByteBuffer.allocate(0).order(byteOrder);
 
     assertThrows(DecoderException.class, () -> {
-      DictEntryDecoder<DBusByte, Variant> decoder = new DictEntryDecoder<>(signature);
+      DictEntryDecoder<DBusByte, DBusVariant> decoder = new DictEntryDecoder<>(signature);
       decoder.decode(buffer, 0);
     });
   }

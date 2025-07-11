@@ -10,8 +10,8 @@ import com.lucimber.dbus.exception.PropertyReadOnlyException;
 import com.lucimber.dbus.exception.UnknownInterfaceException;
 import com.lucimber.dbus.exception.UnknownPropertyException;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.Dict;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.DBusDict;
+import com.lucimber.dbus.type.DBusVariant;
 import java.util.Optional;
 
 /**
@@ -30,12 +30,12 @@ public interface Properties {
    *
    * @param interfaceName the name of the interface
    * @param propertyName  the name of the property
-   * @return An {@link Optional} of {@link Variant}.
+   * @return An {@link Optional} of {@link DBusVariant}.
    * @throws UnknownInterfaceException If the interface is unknown to the implementation.
    * @throws UnknownPropertyException  If the property is unknown to the implementation.
    * @throws AccessDeniedException     If caller is not allowed to access the property.
    */
-  Optional<Variant> getProperty(DBusString interfaceName, DBusString propertyName)
+  Optional<DBusVariant> getProperty(DBusString interfaceName, DBusString propertyName)
           throws UnknownInterfaceException, UnknownPropertyException, AccessDeniedException;
 
   /**
@@ -49,15 +49,15 @@ public interface Properties {
    * @throws AccessDeniedException     If caller is not allowed to access the property.
    * @throws PropertyReadOnlyException If the property can only be read.
    */
-  void setProperty(DBusString interfaceName, DBusString propertyName, Variant value)
+  void setProperty(DBusString interfaceName, DBusString propertyName, DBusVariant value)
           throws UnknownInterfaceException, UnknownPropertyException, AccessDeniedException, PropertyReadOnlyException;
 
   /**
    * Gets all properties. Properties, to which the caller has no access, are silently omitted from the result array.
    *
    * @param interfaceName the name of the interface
-   * @return A {@link Dict} of {@link DBusString} and {@link Variant}.
+   * @return A {@link DBusDict} of {@link DBusString} and {@link DBusVariant}.
    * @throws UnknownInterfaceException If the interface is unknown to the implementation.
    */
-  Dict<DBusString, Variant> getProperties(DBusString interfaceName) throws UnknownInterfaceException;
+  DBusDict<DBusString, DBusVariant> getProperties(DBusString interfaceName) throws UnknownInterfaceException;
 }

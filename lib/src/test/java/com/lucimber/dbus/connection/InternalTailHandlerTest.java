@@ -17,9 +17,9 @@ import com.lucimber.dbus.message.InboundSignal;
 import com.lucimber.dbus.message.OutboundError;
 import com.lucimber.dbus.message.OutboundMessage;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusUInt32;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -40,15 +40,15 @@ final class InternalTailHandlerTest {
     serialCounter = new AtomicLong(123);
     when(mockCtx.getConnection()).thenReturn(mockConnection);
     when(mockConnection.getNextSerial())
-            .thenAnswer(inv -> UInt32.valueOf((int) serialCounter.getAndIncrement()));
+            .thenAnswer(inv -> DBusUInt32.valueOf((int) serialCounter.getAndIncrement()));
   }
 
   @Test
   void testUnhandledMethodCallWithReplyExpectedSendsError() {
     InboundMethodCall call = new InboundMethodCall(
-            UInt32.valueOf(1),
+            DBusUInt32.valueOf(1),
             DBusString.valueOf("org.test.Sender"),
-            ObjectPath.valueOf("/test"),
+            DBusObjectPath.valueOf("/test"),
             DBusString.valueOf("UnknownMethod"),
             true,
             DBusString.valueOf("org.test.Interface"),
@@ -72,18 +72,18 @@ final class InternalTailHandlerTest {
     assertInstanceOf(OutboundError.class, outbound);
 
     OutboundError error = (OutboundError) outbound;
-    assertEquals(UInt32.valueOf(1), error.getReplySerial());
+    assertEquals(DBusUInt32.valueOf(1), error.getReplySerial());
     assertEquals("org.freedesktop.DBus.Error.Failed", error.getErrorName().getDelegate());
     assertTrue(error.getSignature().isPresent());
-    assertEquals(Signature.valueOf("s"), error.getSignature().get());
+    assertEquals(DBusSignature.valueOf("s"), error.getSignature().get());
   }
 
   @Test
   void testUnhandledMethodCallWithoutReplyExpectedDoesNotSendError() {
     InboundMethodCall call = new InboundMethodCall(
-            UInt32.valueOf(2),
+            DBusUInt32.valueOf(2),
             DBusString.valueOf("org.test.Sender"),
-            ObjectPath.valueOf("/test"),
+            DBusObjectPath.valueOf("/test"),
             DBusString.valueOf("NoReplyMethod"),
             false,
             DBusString.valueOf("org.test.Interface"),
@@ -98,8 +98,8 @@ final class InternalTailHandlerTest {
   @Test
   void testUnhandledMethodReturnIsLoggedAndIgnored() {
     InboundMethodReturn reply = new InboundMethodReturn(
-            UInt32.valueOf(3),
-            UInt32.valueOf(1),
+            DBusUInt32.valueOf(3),
+            DBusUInt32.valueOf(1),
             DBusString.valueOf("org.test.Sender"),
             null,
             null
@@ -112,8 +112,8 @@ final class InternalTailHandlerTest {
   @Test
   void testUnhandledErrorReplyIsLoggedAndIgnored() {
     InboundError error = new InboundError(
-            UInt32.valueOf(4),
-            UInt32.valueOf(1),
+            DBusUInt32.valueOf(4),
+            DBusUInt32.valueOf(1),
             DBusString.valueOf("org.test.Sender"),
             DBusString.valueOf("org.test.Error"),
             null,
@@ -127,9 +127,9 @@ final class InternalTailHandlerTest {
   @Test
   void testUnhandledSignalOrUnknownMessageIsIgnored() {
     InboundSignal signal = new InboundSignal(
-            UInt32.valueOf(5),
+            DBusUInt32.valueOf(5),
             DBusString.valueOf("org.test.Sender"),
-            ObjectPath.valueOf("/unit/test"),
+            DBusObjectPath.valueOf("/unit/test"),
             DBusString.valueOf("org.example.Interface"),
             DBusString.valueOf("TestSignal")
     );

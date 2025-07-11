@@ -6,7 +6,7 @@
 package com.lucimber.dbus.encoder;
 
 import com.lucimber.dbus.type.DBusByte;
-import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -21,16 +21,16 @@ import org.slf4j.MarkerFactory;
  * An encoder which encodes a signature to the D-Bus marshalling format using ByteBuffer.
  *
  * @see Encoder
- * @see Signature
+ * @see DBusSignature
  */
-public final class SignatureEncoder implements Encoder<Signature, ByteBuffer> {
+public final class SignatureEncoder implements Encoder<DBusSignature, ByteBuffer> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
 
   private static final int NUL_TERMINATOR_LENGTH = 1;
 
-  private static void logResult(Signature signature, int offset, int producedBytes) {
+  private static void logResult(DBusSignature signature, int offset, int producedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "SIGNATURE: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
       return String.format(s, signature, offset, 0, producedBytes);
@@ -38,7 +38,7 @@ public final class SignatureEncoder implements Encoder<Signature, ByteBuffer> {
   }
 
   @Override
-  public EncoderResult<ByteBuffer> encode(Signature signature, int offset) throws EncoderException {
+  public EncoderResult<ByteBuffer> encode(DBusSignature signature, int offset) throws EncoderException {
     Objects.requireNonNull(signature, "signature must not be null");
     try {
       String value = signature.toString();

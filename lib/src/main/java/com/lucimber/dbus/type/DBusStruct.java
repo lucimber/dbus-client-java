@@ -14,18 +14,18 @@ import java.util.Objects;
  * A struct that can hold various objects.
  * The order of the objects is given.
  */
-public final class Struct implements DBusContainerType {
+public final class DBusStruct implements DBusContainerType {
 
   private final List<DBusType> delegate;
-  private final Signature signature;
+  private final DBusSignature signature;
 
   /**
    * Constructs a new struct with the signature of the values.
    *
-   * @param signature a {@link Signature}
+   * @param signature a {@link DBusSignature}
    * @param values    one or many {@link Object}s
    */
-  public Struct(final Signature signature, final DBusType... values) {
+  public DBusStruct(final DBusSignature signature, final DBusType... values) {
     this.signature = Objects.requireNonNull(signature);
     if (!signature.isStruct()) {
       throw new IllegalArgumentException("signature must describe a struct");
@@ -36,10 +36,10 @@ public final class Struct implements DBusContainerType {
   /**
    * Constructs a new struct with mandatory parameter.
    *
-   * @param signature a {@link Signature}
+   * @param signature a {@link DBusSignature}
    * @param types     a {@link List} of {@link DBusType}s
    */
-  public Struct(final Signature signature, final List<DBusType> types) {
+  public DBusStruct(final DBusSignature signature, final List<DBusType> types) {
     this.signature = Objects.requireNonNull(signature);
     if (!signature.isStruct()) {
       throw new IllegalArgumentException("signature must describe a struct");
@@ -50,9 +50,9 @@ public final class Struct implements DBusContainerType {
   /**
    * Gets the signature of the values of this struct.
    *
-   * @return a {@link Signature}
+   * @return a {@link DBusSignature}
    */
-  public Signature getSignature() {
+  public DBusSignature getSignature() {
     return signature;
   }
 

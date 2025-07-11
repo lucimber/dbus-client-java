@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.encoder;
 
-import com.lucimber.dbus.type.Int32;
+import com.lucimber.dbus.type.DBusInt32;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
@@ -21,9 +21,9 @@ import org.slf4j.MarkerFactory;
  * An encoder which encodes a 32-bit integer to the D-Bus marshalling format using ByteBuffer.
  *
  * @see Encoder
- * @see Int32
+ * @see DBusInt32
  */
-public final class Int32Encoder implements Encoder<Int32, ByteBuffer> {
+public final class Int32Encoder implements Encoder<DBusInt32, ByteBuffer> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
@@ -40,7 +40,7 @@ public final class Int32Encoder implements Encoder<Int32, ByteBuffer> {
     this.order = Objects.requireNonNull(order, "order must not be null");
   }
 
-  private static void logResult(Int32 value, int offset, int padding, int producedBytes) {
+  private static void logResult(DBusInt32 value, int offset, int padding, int producedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "INT32: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
       return String.format(s, value, offset, padding, producedBytes);
@@ -48,7 +48,7 @@ public final class Int32Encoder implements Encoder<Int32, ByteBuffer> {
   }
 
   @Override
-  public EncoderResult<ByteBuffer> encode(Int32 value, int offset) throws EncoderException {
+  public EncoderResult<ByteBuffer> encode(DBusInt32 value, int offset) throws EncoderException {
     Objects.requireNonNull(value, "value must not be null");
     try {
       int padding = EncoderUtils.calculateAlignmentPadding(Type.INT32.getAlignment(), offset);

@@ -7,10 +7,10 @@ package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.DBusArray;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeUtils;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -32,21 +32,21 @@ public final class ArrayDecoder<ValueT extends DBusType> implements Decoder<Byte
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
 
-  private final Signature signature;
+  private final DBusSignature signature;
 
   /**
    * Creates a new instance with mandatory parameters.
    *
    * @param signature the signature describing the array
    */
-  public ArrayDecoder(Signature signature) {
+  public ArrayDecoder(DBusSignature signature) {
     this.signature = Objects.requireNonNull(signature, "signature must not be null");
     if (!signature.isArray()) {
       throw new IllegalArgumentException("signature must describe an array");
     }
   }
 
-  private static void logResult(Signature signature, int offset, int padding, int consumedBytes) {
+  private static void logResult(DBusSignature signature, int offset, int padding, int consumedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "ARRAY: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
       return String.format(s, signature, offset, padding, consumedBytes);
@@ -63,14 +63,14 @@ public final class ArrayDecoder<ValueT extends DBusType> implements Decoder<Byte
       consumedBytes += arrayPadding;
 
       int lengthOffset = offset + consumedBytes;
-      DecoderResult<UInt32> lengthResult = new UInt32Decoder().decode(buffer, lengthOffset);
-      UInt32 length = lengthResult.getValue();
+      DecoderResult<DBusUInt32> lengthResult = new UInt32Decoder().decode(buffer, lengthOffset);
+      DBusUInt32 length = lengthResult.getValue();
       consumedBytes += lengthResult.getConsumedBytes();
 
       DecoderUtils.verifyArrayLength(length);
       int arrayLength = length.getDelegate();
 
-      Signature elementSig = signature.subContainer();
+      DBusSignature elementSig = signature.subContainer();
       DBusArray<ValueT> array = new DBusArray<>(signature);
 
       int elementBytes = 0;

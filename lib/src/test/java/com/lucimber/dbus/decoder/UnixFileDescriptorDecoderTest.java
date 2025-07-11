@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.decoder;
 
-import com.lucimber.dbus.type.UnixFd;
+import com.lucimber.dbus.type.DBusUnixFD;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -28,13 +28,13 @@ final class UnixFileDescriptorDecoderTest {
     buffer.flip();
 
     int expected = -1024;
-    Decoder<ByteBuffer, UnixFd> decoder = new UnixFdDecoder();
-    DecoderResult<UnixFd> result = decoder.decode(buffer, 0);
+    Decoder<ByteBuffer, DBusUnixFD> decoder = new UnixFdDecoder();
+    DecoderResult<DBusUnixFD> result = decoder.decode(buffer, 0);
 
     int numOfBytes = 4;
     assertEquals(numOfBytes, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    UnixFd descriptor = result.getValue();
+    DBusUnixFD descriptor = result.getValue();
     assertEquals(expected, descriptor.getDelegate());
   }
 }

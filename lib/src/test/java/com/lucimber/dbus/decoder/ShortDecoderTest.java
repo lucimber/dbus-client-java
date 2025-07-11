@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.decoder;
 
-import com.lucimber.dbus.type.Int16;
+import com.lucimber.dbus.type.DBusInt16;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -28,7 +28,7 @@ final class ShortDecoderTest {
     buffer.flip();
 
     Int16Decoder decoder = new Int16Decoder();
-    DecoderResult<Int16> result = decoder.decode(buffer, 0);
+    DecoderResult<DBusInt16> result = decoder.decode(buffer, 0);
 
     assertEquals(2, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);

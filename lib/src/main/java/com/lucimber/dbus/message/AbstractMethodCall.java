@@ -7,9 +7,9 @@ package com.lucimber.dbus.message;
 
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusUInt32;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -21,7 +21,7 @@ import java.util.Optional;
  */
 abstract class AbstractMethodCall extends AbstractMessage {
 
-  private final ObjectPath path;
+  private final DBusObjectPath path;
   private final DBusString member;
   private final DBusString iface;
 
@@ -33,8 +33,8 @@ abstract class AbstractMethodCall extends AbstractMessage {
    * @param member the name of the method
    */
   AbstractMethodCall(
-          UInt32 serial,
-          ObjectPath path,
+          DBusUInt32 serial,
+          DBusObjectPath path,
           DBusString member) {
     super(serial);
     this.path = Objects.requireNonNull(path);
@@ -53,11 +53,11 @@ abstract class AbstractMethodCall extends AbstractMessage {
    * @param payload   optional; the message body
    */
   AbstractMethodCall(
-          UInt32 serial,
-          ObjectPath path,
+          DBusUInt32 serial,
+          DBusObjectPath path,
           DBusString member,
           DBusString iface,
-          Signature signature,
+          DBusSignature signature,
           List<? extends DBusType> payload) {
     super(serial, signature, payload);
     this.path = Objects.requireNonNull(path);
@@ -68,9 +68,9 @@ abstract class AbstractMethodCall extends AbstractMessage {
   /**
    * Gets the object path of this method.
    *
-   * @return an {@link ObjectPath}
+   * @return an {@link DBusObjectPath}
    */
-  public ObjectPath getObjectPath() {
+  public DBusObjectPath getObjectPath() {
     return path;
   }
 
@@ -96,7 +96,7 @@ abstract class AbstractMethodCall extends AbstractMessage {
   public String toString() {
     var s = "AbstractMethodCall{serial='%s', path='%s', iface='%s', member='%s', sig='%s'}";
     var mappedIface = getInterfaceName().map(DBusString::toString).orElse("");
-    var sig = getSignature().map(Signature::toString).orElse("");
+    var sig = getSignature().map(DBusSignature::toString).orElse("");
     return String.format(s, getSerial(), path, mappedIface, member, sig);
   }
 }

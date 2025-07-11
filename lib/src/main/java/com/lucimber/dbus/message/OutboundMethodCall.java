@@ -7,9 +7,9 @@ package com.lucimber.dbus.message;
 
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusUInt32;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -39,13 +39,13 @@ public final class OutboundMethodCall extends AbstractMethodCall implements Outb
    * @param payload       optional; the message body
    */
   public OutboundMethodCall(
-          UInt32 serial,
-          ObjectPath path,
+          DBusUInt32 serial,
+          DBusObjectPath path,
           DBusString member,
           boolean replyExpected,
           DBusString dst,
           DBusString iface,
-          Signature signature,
+          DBusSignature signature,
           List<? extends DBusType> payload) {
     this(serial, path, member, replyExpected, dst, iface, signature, payload, null);
   }
@@ -65,13 +65,13 @@ public final class OutboundMethodCall extends AbstractMethodCall implements Outb
    * @param timeout       optional; timeout override for this specific call
    */
   public OutboundMethodCall(
-          UInt32 serial,
-          ObjectPath path,
+          DBusUInt32 serial,
+          DBusObjectPath path,
           DBusString member,
           boolean replyExpected,
           DBusString dst,
           DBusString iface,
-          Signature signature,
+          DBusSignature signature,
           List<? extends DBusType> payload,
           Duration timeout) {
     super(serial, path, member, iface, signature, payload);
@@ -108,19 +108,19 @@ public final class OutboundMethodCall extends AbstractMethodCall implements Outb
     var s = "OutboundMethodCall{dst='%s', serial='%s', path='%s', iface='%s', member='%s', sig='%s'}";
     var dst = getDestination().map(DBusString::toString).orElse("");
     var iface = getInterfaceName().map(DBusString::toString).orElse("");
-    var sig = getSignature().map(Signature::toString).orElse("");
+    var sig = getSignature().map(DBusSignature::toString).orElse("");
     return String.format(s, dst, getSerial(), getObjectPath(), iface, getMember(), sig);
   }
 
   public static class Builder {
 
-    private UInt32 serial;
-    private ObjectPath path;
+    private DBusUInt32 serial;
+    private DBusObjectPath path;
     private DBusString destination;
     private DBusString iface;
     private DBusString member;
     private boolean replyExpected;
-    private Signature signature;
+    private DBusSignature signature;
     private List<? extends DBusType> payload;
     private Duration timeout;
 
@@ -132,12 +132,12 @@ public final class OutboundMethodCall extends AbstractMethodCall implements Outb
       return new Builder();
     }
 
-    public Builder withSerial(UInt32 serial) {
+    public Builder withSerial(DBusUInt32 serial) {
       this.serial = serial;
       return this;
     }
 
-    public Builder withPath(ObjectPath path) {
+    public Builder withPath(DBusObjectPath path) {
       this.path = path;
       return this;
     }
@@ -162,7 +162,7 @@ public final class OutboundMethodCall extends AbstractMethodCall implements Outb
       return this;
     }
 
-    public Builder withBody(Signature signature, List<? extends DBusType> payload) {
+    public Builder withBody(DBusSignature signature, List<? extends DBusType> payload) {
       this.signature = signature;
       this.payload = payload;
       return this;

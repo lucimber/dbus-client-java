@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.message;
 
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 
 /**
  * An inbound reply to a previously send message.
@@ -17,7 +17,7 @@ public interface InboundReply extends InboundMessage {
   /**
    * Gets the serial number of the message this message is a reply to.
    *
-   * @return The serial number as an {@link UInt32}.
+   * @return The serial number as an {@link DBusUInt32}.
    */
-  UInt32 getReplySerial();
+  DBusUInt32 getReplySerial();
 }

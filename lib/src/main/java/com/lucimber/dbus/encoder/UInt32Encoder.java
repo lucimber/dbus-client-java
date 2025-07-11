@@ -6,7 +6,7 @@
 package com.lucimber.dbus.encoder;
 
 import com.lucimber.dbus.type.Type;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -21,9 +21,9 @@ import org.slf4j.MarkerFactory;
  * An encoder which encodes an unsigned 32-bit integer to the D-Bus marshalling format using ByteBuffer.
  *
  * @see Encoder
- * @see UInt32
+ * @see DBusUInt32
  */
-public final class UInt32Encoder implements Encoder<UInt32, ByteBuffer> {
+public final class UInt32Encoder implements Encoder<DBusUInt32, ByteBuffer> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
@@ -40,7 +40,7 @@ public final class UInt32Encoder implements Encoder<UInt32, ByteBuffer> {
     this.order = Objects.requireNonNull(order, "order must not be null");
   }
 
-  private static void logResult(UInt32 value, int offset, int padding, int producedBytes) {
+  private static void logResult(DBusUInt32 value, int offset, int padding, int producedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "UINT32: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
       return String.format(s, value, offset, padding, producedBytes);
@@ -48,7 +48,7 @@ public final class UInt32Encoder implements Encoder<UInt32, ByteBuffer> {
   }
 
   @Override
-  public EncoderResult<ByteBuffer> encode(UInt32 value, int offset) throws EncoderException {
+  public EncoderResult<ByteBuffer> encode(DBusUInt32 value, int offset) throws EncoderException {
     Objects.requireNonNull(value, "value must not be null");
     try {
       int padding = EncoderUtils.calculateAlignmentPadding(Type.UINT32.getAlignment(), offset);

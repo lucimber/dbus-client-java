@@ -11,11 +11,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-final class UInt64Test {
+final class DBusUInt64Test {
 
     @Test
     void createUInt64WithZero() {
-        UInt64 uint64 = UInt64.valueOf(0L);
+        DBusUInt64 uint64 = DBusUInt64.valueOf(0L);
         
         assertEquals(0L, uint64.longValue());
         assertEquals(Type.UINT64, uint64.getType());
@@ -25,7 +25,7 @@ final class UInt64Test {
     @Test
     void createUInt64WithPositiveValue() {
         long value = 123456789012345L;
-        UInt64 uint64 = UInt64.valueOf(value);
+        DBusUInt64 uint64 = DBusUInt64.valueOf(value);
         
         assertEquals(value, uint64.longValue());
         assertEquals(Type.UINT64, uint64.getType());
@@ -36,7 +36,7 @@ final class UInt64Test {
     void createUInt64WithLargeUnsignedValue() {
         // Test with a value that would be negative in signed representation
         long value = -1L; // Represents 18446744073709551615 in unsigned
-        UInt64 uint64 = UInt64.valueOf(value);
+        DBusUInt64 uint64 = DBusUInt64.valueOf(value);
         
         assertEquals(value, uint64.longValue());
         assertEquals(Type.UINT64, uint64.getType());
@@ -47,7 +47,7 @@ final class UInt64Test {
     void createUInt64WithMaxValue() {
         // Test maximum unsigned value (represented as -1 in signed long)
         long maxUnsigned = -1L;
-        UInt64 uint64 = UInt64.valueOf(maxUnsigned);
+        DBusUInt64 uint64 = DBusUInt64.valueOf(maxUnsigned);
         
         assertEquals(maxUnsigned, uint64.longValue());
         assertEquals(Type.UINT64, uint64.getType());
@@ -58,7 +58,7 @@ final class UInt64Test {
     @ValueSource(longs = {0L, 1L, 255L, 256L, 65535L, 65536L, 4294967295L, 4294967296L, 
                          Long.MAX_VALUE, -1L, -100L, -9223372036854775808L})
     void createUInt64WithVariousValues(long value) {
-        UInt64 uint64 = UInt64.valueOf(value);
+        DBusUInt64 uint64 = DBusUInt64.valueOf(value);
         
         assertEquals(value, uint64.longValue());
         assertEquals(Type.UINT64, uint64.getType());
@@ -67,9 +67,9 @@ final class UInt64Test {
 
     @Test
     void testEquals() {
-        UInt64 uint1 = UInt64.valueOf(123456789012345L);
-        UInt64 uint2 = UInt64.valueOf(123456789012345L);
-        UInt64 uint3 = UInt64.valueOf(123456789012346L);
+        DBusUInt64 uint1 = DBusUInt64.valueOf(123456789012345L);
+        DBusUInt64 uint2 = DBusUInt64.valueOf(123456789012345L);
+        DBusUInt64 uint3 = DBusUInt64.valueOf(123456789012346L);
         
         assertEquals(uint1, uint2);
         assertNotEquals(uint1, uint3);
@@ -82,9 +82,9 @@ final class UInt64Test {
 
     @Test
     void testEqualsWithUnsignedValues() {
-        UInt64 uint1 = UInt64.valueOf(-1L); // Max unsigned value
-        UInt64 uint2 = UInt64.valueOf(-1L);
-        UInt64 uint3 = UInt64.valueOf(-2L);
+        DBusUInt64 uint1 = DBusUInt64.valueOf(-1L); // Max unsigned value
+        DBusUInt64 uint2 = DBusUInt64.valueOf(-1L);
+        DBusUInt64 uint3 = DBusUInt64.valueOf(-2L);
         
         assertEquals(uint1, uint2);
         assertNotEquals(uint1, uint3);
@@ -92,9 +92,9 @@ final class UInt64Test {
 
     @Test
     void testHashCode() {
-        UInt64 uint1 = UInt64.valueOf(123456789012345L);
-        UInt64 uint2 = UInt64.valueOf(123456789012345L);
-        UInt64 uint3 = UInt64.valueOf(123456789012346L);
+        DBusUInt64 uint1 = DBusUInt64.valueOf(123456789012345L);
+        DBusUInt64 uint2 = DBusUInt64.valueOf(123456789012345L);
+        DBusUInt64 uint3 = DBusUInt64.valueOf(123456789012346L);
         
         assertEquals(uint1.hashCode(), uint2.hashCode());
         assertNotEquals(uint1.hashCode(), uint3.hashCode());
@@ -102,19 +102,19 @@ final class UInt64Test {
 
     @Test
     void testToString() {
-        assertEquals("0", UInt64.valueOf(0L).toString());
-        assertEquals("123456789012345", UInt64.valueOf(123456789012345L).toString());
-        assertEquals("9223372036854775807", UInt64.valueOf(Long.MAX_VALUE).toString());
-        assertEquals("18446744073709551615", UInt64.valueOf(-1L).toString()); // Max unsigned
-        assertEquals("9223372036854775808", UInt64.valueOf(Long.MIN_VALUE).toString()); // 2^63 unsigned
+        assertEquals("0", DBusUInt64.valueOf(0L).toString());
+        assertEquals("123456789012345", DBusUInt64.valueOf(123456789012345L).toString());
+        assertEquals("9223372036854775807", DBusUInt64.valueOf(Long.MAX_VALUE).toString());
+        assertEquals("18446744073709551615", DBusUInt64.valueOf(-1L).toString()); // Max unsigned
+        assertEquals("9223372036854775808", DBusUInt64.valueOf(Long.MIN_VALUE).toString()); // 2^63 unsigned
     }
 
     @Test
     void testCompareTo() {
-        UInt64 small = UInt64.valueOf(100L);
-        UInt64 medium = UInt64.valueOf(1000L);
-        UInt64 large = UInt64.valueOf(10000L);
-        UInt64 duplicate = UInt64.valueOf(1000L);
+        DBusUInt64 small = DBusUInt64.valueOf(100L);
+        DBusUInt64 medium = DBusUInt64.valueOf(1000L);
+        DBusUInt64 large = DBusUInt64.valueOf(10000L);
+        DBusUInt64 duplicate = DBusUInt64.valueOf(1000L);
         
         assertTrue(small.compareTo(medium) < 0);
         assertTrue(medium.compareTo(large) < 0);
@@ -126,10 +126,10 @@ final class UInt64Test {
 
     @Test
     void testCompareToWithUnsignedValues() {
-        UInt64 zero = UInt64.valueOf(0L);
-        UInt64 signedMax = UInt64.valueOf(Long.MAX_VALUE);
-        UInt64 signedMin = UInt64.valueOf(Long.MIN_VALUE); // 2^63 in unsigned
-        UInt64 unsignedMax = UInt64.valueOf(-1L); // Max unsigned value
+        DBusUInt64 zero = DBusUInt64.valueOf(0L);
+        DBusUInt64 signedMax = DBusUInt64.valueOf(Long.MAX_VALUE);
+        DBusUInt64 signedMin = DBusUInt64.valueOf(Long.MIN_VALUE); // 2^63 in unsigned
+        DBusUInt64 unsignedMax = DBusUInt64.valueOf(-1L); // Max unsigned value
         
         // In unsigned comparison:
         // 0 < Long.MAX_VALUE < 2^63 < UINT64_MAX
@@ -146,9 +146,9 @@ final class UInt64Test {
     @Test
     void testUnsignedComparison() {
         // Test that unsigned comparison works correctly
-        UInt64 largeUnsigned1 = UInt64.valueOf(-100L); // Very large unsigned value
-        UInt64 largeUnsigned2 = UInt64.valueOf(-50L);  // Smaller but still large unsigned
-        UInt64 smallPositive = UInt64.valueOf(100L);
+        DBusUInt64 largeUnsigned1 = DBusUInt64.valueOf(-100L); // Very large unsigned value
+        DBusUInt64 largeUnsigned2 = DBusUInt64.valueOf(-50L);  // Smaller but still large unsigned
+        DBusUInt64 smallPositive = DBusUInt64.valueOf(100L);
         
         // In unsigned terms: -100 (as unsigned) < -50 (as unsigned), but both > 100
         assertTrue(largeUnsigned1.compareTo(largeUnsigned2) < 0);
@@ -158,7 +158,7 @@ final class UInt64Test {
 
     @Test
     void testNumberMethods() {
-        UInt64 uint64 = UInt64.valueOf(123456789012345L);
+        DBusUInt64 uint64 = DBusUInt64.valueOf(123456789012345L);
         
         assertEquals((int) 123456789012345L, uint64.intValue()); // Truncated
         assertEquals(123456789012345L, uint64.longValue());
@@ -171,7 +171,7 @@ final class UInt64Test {
     @Test
     void testNumberMethodsWithUnsignedValues() {
         // Test with maximum unsigned value (-1 in signed representation)
-        UInt64 maxUnsigned = UInt64.valueOf(-1L);
+        DBusUInt64 maxUnsigned = DBusUInt64.valueOf(-1L);
         
         assertEquals(-1, maxUnsigned.intValue()); // Truncated to signed int
         assertEquals(-1L, maxUnsigned.longValue()); // Raw signed representation
@@ -181,7 +181,7 @@ final class UInt64Test {
         assertEquals(18446744073709551615.0, maxUnsigned.doubleValue(), 0.0);
         
         // Test with 2^63 (Long.MIN_VALUE in signed representation)
-        UInt64 twoTo63 = UInt64.valueOf(Long.MIN_VALUE);
+        DBusUInt64 twoTo63 = DBusUInt64.valueOf(Long.MIN_VALUE);
         assertEquals(9223372036854775808.0f, twoTo63.floatValue(), 0.0f);
         assertEquals(9223372036854775808.0, twoTo63.doubleValue(), 0.0);
     }
@@ -189,7 +189,7 @@ final class UInt64Test {
     @Test
     void testGetDelegate() {
         long value = 123456789012345L;
-        UInt64 uint64 = UInt64.valueOf(value);
+        DBusUInt64 uint64 = DBusUInt64.valueOf(value);
         
         assertEquals(Long.valueOf(value), uint64.getDelegate());
         assertEquals(value, uint64.getDelegate().longValue());
@@ -197,22 +197,22 @@ final class UInt64Test {
 
     @Test
     void testGetType() {
-        assertEquals(Type.UINT64, UInt64.valueOf(0L).getType());
-        assertEquals(Type.UINT64, UInt64.valueOf(Long.MAX_VALUE).getType());
-        assertEquals(Type.UINT64, UInt64.valueOf(Long.MIN_VALUE).getType());
-        assertEquals(Type.UINT64, UInt64.valueOf(-1L).getType());
-        assertEquals(Type.UINT64, UInt64.valueOf(1L).getType());
+        assertEquals(Type.UINT64, DBusUInt64.valueOf(0L).getType());
+        assertEquals(Type.UINT64, DBusUInt64.valueOf(Long.MAX_VALUE).getType());
+        assertEquals(Type.UINT64, DBusUInt64.valueOf(Long.MIN_VALUE).getType());
+        assertEquals(Type.UINT64, DBusUInt64.valueOf(-1L).getType());
+        assertEquals(Type.UINT64, DBusUInt64.valueOf(1L).getType());
     }
 
     @Test
     void testBoundaryValues() {
         // Test values at unsigned 64-bit boundaries
-        UInt64 zero = UInt64.valueOf(0L);
-        UInt64 one = UInt64.valueOf(1L);
-        UInt64 signedMax = UInt64.valueOf(Long.MAX_VALUE);
-        UInt64 signedMaxPlusOne = UInt64.valueOf(Long.MIN_VALUE); // 2^63
-        UInt64 unsignedMaxMinusOne = UInt64.valueOf(-2L);
-        UInt64 unsignedMax = UInt64.valueOf(-1L);
+        DBusUInt64 zero = DBusUInt64.valueOf(0L);
+        DBusUInt64 one = DBusUInt64.valueOf(1L);
+        DBusUInt64 signedMax = DBusUInt64.valueOf(Long.MAX_VALUE);
+        DBusUInt64 signedMaxPlusOne = DBusUInt64.valueOf(Long.MIN_VALUE); // 2^63
+        DBusUInt64 unsignedMaxMinusOne = DBusUInt64.valueOf(-2L);
+        DBusUInt64 unsignedMax = DBusUInt64.valueOf(-1L);
         
         assertEquals(0L, zero.longValue());
         assertEquals(1L, one.longValue());
@@ -232,7 +232,7 @@ final class UInt64Test {
     @Test
     void testImmutability() {
         long original = 123456789012345L;
-        UInt64 uint64 = UInt64.valueOf(original);
+        DBusUInt64 uint64 = DBusUInt64.valueOf(original);
         
         // Verify the delegate is the expected value
         assertEquals(original, uint64.getDelegate().longValue());
@@ -245,9 +245,9 @@ final class UInt64Test {
 
     @Test
     void testCompareToIsConsistentWithEquals() {
-        UInt64 uint1 = UInt64.valueOf(123456789012345L);
-        UInt64 uint2 = UInt64.valueOf(123456789012345L);
-        UInt64 uint3 = UInt64.valueOf(123456789012346L);
+        DBusUInt64 uint1 = DBusUInt64.valueOf(123456789012345L);
+        DBusUInt64 uint2 = DBusUInt64.valueOf(123456789012345L);
+        DBusUInt64 uint3 = DBusUInt64.valueOf(123456789012346L);
         
         // If compareTo returns 0, equals should return true
         assertEquals(0, uint1.compareTo(uint2));
@@ -264,8 +264,8 @@ final class UInt64Test {
         // Per D-Bus specification: UINT64 is a 64-bit unsigned integer
         
         // Test that full range of 64-bit unsigned integers is supported
-        UInt64 minValue = UInt64.valueOf(0L);
-        UInt64 maxValue = UInt64.valueOf(-1L); // 18446744073709551615 (2^64 - 1)
+        DBusUInt64 minValue = DBusUInt64.valueOf(0L);
+        DBusUInt64 maxValue = DBusUInt64.valueOf(-1L); // 18446744073709551615 (2^64 - 1)
         
         assertEquals(0L, minValue.longValue());
         assertEquals(-1L, maxValue.longValue()); // Raw signed representation
@@ -279,8 +279,8 @@ final class UInt64Test {
         assertTrue(maxValue.compareTo(minValue) > 0);
         
         // Test middle values
-        UInt64 signedMax = UInt64.valueOf(Long.MAX_VALUE);
-        UInt64 signedMin = UInt64.valueOf(Long.MIN_VALUE); // 2^63 unsigned
+        DBusUInt64 signedMax = DBusUInt64.valueOf(Long.MAX_VALUE);
+        DBusUInt64 signedMin = DBusUInt64.valueOf(Long.MIN_VALUE); // 2^63 unsigned
         
         assertTrue(minValue.compareTo(signedMax) < 0);
         assertTrue(signedMax.compareTo(signedMin) < 0);
@@ -290,11 +290,11 @@ final class UInt64Test {
     @Test
     void testUnsignedIntegerBehavior() {
         // Test that unsigned integer behavior is correct
-        UInt64 zero = UInt64.valueOf(0L);
-        UInt64 small = UInt64.valueOf(1000L);
-        UInt64 large = UInt64.valueOf(Long.MAX_VALUE);
-        UInt64 veryLarge = UInt64.valueOf(Long.MIN_VALUE); // 2^63 unsigned
-        UInt64 maximum = UInt64.valueOf(-1L); // Max unsigned
+        DBusUInt64 zero = DBusUInt64.valueOf(0L);
+        DBusUInt64 small = DBusUInt64.valueOf(1000L);
+        DBusUInt64 large = DBusUInt64.valueOf(Long.MAX_VALUE);
+        DBusUInt64 veryLarge = DBusUInt64.valueOf(Long.MIN_VALUE); // 2^63 unsigned
+        DBusUInt64 maximum = DBusUInt64.valueOf(-1L); // Max unsigned
         
         // Test ordering
         assertTrue(zero.compareTo(small) < 0);
@@ -327,7 +327,7 @@ final class UInt64Test {
         };
         
         for (long value : powerOfTwoBoundaries) {
-            UInt64 uint64 = UInt64.valueOf(value);
+            DBusUInt64 uint64 = DBusUInt64.valueOf(value);
             assertEquals(value, uint64.longValue());
             assertEquals(Type.UINT64, uint64.getType());
             assertEquals(Long.toUnsignedString(value), uint64.toString());
@@ -344,7 +344,7 @@ final class UInt64Test {
         };
         
         for (long value : commonValues) {
-            UInt64 uint64 = UInt64.valueOf(value);
+            DBusUInt64 uint64 = DBusUInt64.valueOf(value);
             assertEquals(value, uint64.longValue());
             assertEquals(Long.toUnsignedString(value), uint64.toString());
             assertEquals(Type.UINT64, uint64.getType());
@@ -354,7 +354,7 @@ final class UInt64Test {
     @Test
     void testFloatPrecisionWithUnsignedValues() {
         // Test precision issues with large unsigned values
-        UInt64 maxUnsigned = UInt64.valueOf(-1L);
+        DBusUInt64 maxUnsigned = DBusUInt64.valueOf(-1L);
         
         // Float has limited precision
         float floatValue = maxUnsigned.floatValue();
@@ -368,7 +368,7 @@ final class UInt64Test {
     @Test
     void testIntegerTruncation() {
         // Test that converting large unsigned values to smaller types truncates properly
-        UInt64 largeUnsigned = UInt64.valueOf(-1L); // Max unsigned value
+        DBusUInt64 largeUnsigned = DBusUInt64.valueOf(-1L); // Max unsigned value
         
         // Should truncate to -1 (all bits set in lower 32 bits)
         assertEquals(-1, largeUnsigned.intValue());
@@ -376,7 +376,7 @@ final class UInt64Test {
         assertEquals((short) -1, largeUnsigned.shortValue());
         
         // Test with specific bit patterns
-        UInt64 specificValue = UInt64.valueOf(0x123456789ABCDEF0L);
+        DBusUInt64 specificValue = DBusUInt64.valueOf(0x123456789ABCDEF0L);
         assertEquals((int) 0x9ABCDEF0, specificValue.intValue());
         assertEquals((byte) 0xF0, specificValue.byteValue());
         assertEquals((short) 0xDEF0, specificValue.shortValue());
@@ -385,12 +385,12 @@ final class UInt64Test {
     @Test
     void testOverflowSafetyInComparison() {
         // Test that unsigned comparison handles all edge cases safely
-        UInt64 zero = UInt64.valueOf(0L);
-        UInt64 one = UInt64.valueOf(1L);
-        UInt64 signedMax = UInt64.valueOf(Long.MAX_VALUE);
-        UInt64 signedMin = UInt64.valueOf(Long.MIN_VALUE);
-        UInt64 unsignedMax = UInt64.valueOf(-1L);
-        UInt64 almostMax = UInt64.valueOf(-2L);
+        DBusUInt64 zero = DBusUInt64.valueOf(0L);
+        DBusUInt64 one = DBusUInt64.valueOf(1L);
+        DBusUInt64 signedMax = DBusUInt64.valueOf(Long.MAX_VALUE);
+        DBusUInt64 signedMin = DBusUInt64.valueOf(Long.MIN_VALUE);
+        DBusUInt64 unsignedMax = DBusUInt64.valueOf(-1L);
+        DBusUInt64 almostMax = DBusUInt64.valueOf(-2L);
         
         // Test all combinations to ensure no overflow in comparison
         assertTrue(zero.compareTo(one) < 0);

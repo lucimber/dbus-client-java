@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.encoder;
 
-import com.lucimber.dbus.type.Int64;
+import com.lucimber.dbus.type.DBusInt64;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -21,8 +21,8 @@ final class LongEncoderTest {
 
   @Test
   void encodeSignedLongMinValueOnBigEndian() {
-    Encoder<Int64, ByteBuffer> encoder = new Int64Encoder(ByteOrder.BIG_ENDIAN);
-    Int64 int64 = Int64.valueOf(-9223372036854775808L);
+    Encoder<DBusInt64, ByteBuffer> encoder = new Int64Encoder(ByteOrder.BIG_ENDIAN);
+    DBusInt64 int64 = DBusInt64.valueOf(-9223372036854775808L);
     EncoderResult<ByteBuffer> result = encoder.encode(int64, 0);
     int expectedNumOfBytes = 8;
     assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
@@ -36,8 +36,8 @@ final class LongEncoderTest {
 
   @Test
   void encodeSignedLongMinValueWithOffsetOnBigEndian() {
-    Encoder<Int64, ByteBuffer> encoder = new Int64Encoder(ByteOrder.BIG_ENDIAN);
-    Int64 int64 = Int64.valueOf(-9223372036854775808L);
+    Encoder<DBusInt64, ByteBuffer> encoder = new Int64Encoder(ByteOrder.BIG_ENDIAN);
+    DBusInt64 int64 = DBusInt64.valueOf(-9223372036854775808L);
     int offset = 5;
     EncoderResult<ByteBuffer> result = encoder.encode(int64, offset);
     int expectedNumOfBytes = 11;
@@ -52,8 +52,8 @@ final class LongEncoderTest {
 
   @Test
   void encodeSignedLongMinValueOnLittleEndian() {
-    Encoder<Int64, ByteBuffer> encoder = new Int64Encoder(ByteOrder.LITTLE_ENDIAN);
-    Int64 int64 = Int64.valueOf(-9223372036854775808L);
+    Encoder<DBusInt64, ByteBuffer> encoder = new Int64Encoder(ByteOrder.LITTLE_ENDIAN);
+    DBusInt64 int64 = DBusInt64.valueOf(-9223372036854775808L);
     EncoderResult<ByteBuffer> result = encoder.encode(int64, 0);
     int expectedNumOfBytes = 8;
     assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
@@ -67,8 +67,8 @@ final class LongEncoderTest {
 
   @Test
   void encodeSignedLongMinValueWithOffsetOnLittleEndian() {
-    Encoder<Int64, ByteBuffer> encoder = new Int64Encoder(ByteOrder.LITTLE_ENDIAN);
-    Int64 int64 = Int64.valueOf(-9223372036854775808L);
+    Encoder<DBusInt64, ByteBuffer> encoder = new Int64Encoder(ByteOrder.LITTLE_ENDIAN);
+    DBusInt64 int64 = DBusInt64.valueOf(-9223372036854775808L);
     int offset = 5;
     EncoderResult<ByteBuffer> result = encoder.encode(int64, offset);
     int expectedNumOfBytes = 11;

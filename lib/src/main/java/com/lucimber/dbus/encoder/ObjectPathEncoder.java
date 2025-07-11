@@ -5,9 +5,9 @@
 
 package com.lucimber.dbus.encoder;
 
-import com.lucimber.dbus.type.ObjectPath;
+import com.lucimber.dbus.type.DBusObjectPath;
 import com.lucimber.dbus.type.Type;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -23,9 +23,9 @@ import org.slf4j.MarkerFactory;
  * An encoder which encodes an object path to the D-Bus marshalling format using ByteBuffer.
  *
  * @see Encoder
- * @see ObjectPath
+ * @see DBusObjectPath
  */
-public final class ObjectPathEncoder implements Encoder<ObjectPath, ByteBuffer> {
+public final class ObjectPathEncoder implements Encoder<DBusObjectPath, ByteBuffer> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
@@ -42,7 +42,7 @@ public final class ObjectPathEncoder implements Encoder<ObjectPath, ByteBuffer> 
     this.order = Objects.requireNonNull(order, "order must not be null");
   }
 
-  private static void logResult(ObjectPath value, int offset, int padding, int producedBytes) {
+  private static void logResult(DBusObjectPath value, int offset, int padding, int producedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "OBJECT_PATH: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
       return String.format(s, value, offset, padding, producedBytes);
@@ -50,7 +50,7 @@ public final class ObjectPathEncoder implements Encoder<ObjectPath, ByteBuffer> 
   }
 
   @Override
-  public EncoderResult<ByteBuffer> encode(ObjectPath value, int offset) throws EncoderException {
+  public EncoderResult<ByteBuffer> encode(DBusObjectPath value, int offset) throws EncoderException {
     Objects.requireNonNull(value, "value must not be null");
     try {
       // Calculate padding
@@ -58,10 +58,10 @@ public final class ObjectPathEncoder implements Encoder<ObjectPath, ByteBuffer> 
 
       // UTF-8 bytes of the object path
       byte[] bytes = value.getDelegate().getBytes(StandardCharsets.UTF_8);
-      UInt32 length = UInt32.valueOf(bytes.length);
+      DBusUInt32 length = DBusUInt32.valueOf(bytes.length);
 
       // Encode length using UInt32Encoder
-      Encoder<UInt32, ByteBuffer> lengthEncoder = new UInt32Encoder(order);
+      Encoder<DBusUInt32, ByteBuffer> lengthEncoder = new UInt32Encoder(order);
       EncoderResult<ByteBuffer> lengthResult = lengthEncoder.encode(length, offset + padding);
       ByteBuffer lengthBuffer = lengthResult.getBuffer();
 

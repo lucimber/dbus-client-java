@@ -12,10 +12,10 @@ import com.lucimber.dbus.decoder.DecoderResult;
 import com.lucimber.dbus.decoder.UInt32Decoder;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.type.DBusArray;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.Struct;
-import com.lucimber.dbus.type.UInt32;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusStruct;
+import com.lucimber.dbus.type.DBusUInt32;
+import com.lucimber.dbus.type.DBusVariant;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -79,7 +79,7 @@ final class FrameDecoder extends ByteToMessageDecoder {
           if (!canDecodeHeaderFields(in)) {
             return; // Wait for full header fields + padding
           }
-          Map<HeaderField, Variant> headerFields = decodeHeaderFields(in);
+          Map<HeaderField, DBusVariant> headerFields = decodeHeaderFields(in);
           frame.setHeaderFields(headerFields);
           decoderState = DecoderState.HEADER_PADDING;
           break;
@@ -127,8 +127,8 @@ final class FrameDecoder extends ByteToMessageDecoder {
     int fieldsLen;
     try {
       ByteBuffer tmpBuffer = in.nioBuffer().order(frame.getByteOrder());
-      Decoder<ByteBuffer, UInt32> decoder = new UInt32Decoder();
-      DecoderResult<UInt32> lengthResult = decoder.decode(tmpBuffer, offset);
+      Decoder<ByteBuffer, DBusUInt32> decoder = new UInt32Decoder();
+      DecoderResult<DBusUInt32> lengthResult = decoder.decode(tmpBuffer, offset);
       fieldsLen = lengthResult.getValue().getDelegate();
     } catch (DecoderException | IndexOutOfBoundsException e) {
       return false;
@@ -156,14 +156,14 @@ final class FrameDecoder extends ByteToMessageDecoder {
       frame.setProtocolVersion(in.readUnsignedByte());
       offset += 1;
 
-      Decoder<ByteBuffer, UInt32> decoder = new UInt32Decoder();
+      Decoder<ByteBuffer, DBusUInt32> decoder = new UInt32Decoder();
       ByteBuffer nioBuffer = in.nioBuffer().order(frame.getByteOrder());
-      DecoderResult<UInt32> bodyLengthResult = decoder.decode(nioBuffer, offset);
+      DecoderResult<DBusUInt32> bodyLengthResult = decoder.decode(nioBuffer, offset);
       offset += bodyLengthResult.getConsumedBytes();
       in.skipBytes(bodyLengthResult.getConsumedBytes());
       frame.setBodyLength(bodyLengthResult.getValue());
 
-      DecoderResult<UInt32> serialResult = decoder.decode(nioBuffer, offset);
+      DecoderResult<DBusUInt32> serialResult = decoder.decode(nioBuffer, offset);
       offset += serialResult.getConsumedBytes();
       in.skipBytes(serialResult.getConsumedBytes());
       frame.setSerial(serialResult.getValue());
@@ -172,12 +172,12 @@ final class FrameDecoder extends ByteToMessageDecoder {
     }
   }
 
-  private Map<HeaderField, Variant> decodeHeaderFields(ByteBuf in) {
+  private Map<HeaderField, DBusVariant> decodeHeaderFields(ByteBuf in) {
     try {
-      Signature signature = Signature.valueOf("a(yv)");
-      ArrayDecoder<Struct> decoder = new ArrayDecoder<>(signature);
+      DBusSignature signature = DBusSignature.valueOf("a(yv)");
+      ArrayDecoder<DBusStruct> decoder = new ArrayDecoder<>(signature);
       ByteBuffer nioBuffer = in.nioBuffer().order(frame.getByteOrder());
-      DecoderResult<DBusArray<Struct>> result = decoder.decode(nioBuffer, offset);
+      DecoderResult<DBusArray<DBusStruct>> result = decoder.decode(nioBuffer, offset);
 
       offset += result.getConsumedBytes();
       in.skipBytes(result.getConsumedBytes());

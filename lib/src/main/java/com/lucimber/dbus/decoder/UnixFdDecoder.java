@@ -6,7 +6,7 @@
 package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.Type;
-import com.lucimber.dbus.type.UnixFd;
+import com.lucimber.dbus.type.DBusUnixFD;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -20,15 +20,15 @@ import org.slf4j.MarkerFactory;
  * A decoder which unmarshals a file descriptor from the byte stream format used by D-Bus.
  *
  * @see Decoder
- * @see UnixFd
+ * @see DBusUnixFD
  */
-public final class UnixFdDecoder implements Decoder<ByteBuffer, UnixFd> {
+public final class UnixFdDecoder implements Decoder<ByteBuffer, DBusUnixFD> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
   private static final int TYPE_BYTES = 4;
 
-  private static void logResult(UnixFd value, int offset, int padding, int consumedBytes) {
+  private static void logResult(DBusUnixFD value, int offset, int padding, int consumedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "UNIX_FD: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
       return String.format(s, value, offset, padding, consumedBytes);
@@ -36,7 +36,7 @@ public final class UnixFdDecoder implements Decoder<ByteBuffer, UnixFd> {
   }
 
   @Override
-  public DecoderResult<UnixFd> decode(ByteBuffer buffer, int offset) throws DecoderException {
+  public DecoderResult<DBusUnixFD> decode(ByteBuffer buffer, int offset) throws DecoderException {
     Objects.requireNonNull(buffer, "buffer must not be null");
     try {
       int consumedBytes = 0;
@@ -47,8 +47,8 @@ public final class UnixFdDecoder implements Decoder<ByteBuffer, UnixFd> {
       int rawValue = buffer.getInt();
       consumedBytes += TYPE_BYTES;
 
-      UnixFd value = UnixFd.valueOf(rawValue);
-      DecoderResult<UnixFd> result = new DecoderResultImpl<>(consumedBytes, value);
+      DBusUnixFD value = DBusUnixFD.valueOf(rawValue);
+      DecoderResult<DBusUnixFD> result = new DecoderResultImpl<>(consumedBytes, value);
       logResult(value, offset, padding, consumedBytes);
 
       return result;

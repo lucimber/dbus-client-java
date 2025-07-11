@@ -14,7 +14,7 @@ import com.lucimber.dbus.message.InboundMethodReturn;
 import com.lucimber.dbus.message.OutboundMessage;
 import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -40,7 +40,7 @@ public class AppLogicHandler extends ChannelDuplexHandler {
   private static final Logger LOGGER = LoggerFactory.getLogger(AppLogicHandler.class);
   private static final long DEFAULT_METHOD_CALL_TIMEOUT_MS = 30_000; // 30 seconds
 
-  private final ConcurrentHashMap<UInt32, PendingMethodCall> pendingMethodCalls;
+  private final ConcurrentHashMap<DBusUInt32, PendingMethodCall> pendingMethodCalls;
   private final ExecutorService applicationTaskExecutor; // For offloading user code
   private final Connection connection;
   private final long methodCallTimeoutMs;
@@ -231,7 +231,7 @@ public class AppLogicHandler extends ChannelDuplexHandler {
     }
   }
 
-  private void handleInboundReply(InboundMessage msg, UInt32 replySerial) {
+  private void handleInboundReply(InboundMessage msg, DBusUInt32 replySerial) {
     if (msg instanceof InboundError) {
       LOGGER.debug("Received error reply for serial {}: {}", replySerial, msg);
     } else {
@@ -270,7 +270,7 @@ public class AppLogicHandler extends ChannelDuplexHandler {
     super.channelInactive(ctx);
   }
 
-  private void cancelPendingMethodCall(UInt32 serial) {
+  private void cancelPendingMethodCall(DBusUInt32 serial) {
     PendingMethodCall pendingCall = pendingMethodCalls.remove(serial);
     if (pendingCall != null) {
       pendingCall.timeoutFuture().cancel(false);

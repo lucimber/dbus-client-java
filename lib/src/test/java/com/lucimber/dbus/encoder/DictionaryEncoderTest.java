@@ -22,10 +22,10 @@ final class DictionaryEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeEmptySimpleDictionary(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("a{sb}");
+    DBusSignature signature = DBusSignature.valueOf("a{sb}");
     DictEncoder<DBusString, DBusBoolean> encoder =
           new DictEncoder<>(byteOrder, signature);
-    Dict<DBusString, DBusBoolean> dict = new Dict<>(signature);
+    DBusDict<DBusString, DBusBoolean> dict = new DBusDict<>(signature);
     EncoderResult<ByteBuffer> result = encoder.encode(dict, 0);
     // Array length + struct boundary
     int expectedBytes = 4 + 4;
@@ -37,10 +37,10 @@ final class DictionaryEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeEmptySimpleDictionaryWithOffset(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("a{sb}");
+    DBusSignature signature = DBusSignature.valueOf("a{sb}");
     DictEncoder<DBusString, DBusBoolean> encoder =
           new DictEncoder<>(byteOrder, signature);
-    Dict<DBusString, DBusBoolean> dict = new Dict<>(signature);
+    DBusDict<DBusString, DBusBoolean> dict = new DBusDict<>(signature);
     int offset = 5;
     EncoderResult<ByteBuffer> result = encoder.encode(dict, offset);
     // Padding + Array length + struct boundary
@@ -53,10 +53,10 @@ final class DictionaryEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeEmptyComplexDictionary(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("a{oa{sv}}");
-    DictEncoder<ObjectPath, Dict<DBusString, Variant>> encoder =
+    DBusSignature signature = DBusSignature.valueOf("a{oa{sv}}");
+    DictEncoder<DBusObjectPath, DBusDict<DBusString, DBusVariant>> encoder =
           new DictEncoder<>(byteOrder, signature);
-    Dict<ObjectPath, Dict<DBusString, Variant>> dict = new Dict<>(signature);
+    DBusDict<DBusObjectPath, DBusDict<DBusString, DBusVariant>> dict = new DBusDict<>(signature);
     EncoderResult<ByteBuffer> result = encoder.encode(dict, 0);
     // Array length + struct boundary
     int expectedBytes = 4 + 4;
@@ -68,27 +68,27 @@ final class DictionaryEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeComplexDictionary(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("a{oa{sa{sv}}}");
-    Signature innerDictSignature = Signature.valueOf("a{sv}");
-    Dict<ObjectPath, Dict<DBusString, Dict<DBusString, Variant>>> dict =
-          new Dict<>(signature);
-    ObjectPath sPath = ObjectPath.valueOf("/services/A8E7E8EF9629/s0");
-    Signature sSignature = Signature.valueOf("a{sa{sv}}");
-    Dict<DBusString, Dict<DBusString, Variant>> sDict = new Dict<>(sSignature);
+    DBusSignature signature = DBusSignature.valueOf("a{oa{sa{sv}}}");
+    DBusSignature innerDictSignature = DBusSignature.valueOf("a{sv}");
+    DBusDict<DBusObjectPath, DBusDict<DBusString, DBusDict<DBusString, DBusVariant>>> dict =
+          new DBusDict<>(signature);
+    DBusObjectPath sPath = DBusObjectPath.valueOf("/services/A8E7E8EF9629/s0");
+    DBusSignature sSignature = DBusSignature.valueOf("a{sa{sv}}");
+    DBusDict<DBusString, DBusDict<DBusString, DBusVariant>> sDict = new DBusDict<>(sSignature);
     // String of interface and empty dict
     DBusString iProperties = DBusString.valueOf("org.freedesktop.DBus.Properties");
-    Dict<DBusString, Variant> emptyDict = new Dict<>(innerDictSignature);
+    DBusDict<DBusString, DBusVariant> emptyDict = new DBusDict<>(innerDictSignature);
     sDict.put(iProperties, emptyDict);
     // String of interface and dict with content
     DBusString iGattService = DBusString.valueOf("org.bluez.GattService1");
-    Dict<DBusString, Variant> innerDict = new Dict<>(innerDictSignature);
-    innerDict.put(DBusString.valueOf("Handle"), Variant.valueOf(UInt16.valueOf((short) 1)));
-    innerDict.put(DBusString.valueOf("Primary"), Variant.valueOf(DBusBoolean.valueOf(true)));
-    innerDict.put(DBusString.valueOf("UUID"), Variant.valueOf(
+    DBusDict<DBusString, DBusVariant> innerDict = new DBusDict<>(innerDictSignature);
+    innerDict.put(DBusString.valueOf("Handle"), DBusVariant.valueOf(DBusUInt16.valueOf((short) 1)));
+    innerDict.put(DBusString.valueOf("Primary"), DBusVariant.valueOf(DBusBoolean.valueOf(true)));
+    innerDict.put(DBusString.valueOf("UUID"), DBusVariant.valueOf(
           DBusString.valueOf("0000180a-0000-1000-8000-00805f9b34fb")));
     sDict.put(iGattService, innerDict);
     dict.put(sPath, sDict);
-    DictEncoder<ObjectPath, Dict<DBusString, Dict<DBusString, Variant>>> encoder =
+    DictEncoder<DBusObjectPath, DBusDict<DBusString, DBusDict<DBusString, DBusVariant>>> encoder =
           new DictEncoder<>(byteOrder, signature);
     EncoderResult<ByteBuffer> result = encoder.encode(dict, 0);
     int expectedBytes = 216;

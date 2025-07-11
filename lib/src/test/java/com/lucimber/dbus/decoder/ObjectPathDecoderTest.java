@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.decoder;
 
-import com.lucimber.dbus.type.ObjectPath;
+import com.lucimber.dbus.type.DBusObjectPath;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -36,7 +36,7 @@ final class ObjectPathDecoderTest {
     buffer.flip();
 
     ObjectPathDecoder decoder = new ObjectPathDecoder();
-    DecoderResult<ObjectPath> result = decoder.decode(buffer, 0);
+    DecoderResult<DBusObjectPath> result = decoder.decode(buffer, 0);
 
     assertEquals(totalLength, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);

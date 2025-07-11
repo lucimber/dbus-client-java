@@ -26,13 +26,13 @@ final class OutboundMethodCallHandlerTest {
     OutboundMessageEncoder handler = new OutboundMessageEncoder();
     EmbeddedChannel channel = new EmbeddedChannel(handler);
 
-    UInt32 serial = UInt32.valueOf(1);
-    ObjectPath path = ObjectPath.valueOf("/unit_test");
+    DBusUInt32 serial = DBusUInt32.valueOf(1);
+    DBusObjectPath path = DBusObjectPath.valueOf("/unit_test");
     DBusString member = DBusString.valueOf("UnitTest");
     boolean replyExpected = true;
     DBusString dst = DBusString.valueOf("io.lucimber.test.destination");
     DBusString iface = DBusString.valueOf("io.lucimber.test");
-    Signature sig = Signature.valueOf("s");
+    DBusSignature sig = DBusSignature.valueOf("s");
     List<DBusType> payload = new ArrayList<>();
     payload.add(DBusString.valueOf("testArg"));
     OutboundMethodCall methodCall = OutboundMethodCall.Builder
@@ -65,8 +65,8 @@ final class OutboundMethodCallHandlerTest {
     EmbeddedChannel channel = new EmbeddedChannel(handler);
 
 
-    UInt32 serial = UInt32.valueOf(1);
-    ObjectPath path = ObjectPath.valueOf("/org/freedesktop/DBus");
+    DBusUInt32 serial = DBusUInt32.valueOf(1);
+    DBusObjectPath path = DBusObjectPath.valueOf("/org/freedesktop/DBus");
 
     DBusString member = DBusString.valueOf("Hello");
     DBusString dst = DBusString.valueOf("org.freedesktop.DBus");

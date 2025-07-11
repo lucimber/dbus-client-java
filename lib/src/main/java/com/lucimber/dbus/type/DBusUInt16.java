@@ -10,11 +10,11 @@ import java.util.Objects;
 /**
  * Maps an unsigned {@link Short} to its D-Bus equivalent of UINT16.
  */
-public final class UInt16 extends Number implements Comparable<UInt16>, DBusBasicType {
+public final class DBusUInt16 extends Number implements Comparable<DBusUInt16>, DBusBasicType {
 
   private final short delegate;
 
-  private UInt16(final short delegate) {
+  private DBusUInt16(final short delegate) {
     this.delegate = delegate;
   }
 
@@ -24,8 +24,8 @@ public final class UInt16 extends Number implements Comparable<UInt16>, DBusBasi
    * @param value the short value
    * @return a new instance
    */
-  public static UInt16 valueOf(final short value) {
-    return new UInt16(value);
+  public static DBusUInt16 valueOf(final short value) {
+    return new DBusUInt16(value);
   }
 
   @Override
@@ -36,7 +36,7 @@ public final class UInt16 extends Number implements Comparable<UInt16>, DBusBasi
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final UInt16 that = (UInt16) o;
+    final DBusUInt16 that = (DBusUInt16) o;
     return delegate == that.delegate;
   }
 
@@ -81,7 +81,7 @@ public final class UInt16 extends Number implements Comparable<UInt16>, DBusBasi
   }
 
   @Override
-  public int compareTo(final UInt16 o) {
+  public int compareTo(final DBusUInt16 o) {
     return Short.toUnsignedInt(delegate) - Short.toUnsignedInt(o.delegate);
   }
 }

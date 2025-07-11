@@ -9,8 +9,8 @@ import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.InboundMethodReturn;
 import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.ObjectPath;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusUInt32;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -41,7 +41,7 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
   private final ScheduledExecutorService scheduler;
   private final ExecutorService eventExecutor;
   private final ConcurrentLinkedQueue<ConnectionEventListener> listeners = new ConcurrentLinkedQueue<>();
-  private final ConcurrentHashMap<UInt32, CompletableFuture<InboundMessage>> pendingHealthChecks = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<DBusUInt32, CompletableFuture<InboundMessage>> pendingHealthChecks = new ConcurrentHashMap<>();
 
   private final AtomicBoolean active = new AtomicBoolean(false);
   private final AtomicReference<ScheduledFuture<?>> healthCheckFuture = new AtomicReference<>();
@@ -206,11 +206,11 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
       LOGGER.debug("Performing health check...");
 
       // Create a ping method call using the standard D-Bus Peer interface
-      UInt32 serial = ctx.getConnection().getNextSerial();
+      DBusUInt32 serial = ctx.getConnection().getNextSerial();
       OutboundMethodCall pingCall = OutboundMethodCall.Builder
               .create()
               .withSerial(serial)
-              .withPath(ObjectPath.valueOf("/org/freedesktop/DBus"))
+              .withPath(DBusObjectPath.valueOf("/org/freedesktop/DBus"))
               .withMember(DBusString.valueOf("Ping"))
               .withDestination(DBusString.valueOf("org.freedesktop.DBus"))
               .withInterface(DBusString.valueOf("org.freedesktop.DBus.Peer"))

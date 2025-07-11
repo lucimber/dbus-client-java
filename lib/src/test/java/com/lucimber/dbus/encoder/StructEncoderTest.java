@@ -22,12 +22,12 @@ final class StructEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSimpleStruct(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("(ibv)");
-    Encoder<Struct, ByteBuffer> encoder = new StructEncoder(byteOrder, signature);
-    Int32 int32 = Int32.valueOf(1);
+    DBusSignature signature = DBusSignature.valueOf("(ibv)");
+    Encoder<DBusStruct, ByteBuffer> encoder = new StructEncoder(byteOrder, signature);
+    DBusInt32 int32 = DBusInt32.valueOf(1);
     DBusBoolean dBusBoolean = DBusBoolean.valueOf(true);
-    Variant variant = Variant.valueOf(DBusDouble.valueOf(2.5));
-    Struct struct = new Struct(signature, int32, dBusBoolean, variant);
+    DBusVariant variant = DBusVariant.valueOf(DBusDouble.valueOf(2.5));
+    DBusStruct struct = new DBusStruct(signature, int32, dBusBoolean, variant);
     EncoderResult<ByteBuffer> result = encoder.encode(struct, 0);
     int expectedBytes = 24; // 4 byte + 4 byte + 3 byte + 5 byte + 8 byte
     assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
@@ -38,12 +38,12 @@ final class StructEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSimpleStructWithOffset(ByteOrder byteOrder) {
-    Signature signature = Signature.valueOf("(ibv)");
-    Encoder<Struct, ByteBuffer> encoder = new StructEncoder(byteOrder, signature);
-    Int32 int32 = Int32.valueOf(1);
+    DBusSignature signature = DBusSignature.valueOf("(ibv)");
+    Encoder<DBusStruct, ByteBuffer> encoder = new StructEncoder(byteOrder, signature);
+    DBusInt32 int32 = DBusInt32.valueOf(1);
     DBusBoolean dBusBoolean = DBusBoolean.valueOf(true);
-    Variant variant = Variant.valueOf(DBusDouble.valueOf(2.5));
-    Struct struct = new Struct(signature, int32, dBusBoolean, variant);
+    DBusVariant variant = DBusVariant.valueOf(DBusDouble.valueOf(2.5));
+    DBusStruct struct = new DBusStruct(signature, int32, dBusBoolean, variant);
     int offset = 5;
     EncoderResult<ByteBuffer> result = encoder.encode(struct, offset);
 

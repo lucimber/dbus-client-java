@@ -16,10 +16,10 @@ import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.message.OutboundMethodReturn;
 import com.lucimber.dbus.message.OutboundSignal;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeUtils;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.DBusVariant;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.EncoderException;
@@ -82,7 +82,7 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     }
   }
 
-  private static Map<HeaderField, Variant> buildHeaderFields(OutboundMessage msg) {
+  private static Map<HeaderField, DBusVariant> buildHeaderFields(OutboundMessage msg) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields.");
     if (msg instanceof OutboundError) {
       return buildHeaderFieldsForError((OutboundError) msg);
@@ -97,83 +97,83 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     }
   }
 
-  private static Map<HeaderField, Variant> buildHeaderFieldsForSignal(OutboundSignal msg) {
+  private static Map<HeaderField, DBusVariant> buildHeaderFieldsForSignal(OutboundSignal msg) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields for signal message.");
-    HashMap<HeaderField, Variant> headerFields = new HashMap<>();
-    Variant pathVariant = Variant.valueOf(msg.getObjectPath());
+    HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>();
+    DBusVariant pathVariant = DBusVariant.valueOf(msg.getObjectPath());
     headerFields.put(HeaderField.PATH, pathVariant);
-    Variant interfaceVariant = Variant.valueOf(msg.getInterfaceName());
+    DBusVariant interfaceVariant = DBusVariant.valueOf(msg.getInterfaceName());
     headerFields.put(HeaderField.INTERFACE, interfaceVariant);
-    Variant memberVariant = Variant.valueOf(msg.getMember());
+    DBusVariant memberVariant = DBusVariant.valueOf(msg.getMember());
     headerFields.put(HeaderField.MEMBER, memberVariant);
     msg.getDestination().ifPresent(destination -> {
-      Variant destinationVariant = Variant.valueOf(destination);
+      DBusVariant destinationVariant = DBusVariant.valueOf(destination);
       headerFields.put(HeaderField.DESTINATION, destinationVariant);
     });
     msg.getSignature().ifPresent(signature -> {
-      Variant signatureVariant = Variant.valueOf(signature);
+      DBusVariant signatureVariant = DBusVariant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
     });
     return headerFields;
   }
 
-  private static Map<HeaderField, Variant> buildHeaderFieldsForMethodReturn(OutboundMethodReturn msg) {
+  private static Map<HeaderField, DBusVariant> buildHeaderFieldsForMethodReturn(OutboundMethodReturn msg) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields for method return message.");
-    HashMap<HeaderField, Variant> headerFields = new HashMap<>();
-    Variant replySerialVariant = Variant.valueOf(msg.getReplySerial());
+    HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>();
+    DBusVariant replySerialVariant = DBusVariant.valueOf(msg.getReplySerial());
     headerFields.put(HeaderField.REPLY_SERIAL, replySerialVariant);
     msg.getDestination().ifPresent(destination -> {
-      Variant destinationVariant = Variant.valueOf(destination);
+      DBusVariant destinationVariant = DBusVariant.valueOf(destination);
       headerFields.put(HeaderField.DESTINATION, destinationVariant);
     });
     msg.getSignature().ifPresent(signature -> {
-      Variant signatureVariant = Variant.valueOf(signature);
+      DBusVariant signatureVariant = DBusVariant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
     });
     return headerFields;
   }
 
-  private static Map<HeaderField, Variant> buildHeaderFieldsForMethodCall(OutboundMethodCall msg) {
+  private static Map<HeaderField, DBusVariant> buildHeaderFieldsForMethodCall(OutboundMethodCall msg) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields for method call message.");
-    HashMap<HeaderField, Variant> headerFields = new HashMap<>();
-    Variant pathVariant = Variant.valueOf(msg.getObjectPath());
+    HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>();
+    DBusVariant pathVariant = DBusVariant.valueOf(msg.getObjectPath());
     headerFields.put(HeaderField.PATH, pathVariant);
-    Variant memberVariant = Variant.valueOf(msg.getMember());
+    DBusVariant memberVariant = DBusVariant.valueOf(msg.getMember());
     headerFields.put(HeaderField.MEMBER, memberVariant);
     msg.getInterfaceName().ifPresent(interfaceName -> {
-      Variant interfaceVariant = Variant.valueOf(interfaceName);
+      DBusVariant interfaceVariant = DBusVariant.valueOf(interfaceName);
       headerFields.put(HeaderField.INTERFACE, interfaceVariant);
     });
     msg.getDestination().ifPresent(destination -> {
-      Variant destinationVariant = Variant.valueOf(destination);
+      DBusVariant destinationVariant = DBusVariant.valueOf(destination);
       headerFields.put(HeaderField.DESTINATION, destinationVariant);
     });
     msg.getSignature().ifPresent(signature -> {
-      Variant signatureVariant = Variant.valueOf(signature);
+      DBusVariant signatureVariant = DBusVariant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
     });
     return headerFields;
   }
 
-  private static Map<HeaderField, Variant> buildHeaderFieldsForError(OutboundError msg) {
+  private static Map<HeaderField, DBusVariant> buildHeaderFieldsForError(OutboundError msg) {
     LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields for error message.");
-    HashMap<HeaderField, Variant> headerFields = new HashMap<>();
-    Variant errorNameVariant = Variant.valueOf(msg.getErrorName());
+    HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>();
+    DBusVariant errorNameVariant = DBusVariant.valueOf(msg.getErrorName());
     headerFields.put(HeaderField.ERROR_NAME, errorNameVariant);
-    Variant replySerialVariant = Variant.valueOf(msg.getReplySerial());
+    DBusVariant replySerialVariant = DBusVariant.valueOf(msg.getReplySerial());
     headerFields.put(HeaderField.REPLY_SERIAL, replySerialVariant);
     msg.getDestination().ifPresent(destination -> {
-      Variant destinationVariant = Variant.valueOf(destination);
+      DBusVariant destinationVariant = DBusVariant.valueOf(destination);
       headerFields.put(HeaderField.DESTINATION, destinationVariant);
     });
     msg.getSignature().ifPresent(signature -> {
-      Variant signatureVariant = Variant.valueOf(signature);
+      DBusVariant signatureVariant = DBusVariant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
     });
     return headerFields;
   }
 
-  private static void validatePayload(List<DBusType> payload, Signature signature) {
+  private static void validatePayload(List<DBusType> payload, DBusSignature signature) {
     boolean matching = isPayloadMatchingWithSignature(payload, signature);
     if (matching) {
       LoggerUtils.debug(LOGGER, () -> "Payload matches signature in message.");
@@ -182,13 +182,13 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     }
   }
 
-  private static boolean isPayloadMatchingWithSignature(List<DBusType> payload, Signature signature) {
+  private static boolean isPayloadMatchingWithSignature(List<DBusType> payload, DBusSignature signature) {
     if (payload.size() != signature.getQuantity()) {
       return false;
     } else if (signature.getQuantity() == 1) {
       return isObjectMatchingWithSignature(payload.get(0), signature);
     } else {
-      List<Signature> children = signature.getChildren();
+      List<DBusSignature> children = signature.getChildren();
       for (int i = 0; i < payload.size(); i++) {
         boolean matches = isObjectMatchingWithSignature(payload.get(i), children.get(i));
         if (!matches) {
@@ -199,7 +199,7 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     }
   }
 
-  private static boolean isObjectMatchingWithSignature(DBusType object, Signature signature) {
+  private static boolean isObjectMatchingWithSignature(DBusType object, DBusSignature signature) {
     try {
       char c = signature.toString().charAt(0);
       Type signatureType = TypeUtils.getTypeFromChar(c)
@@ -223,7 +223,7 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     EncoderResult<ByteBuffer> bodyResult = encodeBody(msg.getPayload());
     frame.setBody(bodyResult.getBuffer());
     frame.setSerial(msg.getSerial());
-    Map<HeaderField, Variant> headerFields = buildHeaderFields(msg);
+    Map<HeaderField, DBusVariant> headerFields = buildHeaderFields(msg);
     frame.setHeaderFields(headerFields);
     out.add(frame);
   }

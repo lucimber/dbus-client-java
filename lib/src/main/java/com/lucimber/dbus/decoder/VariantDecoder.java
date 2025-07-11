@@ -6,8 +6,8 @@
 package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusVariant;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -21,14 +21,14 @@ import org.slf4j.MarkerFactory;
  * A decoder which unmarshals a variant from the byte stream format used by D-Bus.
  *
  * @see Decoder
- * @see Variant
+ * @see DBusVariant
  */
-public final class VariantDecoder implements Decoder<ByteBuffer, Variant> {
+public final class VariantDecoder implements Decoder<ByteBuffer, DBusVariant> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
 
-  private static void logResult(Variant value, int offset, int consumedBytes) {
+  private static void logResult(DBusVariant value, int offset, int consumedBytes) {
     LoggerUtils.debug(LOGGER, MARKER, () -> {
       String s = "VARIANT: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
       return String.format(s, value, offset, 0, consumedBytes);
@@ -36,15 +36,15 @@ public final class VariantDecoder implements Decoder<ByteBuffer, Variant> {
   }
 
   @Override
-  public DecoderResult<Variant> decode(ByteBuffer buffer, int offset) throws DecoderException {
+  public DecoderResult<DBusVariant> decode(ByteBuffer buffer, int offset) throws DecoderException {
     Objects.requireNonNull(buffer, "buffer must not be null");
     try {
       int consumedBytes = 0;
 
       // Decode the signature
-      Decoder<ByteBuffer, Signature> signatureDecoder = new SignatureDecoder();
-      DecoderResult<Signature> sigResult = signatureDecoder.decode(buffer, offset);
-      Signature signature = sigResult.getValue();
+      Decoder<ByteBuffer, DBusSignature> signatureDecoder = new SignatureDecoder();
+      DecoderResult<DBusSignature> sigResult = signatureDecoder.decode(buffer, offset);
+      DBusSignature signature = sigResult.getValue();
       consumedBytes += sigResult.getConsumedBytes();
 
       if (signature.getQuantity() != 1) {
@@ -56,8 +56,8 @@ public final class VariantDecoder implements Decoder<ByteBuffer, Variant> {
       DecoderResult<? extends DBusType> valueResult = DecoderUtils.decode(signature, buffer, valueOffset);
       consumedBytes += valueResult.getConsumedBytes();
 
-      Variant variant = Variant.valueOf(valueResult.getValue());
-      DecoderResult<Variant> result = new DecoderResultImpl<>(consumedBytes, variant);
+      DBusVariant variant = DBusVariant.valueOf(valueResult.getValue());
+      DecoderResult<DBusVariant> result = new DecoderResultImpl<>(consumedBytes, variant);
       logResult(variant, offset, result.getConsumedBytes());
 
       return result;

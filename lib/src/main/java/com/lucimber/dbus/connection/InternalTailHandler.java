@@ -12,7 +12,7 @@ import com.lucimber.dbus.message.InboundMethodReturn;
 import com.lucimber.dbus.message.OutboundError;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Signature;
+import com.lucimber.dbus.type.DBusSignature;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -49,7 +49,7 @@ final class InternalTailHandler extends AbstractDuplexHandler implements Inbound
   private void sendErrorReply(Context ctx, InboundMethodCall call) {
     LOGGER.debug("Sending error reply for unhandled method call: {}", call);
 
-    Signature signature = Signature.valueOf("s");
+    DBusSignature signature = DBusSignature.valueOf("s");
     List<DBusType> payload = List
             .of(DBusString.valueOf("No handler was able to process the request."));
 

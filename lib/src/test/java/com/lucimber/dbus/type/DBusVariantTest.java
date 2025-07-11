@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-final class VariantTest {
+final class DBusVariantTest {
 
     @Test
     void createVariantWithString() {
         DBusString string = DBusString.valueOf("Hello, D-Bus!");
-        Variant variant = Variant.valueOf(string);
+        DBusVariant variant = DBusVariant.valueOf(string);
         
         assertEquals(string, variant.getDelegate());
         assertEquals(Type.VARIANT, variant.getType());
@@ -23,8 +23,8 @@ final class VariantTest {
 
     @Test
     void createVariantWithInteger() {
-        UInt32 uint32 = UInt32.valueOf(42);
-        Variant variant = Variant.valueOf(uint32);
+        DBusUInt32 uint32 = DBusUInt32.valueOf(42);
+        DBusVariant variant = DBusVariant.valueOf(uint32);
         
         assertEquals(uint32, variant.getDelegate());
         assertEquals(Type.VARIANT, variant.getType());
@@ -33,8 +33,8 @@ final class VariantTest {
 
     @Test
     void createVariantWithObjectPath() {
-        ObjectPath objectPath = ObjectPath.valueOf("/com/example/MyObject");
-        Variant variant = Variant.valueOf(objectPath);
+        DBusObjectPath objectPath = DBusObjectPath.valueOf("/com/example/MyObject");
+        DBusVariant variant = DBusVariant.valueOf(objectPath);
         
         assertEquals(objectPath, variant.getDelegate());
         assertEquals(Type.VARIANT, variant.getType());
@@ -44,8 +44,8 @@ final class VariantTest {
     @Test
     void createVariantWithNestedVariant() {
         DBusString innerString = DBusString.valueOf("nested");
-        Variant innerVariant = Variant.valueOf(innerString);
-        Variant outerVariant = Variant.valueOf(innerVariant);
+        DBusVariant innerVariant = DBusVariant.valueOf(innerString);
+        DBusVariant outerVariant = DBusVariant.valueOf(innerVariant);
         
         assertEquals(innerVariant, outerVariant.getDelegate());
         assertEquals(Type.VARIANT, outerVariant.getType());
@@ -54,7 +54,7 @@ final class VariantTest {
 
     @Test
     void failWithNullValue() {
-        assertThrows(NullPointerException.class, () -> Variant.valueOf(null));
+        assertThrows(NullPointerException.class, () -> DBusVariant.valueOf(null));
     }
 
     @Test
@@ -63,9 +63,9 @@ final class VariantTest {
         DBusString string2 = DBusString.valueOf("test");
         DBusString string3 = DBusString.valueOf("different");
         
-        Variant variant1 = Variant.valueOf(string1);
-        Variant variant2 = Variant.valueOf(string2);
-        Variant variant3 = Variant.valueOf(string3);
+        DBusVariant variant1 = DBusVariant.valueOf(string1);
+        DBusVariant variant2 = DBusVariant.valueOf(string2);
+        DBusVariant variant3 = DBusVariant.valueOf(string3);
         
         // Test equality based on delegate
         assertEquals(variant1, variant2);
@@ -86,9 +86,9 @@ final class VariantTest {
         DBusString string2 = DBusString.valueOf("test");
         DBusString string3 = DBusString.valueOf("different");
         
-        Variant variant1 = Variant.valueOf(string1);
-        Variant variant2 = Variant.valueOf(string2);
-        Variant variant3 = Variant.valueOf(string3);
+        DBusVariant variant1 = DBusVariant.valueOf(string1);
+        DBusVariant variant2 = DBusVariant.valueOf(string2);
+        DBusVariant variant3 = DBusVariant.valueOf(string3);
         
         // Equal objects should have equal hash codes
         assertEquals(variant1.hashCode(), variant2.hashCode());
@@ -101,17 +101,17 @@ final class VariantTest {
     void testToStringWithBasicType() {
         // Test with string
         DBusString string = DBusString.valueOf("test");
-        Variant variant = Variant.valueOf(string);
+        DBusVariant variant = DBusVariant.valueOf(string);
         assertEquals("v[s]", variant.toString());
         
         // Test with UInt32
-        UInt32 uint32 = UInt32.valueOf(42);
-        Variant variantUInt32 = Variant.valueOf(uint32);
+        DBusUInt32 uint32 = DBusUInt32.valueOf(42);
+        DBusVariant variantUInt32 = DBusVariant.valueOf(uint32);
         assertEquals("v[u]", variantUInt32.toString());
         
         // Test with ObjectPath
-        ObjectPath objectPath = ObjectPath.valueOf("/test");
-        Variant variantObjectPath = Variant.valueOf(objectPath);
+        DBusObjectPath objectPath = DBusObjectPath.valueOf("/test");
+        DBusVariant variantObjectPath = DBusVariant.valueOf(objectPath);
         assertEquals("v[o]", variantObjectPath.toString());
     }
 
@@ -119,8 +119,8 @@ final class VariantTest {
     void testToStringWithContainerType() {
         // Create a variant with another variant (container type)
         DBusString innerString = DBusString.valueOf("nested");
-        Variant innerVariant = Variant.valueOf(innerString);
-        Variant outerVariant = Variant.valueOf(innerVariant);
+        DBusVariant innerVariant = DBusVariant.valueOf(innerString);
+        DBusVariant outerVariant = DBusVariant.valueOf(innerVariant);
         
         // The inner variant should be treated as a container type
         assertEquals("v[v]", outerVariant.toString());
@@ -129,9 +129,9 @@ final class VariantTest {
     @Test
     void testGetSignature() {
         DBusString string = DBusString.valueOf("test");
-        Variant variant = Variant.valueOf(string);
+        DBusVariant variant = DBusVariant.valueOf(string);
         
-        Signature signature = variant.getSignature();
+        DBusSignature signature = variant.getSignature();
         assertEquals("v", signature.toString());
         assertEquals(1, signature.getQuantity());
     }
@@ -139,7 +139,7 @@ final class VariantTest {
     @Test
     void testGetType() {
         DBusString string = DBusString.valueOf("test");
-        Variant variant = Variant.valueOf(string);
+        DBusVariant variant = DBusVariant.valueOf(string);
         
         assertEquals(Type.VARIANT, variant.getType());
     }
@@ -147,7 +147,7 @@ final class VariantTest {
     @Test
     void testGetDelegate() {
         DBusString string = DBusString.valueOf("test");
-        Variant variant = Variant.valueOf(string);
+        DBusVariant variant = DBusVariant.valueOf(string);
         
         assertEquals(string, variant.getDelegate());
         assertSame(string, variant.getDelegate()); // Should be the same reference
@@ -159,17 +159,17 @@ final class VariantTest {
         
         // DBusString
         DBusString string = DBusString.valueOf("test");
-        Variant stringVariant = Variant.valueOf(string);
+        DBusVariant stringVariant = DBusVariant.valueOf(string);
         assertEquals("v[s]", stringVariant.toString());
         
         // UInt32
-        UInt32 uint32 = UInt32.valueOf(123);
-        Variant uint32Variant = Variant.valueOf(uint32);
+        DBusUInt32 uint32 = DBusUInt32.valueOf(123);
+        DBusVariant uint32Variant = DBusVariant.valueOf(uint32);
         assertEquals("v[u]", uint32Variant.toString());
         
         // ObjectPath
-        ObjectPath objectPath = ObjectPath.valueOf("/test/path");
-        Variant objectPathVariant = Variant.valueOf(objectPath);
+        DBusObjectPath objectPath = DBusObjectPath.valueOf("/test/path");
+        DBusVariant objectPathVariant = DBusVariant.valueOf(objectPath);
         assertEquals("v[o]", objectPathVariant.toString());
     }
 
@@ -180,9 +180,9 @@ final class VariantTest {
         DBusString string2 = DBusString.valueOf("same");
         DBusString string3 = DBusString.valueOf("different");
         
-        Variant variant1 = Variant.valueOf(string1);
-        Variant variant2 = Variant.valueOf(string2);
-        Variant variant3 = Variant.valueOf(string3);
+        DBusVariant variant1 = DBusVariant.valueOf(string1);
+        DBusVariant variant2 = DBusVariant.valueOf(string2);
+        DBusVariant variant3 = DBusVariant.valueOf(string3);
         
         assertEquals(variant1, variant2);
         assertNotEquals(variant1, variant3);
@@ -195,10 +195,10 @@ final class VariantTest {
     void testVariantWithDifferentTypes() {
         // Test that variants containing different types are not equal
         DBusString string = DBusString.valueOf("42");
-        UInt32 uint32 = UInt32.valueOf(42);
+        DBusUInt32 uint32 = DBusUInt32.valueOf(42);
         
-        Variant stringVariant = Variant.valueOf(string);
-        Variant uint32Variant = Variant.valueOf(uint32);
+        DBusVariant stringVariant = DBusVariant.valueOf(string);
+        DBusVariant uint32Variant = DBusVariant.valueOf(uint32);
         
         assertNotEquals(stringVariant, uint32Variant);
         assertNotEquals(stringVariant.hashCode(), uint32Variant.hashCode());
@@ -208,9 +208,9 @@ final class VariantTest {
     void testNestedVariants() {
         // Test deeply nested variants
         DBusString innerString = DBusString.valueOf("deep");
-        Variant level1 = Variant.valueOf(innerString);
-        Variant level2 = Variant.valueOf(level1);
-        Variant level3 = Variant.valueOf(level2);
+        DBusVariant level1 = DBusVariant.valueOf(innerString);
+        DBusVariant level2 = DBusVariant.valueOf(level1);
+        DBusVariant level3 = DBusVariant.valueOf(level2);
         
         assertEquals(level2, level3.getDelegate());
         assertEquals(level1, level2.getDelegate());
@@ -229,13 +229,13 @@ final class VariantTest {
     @Test
     void testVariantImmutability() {
         DBusString string = DBusString.valueOf("test");
-        Variant variant = Variant.valueOf(string);
+        DBusVariant variant = DBusVariant.valueOf(string);
         
         // The delegate should be the same reference
         assertSame(string, variant.getDelegate());
         
         // Creating a new variant with the same delegate should be equal
-        Variant variant2 = Variant.valueOf(string);
+        DBusVariant variant2 = DBusVariant.valueOf(string);
         assertEquals(variant, variant2);
     }
 
@@ -243,7 +243,7 @@ final class VariantTest {
     void testVariantWithNullString() {
         // Test variant containing a DBusString with null value
         DBusString nullString = DBusString.valueOf(null);
-        Variant variant = Variant.valueOf(nullString);
+        DBusVariant variant = DBusVariant.valueOf(nullString);
         
         assertEquals(nullString, variant.getDelegate());
         assertEquals(Type.VARIANT, variant.getType());
@@ -254,7 +254,7 @@ final class VariantTest {
     void testVariantWithEmptyString() {
         // Test variant containing a DBusString with empty value
         DBusString emptyString = DBusString.valueOf("");
-        Variant variant = Variant.valueOf(emptyString);
+        DBusVariant variant = DBusVariant.valueOf(emptyString);
         
         assertEquals(emptyString, variant.getDelegate());
         assertEquals(Type.VARIANT, variant.getType());

@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.decoder;
 
-import com.lucimber.dbus.type.Int32;
+import com.lucimber.dbus.type.DBusInt32;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -30,7 +30,7 @@ final class IntegerDecoderTest {
     buffer.flip();
 
     Int32Decoder decoder = new Int32Decoder();
-    DecoderResult<Int32> result = decoder.decode(buffer, 0);
+    DecoderResult<DBusInt32> result = decoder.decode(buffer, 0);
 
     assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
     assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);

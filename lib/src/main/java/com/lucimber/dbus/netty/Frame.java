@@ -8,8 +8,8 @@ package com.lucimber.dbus.netty;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageFlag;
 import com.lucimber.dbus.message.MessageType;
-import com.lucimber.dbus.type.UInt32;
-import com.lucimber.dbus.type.Variant;
+import com.lucimber.dbus.type.DBusUInt32;
+import com.lucimber.dbus.type.DBusVariant;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
@@ -23,10 +23,10 @@ final class Frame {
   private MessageType type;
   private Set<MessageFlag> flags;
   private int protocolVersion;
-  private UInt32 serial;
-  private Map<HeaderField, Variant> headerFields;
+  private DBusUInt32 serial;
+  private Map<HeaderField, DBusVariant> headerFields;
   private ByteBuffer body;
-  private UInt32 bodyLength;
+  private DBusUInt32 bodyLength;
 
   public ByteOrder getByteOrder() {
     return byteOrder;
@@ -60,19 +60,19 @@ final class Frame {
     this.protocolVersion = protocolVersion;
   }
 
-  public UInt32 getSerial() {
+  public DBusUInt32 getSerial() {
     return serial;
   }
 
-  public void setSerial(UInt32 serial) {
+  public void setSerial(DBusUInt32 serial) {
     this.serial = serial;
   }
 
-  public Map<HeaderField, Variant> getHeaderFields() {
+  public Map<HeaderField, DBusVariant> getHeaderFields() {
     return new HashMap<>(headerFields);
   }
 
-  public void setHeaderFields(Map<HeaderField, Variant> headerFields) {
+  public void setHeaderFields(Map<HeaderField, DBusVariant> headerFields) {
     this.headerFields = new HashMap<>(headerFields);
   }
 
@@ -84,11 +84,11 @@ final class Frame {
     this.body = body;
   }
 
-  public UInt32 getBodyLength() {
+  public DBusUInt32 getBodyLength() {
     return bodyLength;
   }
 
-  public void setBodyLength(UInt32 bodyLength) {
+  public void setBodyLength(DBusUInt32 bodyLength) {
     this.bodyLength = bodyLength;
   }
 

@@ -15,31 +15,31 @@ import java.util.Objects;
  * @param <KeyT>   The key's data type.
  * @param <ValueT> The value's data type.
  */
-public final class DictEntry<KeyT extends DBusBasicType, ValueT extends DBusType>
+public final class DBusDictEntry<KeyT extends DBusBasicType, ValueT extends DBusType>
         implements Map.Entry<KeyT, ValueT>, DBusContainerType {
 
   private final KeyT key;
-  private final Signature signature;
+  private final DBusSignature signature;
   private ValueT value;
 
   /**
    * Constructs a new instance.
    *
-   * @param signature a {@link Signature}; must describe an dict-entry
+   * @param signature a {@link DBusSignature}; must describe an dict-entry
    * @param key       a {@link DBusBasicType}
    */
-  public DictEntry(final Signature signature, final KeyT key) {
+  public DBusDictEntry(final DBusSignature signature, final KeyT key) {
     this(signature, key, null);
   }
 
   /**
    * Constructs a new instance.
    *
-   * @param signature a {@link Signature}; must describe an dict-entry
+   * @param signature a {@link DBusSignature}; must describe an dict-entry
    * @param key       a {@link DBusBasicType}
    * @param value     a {@link DBusType}
    */
-  public DictEntry(final Signature signature, final KeyT key, final ValueT value) {
+  public DBusDictEntry(final DBusSignature signature, final KeyT key, final ValueT value) {
     this.signature = Objects.requireNonNull(signature);
     if (!signature.isDictionaryEntry()) {
       throw new IllegalArgumentException("Signature must describe a dictionary entry.");
@@ -51,9 +51,9 @@ public final class DictEntry<KeyT extends DBusBasicType, ValueT extends DBusType
   /**
    * Constructs a new instance from another.
    *
-   * @param other a {@link DictEntry}
+   * @param other a {@link DBusDictEntry}
    */
-  public DictEntry(final DictEntry<KeyT, ValueT> other) {
+  public DBusDictEntry(final DBusDictEntry<KeyT, ValueT> other) {
     signature = other.signature;
     key = other.key;
     value = other.value;
@@ -65,7 +65,7 @@ public final class DictEntry<KeyT extends DBusBasicType, ValueT extends DBusType
   }
 
   @Override
-  public Signature getSignature() {
+  public DBusSignature getSignature() {
     return signature;
   }
 
@@ -99,7 +99,7 @@ public final class DictEntry<KeyT extends DBusBasicType, ValueT extends DBusType
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final DictEntry<?, ?> that = (DictEntry<?, ?>) o;
+    final DBusDictEntry<?, ?> that = (DBusDictEntry<?, ?>) o;
     return key.equals(that.key) && Objects.equals(value, that.value);
   }
 

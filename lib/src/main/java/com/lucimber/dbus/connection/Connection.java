@@ -7,7 +7,7 @@ package com.lucimber.dbus.connection;
 
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
-import com.lucimber.dbus.type.UInt32;
+import com.lucimber.dbus.type.DBusUInt32;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -51,9 +51,9 @@ public interface Connection extends AutoCloseable {
    * <p>
    * Serial numbers are used to correlate requests and replies and are unique per connection.
    *
-   * @return a unique {@link UInt32} serial number for an {@link OutboundMessage}.
+   * @return a unique {@link DBusUInt32} serial number for an {@link OutboundMessage}.
    */
-  UInt32 getNextSerial();
+  DBusUInt32 getNextSerial();
 
   /**
    * Sends the given {@link OutboundMessage} over this connection, bypassing the pipeline.
