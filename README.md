@@ -61,13 +61,22 @@ For reliable cross-platform D-Bus integration testing:
 # Recommended: Container-based testing (works on any platform)
 ./test-container.sh
 
+# With verbose output to see detailed test results
+./test-container.sh --verbose
+
 # Alternative: Gradle task
 ./gradlew integrationTestContainer
+
+# With verbose output
+./gradlew integrationTestContainer -PshowOutput
 ```
 
 For host-based testing (may fail on non-Linux platforms):
 ```bash
 ./gradlew integrationTest
+
+# With verbose output
+./gradlew integrationTest -PshowOutput
 ```
 
 See [docs/testing-guide.md](docs/testing-guide.md) for detailed testing documentation.

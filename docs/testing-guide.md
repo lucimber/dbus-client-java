@@ -27,8 +27,14 @@ The D-Bus client library includes a comprehensive testing suite designed to ensu
 # Option 1: Simple test script (fastest)
 ./test-container.sh
 
+# Option 1a: With verbose output to see detailed test results
+./test-container.sh --verbose
+
 # Option 2: Gradle task (skips PMD/Checkstyle/JaCoCo for speed)
 ./gradlew integrationTestContainer
+
+# Option 2a: With verbose output to see detailed test results
+./gradlew integrationTestContainer -PshowOutput
 
 # Option 3: Manual Docker run
 docker build -f Dockerfile.test -t dbus-integration-test .
@@ -37,7 +43,11 @@ docker run --rm dbus-integration-test
 
 **Host-Based Testing (May Fail on Non-Linux):**
 ```bash
+# Basic execution
 ./gradlew integrationTest
+
+# With verbose output to see detailed test results
+./gradlew integrationTest -PshowOutput
 ```
 
 #### 3. **Performance Tests** ⚡
@@ -335,8 +345,13 @@ docker pull ubuntu:22.04
 ./test-container.sh
 ./gradlew integrationTestContainer
 
+# Integration tests with verbose output
+./test-container.sh --verbose
+./gradlew integrationTestContainer -PshowOutput
+
 # Integration tests - host-based (legacy, may fail, fast)
 ./gradlew integrationTest
+./gradlew integrationTest -PshowOutput
 
 # Performance benchmarks (fast - skips static analysis)
 ./gradlew performanceTest
@@ -629,6 +644,40 @@ Enable debug logging for test troubleshooting:
 
 # Debug container execution
 docker run -it --rm dbus-integration-test /bin/bash
+```
+
+### Verbose Test Output
+
+To see detailed test output including D-Bus daemon logs and test execution details:
+
+**Container-based tests:**
+```bash
+# Using test script
+./test-container.sh --verbose
+
+# Using Gradle task
+./gradlew integrationTestContainer -PshowOutput
+```
+
+**Host-based tests:**
+```bash
+# Show detailed test output
+./gradlew integrationTest -PshowOutput
+```
+
+**Test script options:**
+```bash
+# Show help
+./test-container.sh --help
+
+# Show verbose test output
+./test-container.sh --verbose
+
+# Show Docker build output
+./test-container.sh --show-build
+
+# Show both verbose and build output
+./test-container.sh --verbose --show-build
 ```
 
 ### Test Scripts

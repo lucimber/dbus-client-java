@@ -66,8 +66,17 @@ tasks.register<Test>("integrationTest") {
     dependsOn(tasks.compileJava, tasks.compileTestJava)
     
     systemProperty("testcontainers.reuse.enable", "true")
+    
+    // Configure test logging based on verbose flag
     testLogging {
         events("passed", "skipped", "failed")
+        
+        // Show detailed output if verbose mode is enabled
+        if (project.hasProperty("showOutput") || project.hasProperty("verbose")) {
+            events("passed", "skipped", "failed", "standardOut", "standardError")
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            showStandardStreams = true
+        }
     }
     
     // Don't fail the build if host-based integration tests fail
@@ -159,14 +168,35 @@ tasks.register<Exec>("integrationTestContainer") {
     doLast {
         println("🐳 Running integration tests inside Linux container...")
         println("📋 This will test D-Bus SASL authentication in a native Linux environment")
+        
+        // Check if verbose flag is provided
+        val showOutput = project.hasProperty("showOutput") || project.hasProperty("verbose")
+        
+        if (showOutput) {
+            println("📊 Verbose mode enabled - showing full test output")
+        } else {
+            println("💡 Use --verbose or -PshowOutput to see detailed test output")
+        }
         println("")
         
         // Run the container and execute tests
-        project.providers.exec {
-            commandLine("docker", "run", "--rm", 
-                        "--name", "dbus-integration-test-run",
-                        "dbus-integration-test")
-        }.result.get().assertNormalExitValue()
+        if (showOutput) {
+            // Use direct exec with output shown
+            project.exec {
+                commandLine("docker", "run", "--rm", 
+                            "--name", "dbus-integration-test-run",
+                            "dbus-integration-test")
+                standardOutput = System.out
+                errorOutput = System.err
+            }
+        } else {
+            // Use exec with suppressed output
+            project.exec {
+                commandLine("docker", "run", "--rm", 
+                            "--name", "dbus-integration-test-run",
+                            "dbus-integration-test")
+            }
+        }
         
         println("")
         println("✅ Container-based integration tests completed successfully!")
