@@ -59,11 +59,19 @@ echo ""
 # Run the container and capture output
 if [ "$VERBOSE" = true ]; then
     docker run --rm --name dbus-integration-test-run dbus-integration-test
+    CONTAINER_EXIT_CODE=$?
 else
-    docker run --rm --name dbus-integration-test-run dbus-integration-test 2>&1 | grep -E "(=== D-Bus Integration Test|✓|❌|ERROR|FAILED|BUILD)"
+    # Use a temporary file to capture the full output, then filter it
+    TEMP_OUTPUT=$(mktemp)
+    docker run --rm --name dbus-integration-test-run dbus-integration-test > "$TEMP_OUTPUT" 2>&1
+    CONTAINER_EXIT_CODE=$?
+    
+    # Show filtered output
+    grep -E "(=== D-Bus Integration Test|✓|❌|ERROR|FAILED|BUILD)" "$TEMP_OUTPUT"
+    
+    # Clean up temp file
+    rm "$TEMP_OUTPUT"
 fi
-
-CONTAINER_EXIT_CODE=$?
 
 echo ""
 if [ $CONTAINER_EXIT_CODE -eq 0 ]; then

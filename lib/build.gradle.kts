@@ -184,7 +184,7 @@ tasks.register<Exec>("integrationTestContainer") {
         println("")
         
         // Run the container and execute tests
-        if (showOutput) {
+        val result = if (showOutput) {
             // Use direct exec with output shown
             project.exec {
                 commandLine("docker", "run", "--rm", 
@@ -192,6 +192,7 @@ tasks.register<Exec>("integrationTestContainer") {
                             "dbus-integration-test")
                 standardOutput = System.out
                 errorOutput = System.err
+                isIgnoreExitValue = true
             }
         } else {
             // Use exec with suppressed output
@@ -199,11 +200,18 @@ tasks.register<Exec>("integrationTestContainer") {
                 commandLine("docker", "run", "--rm", 
                             "--name", "dbus-integration-test-run",
                             "dbus-integration-test")
+                isIgnoreExitValue = true
             }
         }
         
         println("")
-        println("✅ Container-based integration tests completed successfully!")
+        if (result.exitValue == 0) {
+            println("✅ Container-based integration tests completed successfully!")
+        } else {
+            println("❌ Container-based integration tests failed with exit code: ${result.exitValue}")
+            println("📋 Check the test output above for details")
+            throw GradleException("Integration tests failed in container")
+        }
     }
 }
 

@@ -152,17 +152,44 @@ export GRADLE_USER_HOME=/root/.gradle
     -Dconsole.encoding=UTF-8 \
     --no-daemon --quiet --console=plain
 
+# Since integrationTest task has ignoreFailures=true, we need to check actual test results
+# Check if test report exists and parse it for failures
+TEST_FAILED=false
+if [ -f lib/build/reports/tests/integrationTest/index.html ]; then
+    echo "✓ Test report generated: lib/build/reports/tests/integrationTest/index.html"
+    
+    # Check for test failures in the HTML report
+    if grep -q "failures.*[1-9]" lib/build/reports/tests/integrationTest/index.html; then
+        TEST_FAILED=true
+    fi
+    
+    # Also check for 0% success rate as additional indicator
+    if grep -q "0%" lib/build/reports/tests/integrationTest/index.html; then
+        TEST_FAILED=true
+    fi
+else
+    echo "❌ Test report not found - tests may have failed to run"
+    TEST_FAILED=true
+fi
+
 # Display test results
 echo
 echo "=== Test Results ==="
-if [ -f lib/build/reports/tests/integrationTest/index.html ]; then
-    echo "✓ Test report generated: lib/build/reports/tests/integrationTest/index.html"
-fi
 
 # Keep D-Bus logs available for debugging
 echo
 echo "=== D-Bus Process Status ==="
 ps aux | grep dbus | grep -v grep || echo "No D-Bus processes found"
+
+# Exit with proper code based on actual test results
+echo
+if [ "$TEST_FAILED" = true ]; then
+    echo "❌ Integration tests failed - see output above for details"
+    exit 1
+else
+    echo "✅ All integration tests passed successfully!"
+    exit 0
+fi
 EOF
 
 RUN chmod +x /usr/local/bin/run-dbus-tests.sh
