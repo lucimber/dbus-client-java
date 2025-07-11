@@ -190,6 +190,22 @@ java -cp "lib/build/classes/java/main:lib/build/classes/java/test:$(./gradlew :l
      -Dfile.encoding=UTF-8 \
      com.lucimber.dbus.integration.NettyTransportTest 2>/dev/null || echo "Could not run Netty transport test"
 
+# Check Unix UID resolution for EXTERNAL SASL
+echo ""
+echo "Checking Unix UID resolution for EXTERNAL SASL..."
+echo "Current UID: $(id -u)"
+echo "Current GID: $(id -g)"
+echo "Current user: $(whoami)"
+echo "/proc/self exists: $([ -e /proc/self ] && echo "yes" || echo "no")"
+if [ -e /proc/self ]; then
+    echo "/proc/self contents:"
+    ls -la /proc/self/ 2>/dev/null | head -5 || echo "Could not list /proc/self"
+fi
+echo "Testing SASL authorization ID resolution..."
+java -cp "lib/build/classes/java/main:lib/build/classes/java/test:$(./gradlew :lib:printRuntimeClasspath --quiet 2>/dev/null || echo '')" \
+     -Dfile.encoding=UTF-8 \
+     com.lucimber.dbus.integration.SaslDebugTest 2>/dev/null || echo "Could not run SASL debug test"
+
 # Run the integration tests 
 echo "Running integration tests..."
 cd /app

@@ -241,3 +241,13 @@ tasks.register("printRuntimeClasspath") {
         println(configurations.runtimeClasspath.get().asPath)
     }
 }
+
+// Task to print test runtime classpath for debugging
+tasks.register("printTestRuntimeClasspath") {
+    group = "help"
+    description = "Prints the test runtime classpath including test dependencies"
+    
+    doLast {
+        println(configurations.testRuntimeClasspath.get().asPath)
+    }
+}
