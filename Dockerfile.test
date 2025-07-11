@@ -181,6 +181,15 @@ uname -a
 echo "Available network libraries:"
 ldd /usr/lib/jvm/java-17-openjdk-arm64/bin/java 2>/dev/null | grep -E "(libc|libpthread|libdl)" | head -3 || echo "Could not check system libraries"
 
+# Check Netty transport availability using Java test class
+echo ""
+echo "Checking Netty transport availability..."
+cd /app
+./gradlew :lib:compileTestJava --no-daemon --quiet
+java -cp "lib/build/classes/java/main:lib/build/classes/java/test:$(./gradlew :lib:printRuntimeClasspath --quiet 2>/dev/null || echo '')" \
+     -Dfile.encoding=UTF-8 \
+     com.lucimber.dbus.integration.NettyTransportTest 2>/dev/null || echo "Could not run Netty transport test"
+
 # Run the integration tests 
 echo "Running integration tests..."
 cd /app

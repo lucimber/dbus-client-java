@@ -231,3 +231,13 @@ tasks.register("integrationTestSummary") {
         |""".trimMargin())
     }
 }
+
+// Task to print runtime classpath for debugging
+tasks.register("printRuntimeClasspath") {
+    group = "help"
+    description = "Prints the runtime classpath"
+    
+    doLast {
+        println(configurations.runtimeClasspath.get().asPath)
+    }
+}
