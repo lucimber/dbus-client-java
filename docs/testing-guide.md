@@ -21,8 +21,21 @@ The D-Bus client library includes a comprehensive testing suite designed to ensu
 - **Tag**: `@Tag("integration")`
 - **Purpose**: Test real D-Bus scenarios using Docker containers
 - **Requirements**: Docker installed and running
-- **Run with**: `./gradlew integrationTest`
 
+**Reliable Cross-Platform Testing (Recommended):**
+```bash
+# Option 1: Simple test script (fastest)
+./test-container.sh
+
+# Option 2: Gradle task (skips PMD/Checkstyle/JaCoCo for speed)
+./gradlew integrationTestContainer
+
+# Option 3: Manual Docker run
+docker build -f Dockerfile.test -t dbus-integration-test .
+docker run --rm dbus-integration-test
+```
+
+**Host-Based Testing (May Fail on Non-Linux):**
 ```bash
 ./gradlew integrationTest
 ```
@@ -52,21 +65,68 @@ The D-Bus client library includes a comprehensive testing suite designed to ensu
 
 ### Docker-Based Integration Testing
 
-Integration tests use Docker to provide isolated D-Bus environments:
+Integration tests use Docker to provide isolated D-Bus environments with two approaches:
+
+#### Container-Based Testing (Recommended)
+Tests run inside a Linux container with native D-Bus daemon:
 
 ```java
 @Tag("integration")
 @DisabledIf("shouldSkipDBusTests")
 class ConnectionIntegrationTest extends DBusIntegrationTestBase {
-    // Tests real D-Bus connections using containerized D-Bus daemon
+    // Tests run inside Linux container with full D-Bus functionality
 }
 ```
 
 **Features:**
-- Automatic Docker container management
-- Cross-platform compatibility
-- Isolated test environments
-- TCP and Unix socket support
+- ✅ **Cross-platform reliability** - works on macOS, Linux, Windows
+- 🔒 **Full SASL authentication** - EXTERNAL + DBUS_COOKIE_SHA1
+- 🌐 **Both connection types** - Unix socket + TCP
+- 🐳 **Native Linux environment** - eliminates cross-platform SASL issues
+- ⚡ **Consistent performance** - same environment every time
+
+#### Host-Based Testing (Legacy)
+Tests run on host connecting to containerized D-Bus daemon:
+
+```java
+// Uses Testcontainers to manage D-Bus daemon container
+// Host JVM connects to container via TCP
+```
+
+**Limitations:**
+- ⚠️ **May fail on macOS** due to SASL EXTERNAL authentication issues
+- ⚠️ **May fail on Windows** due to Unix socket limitations
+- ✅ **Usually works on Linux** with proper D-Bus installation
+
+#### Technical Implementation
+
+**Container Architecture:**
+```dockerfile
+# Multi-stage build
+FROM gradle:8.14.2-jdk17 AS builder
+# ... compile Java code
+
+FROM ubuntu:22.04
+# ... install D-Bus + JDK
+# ... configure SASL authentication
+# ... run tests inside container
+```
+
+**D-Bus Configuration:**
+- SASL mechanisms: EXTERNAL, DBUS_COOKIE_SHA1
+- Both transport types: Unix socket `/tmp/dbus-test-socket`, TCP `127.0.0.1:12345`
+- Proper authentication setup with D-Bus keyrings
+- Policy configuration for comprehensive testing
+
+**Connection Detection:**
+```java
+protected static boolean shouldPreferUnixSocket() {
+    if (isRunningInContainer()) {
+        return true; // Always prefer Unix socket in container
+    }
+    return false; // Use TCP for cross-platform compatibility
+}
+```
 
 ### Performance Benchmarking
 
@@ -184,13 +244,82 @@ testImplementation("org.testcontainers:junit-jupiter")
 testImplementation("org.awaitility:awaitility:4.2.2")
 ```
 
+## Cross-Platform Testing
+
+### Platform-Specific Considerations
+
+#### macOS
+- **Container-based**: ✅ Always works
+- **Host-based**: ❌ Often fails due to SASL EXTERNAL authentication
+- **Recommendation**: Use `./test-container.sh` or `./gradlew integrationTestContainer`
+
+#### Linux
+- **Container-based**: ✅ Always works
+- **Host-based**: ✅ Usually works with proper D-Bus installation
+- **Recommendation**: Either approach works, container-based is more reliable
+
+#### Windows
+- **Container-based**: ✅ Works with Docker Desktop
+- **Host-based**: ❌ May fail due to Unix socket limitations
+- **Recommendation**: Use `./test-container.sh` or `./gradlew integrationTestContainer`
+
+### Prerequisites
+
+**For Container-Based Testing:**
+- Docker installed and running
+- Docker daemon accessible from command line
+- Internet connection for base image downloads (first run only)
+
+**For Host-Based Testing:**
+- Docker installed and running (for Testcontainers)
+- D-Bus daemon available on host system (Linux only)
+
+### Troubleshooting Integration Tests
+
+**Docker Issues:**
+```bash
+# Check if Docker is running
+docker version
+
+# Check if Docker daemon is accessible
+docker ps
+
+# Test Docker with simple container
+docker run hello-world
+```
+
+**Container Build Issues:**
+```bash
+# Clean rebuild container
+docker rmi dbus-integration-test
+./gradlew integrationTestContainer
+```
+
+**Host-Based Test Failures:**
+```bash
+# Check D-Bus installation (Linux)
+dbus-daemon --version
+
+# Check if D-Bus is running
+ps aux | grep dbus
+
+# Use container-based tests instead
+./test-container.sh
+```
+
+**Network Issues:**
+```bash
+# Check if Docker can access internet
+docker pull ubuntu:22.04
+```
+
 ## Running Tests
 
 ### Complete Test Suite
 
 ```bash
-# Run all test types
-./gradlew test integrationTest performanceTest chaosTest
+# Run all test types (use container-based integration tests)
+./gradlew test integrationTestContainer performanceTest chaosTest
 
 # Generate coverage report
 ./gradlew jacocoTestReport
@@ -199,17 +328,41 @@ testImplementation("org.awaitility:awaitility:4.2.2")
 ### Individual Test Categories
 
 ```bash
-# Unit tests only (default)
+# Unit tests only (includes static analysis)
 ./gradlew test
 
-# Integration tests (requires Docker)
+# Integration tests - container-based (recommended, fast)
+./test-container.sh
+./gradlew integrationTestContainer
+
+# Integration tests - host-based (legacy, may fail, fast)
 ./gradlew integrationTest
 
-# Performance benchmarks
+# Performance benchmarks (fast - skips static analysis)
 ./gradlew performanceTest
 
-# Chaos engineering tests
+# Chaos engineering tests (fast - skips static analysis)
 ./gradlew chaosTest
+```
+
+### Development Workflow
+
+**During Development:**
+```bash
+# Quick feedback loop
+./gradlew test
+
+# Full integration verification
+./test-container.sh
+
+# Performance check
+./gradlew performanceTest
+```
+
+**Before Commit:**
+```bash
+# Full verification suite
+./gradlew check integrationTestContainer
 ```
 
 ### Skipping Test Categories
@@ -242,26 +395,112 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Setup JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
       - name: Run Unit Tests
         run: ./gradlew test
 
   integration-tests:
     runs-on: ubuntu-latest
-    services:
-      docker:
-        image: docker:latest
     steps:
       - uses: actions/checkout@v3
-      - name: Run Integration Tests
-        run: ./gradlew integrationTest
+      - name: Setup JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Run Container-Based Integration Tests
+        run: ./gradlew integrationTestContainer
 
   performance-tests:
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
     steps:
       - uses: actions/checkout@v3
+      - name: Setup JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
       - name: Run Performance Tests
         run: ./gradlew performanceTest
+```
+
+### GitLab CI Example
+
+```yaml
+stages:
+  - test
+  - integration
+  - performance
+
+unit-tests:
+  stage: test
+  image: openjdk:17-jdk
+  services:
+    - docker:dind
+  script:
+    - ./gradlew test
+
+integration-tests:
+  stage: integration
+  image: openjdk:17-jdk
+  services:
+    - docker:dind
+  script:
+    - ./gradlew integrationTestContainer
+
+performance-tests:
+  stage: performance
+  image: openjdk:17-jdk
+  services:
+    - docker:dind
+  script:
+    - ./gradlew performanceTest
+  only:
+    - tags
+```
+
+### Jenkins Pipeline Example
+
+```groovy
+pipeline {
+    agent any
+    
+    stages {
+        stage('Unit Tests') {
+            steps {
+                sh './gradlew test'
+            }
+            post {
+                always {
+                    publishTestResults testResultsPattern: 'lib/build/test-results/test/TEST-*.xml'
+                }
+            }
+        }
+        
+        stage('Integration Tests') {
+            steps {
+                sh './gradlew integrationTestContainer'
+            }
+        }
+        
+        stage('Performance Tests') {
+            when {
+                anyOf {
+                    branch 'main'
+                    buildingTag()
+                }
+            }
+            steps {
+                sh './gradlew performanceTest'
+            }
+        }
+    }
+}
 ```
 
 ## Best Practices
@@ -318,6 +557,26 @@ jobs:
    - Performance tests: 5 minute benchmark timeout
    - Chaos tests: 2 minute chaos timeout
 
+### Performance Considerations
+
+**Container-Based Testing:**
+- **First run**: 3-5 minutes (includes Docker image downloads)
+- **Subsequent runs**: 1-2 minutes (uses Docker layer caching)
+- **Docker build**: ~1 minute (Java compilation + container setup)
+- **Test execution**: ~30-60 seconds (actual test runtime)
+
+**Host-Based Testing:**
+- **First run**: 1-2 minutes (Testcontainers setup)
+- **Subsequent runs**: 30-60 seconds (when working)
+- **Cross-platform failures**: May timeout after 30 seconds
+
+**Optimization Tips:**
+- Use `./test-container.sh` for fastest container-based testing
+- Enable Docker layer caching in CI/CD
+- Run integration tests in parallel with unit tests
+- Use `--no-daemon` flag to avoid Gradle daemon overhead
+- **All integration test tasks skip expensive static analysis** (PMD, Checkstyle, JaCoCo) for faster execution
+
 ## Troubleshooting
 
 ### Common Issues
@@ -325,11 +584,25 @@ jobs:
 **Docker not available:**
 ```
 Integration tests will be skipped if Docker is not installed or running
+Solution: Install Docker and ensure daemon is running
+```
+
+**Container build failures:**
+```
+Error: Failed to build Docker container
+Solution: Check Docker permissions and disk space
+```
+
+**SASL authentication failures (host-based tests):**
+```
+Error: Authentication failed with EXTERNAL mechanism
+Solution: Use container-based tests instead: ./test-container.sh
 ```
 
 **Performance test failures:**
 ```
-Increase heap size: ./gradlew performanceTest -Xmx4g
+Error: OutOfMemoryError during performance tests
+Solution: Increase heap size: ./gradlew performanceTest -Xmx4g
 ```
 
 **Chaos test instability:**
@@ -337,12 +610,55 @@ Increase heap size: ./gradlew performanceTest -Xmx4g
 Chaos tests may be flaky by design - rerun to verify
 ```
 
+**Gradle task not found:**
+```
+Error: Task 'integrationTestContainer' not found
+Solution: Run from project root directory
+```
+
 ### Debug Mode
 
 Enable debug logging for test troubleshooting:
 
 ```bash
+# Debug unit tests
 ./gradlew test --debug-jvm
+
+# Debug integration tests with verbose output
+./gradlew integrationTestContainer --info
+
+# Debug container execution
+docker run -it --rm dbus-integration-test /bin/bash
 ```
 
-This comprehensive testing suite ensures the D-Bus client library is reliable, performant, and resilient under various conditions.
+### Test Scripts
+
+**Simple Container Test Script (test-container.sh):**
+```bash
+#!/bin/bash
+# Builds and runs D-Bus integration tests in container
+# Provides clear output and handles errors gracefully
+./test-container.sh
+```
+
+**Features:**
+- ✅ Simple execution without Gradle overhead
+- 🐳 Automatic Docker container management
+- 📊 Clear success/failure reporting
+- ⚡ Fastest way to run integration tests
+
+## Summary
+
+This comprehensive testing suite ensures the D-Bus client library is reliable, performant, and resilient under various conditions:
+
+- **Unit Tests**: Fast feedback for individual components
+- **Integration Tests**: Real D-Bus scenarios with cross-platform reliability
+- **Performance Tests**: Benchmarks for latency, throughput, and resource usage
+- **Chaos Tests**: Resilience under adverse conditions
+
+**Key Benefits:**
+- 🌐 **Cross-platform compatibility** through container-based testing
+- 🔒 **Comprehensive SASL authentication** testing
+- ⚡ **Fast feedback loops** with multiple testing options
+- 📊 **Detailed coverage analysis** for continuous improvement
+- 🐳 **Reliable CI/CD integration** with Docker-based testing

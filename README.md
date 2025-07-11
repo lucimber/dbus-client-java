@@ -48,6 +48,30 @@ This project relies on Gradle's toolchain support. The wrapper will download
 JDK 17 automatically when running the build. Simply execute `./gradlew test`
 to compile and test the code.
 
+## Testing
+
+### Unit Tests
+```bash
+./gradlew test
+```
+
+### Integration Tests
+For reliable cross-platform D-Bus integration testing:
+```bash
+# Recommended: Container-based testing (works on any platform)
+./test-container.sh
+
+# Alternative: Gradle task
+./gradlew integrationTestContainer
+```
+
+For host-based testing (may fail on non-Linux platforms):
+```bash
+./gradlew integrationTest
+```
+
+See [docs/testing-guide.md](docs/testing-guide.md) for detailed testing documentation.
+
 ## Examples
 
 ### Bootstrap a connection

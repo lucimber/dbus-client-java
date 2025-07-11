@@ -21,8 +21,8 @@ import java.nio.file.Path;
 import java.time.Duration;
 
 /**
- * Base class for D-Bus integration tests that provides Docker-based D-Bus test environment.
- * Uses Testcontainers framework for robust container lifecycle management.
+ * Base class for D-Bus integration tests that provides D-Bus test environment.
+ * Supports both Testcontainers (external) and in-container (local D-Bus daemon) execution.
  */
 @Testcontainers
 public abstract class DBusIntegrationTestBase {
@@ -31,6 +31,9 @@ public abstract class DBusIntegrationTestBase {
   
   protected static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30);
   private static final int DBUS_PORT = 12345;
+  
+  // Detect if running inside a container with local D-Bus daemon
+  private static final boolean IS_RUNNING_IN_CONTAINER = detectContainerEnvironment();
 
   @Container
   protected static final GenericContainer<?> dbusContainer = new GenericContainer<>(
@@ -40,6 +43,8 @@ public abstract class DBusIntegrationTestBase {
                   .from("ubuntu:22.04")
                   .run("apt-get update && apt-get install -y dbus dbus-x11 netcat-openbsd && rm -rf /var/lib/apt/lists/*")
                   .run("mkdir -p /etc/dbus-1/session.d")
+                  .run("mkdir -p /tmp && chmod 777 /tmp")
+                  .run("mkdir -p /shared-dbus-cookies && chmod 755 /shared-dbus-cookies")
                   .copy("dbus-test.conf", "/etc/dbus-1/session.conf")
                   .copy("start-dbus.sh", "/start-dbus.sh")
                   .run("chmod +x /start-dbus.sh")
@@ -55,19 +60,36 @@ public abstract class DBusIntegrationTestBase {
   @BeforeEach
   void logTestStart(TestInfo testInfo) {
     LOGGER.info("Starting integration test: {}", testInfo.getDisplayName());
+    LOGGER.info("Test execution mode: {}", IS_RUNNING_IN_CONTAINER ? "IN-CONTAINER" : "TESTCONTAINERS");
+  }
+  
+  /**
+   * Detects if we're running inside a container environment with local D-Bus daemon.
+   */
+  private static boolean detectContainerEnvironment() {
+    // Check for container-specific indicators
+    return System.getenv("DBUS_SESSION_BUS_ADDRESS") != null ||
+           new java.io.File("/tmp/dbus-test-socket").exists() ||
+           new java.io.File("/.dockerenv").exists();
   }
 
   /**
-   * Gets the D-Bus connection host. With Testcontainers, this is always localhost.
+   * Gets the D-Bus connection host.
    */
   protected static String getDBusHost() {
+    if (IS_RUNNING_IN_CONTAINER) {
+      return "127.0.0.1"; // Local connection within container
+    }
     return dbusContainer.getHost();
   }
 
   /**
-   * Gets the mapped D-Bus port from the container.
+   * Gets the D-Bus port for connections.
    */
   protected static int getDBusPort() {
+    if (IS_RUNNING_IN_CONTAINER) {
+      return DBUS_PORT; // Direct port within container
+    }
     return dbusContainer.getMappedPort(DBUS_PORT);
   }
 
@@ -79,6 +101,32 @@ public abstract class DBusIntegrationTestBase {
   }
 
   /**
+   * Gets the D-Bus Unix socket address for connections.
+   */
+  protected static String getDBusUnixAddress() {
+    return "unix:path=/tmp/dbus-test-socket";
+  }
+
+  /**
+   * Determines if Unix socket should be preferred over TCP.
+   * In container mode, Unix socket is always preferred for better authentication.
+   */
+  protected static boolean shouldPreferUnixSocket() {
+    if (IS_RUNNING_IN_CONTAINER) {
+      return true; // Always prefer Unix socket when running in container
+    }
+    // For Testcontainers, use TCP due to cross-platform considerations
+    return false;
+  }
+
+  /**
+   * Returns true if we're running in container mode with local D-Bus daemon.
+   */
+  protected static boolean isRunningInContainer() {
+    return IS_RUNNING_IN_CONTAINER;
+  }
+
+  /**
    * Creates the D-Bus configuration file content.
    */
   private static String createDBusConfig() {
@@ -87,9 +135,13 @@ public abstract class DBusIntegrationTestBase {
          "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
         <busconfig>
           <type>session</type>
+          <listen>unix:path=/tmp/dbus-test-socket</listen>
           <listen>tcp:host=0.0.0.0,port=12345</listen>
-          <auth>ANONYMOUS</auth>
-          <allow_anonymous/>
+          
+          <!-- For testing purposes, use DBUS_COOKIE_SHA1 which works better for TCP -->
+          <auth>DBUS_COOKIE_SHA1</auth>
+          <auth>EXTERNAL</auth>
+          
           <standard_session_servicedirs />
           
           <!-- Service definitions for basic D-Bus functionality -->
@@ -121,8 +173,33 @@ public abstract class DBusIntegrationTestBase {
             dbus-uuidgen > /etc/machine-id
         fi
         
+        # Create D-Bus keyring directory for DBUS_COOKIE_SHA1 auth
+        mkdir -p ~/.dbus-keyrings
+        chmod 700 ~/.dbus-keyrings
+        
+        # Create a simple cookie for testing that can be read by clients
+        # Generate a cookie in the shared directory for cross-platform access
+        mkdir -p /shared-dbus-cookies
+        chmod 755 /shared-dbus-cookies
+        
+        # Create a predictable cookie for integration testing
+        COOKIE_ID="1"
+        COOKIE_TIME=$(date +%s)
+        COOKIE_VALUE="$(openssl rand -hex 32 2>/dev/null || dd if=/dev/urandom bs=32 count=1 2>/dev/null | xxd -p | tr -d '\\n')"
+        
+        echo "$COOKIE_ID $COOKIE_TIME $COOKIE_VALUE" > ~/.dbus-keyrings/org_freedesktop_general
+        chmod 600 ~/.dbus-keyrings/org_freedesktop_general
+        
+        # Also copy to shared location (though this won't work cross-platform without volume mounting)
+        cp ~/.dbus-keyrings/org_freedesktop_general /shared-dbus-cookies/ 2>/dev/null || true
+        
         # Start D-Bus daemon in background and wait for it to be ready
         echo "Starting D-Bus daemon..."
+        echo "D-Bus daemon configuration:"
+        echo "- Auth mechanisms: DBUS_COOKIE_SHA1 (preferred), EXTERNAL"
+        echo "- Listening on: TCP port 12345, Unix socket /tmp/dbus-test-socket"
+        echo "- Cookie created: $COOKIE_VALUE"
+        
         dbus-daemon --config-file=/etc/dbus-1/session.conf --nofork --print-address &
         DBUS_PID=$!
         
@@ -130,6 +207,8 @@ public abstract class DBusIntegrationTestBase {
         for i in {1..30}; do
             if netcat -z 0.0.0.0 12345; then
                 echo "D-Bus daemon ready"
+                echo "Authentication cookie file:"
+                ls -la ~/.dbus-keyrings/
                 break
             fi
             sleep 1
@@ -141,13 +220,36 @@ public abstract class DBusIntegrationTestBase {
   }
 
   /**
-   * Checks if Docker-based D-Bus integration tests should be skipped.
+   * Checks if D-Bus integration tests should be skipped.
+   * In container mode, checks for local D-Bus availability.
    * With Testcontainers, this is automatically handled by the framework.
    */
   protected static boolean shouldSkipDBusTests() {
+    if (IS_RUNNING_IN_CONTAINER) {
+      // Check if D-Bus daemon is running locally
+      try {
+        // Check if Unix socket exists or TCP port is listening
+        return !new java.io.File("/tmp/dbus-test-socket").exists() && 
+               !isPortListening("127.0.0.1", DBUS_PORT);
+      } catch (Exception e) {
+        LOGGER.warn("Error checking D-Bus availability: {}", e.getMessage());
+        return true;
+      }
+    }
     // Testcontainers automatically handles Docker availability
-    // Tests will be skipped automatically if Docker is not available
     return false;
+  }
+  
+  /**
+   * Checks if a port is listening on the given host.
+   */
+  private static boolean isPortListening(String host, int port) {
+    try (java.net.Socket socket = new java.net.Socket()) {
+      socket.connect(new java.net.InetSocketAddress(host, port), 1000);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   /**

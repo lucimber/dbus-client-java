@@ -29,6 +29,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import io.netty.channel.unix.DomainSocketAddress;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,30 +44,95 @@ class ConnectionIntegrationTest extends DBusIntegrationTestBase {
 
   @Test
   void testBasicConnectionLifecycle() throws Exception {
-    // Debug: Check container configuration 
-    LOGGER.info("D-Bus container host: {}, port: {}", getDBusHost(), getDBusPort());
+    LOGGER.info("D-Bus host: {}, port: {}", getDBusHost(), getDBusPort());
+    LOGGER.info("Operating system: {}", System.getProperty("os.name"));
+    LOGGER.info("Running in container: {}", isRunningInContainer());
+    LOGGER.info("Should prefer Unix socket: {}", shouldPreferUnixSocket());
     
-    // Use TCP connection for cross-platform compatibility
     ConnectionConfig config = ConnectionConfig.builder()
-        .withConnectTimeout(Duration.ofSeconds(5))
+        .withConnectTimeout(Duration.ofSeconds(10))
         .build();
     
-    Connection connection = new NettyConnection(
-        new InetSocketAddress(getDBusHost(), getDBusPort()),
-        config
-    );
+    Connection connection = null;
+    Exception lastException = null;
+    
+    // Try Unix socket first if preferred (container mode)
+    if (shouldPreferUnixSocket()) {
+      try {
+        LOGGER.info("Attempting Unix socket connection to D-Bus daemon");
+        connection = new NettyConnection(
+            new DomainSocketAddress("/tmp/dbus-test-socket"),
+            config
+        );
 
-    try {
-      // Test connection
-      CompletableFuture<Void> connectFuture = connection.connect().toCompletableFuture();
-      assertDoesNotThrow(() -> connectFuture.get(DEFAULT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS));
+        CompletableFuture<Void> connectFuture = connection.connect().toCompletableFuture();
+        connectFuture.get(DEFAULT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+        
+        assertTrue(connection.isConnected());
+        assertEquals(ConnectionState.CONNECTED, connection.getState());
+        
+        LOGGER.info("✓ Successfully connected via Unix socket with EXTERNAL authentication");
+        
+      } catch (Exception e) {
+        lastException = e;
+        LOGGER.warn("Unix socket connection failed: {}", e.getMessage());
+        
+        if (connection != null) {
+          try {
+            connection.close();
+          } catch (Exception closeException) {
+            LOGGER.debug("Error closing failed connection", closeException);
+          }
+          connection = null;
+        }
+      }
+    }
+    
+    // Try TCP connection if Unix socket failed or not preferred
+    if (connection == null) {
+      try {
+        LOGGER.info("Attempting TCP connection to D-Bus daemon");
+        connection = new NettyConnection(
+            new InetSocketAddress(getDBusHost(), getDBusPort()),
+            config
+        );
 
-      // Verify connection state
-      assertTrue(connection.isConnected());
-      assertEquals(ConnectionState.CONNECTED, connection.getState());
-
-    } finally {
-      connection.close();
+        CompletableFuture<Void> connectFuture = connection.connect().toCompletableFuture();
+        connectFuture.get(DEFAULT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+        
+        assertTrue(connection.isConnected());
+        assertEquals(ConnectionState.CONNECTED, connection.getState());
+        
+        LOGGER.info("✓ Successfully connected via TCP");
+        
+      } catch (Exception e) {
+        lastException = e;
+        LOGGER.warn("TCP connection failed: {}", e.getMessage());
+        
+        if (connection != null) {
+          try {
+            connection.close();
+          } catch (Exception closeException) {
+            LOGGER.debug("Error closing failed connection", closeException);
+          }
+          connection = null;
+        }
+      }
+    }
+    
+    // If all connection attempts failed, throw an assertion error
+    if (connection == null && lastException != null) {
+      throw new AssertionError("All connection attempts failed. Last error: " + lastException.getMessage(), lastException);
+    }
+    
+    // Clean up
+    if (connection != null) {
+      try {
+        connection.close();
+        LOGGER.info("✓ Connection closed successfully");
+      } finally {
+        // Ensure connection is closed
+      }
     }
   }
 

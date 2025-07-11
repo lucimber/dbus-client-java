@@ -1,0 +1,154 @@
+# Multi-stage Dockerfile for running D-Bus integration tests in a Linux container
+# This solves cross-platform SASL authentication issues by running everything in Linux
+
+# Stage 1: Build the Java application
+FROM gradle:8.14.2-jdk17 AS builder
+
+WORKDIR /app
+COPY . .
+
+# Build the project and prepare test classes - skip expensive static analysis tasks
+RUN gradle compileJava compileTestJava -x checkstyleMain -x checkstyleTest -x pmdMain -x pmdTest -x jacocoTestReport -x jacocoTestCoverageVerification --no-daemon
+
+# Stage 2: Test execution environment
+FROM ubuntu:22.04
+
+# Install required packages
+RUN apt-get update && apt-get install -y \
+    openjdk-17-jdk-headless \
+    dbus \
+    dbus-x11 \
+    netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create test user with specific UID for consistent EXTERNAL auth
+RUN useradd -u 1000 -m -s /bin/bash testuser
+
+# Copy built application and dependencies from builder stage
+COPY --from=builder /app/lib/build /app/lib/build
+COPY --from=builder /app/gradle /app/gradle
+COPY --from=builder /app/gradlew /app/
+COPY --from=builder /app/gradlew.bat /app/
+COPY --from=builder /app/settings.gradle.kts /app/
+COPY --from=builder /app/lib/build.gradle.kts /app/lib/
+COPY --from=builder /app/lib/src /app/lib/src
+COPY --from=builder /root/.gradle /root/.gradle
+
+# Create D-Bus configuration for comprehensive testing
+RUN mkdir -p /etc/dbus-1/session.d
+
+# Create D-Bus configuration that supports all authentication mechanisms
+COPY <<EOF /etc/dbus-1/test-session.conf
+<!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-Bus Bus Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+<busconfig>
+  <type>session</type>
+  <listen>unix:path=/tmp/dbus-test-socket</listen>
+  <listen>tcp:host=127.0.0.1,port=12345</listen>
+  
+  <!-- Support all authentication mechanisms for comprehensive testing -->
+  <auth>EXTERNAL</auth>
+  <auth>DBUS_COOKIE_SHA1</auth>
+  
+  <standard_session_servicedirs />
+  
+  <!-- Service definitions for basic D-Bus functionality -->
+  <servicedir>/usr/share/dbus-1/services</servicedir>
+  
+  <!-- Policy to allow everything for testing -->
+  <policy context="default">
+    <allow send_destination="*"/>
+    <allow send_interface="*"/>
+    <allow receive_sender="*"/>
+    <allow receive_interface="*"/>
+    <allow own="*"/>
+    <allow user="*"/>
+    <allow eavesdrop="true"/>
+  </policy>
+  
+  <!-- Allow root user specifically for testing -->
+  <policy user="root">
+    <allow send_destination="*"/>
+    <allow send_interface="*"/>
+    <allow receive_sender="*"/>
+    <allow receive_interface="*"/>
+    <allow own="*"/>
+    <allow eavesdrop="true"/>
+  </policy>
+</busconfig>
+EOF
+
+# Create test execution script
+COPY <<'EOF' /usr/local/bin/run-dbus-tests.sh
+#!/bin/bash
+set -e
+
+echo "=== D-Bus Integration Test Execution ==="
+echo "Running tests inside Linux container for proper SASL authentication"
+echo
+
+# Create machine ID for D-Bus
+if [ ! -f /etc/machine-id ]; then
+    echo "Creating machine ID..."
+    dbus-uuidgen > /etc/machine-id
+fi
+
+# Setup D-Bus keyring directory for DBUS_COOKIE_SHA1
+mkdir -p ~/.dbus-keyrings
+chmod 700 ~/.dbus-keyrings
+
+echo "Starting D-Bus daemon in background..."
+dbus-daemon --config-file=/etc/dbus-1/test-session.conf --fork --print-address
+
+# Wait for D-Bus daemon to be ready
+echo "Waiting for D-Bus daemon to be ready..."
+for i in {1..30}; do
+    if netcat -z 127.0.0.1 12345 && [ -S /tmp/dbus-test-socket ]; then
+        echo "✓ D-Bus daemon is ready"
+        echo "  - TCP socket: 127.0.0.1:12345"
+        echo "  - Unix socket: /tmp/dbus-test-socket"
+        break
+    fi
+    sleep 1
+done
+
+# Display authentication setup
+echo
+echo "Authentication setup:"
+echo "  - Unix UID: $(id -u)"
+echo "  - D-Bus keyrings: $(ls -la ~/.dbus-keyrings/ 2>/dev/null || echo 'None yet')"
+echo
+
+# Set environment for tests
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/tmp/dbus-test-socket"
+
+# Run the integration tests 
+echo "Running integration tests..."
+cd /app
+export GRADLE_USER_HOME=/root/.gradle
+./gradlew integrationTest --no-daemon --quiet --console=plain
+
+# Display test results
+echo
+echo "=== Test Results ==="
+if [ -f lib/build/reports/tests/integrationTest/index.html ]; then
+    echo "✓ Test report generated: lib/build/reports/tests/integrationTest/index.html"
+fi
+
+# Keep D-Bus logs available for debugging
+echo
+echo "=== D-Bus Process Status ==="
+ps aux | grep dbus | grep -v grep || echo "No D-Bus processes found"
+EOF
+
+RUN chmod +x /usr/local/bin/run-dbus-tests.sh
+
+# Stay as root to avoid permission issues with Gradle
+# D-Bus daemon will run as root but allow connections from any user
+WORKDIR /app
+
+# Expose ports for external access if needed
+EXPOSE 12345
+
+# Default command runs the tests
+CMD ["/usr/local/bin/run-dbus-tests.sh"]
