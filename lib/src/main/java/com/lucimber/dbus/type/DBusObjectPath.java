@@ -5,6 +5,7 @@
 
 package com.lucimber.dbus.type;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,6 +26,7 @@ import java.util.regex.Pattern;
 public final class DBusObjectPath implements DBusBasicType {
 
   private static final Pattern PATTERN = Pattern.compile("^/|(/[a-zA-Z0-9_]+)+$");
+  private static final int MAX_PATH_LENGTH = 268435455; // 2^28 - 1 (256MB - 1)
   private final String delegate;
 
   private DBusObjectPath(final CharSequence sequence) {
@@ -33,6 +35,7 @@ public final class DBusObjectPath implements DBusBasicType {
 
   /**
    * Constructs a new {@link DBusObjectPath} instance by parsing a {@link CharSequence}.
+   * Validates that the path is valid UTF-8, follows D-Bus object path syntax, and is within size limits.
    *
    * @param sequence The sequence composed of a valid object path.
    * @return A new instance of {@link DBusObjectPath}.
@@ -40,12 +43,72 @@ public final class DBusObjectPath implements DBusBasicType {
    */
   public static DBusObjectPath valueOf(final CharSequence sequence) throws ObjectPathException {
     Objects.requireNonNull(sequence, "sequence must not be null");
-    final Matcher matcher = PATTERN.matcher(sequence);
-    if (matcher.matches()) {
-      return new DBusObjectPath(sequence);
-    } else {
-      throw new ObjectPathException("invalid object path");
+    
+    String pathStr = sequence.toString();
+    
+    // Validate UTF-8 and check for NUL characters
+    byte[] utf8Bytes = pathStr.getBytes(StandardCharsets.UTF_8);
+    String roundTrip = new String(utf8Bytes, StandardCharsets.UTF_8);
+    if (!pathStr.equals(roundTrip)) {
+      throw new ObjectPathException("Object path contains invalid UTF-8 sequences");
     }
+    
+    if (pathStr.contains("\u0000")) {
+      throw new ObjectPathException("Object path must not contain NUL characters");
+    }
+    
+    // Check size limit
+    if (utf8Bytes.length > MAX_PATH_LENGTH) {
+      throw new ObjectPathException("Object path too long: " + utf8Bytes.length + " bytes, maximum " + MAX_PATH_LENGTH);
+    }
+    
+    // Validate enhanced object path syntax
+    if (!isValidObjectPath(pathStr)) {
+      throw new ObjectPathException("Invalid object path syntax: " + pathStr);
+    }
+    
+    return new DBusObjectPath(sequence);
+  }
+  
+  /**
+   * Enhanced validation for D-Bus object path syntax.
+   * 
+   * @param path the path to validate
+   * @return true if valid, false otherwise
+   */
+  private static boolean isValidObjectPath(String path) {
+    // Basic pattern check
+    final Matcher matcher = PATTERN.matcher(path);
+    if (!matcher.matches()) {
+      return false;
+    }
+    
+    // Root path is always valid
+    if (path.equals("/")) {
+      return true;
+    }
+    
+    // Additional edge case validation for non-root paths
+    // No trailing slash (except root)
+    if (path.endsWith("/")) {
+      return false;
+    }
+    
+    // No consecutive slashes
+    if (path.contains("//")) {
+      return false;
+    }
+    
+    // Validate components (skip first empty element from split)
+    String[] components = path.split("/");
+    for (int i = 1; i < components.length; i++) { // Start at 1 to skip empty first element
+      String component = components[i];
+      if (component.isEmpty()) {
+        return false; // Empty component (from consecutive slashes)
+      }
+    }
+    
+    return true;
   }
 
   /**

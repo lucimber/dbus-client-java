@@ -7,7 +7,7 @@ package com.lucimber.dbus.type;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,11 +26,8 @@ final class DBusStringTest {
 
     @Test
     void createStringWithNullValue() {
-        DBusString dbusString = DBusString.valueOf(null);
-        
-        assertNull(dbusString.toString());
-        assertNull(dbusString.getDelegate());
-        assertEquals(Type.STRING, dbusString.getType());
+        // D-Bus specification compliance: null values should be rejected
+        assertThrows(NullPointerException.class, () -> DBusString.valueOf(null));
     }
 
     @Test
@@ -43,7 +40,7 @@ final class DBusStringTest {
     }
 
     @ParameterizedTest
-    @NullAndEmptySource
+    @EmptySource
     @ValueSource(strings = {
         "simple text",
         "Hello, World!",
@@ -59,7 +56,7 @@ final class DBusStringTest {
         "JSON-like: {\"key\": \"value\"}",
         "SQL-like: SELECT * FROM table;",
         "Very long string that exceeds typical buffer sizes and should still work correctly with the DBusString implementation regardless of the content length",
-        "\u0000\u0001\u0002\u0003", // Control characters
+        "\u0001\u0002\u0003", // Control characters (excluding NUL)
         "\u00FF\u0100\u0101", // Extended ASCII
         "\uD83D\uDE00\uD83D\uDE01", // Emoji surrogates
         "   leading and trailing spaces   ",
@@ -72,24 +69,38 @@ final class DBusStringTest {
         assertEquals(input, dbusString.getDelegate());
         assertEquals(Type.STRING, dbusString.getType());
     }
+    
+    @Test
+    void rejectNullStringInput() {
+        // D-Bus specification compliance: null values should be rejected
+        assertThrows(NullPointerException.class, () -> DBusString.valueOf(null));
+    }
+    
+    @Test
+    void rejectStringWithNullBytes() {
+        // D-Bus specification compliance: NUL bytes should be rejected
+        assertThrows(IllegalArgumentException.class, () -> DBusString.valueOf("test\u0000string"));
+        assertThrows(IllegalArgumentException.class, () -> DBusString.valueOf("\u0000"));
+        assertThrows(IllegalArgumentException.class, () -> DBusString.valueOf("\u0000\u0001\u0002\u0003"));
+    }
 
     @Test
     void testEquals() {
         DBusString string1 = DBusString.valueOf("test");
         DBusString string2 = DBusString.valueOf("test");
         DBusString string3 = DBusString.valueOf("different");
-        DBusString nullString1 = DBusString.valueOf(null);
-        DBusString nullString2 = DBusString.valueOf(null);
+        DBusString emptyString1 = DBusString.valueOf("");
+        DBusString emptyString2 = DBusString.valueOf("");
 
         // Test equality
         assertEquals(string1, string2);
         assertNotEquals(string1, string3);
-        assertEquals(nullString1, nullString2);
-        assertNotEquals(string1, nullString1);
+        assertEquals(emptyString1, emptyString2);
+        assertNotEquals(string1, emptyString1);
         
         // Test self-equality
         assertEquals(string1, string1);
-        assertEquals(nullString1, nullString1);
+        assertEquals(emptyString1, emptyString1);
         
         // Test against null and different types
         assertNotEquals(string1, null);
@@ -102,16 +113,16 @@ final class DBusStringTest {
         DBusString string1 = DBusString.valueOf("test");
         DBusString string2 = DBusString.valueOf("test");
         DBusString string3 = DBusString.valueOf("different");
-        DBusString nullString1 = DBusString.valueOf(null);
-        DBusString nullString2 = DBusString.valueOf(null);
+        DBusString emptyString1 = DBusString.valueOf("");
+        DBusString emptyString2 = DBusString.valueOf("");
 
         // Equal objects should have equal hash codes
         assertEquals(string1.hashCode(), string2.hashCode());
-        assertEquals(nullString1.hashCode(), nullString2.hashCode());
+        assertEquals(emptyString1.hashCode(), emptyString2.hashCode());
         
         // Different objects should typically have different hash codes
         assertNotEquals(string1.hashCode(), string3.hashCode());
-        assertNotEquals(string1.hashCode(), nullString1.hashCode());
+        assertNotEquals(string1.hashCode(), emptyString1.hashCode());
     }
 
     @Test
@@ -121,13 +132,13 @@ final class DBusStringTest {
         DBusString dbusString = DBusString.valueOf(input);
         assertEquals(input, dbusString.toString());
         
-        // Test with null
-        DBusString nullString = DBusString.valueOf(null);
-        assertNull(nullString.toString());
-        
         // Test with empty string
         DBusString emptyString = DBusString.valueOf("");
         assertEquals("", emptyString.toString());
+        
+        // Test with various valid strings
+        DBusString unicodeString = DBusString.valueOf("Unicode: 🌍");
+        assertEquals("Unicode: 🌍", unicodeString.toString());
     }
 
     @Test
@@ -138,15 +149,17 @@ final class DBusStringTest {
         assertEquals(input, dbusString.getDelegate());
         assertSame(input, dbusString.getDelegate()); // Should be the same reference
         
-        // Test with null
-        DBusString nullString = DBusString.valueOf(null);
-        assertNull(nullString.getDelegate());
-        
         // Test with empty string
         String empty = "";
         DBusString emptyString = DBusString.valueOf(empty);
         assertEquals(empty, emptyString.getDelegate());
         assertSame(empty, emptyString.getDelegate()); // Should be the same reference
+        
+        // Test with Unicode string
+        String unicode = "🌍🚀";
+        DBusString unicodeString = DBusString.valueOf(unicode);
+        assertEquals(unicode, unicodeString.getDelegate());
+        assertSame(unicode, unicodeString.getDelegate());
     }
 
     @Test
@@ -154,7 +167,7 @@ final class DBusStringTest {
         // Test that getType always returns STRING regardless of content
         assertEquals(Type.STRING, DBusString.valueOf("test").getType());
         assertEquals(Type.STRING, DBusString.valueOf("").getType());
-        assertEquals(Type.STRING, DBusString.valueOf(null).getType());
+        assertEquals(Type.STRING, DBusString.valueOf("Unicode: 🌍").getType());
         assertEquals(Type.STRING, DBusString.valueOf("very long string with lots of content").getType());
     }
 
@@ -290,7 +303,6 @@ final class DBusStringTest {
     @Test
     void testNullByteHandling() {
         // Test D-Bus specification requirement: strings must not contain U+0000 (null bytes)
-        // Note: Java String cannot contain null bytes in the middle, but we test the principle
         
         // Test that empty string is valid
         assertDoesNotThrow(() -> {
@@ -298,14 +310,15 @@ final class DBusStringTest {
             assertEquals("", dbusString.toString());
         });
         
-        // Test that null reference is handled
-        assertDoesNotThrow(() -> {
-            DBusString dbusString = DBusString.valueOf(null);
-            assertNull(dbusString.toString());
+        // Test that null reference is properly rejected per D-Bus specification
+        assertThrows(NullPointerException.class, () -> {
+            DBusString.valueOf(null);
         });
         
-        // Java String cannot contain embedded null bytes, so this test documents the behavior
-        // If the implementation were to receive raw bytes, it should reject null bytes
+        // Test that strings with null bytes are rejected per D-Bus specification
+        assertThrows(IllegalArgumentException.class, () -> {
+            DBusString.valueOf("test\u0000invalid");
+        });
     }
 
     @Test

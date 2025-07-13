@@ -240,14 +240,11 @@ final class DBusVariantTest {
     }
 
     @Test
-    void testVariantWithNullString() {
-        // Test variant containing a DBusString with null value
-        DBusString nullString = DBusString.valueOf(null);
-        DBusVariant variant = DBusVariant.valueOf(nullString);
-        
-        assertEquals(nullString, variant.getDelegate());
-        assertEquals(Type.VARIANT, variant.getType());
-        assertEquals("v[s]", variant.toString());
+    void testVariantWithNullStringRejection() {
+        // Test that null strings are properly rejected per D-Bus specification
+        assertThrows(NullPointerException.class, () -> {
+            DBusString.valueOf(null);
+        });
     }
 
     @Test

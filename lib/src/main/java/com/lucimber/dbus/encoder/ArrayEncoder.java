@@ -34,6 +34,9 @@ public final class ArrayEncoder<E extends DBusType> implements Encoder<DBusArray
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
+  
+  // D-Bus specification: maximum array size is 64 MiB (67,108,864 bytes)
+  private static final int MAX_ARRAY_SIZE = 67108864; // 2^26
 
   private final ByteOrder order;
   private final DBusSignature signature;
@@ -83,6 +86,11 @@ public final class ArrayEncoder<E extends DBusType> implements Encoder<DBusArray
                 .encode(element, entryOffsetBase + elementsSize, order);
         elementsSize += result.getProducedBytes();
         encodedElements.add(result.getBuffer());
+      }
+
+      // Check array size limit before encoding
+      if (elementsSize > MAX_ARRAY_SIZE) {
+        throw new EncoderException("Array too large: " + elementsSize + " bytes, maximum " + MAX_ARRAY_SIZE + " bytes");
       }
 
       // Encode the length prefix

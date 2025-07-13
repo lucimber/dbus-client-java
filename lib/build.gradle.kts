@@ -51,6 +51,9 @@ tasks.named<Test>("test") {
     useJUnitPlatform {
         excludeTags("integration", "performance", "chaos")
     }
+    // Allocate more memory for memory-intensive validation tests
+    maxHeapSize = "4g"
+    jvmArgs("-XX:+UseG1GC", "-XX:MaxMetaspaceSize=512m")
     finalizedBy(tasks.jacocoTestReport)
 }
 
