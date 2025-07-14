@@ -257,14 +257,14 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
 
   @Override
   public void decode(ChannelHandlerContext ctx, Frame frame, List<Object> out) {
-    LOGGER.debug("InboundMessageDecoder: Received frame: {}", frame);
+    LOGGER.debug("[InboundMessageDecoder] Decoding frame: type={}, serial={}", 
+        frame.getType(), frame.getSerial());
     InboundMessage msg = mapFrameToInboundMessage(frame);
     if (msg == null) {
-      LoggerUtils.warn(LOGGER, MARKER, () -> "Ignoring inbound message with invalid type.");
-      LOGGER.warn("InboundMessageDecoder: Failed to decode frame: {}", frame);
+      LOGGER.warn("[InboundMessageDecoder] Failed to decode frame with invalid type: {}", frame.getType());
     } else {
-      LoggerUtils.debug(LOGGER, MARKER, () -> "Decoded an " + msg);
-      LOGGER.debug("InboundMessageDecoder: Successfully decoded message: {}", msg);
+      LOGGER.debug("[InboundMessageDecoder] Decoded {}: serial={}", 
+          msg.getClass().getSimpleName(), msg.getSerial());
       out.add(msg);
     }
   }

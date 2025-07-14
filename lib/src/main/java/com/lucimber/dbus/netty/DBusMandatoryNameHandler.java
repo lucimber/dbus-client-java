@@ -47,9 +47,8 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
 
   @Override
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-    LOGGER.debug("DBusMandatoryNameHandler: Received user event: {}, current state: {}", evt, currentState);
     if (evt == DBusChannelEvent.SASL_AUTH_COMPLETE && currentState == State.IDLE) {
-      LOGGER.debug("DBus message pipeline is ready. Sending org.freedesktop.DBus.Hello method call.");
+      LOGGER.info("[DBusMandatoryNameHandler] SASL authentication complete, sending Hello method call");
 
       AtomicLong serialCounter = ctx.channel().attr(DBusChannelAttribute.SERIAL_COUNTER).get();
       // D-Bus serial numbers are 32-bit unsigned and allowed to wrap around
@@ -65,14 +64,14 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
               .withInterface(DBUS_INTERFACE_NAME)
               .build();
 
-      LOGGER.debug("About to writeAndFlush Hello call (serial {})", helloCallSerial.getDelegate());
       ctx.writeAndFlush(helloCall).addListener(future -> {
         if (future.isSuccess()) {
-          LOGGER.debug("Hello call (serial {}) sent successfully. Channel active: {}, writable: {}", 
-              helloCallSerial.getDelegate(), ctx.channel().isActive(), ctx.channel().isWritable());
+          LOGGER.info("[DBusMandatoryNameHandler] Hello call sent successfully (serial={})", 
+              helloCallSerial.getDelegate());
           currentState = State.AWAITING_HELLO_REPLY;
         } else {
-          LOGGER.error("Failed to send Hello call (serial {}).", helloCallSerial.getDelegate(), future.cause());
+          LOGGER.error("[DBusMandatoryNameHandler] Failed to send Hello call (serial={}): {}", 
+              helloCallSerial.getDelegate(), future.cause().getMessage());
           ctx.fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
           ctx.pipeline().remove(this); // Remove self on send failure
           ctx.close(); // Critical failure
@@ -86,32 +85,25 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
 
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-    LOGGER.debug("Received message in DBusMandatoryNameHandler: {} (type: {}), current state: {}", 
-        msg, msg.getClass().getSimpleName(), currentState);
-    
     if (currentState != State.AWAITING_HELLO_REPLY) {
-      // Not waiting for our Hello reply, pass it on.
-      LOGGER.debug("Not waiting for Hello reply, passing message along");
       ctx.fireChannelRead(msg);
       return;
     }
 
     boolean handled = false;
     if (msg instanceof InboundMethodReturn methodReturn) {
-      LOGGER.debug("Received InboundMethodReturn: serial={}, replySerial={}, expected replySerial={}", 
-          methodReturn.getSerial().getDelegate(), methodReturn.getReplySerial().getDelegate(), 
-          helloCallSerial.getDelegate());
       if (methodReturn.getReplySerial().equals(helloCallSerial)) {
         handled = true;
+        LOGGER.info("[DBusMandatoryNameHandler] Received Hello reply (serial={})", 
+            methodReturn.getSerial().getDelegate());
         handleHelloReply(ctx, methodReturn);
         ReferenceCountUtil.release(msg); // Release message after handling
       }
     } else if (msg instanceof InboundError error) {
-      LOGGER.debug("Received InboundError: serial={}, replySerial={}, expected replySerial={}", 
-          error.getSerial().getDelegate(), error.getReplySerial().getDelegate(), 
-          helloCallSerial.getDelegate());
       if (error.getReplySerial().equals(helloCallSerial)) {
         handled = true;
+        LOGGER.error("[DBusMandatoryNameHandler] Received Hello error (serial={}): {}", 
+            error.getSerial().getDelegate(), error.getErrorName());
         handleHelloError(ctx, error);
         ReferenceCountUtil.release(msg); // Release message after handling
       }
@@ -119,21 +111,19 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
 
     if (!handled) {
       // Not a reply to our Hello call, pass it on.
-      LOGGER.debug("Message not handled (serial mismatch or wrong type), passing along");
       ctx.fireChannelRead(msg);
     }
   }
 
   private void handleHelloReply(ChannelHandlerContext ctx, InboundMethodReturn reply) {
-    LOGGER.debug("Received reply for Hello call (serial {}): {}", helloCallSerial.getDelegate(), reply);
     List<DBusType> payload = reply.getPayload();
 
     if (!payload.isEmpty() && payload.get(0) instanceof DBusString assignedName) {
-      LOGGER.info("Successfully acquired bus name: {}", assignedName);
+      LOGGER.info("[DBusMandatoryNameHandler] Successfully acquired bus name: {}", assignedName);
       ctx.channel().attr(DBusChannelAttribute.ASSIGNED_BUS_NAME).set(assignedName);
       ctx.fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUIRED);
     } else {
-      LOGGER.error("Hello reply did not contain a valid string name in payload. Payload: {}", payload);
+      LOGGER.error("[DBusMandatoryNameHandler] Invalid Hello reply payload: {}", payload);
       ctx.fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
     }
 

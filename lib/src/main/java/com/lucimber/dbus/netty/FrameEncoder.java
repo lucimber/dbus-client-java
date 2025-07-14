@@ -109,20 +109,15 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
 
   @Override
   protected void encode(ChannelHandlerContext ctx, Frame msg, ByteBuf out) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> "Marshalling a frame to the byte stream format.");
-    LOGGER.debug("FrameEncoder: Encoding frame: {}", msg);
+    LOGGER.debug("[FrameEncoder] Encoding frame: type={}, serial={}", msg.getType(), msg.getSerial());
     ByteBuf msgBuffer = ctx.alloc().buffer();
-    LOGGER.debug("FrameEncoder: Initial msgBuffer size: {}", msgBuffer.readableBytes());
     try {
       int byteCount = 0;
       // Byte order
       ByteBuf byteOrderBuffer = encodeByteOrder(ctx.alloc(), msg.getByteOrder());
-      LOGGER.debug("FrameEncoder: byteOrderBuffer size: {}", byteOrderBuffer.readableBytes());
       msgBuffer.writeBytes(byteOrderBuffer);
       byteOrderBuffer.release();
       byteCount += 1;
-      LOGGER.debug("FrameEncoder: After byte order, msgBuffer size: {}", msgBuffer.readableBytes());
-      LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: " + msgBuffer.readableBytes());
       // Message type
       ByteBuf typeBuffer = encodeMessageType(ctx.alloc(), msg.getType());
       msgBuffer.writeBytes(typeBuffer);
@@ -173,9 +168,9 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
       }
       // Copy message
       int bytesToWrite = msgBuffer.readableBytes();
-      LOGGER.debug("FrameEncoder: About to write msgBuffer with {} readable bytes", bytesToWrite);
       out.writeBytes(msgBuffer);
-      LOGGER.debug("FrameEncoder: Wrote {} bytes to output buffer", bytesToWrite);
+      LOGGER.debug("[FrameEncoder] Encoded {} bytes for {} frame (serial={})", 
+          bytesToWrite, msg.getType(), msg.getSerial());
     } catch (Throwable t) {
       LoggerUtils.warn(LOGGER, MARKER, () -> "Caught " + t);
       throw new EncoderException(t);

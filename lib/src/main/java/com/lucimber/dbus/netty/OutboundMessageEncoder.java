@@ -213,8 +213,8 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
 
   @Override
   protected void encode(ChannelHandlerContext ctx, OutboundMessage msg, List<Object> out) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> "Mapping an outbound message to frame: " + msg);
-    LOGGER.debug("OutboundMessageEncoder: Encoding message: {} (type: {})", msg, msg.getClass().getSimpleName());
+    LOGGER.debug("[OutboundMessageEncoder] Encoding {}: destination={}, serial={}", 
+        msg.getClass().getSimpleName(), getDestination(msg), msg.getSerial());
     msg.getSignature().ifPresent(signature -> validatePayload(msg.getPayload(), signature));
     Frame frame = new Frame();
     frame.setByteOrder(BYTE_ORDER);
@@ -227,6 +227,14 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     Map<HeaderField, DBusVariant> headerFields = buildHeaderFields(msg);
     frame.setHeaderFields(headerFields);
     out.add(frame);
-    LOGGER.debug("OutboundMessageEncoder: Successfully encoded frame: {}", frame);
+    LOGGER.debug("[OutboundMessageEncoder] Created frame: type={}, serial={}", 
+        frame.getType(), frame.getSerial());
+  }
+
+  private String getDestination(OutboundMessage msg) {
+    if (msg instanceof OutboundMethodCall methodCall) {
+      return methodCall.getDestination().map(dest -> dest.getDelegate()).orElse("(none)");
+    }
+    return "(unknown)";
   }
 }
