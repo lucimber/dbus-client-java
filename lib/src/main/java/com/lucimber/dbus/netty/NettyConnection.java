@@ -225,6 +225,9 @@ public final class NettyConnection implements Connection {
 
     if (this.serverAddress instanceof InetSocketAddress) { // Only set for TCP
       b.option(ChannelOption.SO_KEEPALIVE, true);
+      b.option(ChannelOption.TCP_NODELAY, true); // Disable Nagle's algorithm for low-latency
+      b.option(ChannelOption.SO_REUSEADDR, true); // Allow reuse of local addresses
+      b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) config.getConnectTimeout().toMillis());
     }
 
     b.handler(new DBusChannelInitializer(appLogicHandler, connectPromise));

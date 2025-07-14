@@ -65,9 +65,11 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
               .withInterface(DBUS_INTERFACE_NAME)
               .build();
 
+      LOGGER.debug("About to writeAndFlush Hello call (serial {})", helloCallSerial.getDelegate());
       ctx.writeAndFlush(helloCall).addListener(future -> {
         if (future.isSuccess()) {
-          LOGGER.debug("Hello call (serial {}) sent successfully.", helloCallSerial.getDelegate());
+          LOGGER.debug("Hello call (serial {}) sent successfully. Channel active: {}, writable: {}", 
+              helloCallSerial.getDelegate(), ctx.channel().isActive(), ctx.channel().isWritable());
           currentState = State.AWAITING_HELLO_REPLY;
         } else {
           LOGGER.error("Failed to send Hello call (serial {}).", helloCallSerial.getDelegate(), future.cause());

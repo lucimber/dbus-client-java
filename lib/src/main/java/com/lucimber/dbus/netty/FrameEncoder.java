@@ -170,6 +170,7 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
       }
       // Copy message
       out.writeBytes(msgBuffer);
+      LOGGER.debug("FrameEncoder: Wrote {} bytes to output buffer", msgBuffer.readableBytes());
     } catch (Throwable t) {
       LoggerUtils.warn(LOGGER, MARKER, () -> "Caught " + t);
       throw new EncoderException(t);
