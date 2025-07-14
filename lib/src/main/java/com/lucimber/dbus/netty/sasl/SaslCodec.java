@@ -30,6 +30,8 @@ public final class SaslCodec extends ChannelDuplexHandler {
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
     if (evt == DBusChannelEvent.SASL_AUTH_COMPLETE) {
       handleSaslAuthCompleteEvent(ctx);
+      // Continue propagating the event to other handlers
+      super.userEventTriggered(ctx, evt);
     } else {
       super.userEventTriggered(ctx, evt);
     }

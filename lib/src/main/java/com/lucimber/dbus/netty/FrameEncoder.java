@@ -110,6 +110,7 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
   @Override
   protected void encode(ChannelHandlerContext ctx, Frame msg, ByteBuf out) {
     LoggerUtils.debug(LOGGER, MARKER, () -> "Marshalling a frame to the byte stream format.");
+    LOGGER.debug("FrameEncoder: Encoding frame: {}", msg);
     ByteBuf msgBuffer = ctx.alloc().buffer();
     try {
       int byteCount = 0;

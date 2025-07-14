@@ -217,18 +217,20 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
   private void cleanupAndSignalCompletion(ChannelHandlerContext ctx, boolean success) {
     disposeCurrentMechanism();
 
-    try {
-      ctx.pipeline().remove(this);
-      LOGGER.debug("SaslAuthenticationHandler removed itself from pipeline.");
-    } catch (NoSuchElementException ignored) {
-    }
-
+    // Fire the event BEFORE removing self from pipeline to ensure proper propagation
     if (success) {
       LOGGER.debug("SaslAuthenticationHandler: Firing SASL_AUTH_COMPLETE event");
       ctx.fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
     } else {
       LOGGER.debug("SaslAuthenticationHandler: Firing SASL_AUTH_FAILED event");
       ctx.fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_FAILED);
+    }
+
+    // Remove self from pipeline AFTER event has been fired
+    try {
+      ctx.pipeline().remove(this);
+      LOGGER.debug("SaslAuthenticationHandler removed itself from pipeline.");
+    } catch (NoSuchElementException ignored) {
     }
   }
 
