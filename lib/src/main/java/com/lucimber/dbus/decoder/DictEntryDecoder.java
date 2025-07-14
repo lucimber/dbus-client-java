@@ -6,9 +6,9 @@
 package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.DBusBasicType;
-import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusDictEntry;
 import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeCode;
 import com.lucimber.dbus.type.TypeUtils;

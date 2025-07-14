@@ -13,8 +13,8 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Represents a virtual channel for communication over D-Bus.
- * <p>
- * A D-Bus connection enables inter-process communication by allowing messages to be sent and received.
+ *
+ * <p>A D-Bus connection enables inter-process communication by allowing messages to be sent and received.
  * There are two primary types of buses in D-Bus:
  * <ul>
  *   <li><strong>System Bus</strong>: A bus shared between system and user processes.</li>
@@ -28,7 +28,7 @@ public interface Connection extends AutoCloseable {
    * Initiates a connection to a D-Bus instance.
    *
    * @return a {@link CompletionStage} that completes when the connection is established,
-   * or exceptionally if the attempt fails.
+   *     or exceptionally if the attempt fails.
    */
   CompletionStage<Void> connect();
 
@@ -48,8 +48,8 @@ public interface Connection extends AutoCloseable {
 
   /**
    * Generates and returns the next unique serial number for outbound messages.
-   * <p>
-   * Serial numbers are used to correlate requests and replies and are unique per connection.
+   *
+   * <p>Serial numbers are used to correlate requests and replies and are unique per connection.
    *
    * @return a unique {@link DBusUInt32} serial number for an {@link OutboundMessage}.
    */
@@ -57,29 +57,29 @@ public interface Connection extends AutoCloseable {
 
   /**
    * Sends the given {@link OutboundMessage} over this connection, bypassing the pipeline.
-   * <p>
-   * This method is intended for simple request-response interactions where no additional
+   *
+   * <p>This method is intended for simple request-response interactions where no additional
    * pipeline-based processing is needed. The returned {@link CompletionStage} is completed
    * directly with the corresponding {@link InboundMessage} response or exceptionally if an error occurs.
-   * <p>
-   * <b>Note:</b> Use this method only for straightforward communication scenarios that do not require
+   *
+   * <p><b>Note:</b> Use this method only for straightforward communication scenarios that do not require
    * handler involvement or advanced message routing.
    *
    * @param msg the outbound message to send.
    * @return a {@link CompletionStage} that completes with the corresponding inbound response message,
-   * or fails exceptionally on error.
+   *     or fails exceptionally on error.
    */
   CompletionStage<InboundMessage> sendRequest(OutboundMessage msg);
 
   /**
    * Sends the given {@link OutboundMessage} over the connection and completes the provided future
    * when the message has been written to the D-Bus transport.
-   * <p>
-   * The outbound message is transmitted directly over the connection and does <strong>not</strong> pass
+   *
+   * <p>The outbound message is transmitted directly over the connection and does <strong>not</strong> pass
    * through the outbound pipeline. However, the corresponding {@link InboundMessage} response will be
    * delivered through the pipeline, allowing it to be processed by registered {@link InboundHandler}s.
-   * <p>
-   * This method is intended for scenarios where custom or advanced processing of responses is needed,
+   *
+   * <p>This method is intended for scenarios where custom or advanced processing of responses is needed,
    * while keeping message transmission efficient.
    *
    * @param msg    the outbound message to send.

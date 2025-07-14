@@ -72,7 +72,7 @@ public final class DBusObjectPath implements DBusBasicType {
   
   /**
    * Enhanced validation for D-Bus object path syntax.
-   * 
+   *
    * @param path the path to validate
    * @return true if valid, false otherwise
    */

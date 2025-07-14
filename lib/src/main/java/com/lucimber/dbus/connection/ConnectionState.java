@@ -7,8 +7,8 @@ package com.lucimber.dbus.connection;
 
 /**
  * Represents the current state of a D-Bus connection.
- * <p>
- * The connection progresses through these states during its lifecycle:
+ *
+ * <p>The connection progresses through these states during its lifecycle:
  * <ul>
  *   <li>{@link #DISCONNECTED} - Initial state, no connection established</li>
  *   <li>{@link #CONNECTING} - Connection attempt in progress</li>

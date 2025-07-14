@@ -45,7 +45,8 @@ public final class DBusString implements DBusBasicType {
     
     // Check size limit (UTF-8 byte length)
     if (utf8Bytes.length > MAX_STRING_LENGTH) {
-      throw new IllegalArgumentException("String too long: " + utf8Bytes.length + " bytes, maximum " + MAX_STRING_LENGTH);
+      throw new IllegalArgumentException(
+          "String too long: " + utf8Bytes.length + " bytes, maximum " + MAX_STRING_LENGTH);
     }
     
     return new DBusString(value);

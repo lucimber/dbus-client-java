@@ -7,8 +7,8 @@ package com.lucimber.dbus.connection;
 
 /**
  * Listener interface for connection lifecycle events.
- * <p>
- * Implementations can register with a connection to receive notifications
+ *
+ * <p>Implementations can register with a connection to receive notifications
  * about state changes, health check results, and reconnection attempts.
  */
 @FunctionalInterface

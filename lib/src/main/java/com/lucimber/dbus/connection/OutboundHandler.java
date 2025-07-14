@@ -10,8 +10,8 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * A specialized {@link Handler} for processing outbound events in a {@link Pipeline}.
- * <p>
- * Outbound handlers process messages and events that flow from the tail toward the head
+ *
+ * <p>Outbound handlers process messages and events that flow from the tail toward the head
  * of the pipeline, typically in preparation for transmission.
  *
  * @see Context
@@ -21,8 +21,8 @@ public interface OutboundHandler extends Handler {
 
   /**
    * Invoked when an outbound message is propagated through the pipeline.
-   * <p>
-   * This method is responsible for handling or forwarding the outbound {@link OutboundMessage}.
+   *
+   * <p>This method is responsible for handling or forwarding the outbound {@link OutboundMessage}.
    * Completion of the provided {@link CompletableFuture} signals the success or failure of the operation.
    *
    * @param ctx    the {@link Context} this handler is bound to.

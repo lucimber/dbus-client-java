@@ -11,8 +11,8 @@ import java.util.Optional;
 
 /**
  * Represents a connection lifecycle event.
- * <p>
- * Connection events are fired when the connection state changes, health checks
+ *
+ * <p>Connection events are fired when the connection state changes, health checks
  * succeed or fail, or other significant connection-related events occur.
  */
 public final class ConnectionEvent {

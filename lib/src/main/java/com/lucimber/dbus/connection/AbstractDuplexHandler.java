@@ -13,8 +13,8 @@ import org.slf4j.Logger;
 /**
  * An abstract base class that combines both {@link InboundHandler} and {@link OutboundHandler}
  * interfaces to handle bidirectional message flow in a {@link Pipeline}.
- * <p>
- * Subclasses can override one or both sets of handler methods to implement custom logic
+ *
+ * <p>Subclasses can override one or both sets of handler methods to implement custom logic
  * for inbound and outbound processing. This class is useful for handlers that need to
  * observe or manipulate both directions of message flow.
  *

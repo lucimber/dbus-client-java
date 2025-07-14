@@ -22,12 +22,12 @@ import org.slf4j.LoggerFactory;
 /**
  * A connection handler that implements automatic reconnection with exponential backoff
  * when connection failures are detected.
- * <p>
- * This handler integrates with the connection pipeline and monitors connection events
+ *
+ * <p>This handler integrates with the connection pipeline and monitors connection events
  * to automatically attempt reconnection when the connection is lost. It uses exponential
  * backoff to avoid overwhelming the server with reconnection attempts.
- * <p>
- * The handler listens for connection state changes and failures, triggering reconnection
+ *
+ * <p>The handler listens for connection state changes and failures, triggering reconnection
  * attempts based on the configured backoff strategy.
  */
 public final class ConnectionReconnectHandler extends AbstractDuplexHandler {

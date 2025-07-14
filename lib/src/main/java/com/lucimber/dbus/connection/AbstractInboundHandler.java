@@ -10,11 +10,11 @@ import org.slf4j.Logger;
 
 /**
  * A skeletal implementation of the {@link InboundHandler} interface.
- * <p>
- * This abstract base class provides default (no-op) implementations of all lifecycle methods
+ *
+ * <p>This abstract base class provides default (no-op) implementations of all lifecycle methods
  * except for the core inbound handling methods, which must be implemented by subclasses.
- * <p>
- * Extend this class to simplify the creation of handlers that only need to process inbound messages
+ *
+ * <p>Extend this class to simplify the creation of handlers that only need to process inbound messages
  * and optionally handle connection or pipeline events.
  *
  * @see InboundHandler

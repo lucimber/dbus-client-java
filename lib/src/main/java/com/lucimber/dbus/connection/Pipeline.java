@@ -7,8 +7,8 @@ package com.lucimber.dbus.connection;
 
 /**
  * Represents an ordered chain of {@link Handler} instances associated with a {@link Connection}.
- * <p>
- * A {@code Pipeline} manages the flow of inbound and outbound events through the handler chain.
+ *
+ * <p>A {@code Pipeline} manages the flow of inbound and outbound events through the handler chain.
  * Handlers can be dynamically added or removed, and events can be propagated through the pipeline.
  *
  * @see Handler

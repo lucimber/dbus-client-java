@@ -104,11 +104,11 @@ public class AppLogicHandler extends ChannelDuplexHandler {
   /**
    * Sends the given {@link OutboundMessage} and returns a nested {@link Future} that tracks both
    * the write completion and the eventual reply.
-   * <p>
-   * This method is intended for use by higher-level components within the library or application.
+   *
+   * <p>This method is intended for use by higher-level components within the library or application.
    * It assumes that the {@code OutboundMessage} already has a valid and unique serial number assigned.
-   * <p>
-   * The returned {@code Future} structure works as follows:
+   *
+   * <p>The returned {@code Future} structure works as follows:
    * <ul>
    *   <li>The <strong>outer {@code Future}</strong> completes when the outbound message has been
    *   successfully written to the transport.</li>
@@ -118,8 +118,8 @@ public class AppLogicHandler extends ChannelDuplexHandler {
    *
    * @param msg the outbound message to send (must have a preassigned unique serial number).
    * @return a {@code Future} that completes with another {@code Future<InboundMessage>}:
-   * the outer future completes when the message is written;
-   * the inner future completes when the reply arrives.
+   *     the outer future completes when the message is written;
+   *     the inner future completes when the reply arrives.
    */
   public Future<Future<InboundMessage>> writeMessage(OutboundMessage msg) {
     if (ctx == null || !ctx.channel().isActive()) {
@@ -178,18 +178,18 @@ public class AppLogicHandler extends ChannelDuplexHandler {
 
   /**
    * Sends the given {@link OutboundMessage} without returning a future for the reply.
-   * <p>
-   * Unlike {@code writeMessage}, this method does not provide a {@link Future} for the expected
+   *
+   * <p>Unlike {@code writeMessage}, this method does not provide a {@link Future} for the expected
    * {@link InboundMessage} response. Instead, the reply will be delivered asynchronously
    * through the connection’s {@link Pipeline} and must be handled by registered
    * {@link InboundHandler}s.
-   * <p>
-   * This method is suitable when the application relies on the pipeline for inbound message
+   *
+   * <p>This method is suitable when the application relies on the pipeline for inbound message
    * processing rather than awaiting a reply programmatically.
    *
    * @param msg the outbound message to send.
    * @return a {@link Future} that completes when the message has been successfully written,
-   * or exceptionally if an error occurs during transmission.
+   *     or exceptionally if an error occurs during transmission.
    */
   public Future<Void> writeAndRouteResponse(OutboundMessage msg) {
     if (ctx == null || !ctx.channel().isActive()) {

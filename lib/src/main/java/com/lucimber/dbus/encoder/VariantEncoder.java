@@ -7,8 +7,8 @@ package com.lucimber.dbus.encoder;
 
 import com.lucimber.dbus.type.DBusBasicType;
 import com.lucimber.dbus.type.DBusContainerType;
-import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusVariant;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;

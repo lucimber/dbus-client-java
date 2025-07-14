@@ -6,13 +6,13 @@
 package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.DBusBasicType;
-import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusDict;
 import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeCode;
 import com.lucimber.dbus.type.TypeUtils;
-import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -39,6 +39,12 @@ public final class DictDecoder<KeyT extends DBusBasicType, ValueT extends DBusTy
   private final DBusSignature signature;
   private final DBusSignature valueSignature;
 
+  /**
+   * Creates a new decoder for D-Bus dictionary types.
+   *
+   * @param signature the dictionary signature to decode
+   * @throws IllegalArgumentException if signature is not a dictionary
+   */
   public DictDecoder(DBusSignature signature) {
     this.signature = Objects.requireNonNull(signature, "signature must not be null");
     if (!signature.isDictionary()) {
@@ -79,7 +85,8 @@ public final class DictDecoder<KeyT extends DBusBasicType, ValueT extends DBusTy
       DecoderResult<DBusDict<KeyT, ValueT>> entriesResult = decodeEntries(buffer, entriesOffset, length);
       consumedBytes += entriesResult.getConsumedBytes();
 
-      DecoderResult<DBusDict<KeyT, ValueT>> finalResult = new DecoderResultImpl<>(consumedBytes, entriesResult.getValue());
+      DecoderResult<DBusDict<KeyT, ValueT>> finalResult =
+          new DecoderResultImpl<>(consumedBytes, entriesResult.getValue());
       logResult(signature, offset, arrayPadding, consumedBytes);
 
       return finalResult;

@@ -8,9 +8,9 @@ package com.lucimber.dbus.netty;
 import com.lucimber.dbus.message.InboundError;
 import com.lucimber.dbus.message.InboundMethodReturn;
 import com.lucimber.dbus.message.OutboundMethodCall;
+import com.lucimber.dbus.type.DBusObjectPath;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.DBusObjectPath;
 import com.lucimber.dbus.type.DBusUInt32;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -24,13 +24,13 @@ import org.slf4j.LoggerFactory;
  * After SASL authentication completes and the DBus message pipeline is configured,
  * this handler sends the mandatory org.freedesktop.DBus.Hello method call
  * to request a unique bus name.
- * <p>
- * It listens for the reply to this specific Hello call. On success, it stores
+ *
+ * <p>It listens for the reply to this specific Hello call. On success, it stores
  * the assigned bus name as a channel attribute and fires a
  * {@link DBusChannelEvent#MANDATORY_NAME_ACQUIRED} event. On failure, it fires
  * {@link DBusChannelEvent#MANDATORY_NAME_ACQUISITION_FAILED}.
- * <p>
- * Regardless of success or failure of the Hello call, this handler removes
+ *
+ * <p>Regardless of success or failure of the Hello call, this handler removes
  * itself from the pipeline after processing the reply or an error related to it.
  */
 public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<Object> {

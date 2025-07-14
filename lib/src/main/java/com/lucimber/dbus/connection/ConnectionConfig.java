@@ -216,21 +216,25 @@ public final class ConnectionConfig {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     ConnectionConfig that = (ConnectionConfig) o;
-    return healthCheckEnabled == that.healthCheckEnabled &&
-            autoReconnectEnabled == that.autoReconnectEnabled &&
-            Double.compare(that.reconnectBackoffMultiplier, reconnectBackoffMultiplier) == 0 &&
-            maxReconnectAttempts == that.maxReconnectAttempts &&
-            Objects.equals(methodCallTimeout, that.methodCallTimeout) &&
-            Objects.equals(connectTimeout, that.connectTimeout) &&
-            Objects.equals(readTimeout, that.readTimeout) &&
-            Objects.equals(writeTimeout, that.writeTimeout) &&
-            Objects.equals(healthCheckInterval, that.healthCheckInterval) &&
-            Objects.equals(healthCheckTimeout, that.healthCheckTimeout) &&
-            Objects.equals(reconnectInitialDelay, that.reconnectInitialDelay) &&
-            Objects.equals(reconnectMaxDelay, that.reconnectMaxDelay);
+    return healthCheckEnabled == that.healthCheckEnabled
+            && autoReconnectEnabled == that.autoReconnectEnabled
+            && Double.compare(that.reconnectBackoffMultiplier, reconnectBackoffMultiplier) == 0
+            && maxReconnectAttempts == that.maxReconnectAttempts
+            && Objects.equals(methodCallTimeout, that.methodCallTimeout)
+            && Objects.equals(connectTimeout, that.connectTimeout)
+            && Objects.equals(readTimeout, that.readTimeout)
+            && Objects.equals(writeTimeout, that.writeTimeout)
+            && Objects.equals(healthCheckInterval, that.healthCheckInterval)
+            && Objects.equals(healthCheckTimeout, that.healthCheckTimeout)
+            && Objects.equals(reconnectInitialDelay, that.reconnectInitialDelay)
+            && Objects.equals(reconnectMaxDelay, that.reconnectMaxDelay);
   }
 
   @Override
@@ -243,20 +247,20 @@ public final class ConnectionConfig {
 
   @Override
   public String toString() {
-    return "ConnectionConfig{" +
-            "methodCallTimeout=" + methodCallTimeout +
-            ", connectTimeout=" + connectTimeout +
-            ", readTimeout=" + readTimeout +
-            ", writeTimeout=" + writeTimeout +
-            ", healthCheckEnabled=" + healthCheckEnabled +
-            ", healthCheckInterval=" + healthCheckInterval +
-            ", healthCheckTimeout=" + healthCheckTimeout +
-            ", autoReconnectEnabled=" + autoReconnectEnabled +
-            ", reconnectInitialDelay=" + reconnectInitialDelay +
-            ", reconnectMaxDelay=" + reconnectMaxDelay +
-            ", reconnectBackoffMultiplier=" + reconnectBackoffMultiplier +
-            ", maxReconnectAttempts=" + maxReconnectAttempts +
-            '}';
+    return "ConnectionConfig{"
+            + "methodCallTimeout=" + methodCallTimeout
+            + ", connectTimeout=" + connectTimeout
+            + ", readTimeout=" + readTimeout
+            + ", writeTimeout=" + writeTimeout
+            + ", healthCheckEnabled=" + healthCheckEnabled
+            + ", healthCheckInterval=" + healthCheckInterval
+            + ", healthCheckTimeout=" + healthCheckTimeout
+            + ", autoReconnectEnabled=" + autoReconnectEnabled
+            + ", reconnectInitialDelay=" + reconnectInitialDelay
+            + ", reconnectMaxDelay=" + reconnectMaxDelay
+            + ", reconnectBackoffMultiplier=" + reconnectBackoffMultiplier
+            + ", maxReconnectAttempts=" + maxReconnectAttempts
+            + '}';
   }
 
   /**

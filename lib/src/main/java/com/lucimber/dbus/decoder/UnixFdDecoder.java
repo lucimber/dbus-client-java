@@ -5,8 +5,8 @@
 
 package com.lucimber.dbus.decoder;
 
-import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.DBusUnixFD;
+import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;

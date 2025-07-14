@@ -7,12 +7,12 @@ package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.DBusBasicType;
 import com.lucimber.dbus.type.DBusContainerType;
-import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeCode;
 import com.lucimber.dbus.type.TypeUtils;
-import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -32,6 +32,14 @@ public final class DecoderUtils {
     // Utility class
   }
 
+  /**
+   * Skips alignment padding bytes in the buffer for the given type.
+   *
+   * @param buffer the ByteBuffer to advance
+   * @param offset the current byte offset
+   * @param type the D-Bus type requiring alignment
+   * @return the number of padding bytes skipped
+   */
   public static int skipPadding(ByteBuffer buffer, int offset, Type type) {
     int padding = calculateAlignmentPadding(type, offset);
     if (padding > 0) {
@@ -40,6 +48,13 @@ public final class DecoderUtils {
     return padding;
   }
 
+  /**
+   * Calculates the number of padding bytes needed for proper alignment.
+   *
+   * @param type the D-Bus type requiring alignment
+   * @param byteCount the current byte count/offset
+   * @return the number of padding bytes needed
+   */
   public static int calculateAlignmentPadding(Type type, int byteCount) {
     int alignment = type.getAlignment().getAlignment();
     int remainder = byteCount % alignment;
@@ -54,6 +69,12 @@ public final class DecoderUtils {
     }
   }
 
+  /**
+   * Verifies that an array length is within D-Bus limits.
+   *
+   * @param length the array length to verify
+   * @throws DecoderException if the length exceeds maximum allowed
+   */
   public static void verifyArrayLength(DBusUInt32 length) {
     LoggerUtils.trace(LOGGER, () -> "Verifying length of D-Bus array.");
     Objects.requireNonNull(length, "length must not be null");
@@ -91,6 +112,16 @@ public final class DecoderUtils {
     }
   }
 
+  /**
+   * Decodes a D-Bus container type from the buffer.
+   *
+   * @param signature signature of the container type
+   * @param buffer buffer containing the data
+   * @param offset offset inside the buffer
+   * @param <R> expected container type
+   * @return decoded container type
+   * @throws DecoderException if decoding fails
+   */
   @SuppressWarnings("unchecked")
   public static <R extends DBusContainerType> DecoderResult<R> decodeContainerType(DBusSignature signature,
                                                                                    ByteBuffer buffer,
@@ -111,6 +142,16 @@ public final class DecoderUtils {
     }
   }
 
+  /**
+   * Decodes a D-Bus basic type from the buffer.
+   *
+   * @param code the type code of the basic type
+   * @param buffer buffer containing the data
+   * @param offset offset inside the buffer
+   * @param <R> expected basic type
+   * @return decoded basic type
+   * @throws DecoderException if decoding fails
+   */
   @SuppressWarnings("unchecked")
   public static <R extends DBusBasicType> DecoderResult<R> decodeBasicType(TypeCode code,
                                                                            ByteBuffer buffer,

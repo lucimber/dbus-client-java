@@ -5,9 +5,9 @@
 
 package com.lucimber.dbus.encoder;
 
-import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.DBusStruct;
+import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;

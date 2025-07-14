@@ -8,8 +8,8 @@ package com.lucimber.dbus.connection;
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.InboundMethodReturn;
 import com.lucimber.dbus.message.OutboundMethodCall;
-import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusUInt32;
 import java.time.Instant;
 import java.util.Objects;
@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
 /**
  * A connection handler that monitors the health of a D-Bus connection by performing
  * periodic ping operations using the standard D-Bus Peer.Ping method.
- * <p>
- * This handler integrates with the connection pipeline and manages connection state
+ *
+ * <p>This handler integrates with the connection pipeline and manages connection state
  * transitions, health checks, and event firing to registered listeners.
  */
 public final class ConnectionHealthHandler extends AbstractDuplexHandler {
@@ -41,7 +41,8 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
   private final ScheduledExecutorService scheduler;
   private final ExecutorService eventExecutor;
   private final ConcurrentLinkedQueue<ConnectionEventListener> listeners = new ConcurrentLinkedQueue<>();
-  private final ConcurrentHashMap<DBusUInt32, CompletableFuture<InboundMessage>> pendingHealthChecks = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<DBusUInt32, CompletableFuture<InboundMessage>> pendingHealthChecks =
+      new ConcurrentHashMap<>();
 
   private final AtomicBoolean active = new AtomicBoolean(false);
   private final AtomicReference<ScheduledFuture<?>> healthCheckFuture = new AtomicReference<>();
