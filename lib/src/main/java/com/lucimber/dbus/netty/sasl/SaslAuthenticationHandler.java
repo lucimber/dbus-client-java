@@ -45,6 +45,7 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
     if (evt == DBusChannelEvent.SASL_NUL_BYTE_SENT && currentState == SaslState.IDLE) {
       LOGGER.debug("SASL_NUL_BYTE_SENT event received. Adding SASL string codecs and initiating AUTH.");
       SaslMessage authMsg = new SaslMessage(SaslCommandName.AUTH, null);
+      LOGGER.debug("SASL SEND: {}", authMsg);
       ctx.writeAndFlush(authMsg);
       currentState = SaslState.AWAITING_SERVER_MECHS;
     } else {
@@ -88,6 +89,7 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
       case OK -> {
         LOGGER.info("SASL server OK. GUID: {}. Sending BEGIN.", args);
         SaslMessage beginMsg = new SaslMessage(SaslCommandName.BEGIN, null);
+        LOGGER.debug("SASL SEND: {}", beginMsg);
         ctx.writeAndFlush(beginMsg).addListener(future -> {
           if (future.isSuccess()) {
             LOGGER.debug("BEGIN command sent successfully.");
@@ -118,6 +120,7 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
             var responseHex = (String) future.getNow();
             if (responseHex != null) {
               SaslMessage dataMsg = new SaslMessage(SaslCommandName.DATA, responseHex);
+              LOGGER.debug("SASL SEND: {}", dataMsg);
               ctx.writeAndFlush(dataMsg);
             } else {
               LOGGER.debug("Mechanism {} complete, awaiting server response.",
@@ -127,6 +130,7 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
             LOGGER.error("Failed to process challenge with mechanism {}",
                     currentMechanism.getName(), future.cause());
             SaslMessage cancelMsg = new SaslMessage(SaslCommandName.CANCEL, null);
+            LOGGER.debug("SASL SEND: {}", cancelMsg);
             ctx.writeAndFlush(cancelMsg);
           }
         });
@@ -134,6 +138,7 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
       case ERROR -> {
         LOGGER.error("SASL server ERROR: {}", args);
         SaslMessage cancelMsg = new SaslMessage(SaslCommandName.CANCEL, null);
+        LOGGER.debug("SASL SEND: {}", cancelMsg);
         ctx.writeAndFlush(cancelMsg);
       }
       case AGREE_UNIX_FD -> LOGGER.info("Server agreed to UNIX FD passing.");
@@ -176,6 +181,7 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
                 commandArgs += " " + value;
               }
               SaslMessage authMsg = new SaslMessage(SaslCommandName.AUTH, commandArgs);
+              LOGGER.debug("SASL SEND: {}", authMsg);
               ctx.writeAndFlush(authMsg);
               currentState = SaslState.NEGOTIATING;
             } else {

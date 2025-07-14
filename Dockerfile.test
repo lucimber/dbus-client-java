@@ -117,9 +117,9 @@ fi
 mkdir -p ~/.dbus-keyrings
 chmod 700 ~/.dbus-keyrings
 
-# For DBUS_COOKIE_SHA1 to work, we need to let the D-Bus daemon create the cookie file
-# The key is to make the keyring directory writable and let the daemon handle cookie creation
-echo "Preparing D-Bus keyring directory for automatic cookie creation..."
+# Setup D-Bus keyring directory for DBUS_COOKIE_SHA1
+# Let the D-Bus daemon create and manage cookies automatically
+echo "Preparing D-Bus keyring directory for automatic cookie management..."
 
 echo "Starting D-Bus daemon in background..."
 dbus-daemon --config-file=/etc/dbus-1/test-session.conf --fork --print-address

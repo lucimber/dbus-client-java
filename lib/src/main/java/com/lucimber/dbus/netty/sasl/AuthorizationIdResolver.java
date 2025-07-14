@@ -55,6 +55,8 @@ public final class AuthorizationIdResolver {
 
   private static String getUnixUid() throws SaslMechanismException {
     try {
+      // Use the standard Java NIO Files API to get UID from /proc/self
+      // This is the recommended approach for 2024 and avoids internal APIs
       Object uidAttr = Files.getAttribute(Paths.get("/proc/self"), "unix:uid");
       return uidAttr.toString();
     } catch (IOException e) {

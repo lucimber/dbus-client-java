@@ -7,7 +7,7 @@ package com.lucimber.dbus.netty.sasl;
 
 final class SaslUtil {
 
-  private static final char[] HEX_ARRAY_UPPER = "0123456789ABCDEF".toCharArray(); // DBus often uses uppercase hex
+  private static final char[] HEX_ARRAY_LOWER = "0123456789abcdef".toCharArray(); // D-Bus spec requires lowercase hex for DBUS_COOKIE_SHA1
 
   private SaslUtil() {
   } // Static utility class
@@ -19,8 +19,8 @@ final class SaslUtil {
     char[] hexChars = new char[bytes.length * 2];
     for (int j = 0; j < bytes.length; j++) {
       int v = bytes[j] & 0xFF;
-      hexChars[j * 2] = HEX_ARRAY_UPPER[v >>> 4];
-      hexChars[j * 2 + 1] = HEX_ARRAY_UPPER[v & 0x0F];
+      hexChars[j * 2] = HEX_ARRAY_LOWER[v >>> 4];
+      hexChars[j * 2 + 1] = HEX_ARRAY_LOWER[v & 0x0F];
     }
     return new String(hexChars);
   }
