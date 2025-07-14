@@ -15,8 +15,10 @@ import com.lucimber.dbus.type.DBusUInt32;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
+import io.netty.util.concurrent.ScheduledFuture;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +44,10 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
   private static final DBusObjectPath DBUS_OBJECT_PATH = DBusObjectPath.valueOf("/org/freedesktop/DBus");
   private static final DBusString DBUS_INTERFACE_NAME = DBusString.valueOf("org.freedesktop.DBus");
   private static final DBusString HELLO_METHOD_NAME = DBusString.valueOf("Hello");
+  private static final long HELLO_TIMEOUT_SECONDS = 30; // 30 second timeout for Hello call
   private State currentState = State.IDLE;
   private DBusUInt32 helloCallSerial;
+  private ScheduledFuture<?> helloTimeoutFuture;
 
   @Override
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
@@ -69,6 +73,7 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
           LOGGER.info("[DBusMandatoryNameHandler] Hello call sent successfully (serial={})", 
               helloCallSerial.getDelegate());
           currentState = State.AWAITING_HELLO_REPLY;
+          startHelloTimeout(ctx);
         } else {
           LOGGER.error("[DBusMandatoryNameHandler] Failed to send Hello call (serial={}): {}", 
               helloCallSerial.getDelegate(), future.cause().getMessage());
@@ -116,6 +121,8 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
   }
 
   private void handleHelloReply(ChannelHandlerContext ctx, InboundMethodReturn reply) {
+    cancelHelloTimeout();
+    
     List<DBusType> payload = reply.getPayload();
 
     if (!payload.isEmpty() && payload.get(0) instanceof DBusString assignedName) {
@@ -136,6 +143,8 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
   }
 
   private void handleHelloError(ChannelHandlerContext ctx, InboundError error) {
+    cancelHelloTimeout();
+    
     LOGGER.error("Received error reply for Hello call (serial {}): Name: {}, Message: {}",
             helloCallSerial.getDelegate(), error.getErrorName(), error.getPayload());
     ctx.fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
@@ -146,6 +155,7 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
     LOGGER.error("Exception caught. Current state: {}. Closing channel.", currentState, cause);
     // Ensure we signal failure if we were awaiting reply
     if (currentState == State.AWAITING_HELLO_REPLY) {
+      cancelHelloTimeout();
       ctx.fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
     }
   }
@@ -154,10 +164,32 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
     LOGGER.warn("Channel became inactive while in MandatoryNameHandler. State: {}", currentState);
     if (currentState == State.AWAITING_HELLO_REPLY) {
+      cancelHelloTimeout();
       ctx.fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
     }
     // No need to remove self, pipeline is being torn down
     super.channelInactive(ctx);
+  }
+
+  private void startHelloTimeout(ChannelHandlerContext ctx) {
+    helloTimeoutFuture = ctx.executor().schedule(() -> {
+      if (currentState == State.AWAITING_HELLO_REPLY) {
+        LOGGER.error("[DBusMandatoryNameHandler] Hello call timed out after {} seconds", HELLO_TIMEOUT_SECONDS);
+        ctx.fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
+        try {
+          ctx.pipeline().remove(this);
+          LOGGER.debug("Removed myself as {} from pipeline after timeout.", this.getClass().getSimpleName());
+        } catch (NoSuchElementException ignored) {
+          LOGGER.warn("Failed to remove myself as {} from pipeline after timeout.", this.getClass().getSimpleName());
+        }
+      }
+    }, HELLO_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+  }
+
+  private void cancelHelloTimeout() {
+    if (helloTimeoutFuture != null && !helloTimeoutFuture.isDone()) {
+      helloTimeoutFuture.cancel(false);
+    }
   }
 
   private enum State {
