@@ -6,18 +6,29 @@ import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple connection test to debug D-Bus connection issues
  */
 public class SimpleConnectionTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleConnectionTest.class);
+    
     public static void main(String[] args) {
-        System.out.println("=== Simple D-Bus Connection Test ===");
+        LOGGER.info("=== Simple D-Bus Connection Test ===");
         
-        // Enable detailed debugging
+        // Enable detailed debugging via system properties for fallback
         System.setProperty("org.slf4j.simpleLogger.log.com.lucimber.dbus", "debug");
         System.setProperty("org.slf4j.simpleLogger.log.io.netty", "debug");
         System.setProperty("org.slf4j.simpleLogger.log.root", "debug");
+        
+        // Log environment information
+        LOGGER.info("Test environment:");
+        LOGGER.info("  - Java version: {}", System.getProperty("java.version"));
+        LOGGER.info("  - File encoding: {}", System.getProperty("file.encoding"));
+        LOGGER.info("  - DBUS_SESSION_BUS_ADDRESS: {}", System.getenv("DBUS_SESSION_BUS_ADDRESS"));
+        LOGGER.info("  - Container mode: {}", new java.io.File("/.dockerenv").exists() ? "YES" : "NO");
         
         try {
             // Create configuration with shorter timeout for faster feedback
@@ -25,13 +36,13 @@ public class SimpleConnectionTest {
                 .withConnectTimeout(Duration.ofSeconds(10))
                 .build();
             
-            System.out.println("Creating NettyConnection...");
+            LOGGER.info("Creating NettyConnection...");
             NettyConnection connection = new NettyConnection(
                 new InetSocketAddress("127.0.0.1", 12345),
                 config
             );
             
-            System.out.println("Starting connection...");
+            LOGGER.info("Starting connection...");
             long startTime = System.currentTimeMillis();
             
             CompletableFuture<Void> connectFuture = connection.connect().toCompletableFuture();
@@ -39,29 +50,30 @@ public class SimpleConnectionTest {
             try {
                 connectFuture.get(15, TimeUnit.SECONDS);
                 long duration = System.currentTimeMillis() - startTime;
-                System.out.println("✅ Connection successful after " + duration + "ms");
-                System.out.println("Connection state: " + connection.getState());
-                System.out.println("Is connected: " + connection.isConnected());
+                LOGGER.info("✅ Connection successful after {}ms", duration);
+                LOGGER.info("Connection state: {}", connection.getState());
+                LOGGER.info("Is connected: {}", connection.isConnected());
                 
                 // Clean up
                 connection.close();
                 
             } catch (Exception e) {
                 long duration = System.currentTimeMillis() - startTime;
-                System.out.println("❌ Connection failed after " + duration + "ms");
-                System.out.println("Exception: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+                LOGGER.error("❌ Connection failed after {}ms", duration);
+                LOGGER.error("Exception: {}: {}", e.getClass().getSimpleName(), e.getMessage());
                 if (e.getCause() != null) {
-                    System.out.println("Caused by: " + e.getCause().getClass().getSimpleName() + ": " + e.getCause().getMessage());
+                    LOGGER.error("Caused by: {}: {}", e.getCause().getClass().getSimpleName(), e.getCause().getMessage());
                 }
                 
                 // Print stack trace for debugging
-                System.out.println("\nFull stack trace:");
+                LOGGER.error("Full stack trace:", e);
                 e.printStackTrace();
             }
             
         } catch (Exception e) {
-            System.out.println("❌ Failed to create connection: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("❌ Failed to create connection: {}", e.getMessage(), e);
         }
+        
+        LOGGER.info("=== Simple D-Bus Connection Test Complete ===");
     }
 }

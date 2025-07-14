@@ -71,8 +71,26 @@ public abstract class DBusIntegrationTestBase {
 
   @BeforeEach
   void logTestStart(TestInfo testInfo) {
-    LOGGER.info("Starting integration test: {}", testInfo.getDisplayName());
+    LOGGER.info("=== Starting integration test: {} ===", testInfo.getDisplayName());
     LOGGER.info("Test execution mode: {}", IS_RUNNING_IN_CONTAINER ? "IN-CONTAINER" : "TESTCONTAINERS");
+    
+    // Log environment information for debugging
+    if (IS_RUNNING_IN_CONTAINER) {
+      LOGGER.info("Container environment detected:");
+      LOGGER.info("  - DBUS_SESSION_BUS_ADDRESS: {}", System.getenv("DBUS_SESSION_BUS_ADDRESS"));
+      LOGGER.info("  - Unix socket exists: {}", new java.io.File("/tmp/dbus-test-socket").exists());
+      LOGGER.info("  - Docker env file exists: {}", new java.io.File("/.dockerenv").exists());
+    }
+    
+    // Log system properties that affect D-Bus
+    LOGGER.info("System configuration:");
+    LOGGER.info("  - file.encoding: {}", System.getProperty("file.encoding"));
+    LOGGER.info("  - user.name: {}", System.getProperty("user.name"));
+    LOGGER.info("  - java.version: {}", System.getProperty("java.version"));
+    
+    // Force a log flush to ensure this appears in container logs
+    System.out.flush();
+    System.err.flush();
   }
   
   /**

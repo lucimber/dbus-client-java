@@ -1,22 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <!-- Console appender with enhanced formatting for container environment -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %logger{36} - %msg%n%ex{full}</pattern>
         </encoder>
+        <!-- Ensure output is flushed immediately for container logging -->
+        <immediateFlush>true</immediateFlush>
     </appender>
 
-    <!-- Set root logger level to INFO to reduce noise -->
-    <root level="INFO">
+    <!-- File appender for container debugging -->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>/tmp/integration-test.log</file>
+        <encoder>
+            <pattern>%d{ISO8601} [%thread] %-5level %logger{36} - %msg%n%ex{full}</pattern>
+        </encoder>
+        <immediateFlush>true</immediateFlush>
+    </appender>
+
+    <!-- Set root logger level - can be overridden by environment variable -->
+    <root level="${LOG_LEVEL:-INFO}">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
     </root>
 
     <!-- Enable debug logging for D-Bus client library -->
-    <logger name="com.lucimber.dbus" level="DEBUG" />
+    <logger name="com.lucimber.dbus" level="${DBUS_LOG_LEVEL:-DEBUG}" />
     
     <!-- Enable debug logging for Netty if needed -->
-    <logger name="io.netty" level="DEBUG" />
+    <logger name="io.netty" level="${NETTY_LOG_LEVEL:-INFO}" />
     
     <!-- Enable debug logging for integration tests -->
-    <logger name="com.lucimber.dbus.integration" level="DEBUG" />
+    <logger name="com.lucimber.dbus.integration" level="${INTEGRATION_LOG_LEVEL:-DEBUG}" />
+    
+    <!-- JUnit platform logging -->
+    <logger name="org.junit.platform" level="INFO" />
+    <logger name="org.junit.jupiter" level="INFO" />
 </configuration>

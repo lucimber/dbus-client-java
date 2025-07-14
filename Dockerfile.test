@@ -66,9 +66,9 @@ COPY <<EOF /etc/dbus-1/test-session.conf
   <listen>unix:path=/tmp/dbus-test-socket</listen>
   <listen>tcp:host=127.0.0.1,port=12345</listen>
   
-  <!-- Support all authentication mechanisms for comprehensive testing -->
-  <auth>EXTERNAL</auth>
+  <!-- For TCP connections, prefer DBUS_COOKIE_SHA1 over EXTERNAL -->
   <auth>DBUS_COOKIE_SHA1</auth>
+  <auth>EXTERNAL</auth>
   
   <standard_session_servicedirs />
   
@@ -117,6 +117,10 @@ fi
 mkdir -p ~/.dbus-keyrings
 chmod 700 ~/.dbus-keyrings
 
+# For DBUS_COOKIE_SHA1 to work, we need to let the D-Bus daemon create the cookie file
+# The key is to make the keyring directory writable and let the daemon handle cookie creation
+echo "Preparing D-Bus keyring directory for automatic cookie creation..."
+
 echo "Starting D-Bus daemon in background..."
 dbus-daemon --config-file=/etc/dbus-1/test-session.conf --fork --print-address
 
@@ -141,6 +145,15 @@ echo
 
 # Set environment for tests
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/tmp/dbus-test-socket"
+
+# Set required Java system properties for SASL authentication
+export JAVA_OPTS="$JAVA_OPTS -Duser.name=root"
+export JAVA_OPTS="$JAVA_OPTS -Duser.home=/root"  
+export JAVA_OPTS="$JAVA_OPTS -Dos.name=Linux"
+
+# Ensure these are also available as environment variables
+export USER=root
+export HOME=/root
 
 # Verify D-Bus daemon is working before running tests
 echo "Testing D-Bus daemon connectivity..."
@@ -210,11 +223,32 @@ java -cp "lib/build/classes/java/main:lib/build/classes/java/test:$(./gradlew :l
 echo "Running integration tests..."
 cd /app
 export GRADLE_USER_HOME=/root/.gradle
+
+# Set up logging configuration for container environment
+echo "Configuring logging for container environment..."
+export LOG_LEVEL=${LOG_LEVEL:-INFO}
+export DBUS_LOG_LEVEL=${DBUS_LOG_LEVEL:-DEBUG}
+export INTEGRATION_LOG_LEVEL=${INTEGRATION_LOG_LEVEL:-DEBUG}
+
+echo "Logging configuration:"
+echo "  - Root level: $LOG_LEVEL"
+echo "  - D-Bus level: $DBUS_LOG_LEVEL"
+echo "  - Integration level: $INTEGRATION_LOG_LEVEL"
+echo "  - Log file: /tmp/integration-test.log"
+echo ""
+
 # Ensure UTF-8 encoding for test execution and JVM
+echo "Starting integration tests with enhanced logging..."
+echo "JAVA_OPTS: $JAVA_OPTS"
 ./gradlew integrationTest \
     -Dfile.encoding=UTF-8 \
     -Dconsole.encoding=UTF-8 \
-    --no-daemon --console=plain
+    -Dlogback.configurationFile=lib/src/test/resources/logback-test.xml \
+    -Duser.name=root \
+    -Duser.home=/root \
+    -Dos.name=Linux \
+    --no-daemon --console=plain \
+    --info
 
 # Since integrationTest task has ignoreFailures=true, we need to check actual test results
 # Check if test report exists and parse it for failures
@@ -268,6 +302,19 @@ fi
 # Display test results summary
 echo
 echo "=== Test Results Summary ==="
+
+# Show integration test log file if it exists
+if [ -f /tmp/integration-test.log ]; then
+    echo
+    echo "=== Integration Test Log File Content ==="
+    echo "Last 50 lines of /tmp/integration-test.log:"
+    tail -50 /tmp/integration-test.log
+    echo
+    echo "Log file size: $(wc -l < /tmp/integration-test.log) lines"
+else
+    echo
+    echo "⚠️  Integration test log file not found at /tmp/integration-test.log"
+fi
 
 # Keep D-Bus logs available for debugging
 echo

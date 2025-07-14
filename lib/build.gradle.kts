@@ -177,32 +177,51 @@ tasks.register<Exec>("integrationTestContainer") {
         println("📋 This will test D-Bus SASL authentication in a native Linux environment")
         
         // Check if verbose flag is provided
-        val showOutput = project.hasProperty("showOutput") || project.hasProperty("verbose")
+        val showFullOutput = project.hasProperty("showOutput") || project.hasProperty("verbose")
+        val showDebugLogs = project.hasProperty("debug") || project.hasProperty("debugLogs")
         
-        if (showOutput) {
-            println("📊 Verbose mode enabled - showing full test output")
+        if (showFullOutput) {
+            println("📊 Full verbose mode enabled - showing complete test output")
+        } else if (showDebugLogs) {
+            println("🔍 Debug mode enabled - showing test logs with enhanced debugging")
         } else {
-            println("💡 Use --verbose or -PshowOutput to see detailed test output")
+            println("💡 Use --verbose/-PshowOutput for full output, or -Pdebug/-PdebugLogs for debug logs")
         }
         println("")
         
+        // Prepare environment variables for container logging
+        val containerEnvVars = mutableListOf<String>()
+        if (showDebugLogs || showFullOutput) {
+            containerEnvVars.addAll(listOf(
+                "-e", "LOG_LEVEL=DEBUG",
+                "-e", "DBUS_LOG_LEVEL=DEBUG", 
+                "-e", "INTEGRATION_LOG_LEVEL=DEBUG"
+            ))
+        }
+        
         // Run the container and execute tests
-        val result = if (showOutput) {
-            // Use direct exec with output shown
+        val result = if (showFullOutput) {
+            // Use direct exec with complete output shown
             project.exec {
-                commandLine("docker", "run", "--rm", 
-                            "--name", "dbus-integration-test-run",
-                            "dbus-integration-test")
+                commandLine(listOf("docker", "run", "--rm", 
+                            "--name", "dbus-integration-test-run") + 
+                            containerEnvVars + 
+                            listOf("dbus-integration-test"))
                 standardOutput = System.out
                 errorOutput = System.err
                 isIgnoreExitValue = true
             }
         } else {
-            // Use exec with suppressed output
+            // Use exec with limited output filtering
             project.exec {
-                commandLine("docker", "run", "--rm", 
-                            "--name", "dbus-integration-test-run",
-                            "dbus-integration-test")
+                commandLine(listOf("docker", "run", "--rm", 
+                            "--name", "dbus-integration-test-run") + 
+                            containerEnvVars + 
+                            listOf("dbus-integration-test"))
+                if (showDebugLogs) {
+                    standardOutput = System.out
+                    errorOutput = System.err
+                }
                 isIgnoreExitValue = true
             }
         }
