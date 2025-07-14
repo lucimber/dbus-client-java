@@ -27,6 +27,9 @@
     <!-- Enable debug logging for D-Bus client library -->
     <logger name="com.lucimber.dbus" level="${DBUS_LOG_LEVEL:-DEBUG}" />
     
+    <!-- Enable wire-level logging for D-Bus bytes -->
+    <logger name="DBUS_WIRE" level="DEBUG" />
+    
     <!-- Enable debug logging for Netty if needed -->
     <logger name="io.netty" level="${NETTY_LOG_LEVEL:-INFO}" />
     

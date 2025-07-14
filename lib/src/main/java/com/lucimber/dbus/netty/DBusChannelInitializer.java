@@ -12,6 +12,8 @@ import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.Promise;
 import java.lang.invoke.MethodHandles;
 import java.util.Objects;
@@ -42,6 +44,8 @@ final class DBusChannelInitializer extends ChannelInitializer<Channel> {
 
   private void addDbusRelatedHandlers(ChannelPipeline p) {
     LoggerUtils.debug(LOGGER, () -> "Adding D-Bus related handlers to channel pipeline.");
+    // Add wire-level logging to see raw bytes sent/received
+    p.addLast("nettyByteLogger", new LoggingHandler("DBUS_WIRE", LogLevel.DEBUG));
     p.addLast(FrameEncoder.class.getSimpleName(), new FrameEncoder());
     p.addLast(OutboundMessageEncoder.class.getSimpleName(), new OutboundMessageEncoder());
     p.addLast(FrameDecoder.class.getSimpleName(), new FrameDecoder());
