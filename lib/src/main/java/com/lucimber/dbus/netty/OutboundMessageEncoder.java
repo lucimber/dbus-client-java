@@ -214,6 +214,7 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
   @Override
   protected void encode(ChannelHandlerContext ctx, OutboundMessage msg, List<Object> out) {
     LoggerUtils.debug(LOGGER, MARKER, () -> "Mapping an outbound message to frame: " + msg);
+    LOGGER.debug("OutboundMessageEncoder: Encoding message: {} (type: {})", msg, msg.getClass().getSimpleName());
     msg.getSignature().ifPresent(signature -> validatePayload(msg.getPayload(), signature));
     Frame frame = new Frame();
     frame.setByteOrder(BYTE_ORDER);
@@ -226,5 +227,6 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     Map<HeaderField, DBusVariant> headerFields = buildHeaderFields(msg);
     frame.setHeaderFields(headerFields);
     out.add(frame);
+    LOGGER.debug("OutboundMessageEncoder: Successfully encoded frame: {}", frame);
   }
 }

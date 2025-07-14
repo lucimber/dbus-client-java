@@ -107,6 +107,7 @@ final class FrameDecoder extends ByteToMessageDecoder {
           copyMessageBody(in);
           out.add(frame);
           LoggerUtils.debug(LOGGER, MARKER, () -> "Decoded " + frame);
+          LOGGER.debug("FrameDecoder: Decoded and added frame to output: {}", frame);
           frame = new Frame();
           offset = 0;
           decoderState = DecoderState.HEADER_PREAMBLE;

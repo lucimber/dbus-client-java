@@ -223,7 +223,13 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
     } catch (NoSuchElementException ignored) {
     }
 
-    ctx.fireUserEventTriggered(success ? DBusChannelEvent.SASL_AUTH_COMPLETE : DBusChannelEvent.SASL_AUTH_FAILED);
+    if (success) {
+      LOGGER.debug("SaslAuthenticationHandler: Firing SASL_AUTH_COMPLETE event");
+      ctx.fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
+    } else {
+      LOGGER.debug("SaslAuthenticationHandler: Firing SASL_AUTH_FAILED event");
+      ctx.fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_FAILED);
+    }
   }
 
   private void disposeCurrentMechanism() {

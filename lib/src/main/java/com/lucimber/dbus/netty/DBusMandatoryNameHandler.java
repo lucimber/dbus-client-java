@@ -13,7 +13,8 @@ import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusUInt32;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.ReferenceCountUtil;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * <p>Regardless of success or failure of the Hello call, this handler removes
  * itself from the pipeline after processing the reply or an error related to it.
  */
-public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<Object> {
+public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DBusMandatoryNameHandler.class);
 
@@ -46,7 +47,7 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
 
   @Override
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-    LOGGER.debug("Received user event: {}, current state: {}", evt, currentState);
+    LOGGER.debug("DBusMandatoryNameHandler: Received user event: {}, current state: {}", evt, currentState);
     if (evt == DBusChannelEvent.SASL_AUTH_COMPLETE && currentState == State.IDLE) {
       LOGGER.debug("DBus message pipeline is ready. Sending org.freedesktop.DBus.Hello method call.");
 
@@ -82,28 +83,41 @@ public final class DBusMandatoryNameHandler extends SimpleChannelInboundHandler<
   }
 
   @Override
-  protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
+  public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    LOGGER.debug("Received message in DBusMandatoryNameHandler: {} (type: {}), current state: {}", 
+        msg, msg.getClass().getSimpleName(), currentState);
+    
     if (currentState != State.AWAITING_HELLO_REPLY) {
       // Not waiting for our Hello reply, pass it on.
+      LOGGER.debug("Not waiting for Hello reply, passing message along");
       ctx.fireChannelRead(msg);
       return;
     }
 
     boolean handled = false;
     if (msg instanceof InboundMethodReturn methodReturn) {
+      LOGGER.debug("Received InboundMethodReturn: serial={}, replySerial={}, expected replySerial={}", 
+          methodReturn.getSerial().getDelegate(), methodReturn.getReplySerial().getDelegate(), 
+          helloCallSerial.getDelegate());
       if (methodReturn.getReplySerial().equals(helloCallSerial)) {
         handled = true;
         handleHelloReply(ctx, methodReturn);
+        ReferenceCountUtil.release(msg); // Release message after handling
       }
     } else if (msg instanceof InboundError error) {
+      LOGGER.debug("Received InboundError: serial={}, replySerial={}, expected replySerial={}", 
+          error.getSerial().getDelegate(), error.getReplySerial().getDelegate(), 
+          helloCallSerial.getDelegate());
       if (error.getReplySerial().equals(helloCallSerial)) {
         handled = true;
         handleHelloError(ctx, error);
+        ReferenceCountUtil.release(msg); // Release message after handling
       }
     }
 
     if (!handled) {
       // Not a reply to our Hello call, pass it on.
+      LOGGER.debug("Message not handled (serial mismatch or wrong type), passing along");
       ctx.fireChannelRead(msg);
     }
   }

@@ -257,11 +257,14 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
 
   @Override
   public void decode(ChannelHandlerContext ctx, Frame frame, List<Object> out) {
+    LOGGER.debug("InboundMessageDecoder: Received frame: {}", frame);
     InboundMessage msg = mapFrameToInboundMessage(frame);
     if (msg == null) {
       LoggerUtils.warn(LOGGER, MARKER, () -> "Ignoring inbound message with invalid type.");
+      LOGGER.warn("InboundMessageDecoder: Failed to decode frame: {}", frame);
     } else {
       LoggerUtils.debug(LOGGER, MARKER, () -> "Decoded an " + msg);
+      LOGGER.debug("InboundMessageDecoder: Successfully decoded message: {}", msg);
       out.add(msg);
     }
   }
