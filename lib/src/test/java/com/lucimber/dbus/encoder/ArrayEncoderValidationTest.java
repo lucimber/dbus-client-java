@@ -10,6 +10,7 @@ import com.lucimber.dbus.type.DBusByte;
 import com.lucimber.dbus.type.DBusInt32;
 import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.DBusString;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -41,6 +42,7 @@ final class ArrayEncoderValidationTest {
 
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
+  @Tag("memory-intensive")
   void encodeLargeValidArraySucceeds(ByteOrder byteOrder) {
     // Create an array that's large but practical for testing
     // Test with 1MB which is large enough to test but manageable

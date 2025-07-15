@@ -48,12 +48,31 @@ java {
 }
 
 tasks.named<Test>("test") {
+    val runMemoryIntensiveTests = project.hasProperty("withMemoryIntensiveTests")
+    
     useJUnitPlatform {
-        excludeTags("integration", "performance", "chaos")
+        if (runMemoryIntensiveTests) {
+            excludeTags("integration", "performance", "chaos")
+        } else {
+            excludeTags("integration", "performance", "chaos", "memory-intensive")
+        }
     }
-    // Allocate more memory for memory-intensive validation tests
-    maxHeapSize = "4g"
-    jvmArgs("-XX:+UseG1GC", "-XX:MaxMetaspaceSize=512m")
+    
+    // Allocate more memory when running memory-intensive tests
+    if (runMemoryIntensiveTests) {
+        maxHeapSize = "8g"
+        jvmArgs("-XX:+UseG1GC", "-XX:MaxMetaspaceSize=1g")
+        doFirst {
+            println("🧠 Memory-intensive tests enabled - using 8GB heap size")
+        }
+    } else {
+        maxHeapSize = "4g"
+        jvmArgs("-XX:+UseG1GC", "-XX:MaxMetaspaceSize=512m")
+        doFirst {
+            println("💡 Memory-intensive tests disabled - use -PwithMemoryIntensiveTests to enable")
+        }
+    }
+    
     finalizedBy(tasks.jacocoTestReport)
 }
 
@@ -136,6 +155,7 @@ tasks.register<Test>("chaosTest") {
         events("passed", "skipped", "failed")
     }
 }
+
 
 tasks.named<JavaCompile>("compileJava") {
     options.encoding = "UTF-8"

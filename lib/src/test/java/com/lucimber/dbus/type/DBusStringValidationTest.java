@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -47,6 +48,7 @@ final class DBusStringValidationTest {
   }
 
   @Test
+  @Tag("memory-intensive")
   void acceptLargeButValidString() {
     // Create a large but valid string (1MB)
     StringBuilder sb = new StringBuilder();
@@ -57,6 +59,7 @@ final class DBusStringValidationTest {
   }
 
   @Test
+  @Tag("memory-intensive")
   void rejectOversizedString() {
     // Create a string that exceeds the maximum size
     // Use a more practical test that still validates the size limit enforcement
