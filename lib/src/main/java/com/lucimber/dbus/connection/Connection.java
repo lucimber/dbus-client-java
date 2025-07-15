@@ -83,9 +83,9 @@ public interface Connection extends AutoCloseable {
    * while keeping message transmission efficient.
    *
    * @param msg    the outbound message to send.
-   * @param future the {@link CompletableFuture} to complete once the message is written or if an error occurs.
+   * @param future the {@link CompletionStage} to complete once the message is written or if an error occurs.
    */
-  void sendAndRouteResponse(OutboundMessage msg, CompletableFuture<Void> future);
+  void sendAndRouteResponse(OutboundMessage msg, CompletionStage<Void> future);
 
   /**
    * Retrieves the configuration for this connection.
@@ -118,9 +118,9 @@ public interface Connection extends AutoCloseable {
   /**
    * Manually triggers a health check if health monitoring is enabled.
    *
-   * @return a {@link CompletableFuture} that completes when the health check is triggered
+   * @return a {@link CompletionStage} that completes when the health check is triggered
    */
-  CompletableFuture<Void> triggerHealthCheck();
+  CompletionStage<Void> triggerHealthCheck();
 
   /**
    * Gets the current number of reconnection attempts.

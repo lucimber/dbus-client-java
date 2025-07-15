@@ -353,18 +353,18 @@ public final class NettyConnection implements Connection {
   }
 
   @Override
-  public void sendAndRouteResponse(OutboundMessage msg, CompletableFuture<Void> future) {
+  public void sendAndRouteResponse(OutboundMessage msg, CompletionStage<Void> future) {
     if (appLogicHandler == null || !isConnected()) {
       var re = new IllegalStateException("Not connected to D-Bus.");
-      future.completeExceptionally(re);
+      future.toCompletableFuture().completeExceptionally(re);
     } else {
       appLogicHandler.writeAndRouteResponse(msg).addListener(f -> {
         if (f.isSuccess()) {
-          future.complete(null);
+          future.toCompletableFuture().complete(null);
         } else if (f.cause() != null) {
-          future.completeExceptionally(f.cause());
+          future.toCompletableFuture().completeExceptionally(f.cause());
         } else if (f.isCancelled()) {
-          future.cancel(true);
+          future.toCompletableFuture().cancel(true);
         }
       });
     }
@@ -406,7 +406,7 @@ public final class NettyConnection implements Connection {
   }
 
   @Override
-  public CompletableFuture<Void> triggerHealthCheck() {
+  public CompletionStage<Void> triggerHealthCheck() {
     if (healthHandler != null) {
       return healthHandler.triggerHealthCheck();
     }
