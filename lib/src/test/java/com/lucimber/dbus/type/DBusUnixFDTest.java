@@ -301,6 +301,7 @@ final class DBusUnixFDTest {
     }
 
     @Test
+    @Tag("memory-intensive")
     void testFileDescriptorRangeCompliance() {
         // Test that Unix file descriptors are properly represented
         // In Unix systems, file descriptors are typically non-negative integers

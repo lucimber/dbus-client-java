@@ -141,6 +141,7 @@ final class ArrayEncoderValidationTest {
 
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
+  @Tag("memory-intensive")
   void encodeArraySizeLimitingWorks(ByteOrder byteOrder) {
     // The actual size limit testing is complex due to memory constraints
     // The important thing is that the validation logic exists in ArrayEncoder

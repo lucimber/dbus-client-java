@@ -13,8 +13,25 @@ The D-Bus client library includes a comprehensive testing suite designed to ensu
 - **Run with**: `./gradlew test`
 
 ```bash
+# Basic unit tests (memory-intensive tests skipped)
 ./gradlew test
+
+# Include memory-intensive tests (requires more memory)
+./gradlew test -PwithMemoryIntensiveTests
 ```
+
+##### Memory-Intensive Tests 🧠
+- **Tag**: `@Tag("memory-intensive")`
+- **Purpose**: Test components with large data structures (1MB+ arrays/strings)
+- **Memory**: Automatically allocated 8GB heap when enabled (vs 4GB default)
+- **Examples**: Large array validation, 1MB string processing, bulk object creation
+- **Skipped by default** to ensure fast development feedback loops
+
+**Memory-intensive test examples:**
+- `ArrayEncoderValidationTest.encodeLargeValidArraySucceeds()` - 1MB byte arrays
+- `DBusStringValidationTest.acceptLargeButValidString()` - 1MB strings
+- `DBusObjectPathValidationTest.rejectOversizedPath()` - 20M path components
+- And 10 other tests creating large data structures
 
 #### 2. **Integration Tests** 🐳
 - **Location**: `lib/src/test/java/**/integration/**`
@@ -210,10 +227,25 @@ public class DBusChaosTest {
 ### Gradle Configuration
 
 ```kotlin
-// Unit tests (exclude integration/performance/chaos)
+// Unit tests (exclude integration/performance/chaos, conditionally exclude memory-intensive)
 tasks.named<Test>("test") {
+    val runMemoryIntensiveTests = project.hasProperty("withMemoryIntensiveTests")
+    
     useJUnitPlatform {
-        excludeTags("integration", "performance", "chaos")
+        if (runMemoryIntensiveTests) {
+            excludeTags("integration", "performance", "chaos")
+        } else {
+            excludeTags("integration", "performance", "chaos", "memory-intensive")
+        }
+    }
+    
+    // Allocate more memory when running memory-intensive tests
+    if (runMemoryIntensiveTests) {
+        maxHeapSize = "8g"
+        jvmArgs("-XX:+UseG1GC", "-XX:MaxMetaspaceSize=1g")
+    } else {
+        maxHeapSize = "4g"
+        jvmArgs("-XX:+UseG1GC", "-XX:MaxMetaspaceSize=512m")
     }
 }
 
@@ -338,8 +370,11 @@ docker pull ubuntu:22.04
 ### Individual Test Categories
 
 ```bash
-# Unit tests only (includes static analysis)
+# Unit tests only (includes static analysis, memory-intensive tests skipped)
 ./gradlew test
+
+# Unit tests with memory-intensive tests (requires 8GB heap)
+./gradlew test -PwithMemoryIntensiveTests
 
 # Integration tests - container-based (recommended, fast)
 ./test-container.sh
@@ -364,8 +399,11 @@ docker pull ubuntu:22.04
 
 **During Development:**
 ```bash
-# Quick feedback loop
+# Quick feedback loop (fast, memory-intensive tests skipped)
 ./gradlew test
+
+# Complete unit testing (includes memory-intensive tests)
+./gradlew test -PwithMemoryIntensiveTests
 
 # Full integration verification
 ./test-container.sh
@@ -382,9 +420,15 @@ docker pull ubuntu:22.04
 
 ### Skipping Test Categories
 
-Tests can be skipped using environment variables:
+Tests can be skipped using environment variables or project properties:
 
 ```bash
+# Skip memory-intensive tests (default behavior)
+./gradlew test
+
+# Include memory-intensive tests
+./gradlew test -PwithMemoryIntensiveTests
+
 # Skip integration tests
 export SKIP_INTEGRATION_TESTS=true
 ./gradlew integrationTest
@@ -417,6 +461,8 @@ jobs:
           distribution: 'temurin'
       - name: Run Unit Tests
         run: ./gradlew test
+      - name: Run Memory-Intensive Tests  
+        run: ./gradlew test -PwithMemoryIntensiveTests
 
   integration-tests:
     runs-on: ubuntu-latest
@@ -459,6 +505,7 @@ unit-tests:
     - docker:dind
   script:
     - ./gradlew test
+    - ./gradlew test -PwithMemoryIntensiveTests
 
 integration-tests:
   stage: integration
@@ -489,6 +536,7 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 sh './gradlew test'
+                sh './gradlew test -PwithMemoryIntensiveTests'
             }
             post {
                 always {
@@ -618,6 +666,13 @@ Solution: Use container-based tests instead: ./test-container.sh
 ```
 Error: OutOfMemoryError during performance tests
 Solution: Increase heap size: ./gradlew performanceTest -Xmx4g
+```
+
+**Memory-intensive test failures:**
+```
+Error: OutOfMemoryError during memory-intensive tests
+Solution: These tests automatically allocate 8GB heap when using -PwithMemoryIntensiveTests
+If still failing, ensure system has sufficient memory available
 ```
 
 **Chaos test instability:**

@@ -340,6 +340,7 @@ final class DBusStructTest {
     }
 
     @Test
+    @Tag("memory-intensive")
     void testMaximumDepthStructures() {
         // Test deep nesting to ensure it doesn't break
         // Create a structure like ((((i))))

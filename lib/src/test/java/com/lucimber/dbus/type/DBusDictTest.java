@@ -457,6 +457,7 @@ final class DBusDictTest {
     }
 
     @Test
+    @Tag("memory-intensive")
     void testLargeDict() {
         DBusSignature signature = DBusSignature.valueOf("a{si}");
         DBusDict<DBusString, DBusInt32> dict = new DBusDict<>(signature);

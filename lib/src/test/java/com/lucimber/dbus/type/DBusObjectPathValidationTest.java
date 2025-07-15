@@ -105,6 +105,7 @@ final class DBusObjectPathValidationTest {
   }
 
   @Test
+  @Tag("memory-intensive")
   void acceptLargeButValidPath() {
     // Create a large but valid path
     StringBuilder sb = new StringBuilder("/");
@@ -118,6 +119,7 @@ final class DBusObjectPathValidationTest {
   }
 
   @Test
+  @Tag("memory-intensive")
   void rejectOversizedPath() {
     // Create a path that exceeds the maximum size
     StringBuilder sb = new StringBuilder("/");

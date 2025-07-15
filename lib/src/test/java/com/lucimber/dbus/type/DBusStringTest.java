@@ -242,6 +242,7 @@ final class DBusStringTest {
     }
 
     @Test
+    @Tag("memory-intensive")
     void testWithVeryLongString() {
         // Test with a very long string
         StringBuilder sb = new StringBuilder();

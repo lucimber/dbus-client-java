@@ -524,6 +524,7 @@ final class DBusArrayTest {
     }
 
     @Test
+    @Tag("memory-intensive")
     void testLargeArray() {
         DBusSignature signature = DBusSignature.valueOf("ai");
         DBusArray<DBusInt32> array = new DBusArray<>(signature);

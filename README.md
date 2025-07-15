@@ -52,7 +52,11 @@ to compile and test the code.
 
 ### Unit Tests
 ```bash
+# Basic unit tests (memory-intensive tests skipped)
 ./gradlew test
+
+# Include memory-intensive tests (requires more memory)
+./gradlew test -PwithMemoryIntensiveTests
 ```
 
 ### Integration Tests

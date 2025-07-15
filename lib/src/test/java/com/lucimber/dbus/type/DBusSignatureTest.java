@@ -246,6 +246,7 @@ final class DBusSignatureTest {
   }
 
   @Test
+  @Tag("memory-intensive")
   public void testLongSignature() {
     // Test with a very long but valid signature
     StringBuilder longSig = new StringBuilder();
@@ -325,6 +326,7 @@ final class DBusSignatureTest {
   }
 
   @Test
+  @Tag("memory-intensive")
   public void testSpecificationLimits() {
     // Test D-Bus specification limits for signatures
     // Note: This implementation may not enforce all D-Bus specification limits
@@ -349,6 +351,7 @@ final class DBusSignatureTest {
   }
 
   @Test
+  @Tag("memory-intensive")
   public void testMaximumNestingDepth() {
     // Test D-Bus specification limit: maximum depth of 32 array + 32 struct = 64 total
     // Note: This implementation may not enforce nesting depth limits
