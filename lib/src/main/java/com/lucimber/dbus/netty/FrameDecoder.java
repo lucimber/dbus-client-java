@@ -189,7 +189,10 @@ final class FrameDecoder extends ByteToMessageDecoder {
     int bodyLength = frame.getBodyLength().intValue();
     ByteBuffer body = ByteBuffer.allocate(bodyLength);
     body.put(in.nioBuffer(in.readerIndex(), bodyLength));
+    body.flip(); // Reset position to 0 and set limit for reading
+    body.order(frame.getByteOrder()); // Set byte order to match frame's byte order
     frame.setBody(body);
+    in.skipBytes(bodyLength); // Advance input buffer past the body
   }
 
   private enum DecoderState {
