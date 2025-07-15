@@ -27,7 +27,7 @@ import org.slf4j.Logger;
  * <p>After logging, the listener can optionally execute custom completion logic
  * via the provided {@link Consumer} function.
  * 
- * <h3>Usage Examples</h3>
+ * <h2>Usage Examples</h2>
  * 
  * <p><strong>Basic logging only:</strong>
  * <pre>{@code
