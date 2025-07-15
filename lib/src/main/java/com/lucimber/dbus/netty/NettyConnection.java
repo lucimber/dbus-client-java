@@ -245,6 +245,17 @@ public final class NettyConnection implements Connection {
       }
     });
 
+    // Notify D-Bus pipeline when connection is fully established
+    connectPromise.addListener(future -> {
+      if (future.isSuccess()) {
+        LOGGER.debug("Connection completed successfully, notifying D-Bus pipeline");
+        // The D-Bus pipeline should be notified about the connection being active
+        if (pipeline != null) {
+          pipeline.propagateConnectionActive();
+        }
+      }
+    });
+
     return NettyFutureConverter.toCompletionStage(connectPromise);
   }
 

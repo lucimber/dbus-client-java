@@ -162,6 +162,7 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
     ctx.propagateInboundFailure(cause);
   }
 
+
   private void startHealthMonitoring(Context ctx) {
     if (!config.isHealthCheckEnabled()) {
       LOGGER.debug("Health monitoring is disabled in configuration");
