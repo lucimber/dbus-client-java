@@ -12,7 +12,6 @@ import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeUtils;
 import com.lucimber.dbus.util.LoggerUtils;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -20,8 +19,6 @@ import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * An encoder which encodes an array to the D-Bus marshalling format using ByteBuffer.
@@ -32,9 +29,8 @@ import org.slf4j.MarkerFactory;
  */
 public final class ArrayEncoder<E extends DBusType> implements Encoder<DBusArray<E>, ByteBuffer> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
-  
+  private static final Logger LOGGER = LoggerFactory.getLogger(ArrayEncoder.class);
+
   // D-Bus specification: maximum array size is 64 MiB (67,108,864 bytes)
   private static final int MAX_ARRAY_SIZE = 67108864; // 2^26
 
@@ -55,16 +51,10 @@ public final class ArrayEncoder<E extends DBusType> implements Encoder<DBusArray
     }
   }
 
-  private static void logResult(DBusSignature signature, int offset, int padding, int producedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "ARRAY: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
-      return String.format(s, signature, offset, padding, producedBytes);
-    });
-  }
-
   @Override
   public EncoderResult<ByteBuffer> encode(DBusArray<E> array, int offset) throws EncoderException {
     Objects.requireNonNull(array, "array must not be null");
+
     try {
       // Alignment of the array itself
       int padding = EncoderUtils.calculateAlignmentPadding(Type.ARRAY.getAlignment(), offset);
@@ -90,7 +80,9 @@ public final class ArrayEncoder<E extends DBusType> implements Encoder<DBusArray
 
       // Check array size limit before encoding
       if (elementsSize > MAX_ARRAY_SIZE) {
-        throw new EncoderException("Array too large: " + elementsSize + " bytes, maximum " + MAX_ARRAY_SIZE + " bytes");
+        throw new EncoderException("Array too large: "
+                + elementsSize + " bytes, maximum "
+                + MAX_ARRAY_SIZE + " bytes");
       }
 
       // Encode the length prefix
@@ -123,7 +115,10 @@ public final class ArrayEncoder<E extends DBusType> implements Encoder<DBusArray
       }
 
       buffer.flip();
-      logResult(signature, offset, padding + typePadding, totalSize);
+
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "ARRAY: {}; Offset: {}; Padding: {}; Produced bytes: {};",
+              signature, offset, padding + typePadding, totalSize);
 
       return new EncoderResultImpl<>(totalSize, buffer);
     } catch (Exception ex) {

@@ -8,13 +8,10 @@ package com.lucimber.dbus.decoder;
 import com.lucimber.dbus.type.DBusUnixFD;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * A decoder which unmarshals a file descriptor from the byte stream format used by D-Bus.
@@ -24,20 +21,13 @@ import org.slf4j.MarkerFactory;
  */
 public final class UnixFdDecoder implements Decoder<ByteBuffer, DBusUnixFD> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
+  private static final Logger LOGGER = LoggerFactory.getLogger(UnixFdDecoder.class);
   private static final int TYPE_BYTES = 4;
-
-  private static void logResult(DBusUnixFD value, int offset, int padding, int consumedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "UNIX_FD: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
-      return String.format(s, value, offset, padding, consumedBytes);
-    });
-  }
 
   @Override
   public DecoderResult<DBusUnixFD> decode(ByteBuffer buffer, int offset) throws DecoderException {
     Objects.requireNonNull(buffer, "buffer must not be null");
+
     try {
       int consumedBytes = 0;
 
@@ -49,7 +39,10 @@ public final class UnixFdDecoder implements Decoder<ByteBuffer, DBusUnixFD> {
 
       DBusUnixFD value = DBusUnixFD.valueOf(rawValue);
       DecoderResult<DBusUnixFD> result = new DecoderResultImpl<>(consumedBytes, value);
-      logResult(value, offset, padding, consumedBytes);
+
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "UNIX_FD: {}; Offset: {}; Padding: {}; Consumed bytes: {};",
+              value, offset, padding, consumedBytes);
 
       return result;
     } catch (Throwable t) {

@@ -11,14 +11,11 @@ import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusVariant;
 import com.lucimber.dbus.util.LoggerUtils;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * An encoder which encodes a variant to the D-Bus marshalling format using ByteBuffer.
@@ -28,8 +25,7 @@ import org.slf4j.MarkerFactory;
  */
 public final class VariantEncoder implements Encoder<DBusVariant, ByteBuffer> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
+  private static final Logger LOGGER = LoggerFactory.getLogger(VariantEncoder.class);
 
   private final ByteOrder order;
 
@@ -42,16 +38,10 @@ public final class VariantEncoder implements Encoder<DBusVariant, ByteBuffer> {
     this.order = Objects.requireNonNull(order, "order must not be null");
   }
 
-  private static void logResult(DBusVariant value, int offset, int producedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "VARIANT: %s; Offset: %d; Padding: %d, Produced bytes: %d;";
-      return String.format(s, value, offset, 0, producedBytes);
-    });
-  }
-
   @Override
   public EncoderResult<ByteBuffer> encode(DBusVariant variant, int offset) throws EncoderException {
     Objects.requireNonNull(variant, "variant must not be null");
+
     try {
       int producedBytes = 0;
       ByteBuffer output;
@@ -77,7 +67,10 @@ public final class VariantEncoder implements Encoder<DBusVariant, ByteBuffer> {
       output.flip();
 
       EncoderResult<ByteBuffer> result = new EncoderResultImpl<>(producedBytes, output);
-      logResult(variant, offset, producedBytes);
+
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "VARIANT: {}; Offset: {}; Padding: {}; Produced bytes: {};",
+              variant, offset, 0, producedBytes);
 
       return result;
     } catch (Exception ex) {

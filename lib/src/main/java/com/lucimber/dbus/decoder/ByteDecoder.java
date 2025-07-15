@@ -7,13 +7,10 @@ package com.lucimber.dbus.decoder;
 
 import com.lucimber.dbus.type.DBusByte;
 import com.lucimber.dbus.util.LoggerUtils;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * A decoder which unmarshals a byte from the byte stream format used by D-Bus.
@@ -23,15 +20,7 @@ import org.slf4j.MarkerFactory;
  */
 public final class ByteDecoder implements Decoder<ByteBuffer, DBusByte> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
-
-  private static void logResult(DBusByte value, int offset, int consumedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "BYTE: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
-      return String.format(s, value, offset, 0, consumedBytes);
-    });
-  }
+  private static final Logger LOGGER = LoggerFactory.getLogger(ByteDecoder.class);
 
   @Override
   public DecoderResult<DBusByte> decode(ByteBuffer buffer, int offset) {
@@ -43,7 +32,10 @@ public final class ByteDecoder implements Decoder<ByteBuffer, DBusByte> {
       DBusByte value = DBusByte.valueOf(rawValue);
 
       DecoderResult<DBusByte> result = new DecoderResultImpl<>(consumedBytes, value);
-      logResult(value, offset, result.getConsumedBytes());
+
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "BYTE: {}; Offset: {}; Padding: {}; Consumed bytes: {};",
+              value, offset, 0, result.getConsumedBytes());
 
       return result;
     } catch (Throwable t) {

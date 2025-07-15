@@ -8,14 +8,11 @@ package com.lucimber.dbus.encoder;
 import com.lucimber.dbus.type.DBusInt16;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * An encoder which encodes a short to the D-Bus marshalling format using ByteBuffer.
@@ -25,8 +22,7 @@ import org.slf4j.MarkerFactory;
  */
 public final class Int16Encoder implements Encoder<DBusInt16, ByteBuffer> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
+  private static final Logger LOGGER = LoggerFactory.getLogger(Int16Encoder.class);
 
   private static final int TYPE_SIZE = 2;
   private final ByteOrder order;
@@ -38,13 +34,6 @@ public final class Int16Encoder implements Encoder<DBusInt16, ByteBuffer> {
    */
   public Int16Encoder(ByteOrder order) {
     this.order = Objects.requireNonNull(order, "order must not be null");
-  }
-
-  private static void logResult(DBusInt16 value, int offset, int padding, int producedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "INT16: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
-      return String.format(s, value, offset, padding, producedBytes);
-    });
   }
 
   @Override
@@ -62,7 +51,10 @@ public final class Int16Encoder implements Encoder<DBusInt16, ByteBuffer> {
       buffer.flip();
 
       EncoderResult<ByteBuffer> result = new EncoderResultImpl<>(totalSize, buffer);
-      logResult(value, offset, padding, totalSize);
+
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "INT16: {}; Offset: {}; Padding: {}; Produced bytes: {};",
+              value, offset, padding, totalSize);
 
       return result;
     } catch (Exception ex) {

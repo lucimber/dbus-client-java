@@ -12,13 +12,10 @@ import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeUtils;
 import com.lucimber.dbus.util.LoggerUtils;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * A decoder which unmarshals an array from the byte stream format used by D-Bus.
@@ -29,8 +26,7 @@ import org.slf4j.MarkerFactory;
  */
 public final class ArrayDecoder<ValueT extends DBusType> implements Decoder<ByteBuffer, DBusArray<ValueT>> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ArrayDecoder.class);
 
   private final DBusSignature signature;
 
@@ -44,13 +40,6 @@ public final class ArrayDecoder<ValueT extends DBusType> implements Decoder<Byte
     if (!signature.isArray()) {
       throw new IllegalArgumentException("signature must describe an array");
     }
-  }
-
-  private static void logResult(DBusSignature signature, int offset, int padding, int consumedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "ARRAY: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
-      return String.format(s, signature, offset, padding, consumedBytes);
-    });
   }
 
   @Override
@@ -93,7 +82,10 @@ public final class ArrayDecoder<ValueT extends DBusType> implements Decoder<Byte
       }
 
       DecoderResult<DBusArray<ValueT>> result = new DecoderResultImpl<>(consumedBytes, array);
-      logResult(signature, offset, arrayPadding + typePadding, consumedBytes);
+
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "ARRAY: {}; Offset: {}; Padding: {}; Consumed bytes: {};",
+              signature, offset, arrayPadding + typePadding, consumedBytes);
 
       return result;
     } catch (Exception ex) {

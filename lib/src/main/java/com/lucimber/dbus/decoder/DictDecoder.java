@@ -14,14 +14,11 @@ import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeCode;
 import com.lucimber.dbus.type.TypeUtils;
 import com.lucimber.dbus.util.LoggerUtils;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * A decoder which unmarshals a dictionary from the byte stream format used by D-Bus.
@@ -32,8 +29,7 @@ import org.slf4j.MarkerFactory;
 public final class DictDecoder<KeyT extends DBusBasicType, ValueT extends DBusType>
         implements Decoder<ByteBuffer, DBusDict<KeyT, ValueT>> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DictDecoder.class);
 
   private final TypeCode keyTypeCode;
   private final DBusSignature signature;
@@ -59,13 +55,6 @@ public final class DictDecoder<KeyT extends DBusBasicType, ValueT extends DBusTy
     this.valueSignature = children.get(1);
   }
 
-  private static void logResult(DBusSignature signature, int offset, int padding, int consumedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "DICT: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
-      return String.format(s, signature, offset, padding, consumedBytes);
-    });
-  }
-
   @Override
   public DecoderResult<DBusDict<KeyT, ValueT>> decode(ByteBuffer buffer, int offset) throws DecoderException {
     Objects.requireNonNull(buffer, "buffer must not be null");
@@ -86,8 +75,11 @@ public final class DictDecoder<KeyT extends DBusBasicType, ValueT extends DBusTy
       consumedBytes += entriesResult.getConsumedBytes();
 
       DecoderResult<DBusDict<KeyT, ValueT>> finalResult =
-          new DecoderResultImpl<>(consumedBytes, entriesResult.getValue());
-      logResult(signature, offset, arrayPadding, consumedBytes);
+              new DecoderResultImpl<>(consumedBytes, entriesResult.getValue());
+
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "DICT: {}; Offset: {}; Padding: {}; Consumed bytes: {};",
+              signature, offset, arrayPadding, consumedBytes);
 
       return finalResult;
     } catch (Exception ex) {

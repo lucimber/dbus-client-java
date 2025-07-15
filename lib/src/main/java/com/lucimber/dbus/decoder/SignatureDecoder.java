@@ -8,14 +8,11 @@ package com.lucimber.dbus.decoder;
 import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * A decoder which unmarshals a signature from the byte stream format used by D-Bus.
@@ -25,19 +22,12 @@ import org.slf4j.MarkerFactory;
  */
 public final class SignatureDecoder implements Decoder<ByteBuffer, DBusSignature> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
-
-  private static void logResult(DBusSignature value, int offset, int padding, int consumedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "SIGNATURE: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
-      return String.format(s, value, offset, padding, consumedBytes);
-    });
-  }
+  private static final Logger LOGGER = LoggerFactory.getLogger(SignatureDecoder.class);
 
   @Override
   public DecoderResult<DBusSignature> decode(ByteBuffer buffer, int offset) throws DecoderException {
     Objects.requireNonNull(buffer, "buffer must not be null");
+
     try {
       int consumedBytes = 0;
 
@@ -64,7 +54,10 @@ public final class SignatureDecoder implements Decoder<ByteBuffer, DBusSignature
       String sigStr = new String(bytes, StandardCharsets.UTF_8);
       DBusSignature signature = DBusSignature.valueOf(sigStr);
       DecoderResult<DBusSignature> result = new DecoderResultImpl<>(consumedBytes, signature);
-      logResult(signature, offset, padding, consumedBytes);
+
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "SIGNATURE: {}; Offset: {}; Padding: {}; Consumed bytes: {};",
+              signature, offset, padding, consumedBytes);
 
       return result;
     } catch (Exception e) {

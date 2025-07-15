@@ -8,13 +8,10 @@ package com.lucimber.dbus.decoder;
 import com.lucimber.dbus.type.DBusUInt64;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * A decoder which unmarshals an unsigned long from the byte stream format used by D-Bus.
@@ -24,20 +21,13 @@ import org.slf4j.MarkerFactory;
  */
 public final class UInt64Decoder implements Decoder<ByteBuffer, DBusUInt64> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
+  private static final Logger LOGGER = LoggerFactory.getLogger(UInt64Decoder.class);
   private static final int TYPE_BYTES = 8;
-
-  private static void logResult(DBusUInt64 value, int offset, int padding, int consumedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "UINT64: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
-      return String.format(s, value, offset, padding, consumedBytes);
-    });
-  }
 
   @Override
   public DecoderResult<DBusUInt64> decode(ByteBuffer buffer, int offset) throws DecoderException {
     Objects.requireNonNull(buffer, "buffer must not be null");
+
     try {
       int consumedBytes = 0;
 
@@ -49,7 +39,10 @@ public final class UInt64Decoder implements Decoder<ByteBuffer, DBusUInt64> {
 
       DBusUInt64 value = DBusUInt64.valueOf(rawValue);
       DecoderResult<DBusUInt64> result = new DecoderResultImpl<>(consumedBytes, value);
-      logResult(value, offset, padding, consumedBytes);
+
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "UINT64: {}; Offset: {}; Padding: {}; Consumed bytes: {};",
+              value, offset, padding, consumedBytes);
 
       return result;
     } catch (Throwable t) {

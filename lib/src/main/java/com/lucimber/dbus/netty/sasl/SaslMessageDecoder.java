@@ -24,8 +24,23 @@ public class SaslMessageDecoder extends ByteToMessageDecoder {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SaslMessageDecoder.class);
 
+  @Override
+  public void handlerAdded(ChannelHandlerContext ctx) {
+    LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE,
+            "Added to pipeline using context name '{}'.",
+            ctx.name());
+  }
+
+  @Override
+  protected void handlerRemoved0(ChannelHandlerContext ctx) {
+    LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE,
+            "Removed from pipeline using context name '{}'.",
+            ctx.name());
+  }
+
   private static int findEndOfLine(ByteBuf buffer) {
-    LoggerUtils.trace(LOGGER, () -> "Finding end of line (CRLF) in buffer.");
+    LOGGER.trace("Finding end of line (CRLF) in buffer.");
+
     final int start = buffer.readerIndex();
     final int end = buffer.writerIndex();
 
@@ -49,10 +64,12 @@ public class SaslMessageDecoder extends ByteToMessageDecoder {
     ByteBuf lineBuf = in.readRetainedSlice(length);
     in.skipBytes(2); // Skip CRLF
     String line = lineBuf.toString(StandardCharsets.US_ASCII);
-
     lineBuf.release();
 
-    out.add(mapToSaslMessage(line));
+    SaslMessage msg = mapToSaslMessage(line);
+    LOGGER.debug(LoggerUtils.SASL, "Decoded {}", msg);
+
+    out.add(msg);
   }
 
   private SaslMessage mapToSaslMessage(String line) {

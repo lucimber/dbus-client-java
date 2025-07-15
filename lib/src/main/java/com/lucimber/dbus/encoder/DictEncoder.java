@@ -19,8 +19,6 @@ import java.nio.ByteOrder;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * An encoder which encodes a dictionary to the D-Bus marshalling format using ByteBuffer.
@@ -34,7 +32,6 @@ public final class DictEncoder<KeyT extends DBusBasicType, ValueT extends DBusTy
         implements Encoder<DBusDict<KeyT, ValueT>, ByteBuffer> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
 
   private final ByteOrder order;
   private final DBusSignature signature;
@@ -48,13 +45,6 @@ public final class DictEncoder<KeyT extends DBusBasicType, ValueT extends DBusTy
   public DictEncoder(ByteOrder order, DBusSignature signature) {
     this.order = Objects.requireNonNull(order, "order must not be null");
     this.signature = Objects.requireNonNull(signature, "signature must not be null");
-  }
-
-  private static void logResult(DBusSignature signature, int offset, int padding, int producedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "DICT: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
-      return String.format(s, signature, offset, padding, producedBytes);
-    });
   }
 
   @Override
@@ -112,7 +102,10 @@ public final class DictEncoder<KeyT extends DBusBasicType, ValueT extends DBusTy
 
       buffer.flip();
 
-      logResult(signature, offset, padding + typePadding, totalSize);
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "DICT: {}; Offset: {}; Padding: {}; Produced bytes: {};",
+              signature, offset, padding, totalSize);
+
       return new EncoderResultImpl<>(totalSize, buffer);
     } catch (Exception ex) {
       throw new EncoderException("Could not encode DICT.", ex);

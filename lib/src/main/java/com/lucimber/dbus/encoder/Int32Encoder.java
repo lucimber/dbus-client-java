@@ -14,8 +14,6 @@ import java.nio.ByteOrder;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * An encoder which encodes a 32-bit integer to the D-Bus marshalling format using ByteBuffer.
@@ -26,7 +24,6 @@ import org.slf4j.MarkerFactory;
 public final class Int32Encoder implements Encoder<DBusInt32, ByteBuffer> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
 
   private static final int TYPE_SIZE = 4;
   private final ByteOrder order;
@@ -40,16 +37,10 @@ public final class Int32Encoder implements Encoder<DBusInt32, ByteBuffer> {
     this.order = Objects.requireNonNull(order, "order must not be null");
   }
 
-  private static void logResult(DBusInt32 value, int offset, int padding, int producedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "INT32: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
-      return String.format(s, value, offset, padding, producedBytes);
-    });
-  }
-
   @Override
   public EncoderResult<ByteBuffer> encode(DBusInt32 value, int offset) throws EncoderException {
     Objects.requireNonNull(value, "value must not be null");
+
     try {
       int padding = EncoderUtils.calculateAlignmentPadding(Type.INT32.getAlignment(), offset);
       int totalSize = padding + TYPE_SIZE;
@@ -62,7 +53,10 @@ public final class Int32Encoder implements Encoder<DBusInt32, ByteBuffer> {
       buffer.flip();
 
       EncoderResult<ByteBuffer> result = new EncoderResultImpl<>(totalSize, buffer);
-      logResult(value, offset, padding, totalSize);
+
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "INT32: {}; Offset: {}; Padding: {}; Produced bytes: {};",
+              value, offset, padding, totalSize);
 
       return result;
     } catch (Exception ex) {

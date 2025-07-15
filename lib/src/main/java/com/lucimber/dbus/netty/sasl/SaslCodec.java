@@ -6,10 +6,9 @@
 package com.lucimber.dbus.netty.sasl;
 
 import com.lucimber.dbus.netty.DBusChannelEvent;
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
-import java.util.List;
 import java.util.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,39 +21,49 @@ public final class SaslCodec extends ChannelDuplexHandler {
 
   @Override
   public void handlerAdded(ChannelHandlerContext ctx) {
-    ctx.pipeline().addBefore(ctx.name(), SASL_MSG_DECODER_NAME, new SaslMessageDecoder());
-    ctx.pipeline().addBefore(ctx.name(), SASL_MSG_ENCODER_NAME, new SaslMessageEncoder());
+    LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE, "Added using context name '{}'.", ctx.name());
+
+    try {
+      ctx.pipeline().addBefore(ctx.name(), SASL_MSG_DECODER_NAME, new SaslMessageDecoder());
+      ctx.pipeline().addBefore(ctx.name(), SASL_MSG_ENCODER_NAME, new SaslMessageEncoder());
+    } catch (RuntimeException e) {
+      LOGGER.error(LoggerUtils.HANDLER_LIFECYCLE, "Failed to add handlers.", e);
+      throw e;
+    }
   }
 
   @Override
-  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+  public void handlerRemoved(ChannelHandlerContext ctx) {
+    LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE, "Removed using context name '{}'.", ctx.name());
+
+    try {
+      ctx.pipeline().remove(SASL_MSG_DECODER_NAME);
+      ctx.pipeline().remove(SASL_MSG_ENCODER_NAME);
+    } catch (NoSuchElementException e) {
+      LOGGER.warn(LoggerUtils.HANDLER_LIFECYCLE, "Failed to remove handlers.", e);
+    }
+  }
+
+  @Override
+  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
     if (evt == DBusChannelEvent.SASL_AUTH_COMPLETE) {
       handleSaslAuthCompleteEvent(ctx);
-      // Continue propagating the event to other handlers
-      super.userEventTriggered(ctx, evt);
+      ctx.fireUserEventTriggered(evt);
     } else {
-      super.userEventTriggered(ctx, evt);
+      ctx.fireUserEventTriggered(evt);
     }
   }
 
   private void handleSaslAuthCompleteEvent(ChannelHandlerContext ctx) {
-    ChannelPipeline pipeline = ctx.pipeline();
-
-    for (var name : List.of(SASL_MSG_DECODER_NAME, SASL_MSG_ENCODER_NAME)) {
-      if (pipeline.get(name) != null) {
-        try {
-          pipeline.remove(name);
-          LOGGER.debug("Removed {} from pipeline.", name);
-        } catch (NoSuchElementException ignored) {
-        }
-      }
-    }
-
     try {
-      pipeline.remove(this);
-      LOGGER.debug("Removed myself as {} from pipeline.", SaslCodec.class.getSimpleName());
+      ctx.pipeline().remove(this);
+      LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE,
+              "Removed myself from pipeline using context name '{}'.",
+              ctx.name());
     } catch (NoSuchElementException ignored) {
-      LOGGER.warn("Failed to remove myself as {} from pipeline.", SaslCodec.class.getSimpleName());
+      LOGGER.warn(LoggerUtils.HANDLER_LIFECYCLE,
+              "Failed to remove myself from pipeline using context name '{}'.",
+              ctx.name());
     }
   }
 }

@@ -32,8 +32,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * An inbound handler that decodes message frames into typed messages.
@@ -44,10 +42,10 @@ import org.slf4j.MarkerFactory;
 final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_CONNECTION_INBOUND);
+
 
   private static Optional<DBusString> getErrorNameFromHeader(Map<HeaderField, DBusVariant> headerFields) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Getting signature from message header.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Getting signature from message header.");
     DBusVariant variant = headerFields.get(HeaderField.ERROR_NAME);
     if (variant == null) {
       return Optional.empty();
@@ -62,7 +60,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
   }
 
   private static Optional<DBusString> getInterfaceNameFromHeader(Map<HeaderField, DBusVariant> headerFields) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Getting interface name from message header.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Getting interface name from message header.");
     DBusVariant variant = headerFields.get(HeaderField.INTERFACE);
     if (variant == null) {
       return Optional.empty();
@@ -77,7 +75,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
   }
 
   private static DBusString getMemberFromHeader(Map<HeaderField, DBusVariant> headerFields) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Getting member from message header.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Getting member from message header.");
     DBusVariant variant = headerFields.get(HeaderField.MEMBER);
     if (variant == null) {
       String msg = "Missing member in message header.";
@@ -93,7 +91,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
   }
 
   private static DBusObjectPath getObjectPathFromHeader(Map<HeaderField, DBusVariant> headerFields) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Getting object path from message header.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Getting object path from message header.");
     DBusVariant variant = headerFields.get(HeaderField.PATH);
     if (variant == null) {
       String msg = "Missing object path in message header.";
@@ -109,7 +107,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
   }
 
   private static DBusUInt32 getReplySerialFromHeader(Map<HeaderField, DBusVariant> headerFields) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Getting reply serial from message header.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Getting reply serial from message header.");
     DBusVariant variant = headerFields.get(HeaderField.REPLY_SERIAL);
     if (variant == null) {
       String msg = "Missing reply serial in message header.";
@@ -125,7 +123,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
   }
 
   private static Optional<DBusSignature> getSignatureFromHeader(Map<HeaderField, DBusVariant> headerFields) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Getting signature from message header.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Getting signature from message header.");
     DBusVariant variant = headerFields.get(HeaderField.SIGNATURE);
     if (variant == null) {
       return Optional.empty();
@@ -140,7 +138,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
   }
 
   private static DBusString getSenderFromHeader(Map<HeaderField, DBusVariant> headerFields) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Getting sender from message header.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Getting sender from message header.");
     DBusVariant variant = headerFields.get(HeaderField.SENDER);
     if (variant == null) {
       String msg = "Missing sender in message header.";
@@ -156,7 +154,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
   }
 
   private static InboundError mapToError(Frame frame) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Mapping frame to inbound error.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Mapping frame to inbound error.");
     DBusUInt32 serial = frame.getSerial();
     Map<HeaderField, DBusVariant> headerFields = frame.getHeaderFields();
     DBusUInt32 replySerial = getReplySerialFromHeader(headerFields);
@@ -176,7 +174,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
   }
 
   private static InboundMethodCall mapToMethodCall(Frame frame) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Mapping frame to inbound method call.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Mapping frame to inbound method call.");
     DBusUInt32 serial = frame.getSerial();
     Map<HeaderField, DBusVariant> headerFields = frame.getHeaderFields();
     DBusString sender = getSenderFromHeader(headerFields);
@@ -194,7 +192,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
   }
 
   private static InboundMethodReturn mapToMethodReturn(Frame frame) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Mapping frame to inbound method return.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Mapping frame to inbound method return.");
     DBusUInt32 serial = frame.getSerial();
     Map<HeaderField, DBusVariant> headerFields = frame.getHeaderFields();
     DBusUInt32 replySerial = getReplySerialFromHeader(headerFields);
@@ -209,7 +207,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
   }
 
   private static InboundSignal mapToSignal(Frame frame) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Mapping frame to inbound signal.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Mapping frame to inbound signal.");
     DBusUInt32 serial = frame.getSerial();
     Map<HeaderField, DBusVariant> headerFields = frame.getHeaderFields();
     DBusString sender = getSenderFromHeader(headerFields);
@@ -230,7 +228,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
   }
 
   private static List<DBusType> decodeFrameBody(ByteBuffer body, DBusSignature sig) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Decoding frame body.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Decoding frame body.");
     ArrayList<DBusType> list = new ArrayList<>();
     try {
       if (sig.getQuantity() == 1) {
@@ -247,8 +245,8 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
         }
       }
     } catch (Exception ex) {
-      String failureMsg = "Could not decode frame body.";
-      LoggerUtils.error(LOGGER, MARKER, () -> failureMsg, ex);
+      String failureMsg = "Couldn't decode frame body.";
+      LOGGER.error(LoggerUtils.MARSHALLING, failureMsg, ex);
       throw new CorruptedFrameException(failureMsg, ex);
     }
     list.trimToSize();
@@ -257,14 +255,14 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
 
   @Override
   public void decode(ChannelHandlerContext ctx, Frame frame, List<Object> out) {
-    LOGGER.debug("[InboundMessageDecoder] Decoding frame: type={}, serial={}", 
-        frame.getType(), frame.getSerial());
+    LOGGER.debug(LoggerUtils.MARSHALLING, "Decoding frame: type={}, serial={}",
+            frame.getType(), frame.getSerial());
     InboundMessage msg = mapFrameToInboundMessage(frame);
     if (msg == null) {
-      LOGGER.warn("[InboundMessageDecoder] Failed to decode frame with invalid type: {}", frame.getType());
+      LOGGER.warn(LoggerUtils.MARSHALLING, "Failed to decode frame with invalid type: {}", frame.getType());
     } else {
-      LOGGER.debug("[InboundMessageDecoder] Decoded {}: serial={}", 
-          msg.getClass().getSimpleName(), msg.getSerial());
+      LOGGER.debug(LoggerUtils.MARSHALLING, "Decoded {} with serial={}",
+              msg.getClass().getSimpleName(), msg.getSerial());
       out.add(msg);
     }
   }

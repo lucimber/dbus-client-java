@@ -9,15 +9,12 @@ import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * An encoder which encodes a string to the D-Bus marshalling format using ByteBuffer.
@@ -27,8 +24,7 @@ import org.slf4j.MarkerFactory;
  */
 public final class StringEncoder implements Encoder<DBusString, ByteBuffer> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
+  private static final Logger LOGGER = LoggerFactory.getLogger(StringEncoder.class);
 
   private static final int NUL_TERMINATOR_LENGTH = 1;
   private final ByteOrder order;
@@ -40,13 +36,6 @@ public final class StringEncoder implements Encoder<DBusString, ByteBuffer> {
    */
   public StringEncoder(ByteOrder order) {
     this.order = Objects.requireNonNull(order, "order must not be null");
-  }
-
-  private static void logResult(DBusString value, int offset, int padding, int producedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "STRING: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
-      return String.format(s, value, offset, padding, producedBytes);
-    });
   }
 
   @Override
@@ -81,7 +70,10 @@ public final class StringEncoder implements Encoder<DBusString, ByteBuffer> {
       buffer.flip();
 
       EncoderResult<ByteBuffer> result = new EncoderResultImpl<>(totalSize, buffer);
-      logResult(value, offset, padding, totalSize);
+
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "STRING: {}; Offset: {}; Padding: {}; Produced bytes: {};",
+              value, offset, padding, totalSize);
 
       return result;
     } catch (Exception ex) {

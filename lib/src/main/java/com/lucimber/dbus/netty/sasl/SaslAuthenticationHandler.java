@@ -8,6 +8,8 @@ package com.lucimber.dbus.netty.sasl;
 import com.lucimber.dbus.connection.sasl.SaslCommandName;
 import com.lucimber.dbus.connection.sasl.SaslMessage;
 import com.lucimber.dbus.netty.DBusChannelEvent;
+import com.lucimber.dbus.netty.WriteOperationListener;
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import java.util.ArrayList;
@@ -41,40 +43,43 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
   }
 
   @Override
-  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
     if (evt == DBusChannelEvent.SASL_NUL_BYTE_SENT && currentState == SaslState.IDLE) {
-      LOGGER.debug("SASL_NUL_BYTE_SENT event received. Adding SASL string codecs and initiating AUTH.");
+      LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE, "SASL_NUL_BYTE_SENT event received.");
       SaslMessage authMsg = new SaslMessage(SaslCommandName.AUTH, null);
-      LOGGER.debug("SASL SEND: {}", authMsg);
-      ctx.writeAndFlush(authMsg);
+      ctx.writeAndFlush(authMsg).addListener(new WriteOperationListener<>(LOGGER));
       currentState = SaslState.AWAITING_SERVER_MECHS;
     } else {
-      super.userEventTriggered(ctx, evt);
+      ctx.fireUserEventTriggered(evt);
     }
   }
 
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) {
     if (msg instanceof SaslMessage saslMessage) {
-      LOGGER.debug("SASL RECV: {}", saslMessage);
       switch (currentState) {
         case AWAITING_SERVER_MECHS, NEGOTIATING -> handleSaslServerResponse(ctx, saslMessage);
         default -> {
-          LOGGER.warn("Received SASL command '{}' in unexpected state: {}.",
+          LOGGER.warn(LoggerUtils.SASL,
+                  "Received command '{}' in unexpected state: {}.",
                   saslMessage.getCommandName(), currentState);
           if (EnumSet.of(SaslState.AUTHENTICATED, SaslState.FAILED).contains(currentState)) {
-            LOGGER.warn("Ignoring SASL command '{}' as SASL state is already {}.",
+            LOGGER.warn(LoggerUtils.SASL,
+                    "Ignoring command '{}' as state is already {}.",
                     saslMessage.getCommandName(), currentState);
           } else {
-            failAuthentication(ctx, "Unexpected SASL command '"
+            failAuthentication(ctx, "Unexpected command '"
                     + saslMessage.getCommandName() + "' in state " + currentState);
           }
         }
       }
     } else {
-      LOGGER.warn("Received unexpected non-SASL message type during SASL: {}", msg.getClass().getName());
+      LOGGER.warn(LoggerUtils.SASL,
+              "Received unexpected non-SASL message type during SASL: {}",
+              msg.getClass().getName());
       if (currentState == SaslState.AUTHENTICATED) {
-        LOGGER.debug("Passing non-string message up, assuming post-SASL and pre-DBus-pipeline data.");
+        LOGGER.debug(LoggerUtils.SASL,
+                "Passing non-string message up, assuming post-SASL and pre-DBus-pipeline data.");
         ctx.fireChannelRead(msg);
       } else {
         failAuthentication(ctx, "Received non-string data during active SASL exchange.");
@@ -87,23 +92,22 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
     String args = msg.getCommandArgs().orElse("");
     switch (command) {
       case OK -> {
-        LOGGER.info("SASL server OK. GUID: {}. Sending BEGIN.", args);
+        LOGGER.info(LoggerUtils.SASL, "Server send OK. GUID: {}. Sending BEGIN.", args);
         SaslMessage beginMsg = new SaslMessage(SaslCommandName.BEGIN, null);
-        LOGGER.debug("SASL SEND: {}", beginMsg);
-        ctx.writeAndFlush(beginMsg).addListener(future -> {
+        ctx.writeAndFlush(beginMsg).addListener(new WriteOperationListener<>(LOGGER, future -> {
           if (future.isSuccess()) {
-            LOGGER.debug("BEGIN command sent successfully.");
+            LOGGER.debug(LoggerUtils.SASL, "BEGIN command sent successfully.");
             currentState = SaslState.AUTHENTICATED;
             cleanupAndSignalCompletion(ctx, true);
           } else {
-            LOGGER.error("Failed to send BEGIN: {}", future.cause().getMessage());
+            LOGGER.error(LoggerUtils.SASL, "Failed to send BEGIN: {}", future.cause().getMessage());
             failAuthentication(ctx, "Failed to send BEGIN: " + future.cause().getMessage());
           }
-        });
+        }));
       }
       case REJECTED -> {
         serverSupportedMechanisms = Arrays.asList(args.split(" "));
-        LOGGER.warn("SASL mechanism rejected. Server supports: {}", serverSupportedMechanisms);
+        LOGGER.warn(LoggerUtils.SASL, "Mechanism rejected. Server supports: {}", serverSupportedMechanisms);
         disposeCurrentMechanism();
         tryNextMechanism(ctx);
       }
@@ -120,33 +124,32 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
             var responseHex = (String) future.getNow();
             if (responseHex != null) {
               SaslMessage dataMsg = new SaslMessage(SaslCommandName.DATA, responseHex);
-              LOGGER.debug("SASL SEND: {}", dataMsg);
-              ctx.writeAndFlush(dataMsg);
+              ctx.writeAndFlush(dataMsg).addListener(new WriteOperationListener<>(LOGGER));
             } else {
-              LOGGER.debug("Mechanism {} complete, awaiting server response.",
+              LOGGER.debug(LoggerUtils.SASL,
+                      "Mechanism {} complete, awaiting server response.",
                       currentMechanism.getName());
             }
           } else {
-            LOGGER.error("Failed to process challenge with mechanism {}",
+            LOGGER.error(LoggerUtils.SASL,
+                    "Failed to process challenge with mechanism {}",
                     currentMechanism.getName(), future.cause());
             SaslMessage cancelMsg = new SaslMessage(SaslCommandName.CANCEL, null);
-            LOGGER.debug("SASL SEND: {}", cancelMsg);
-            ctx.writeAndFlush(cancelMsg);
+            ctx.writeAndFlush(cancelMsg).addListener(new WriteOperationListener<>(LOGGER));
           }
         });
       }
       case ERROR -> {
-        LOGGER.error("SASL server ERROR: {}", args);
+        LOGGER.error(LoggerUtils.SASL, "Server send ERROR: {}", args);
         SaslMessage cancelMsg = new SaslMessage(SaslCommandName.CANCEL, null);
-        LOGGER.debug("SASL SEND: {}", cancelMsg);
-        ctx.writeAndFlush(cancelMsg);
+        ctx.writeAndFlush(cancelMsg).addListener(new WriteOperationListener<>(LOGGER));
       }
-      case AGREE_UNIX_FD -> LOGGER.info("Server agreed to UNIX FD passing.");
+      case AGREE_UNIX_FD -> LOGGER.info(LoggerUtils.SASL, "Server agreed to UNIX FD passing.");
       default -> {
         if (currentState == SaslState.AWAITING_SERVER_MECHS
                 && command.name().matches("[A-Z0-9_]+([-A-Z0-9_]*[A-Z0-9_]+)?")) {
           serverSupportedMechanisms = Arrays.asList(msg.toString().split(" "));
-          LOGGER.debug("Server mechanisms: {}", serverSupportedMechanisms);
+          LOGGER.debug(LoggerUtils.SASL, "Server mechanisms: {}", serverSupportedMechanisms);
           currentMechanismAttemptIndex = 0;
           tryNextMechanism(ctx);
         } else {
@@ -166,7 +169,7 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
       var candidate = clientMechanismsPreference.get(currentMechanismAttemptIndex++);
       if (serverSupportedMechanisms.contains(candidate.getName())) {
         currentMechanism = candidate;
-        LOGGER.info("Trying SASL mechanism: {}", candidate.getName());
+        LOGGER.info(LoggerUtils.SASL, "Trying mechanism: {}", candidate.getName());
         try {
           currentMechanism.init(ctx);
           currentMechanism.getInitialResponseAsync(ctx).addListener(future -> {
@@ -181,17 +184,16 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
                 commandArgs += " " + value;
               }
               SaslMessage authMsg = new SaslMessage(SaslCommandName.AUTH, commandArgs);
-              LOGGER.debug("SASL SEND: {}", authMsg);
-              ctx.writeAndFlush(authMsg);
+              ctx.writeAndFlush(authMsg).addListener(new WriteOperationListener<>(LOGGER));
               currentState = SaslState.NEGOTIATING;
             } else {
-              LOGGER.error("Failed to get initial response for {}: {}",
+              LOGGER.error(LoggerUtils.SASL, "Failed to get initial response for {}: {}",
                       candidate.getName(), future.cause().getMessage());
               tryNextMechanism(ctx);
             }
           });
         } catch (SaslMechanismException e) {
-          LOGGER.warn("Initialization failed for {}: {}", candidate.getName(), e.getMessage());
+          LOGGER.warn(LoggerUtils.SASL, "Initialization failed for {}: {}", candidate.getName(), e.getMessage());
           tryNextMechanism(ctx);
         }
       }
@@ -204,11 +206,11 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
     if (currentState == SaslState.FAILED) {
       return;
     }
-    LOGGER.error("SASL Authentication Failed: {}", reason);
+    LOGGER.error(LoggerUtils.SASL, "Authentication failed: {}", reason);
     currentState = SaslState.FAILED;
     if (currentMechanism != null) {
       SaslMessage responseMsg = new SaslMessage(SaslCommandName.CANCEL, null);
-      ctx.writeAndFlush(responseMsg).addListener(f -> cleanupAndSignalCompletion(ctx, false));
+      ctx.writeAndFlush(responseMsg).addListener(new WriteOperationListener<>(LOGGER, f -> cleanupAndSignalCompletion(ctx, false)));
     } else {
       cleanupAndSignalCompletion(ctx, false);
     }
@@ -217,20 +219,24 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
   private void cleanupAndSignalCompletion(ChannelHandlerContext ctx, boolean success) {
     disposeCurrentMechanism();
 
-    // Fire the event BEFORE removing self from pipeline to ensure proper propagation
-    if (success) {
-      LOGGER.info("[SaslAuthenticationHandler] SASL authentication completed successfully");
-      ctx.fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
-    } else {
-      LOGGER.error("[SaslAuthenticationHandler] SASL authentication failed");
-      ctx.fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_FAILED);
-    }
-
-    // Remove self from pipeline AFTER event has been fired
+    // Remove self from pipeline BEFORE event has been fired
     try {
       ctx.pipeline().remove(this);
-      LOGGER.debug("[SaslAuthenticationHandler] Removed from pipeline");
+      LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE,
+              "Removed myself from pipeline using context name '{}'.",
+              ctx.name());
     } catch (NoSuchElementException ignored) {
+    }
+
+    // Fire the event AFTER removing self from pipeline to ensure proper propagation
+    // Make sure the event is propagated from head to tail of pipeline,
+    // so every handler can act upon it.
+    if (success) {
+      LOGGER.info(LoggerUtils.SASL, "Authentication completed successfully.");
+      ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
+    } else {
+      LOGGER.error(LoggerUtils.SASL, "Authentication failed.");
+      ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_FAILED);
     }
   }
 
@@ -239,7 +245,9 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
       try {
         currentMechanism.dispose();
       } catch (Exception e) {
-        LOGGER.warn("Error disposing SASL mechanism {}: {}", currentMechanism.getName(), e.getMessage());
+        LOGGER.warn(LoggerUtils.SASL,
+                "Error disposing mechanism {}: {}",
+                currentMechanism.getName(), e.getMessage());
       }
       currentMechanism = null;
     }
@@ -247,21 +255,30 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
 
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-    LOGGER.warn("Channel became inactive during SASL authentication. Current state: {}", currentState);
+    LOGGER.warn(LoggerUtils.SASL,
+            "Channel became inactive during authentication. Current state: {}",
+            currentState);
+
     if (!EnumSet.of(SaslState.AUTHENTICATED, SaslState.FAILED).contains(currentState)) {
       failAuthentication(ctx, "Channel became inactive.");
     }
     disposeCurrentMechanism();
-    super.channelInactive(ctx);
+
+    ctx.fireChannelInactive();
   }
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     if (currentState == SaslState.FAILED) {
-      LOGGER.debug("Ignoring exception as SASL already in FAILED state: ", cause);
+      LOGGER.debug(LoggerUtils.SASL,
+              "Ignoring exception as SASL already in FAILED state: ",
+              cause);
       return;
     }
-    LOGGER.error("Exception in SaslAuthenticationHandler. State: {}", currentState, cause);
+    LOGGER.error(LoggerUtils.SASL,
+            "Exception in SaslAuthenticationHandler. State: {}",
+            currentState,
+            cause);
     failAuthentication(ctx, "Exception caught: " + cause.getMessage());
   }
 

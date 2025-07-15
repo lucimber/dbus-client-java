@@ -34,16 +34,13 @@ import java.nio.ByteOrder;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 final class FrameEncoder extends MessageToByteEncoder<Frame> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_CONNECTION_OUTBOUND);
 
   private static ByteBuf encodeByteOrder(ByteBufAllocator allocator, ByteOrder order) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding byte order: " + order);
+    LOGGER.trace(LoggerUtils.TRANSPORT, "Encoding byte order: {}", order);
     final int capacity = 1;
     final ByteBuf buffer = allocator.buffer(capacity, capacity);
     final byte bigEndian = 0x42;
@@ -59,7 +56,7 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
   }
 
   private static ByteBuf encodeMessageType(ByteBufAllocator allocator, MessageType type) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding message type: " + type);
+    LOGGER.trace(LoggerUtils.TRANSPORT, "Encoding message type: {}", type);
     final int capacity = 1;
     final ByteBuf buffer = allocator.buffer(capacity, capacity);
     switch (type) {
@@ -76,13 +73,13 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
   }
 
   private static void encodeProtocolVersion(ByteBuf buffer, int version) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding protocol version: " + version);
+    LOGGER.trace(LoggerUtils.TRANSPORT, "Encoding protocol version: {}", version);
     buffer.writeByte(version);
   }
 
   private static EncoderResult<ByteBuffer> encodeHeaderFields(Map<HeaderField, DBusVariant> fields,
                                                               ByteOrder order, int offset) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding header fields: " + fields);
+    LOGGER.trace(LoggerUtils.TRANSPORT, "Encoding header fields: {}", fields);
     DBusArray<DBusStruct> structs = new DBusArray<>(DBusSignature.valueOf("a(yv)"));
     for (Map.Entry<HeaderField, DBusVariant> entry : fields.entrySet()) {
       DBusByte dbusByte = DBusByte.valueOf(entry.getKey().getCode());
@@ -96,20 +93,20 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
   }
 
   private static EncoderResult<ByteBuffer> encodeBodyLength(int bodyLength, ByteOrder order, int offset) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding length of body: " + bodyLength);
+    LOGGER.trace(LoggerUtils.TRANSPORT, "Encoding length of body: {}", bodyLength);
     Encoder<DBusInt32, ByteBuffer> encoder = new Int32Encoder(order);
     return encoder.encode(DBusInt32.valueOf(bodyLength), offset);
   }
 
   private static EncoderResult<ByteBuffer> encodeSerial(ByteOrder order, DBusUInt32 serial, int offset) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding serial number: " + serial);
+    LOGGER.trace(LoggerUtils.TRANSPORT, "Encoding serial number: {}", serial);
     Encoder<DBusUInt32, ByteBuffer> encoder = new UInt32Encoder(order);
     return encoder.encode(serial, offset);
   }
 
   @Override
   protected void encode(ChannelHandlerContext ctx, Frame msg, ByteBuf out) {
-    LOGGER.debug("[FrameEncoder] Encoding frame: type={}, serial={}", msg.getType(), msg.getSerial());
+    LOGGER.debug(LoggerUtils.TRANSPORT, "Encoding frame: type={}, serial={}", msg.getType(), msg.getSerial());
     ByteBuf msgBuffer = ctx.alloc().buffer();
     try {
       int byteCount = 0;
@@ -123,56 +120,54 @@ final class FrameEncoder extends MessageToByteEncoder<Frame> {
       msgBuffer.writeBytes(typeBuffer);
       typeBuffer.release();
       byteCount += 1;
-      LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: " + msgBuffer.readableBytes());
+      LOGGER.trace(LoggerUtils.TRANSPORT, "Readable bytes in message buffer: {}", msgBuffer.readableBytes());
       // Message flags
       int flagBytes = 1;
       msgBuffer.writeZero(flagBytes);
       byteCount += flagBytes;
-      LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: " + msgBuffer.readableBytes());
+      LOGGER.trace(LoggerUtils.TRANSPORT, "Readable bytes in message buffer: {}", msgBuffer.readableBytes());
       // Major protocol version
       encodeProtocolVersion(msgBuffer, msg.getProtocolVersion());
       byteCount += 1;
-      LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: " + msgBuffer.readableBytes());
+      LOGGER.trace(LoggerUtils.TRANSPORT, "Readable bytes in message buffer: {}", msgBuffer.readableBytes());
       // Body length
       int bodyLength = msg.getBody() == null ? 0 : msg.getBody().remaining();
       EncoderResult<ByteBuffer> bodyLengthResult = encodeBodyLength(bodyLength, msg.getByteOrder(), byteCount);
       byteCount += bodyLengthResult.getProducedBytes();
       msgBuffer.writeBytes(bodyLengthResult.getBuffer());
-      LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: " + msgBuffer.readableBytes());
+      LOGGER.trace(LoggerUtils.TRANSPORT, "Readable bytes in message buffer: {}", msgBuffer.readableBytes());
       // Serial
       EncoderResult<ByteBuffer> serialResult = encodeSerial(msg.getByteOrder(), msg.getSerial(), byteCount);
       byteCount += serialResult.getProducedBytes();
       msgBuffer.writeBytes(serialResult.getBuffer());
-      LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: " + msgBuffer.readableBytes());
+      LOGGER.trace(LoggerUtils.TRANSPORT, "Readable bytes in message buffer: {}", msgBuffer.readableBytes());
       // Header fields
       EncoderResult<ByteBuffer> headerFieldsResult =
               encodeHeaderFields(msg.getHeaderFields(), msg.getByteOrder(), byteCount);
       byteCount += headerFieldsResult.getProducedBytes();
       msgBuffer.writeBytes(headerFieldsResult.getBuffer());
-      LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: " + msgBuffer.readableBytes());
+      LOGGER.trace(LoggerUtils.TRANSPORT, "Readable bytes in message buffer: {}", msgBuffer.readableBytes());
       // Pad before body
       int headerBoundary = 8;
       int remainder = byteCount % headerBoundary;
       if (remainder != 0) {
         int padding = headerBoundary - remainder;
         msgBuffer.writeZero(padding);
-        LoggerUtils.trace(LOGGER, MARKER, () -> "Padding header with bytes: " + padding);
-        LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: "
-                + msgBuffer.readableBytes());
+        LOGGER.trace(LoggerUtils.TRANSPORT, "Padding header with bytes: {}", padding);
+        LOGGER.trace(LoggerUtils.TRANSPORT, "Readable bytes in message buffer: {}", msgBuffer.readableBytes());
       }
       // Message body
       if (msg.getBody() != null) {
         msgBuffer.writeBytes(msg.getBody());
-        LoggerUtils.trace(LOGGER, MARKER, () -> "Readable bytes in message buffer: "
-                + msgBuffer.readableBytes());
+        LOGGER.trace(LoggerUtils.TRANSPORT, "Readable bytes in message buffer: {}", msgBuffer.readableBytes());
       }
       // Copy message
       int bytesToWrite = msgBuffer.readableBytes();
       out.writeBytes(msgBuffer);
-      LOGGER.debug("[FrameEncoder] Encoded {} bytes for {} frame (serial={})", 
-          bytesToWrite, msg.getType(), msg.getSerial());
+      LOGGER.debug(LoggerUtils.TRANSPORT, "Encoded {} bytes for {} frame (serial={})",
+              bytesToWrite, msg.getType(), msg.getSerial());
     } catch (Throwable t) {
-      LoggerUtils.warn(LOGGER, MARKER, () -> "Caught " + t);
+      LOGGER.warn(LoggerUtils.TRANSPORT, "Caught exception while encoding.", t);
       throw new EncoderException(t);
     } finally {
       msgBuffer.release();

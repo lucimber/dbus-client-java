@@ -6,6 +6,7 @@
 package com.lucimber.dbus.netty.sasl;
 
 import com.lucimber.dbus.netty.DBusChannelEvent;
+import com.lucimber.dbus.netty.WriteOperationListener;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -33,7 +34,7 @@ public class SaslInitiationHandler extends ChannelInboundHandlerAdapter {
 
     // Send the NUL byte
     ctx.writeAndFlush(Unpooled.wrappedBuffer(NUL_BYTE_ARRAY))
-            .addListener((ChannelFutureListener) future -> {
+            .addListener(new WriteOperationListener<>(LOGGER, future -> {
               if (future.isSuccess()) {
                 LOGGER.debug("SASL NUL byte sent successfully.");
                 // Fire event to signal the next stage of SASL can begin
@@ -45,7 +46,7 @@ public class SaslInitiationHandler extends ChannelInboundHandlerAdapter {
                 LOGGER.error("Failed to send SASL NUL byte. Closing channel.", future.cause());
                 ctx.close(); // Close channel on failure to send critical initial byte
               }
-            });
+            }));
   }
 
   @Override

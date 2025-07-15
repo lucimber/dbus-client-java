@@ -8,14 +8,11 @@ package com.lucimber.dbus.encoder;
 import com.lucimber.dbus.type.DBusByte;
 import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.util.LoggerUtils;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * An encoder which encodes a signature to the D-Bus marshalling format using ByteBuffer.
@@ -25,21 +22,14 @@ import org.slf4j.MarkerFactory;
  */
 public final class SignatureEncoder implements Encoder<DBusSignature, ByteBuffer> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SignatureEncoder.class);
 
   private static final int NUL_TERMINATOR_LENGTH = 1;
-
-  private static void logResult(DBusSignature signature, int offset, int producedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "SIGNATURE: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
-      return String.format(s, signature, offset, 0, producedBytes);
-    });
-  }
 
   @Override
   public EncoderResult<ByteBuffer> encode(DBusSignature signature, int offset) throws EncoderException {
     Objects.requireNonNull(signature, "signature must not be null");
+
     try {
       String value = signature.toString();
       byte[] signatureBytes = value.getBytes(StandardCharsets.UTF_8);
@@ -60,7 +50,10 @@ public final class SignatureEncoder implements Encoder<DBusSignature, ByteBuffer
       buffer.flip();
 
       EncoderResult<ByteBuffer> result = new EncoderResultImpl<>(totalSize, buffer);
-      logResult(signature, offset, totalSize);
+
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "SIGNATURE: {}; Offset: {}; Padding: {}; Produced bytes: {};",
+              signature, offset, 0, totalSize);
 
       return result;
     } catch (Exception ex) {

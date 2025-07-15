@@ -10,15 +10,12 @@ import com.lucimber.dbus.type.DBusStruct;
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * An encoder which encodes a struct to the D-Bus marshalling format using ByteBuffer.
@@ -28,8 +25,7 @@ import org.slf4j.MarkerFactory;
  */
 public final class StructEncoder implements Encoder<DBusStruct, ByteBuffer> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_MARSHALLING);
+  private static final Logger LOGGER = LoggerFactory.getLogger(StructEncoder.class);
 
   private final ByteOrder order;
   private final DBusSignature signature;
@@ -43,13 +39,6 @@ public final class StructEncoder implements Encoder<DBusStruct, ByteBuffer> {
   public StructEncoder(ByteOrder order, DBusSignature signature) {
     this.order = Objects.requireNonNull(order, "order must not be null");
     this.signature = Objects.requireNonNull(signature, "signature must not be null");
-  }
-
-  private static void logResult(DBusSignature signature, int offset, int padding, int producedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "STRUCT: %s; Offset: %d; Padding: %d; Produced bytes: %d;";
-      return String.format(s, signature, offset, padding, producedBytes);
-    });
   }
 
   @Override
@@ -85,7 +74,10 @@ public final class StructEncoder implements Encoder<DBusStruct, ByteBuffer> {
       buffer.flip();
 
       EncoderResult<ByteBuffer> result = new EncoderResultImpl<>(producedBytes, buffer);
-      logResult(signature, offset, padding, producedBytes);
+
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "STRUCT: {}; Offset: {}; Padding: {}; Produced bytes: {};",
+              signature, offset, padding, producedBytes);
 
       return result;
     } catch (Exception ex) {

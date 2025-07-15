@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * An inbound handler that decodes buffer into frame.
@@ -48,7 +46,6 @@ final class FrameDecoder extends ByteToMessageDecoder {
    */
   private static final int HEADER_PREAMBLE_SIZE = 12;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_CONNECTION_INBOUND);
 
   private Frame frame = new Frame();
   private int offset = 0;
@@ -56,7 +53,7 @@ final class FrameDecoder extends ByteToMessageDecoder {
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-    LoggerUtils.error(LOGGER, () -> "Encountered an exception.", cause);
+    LOGGER.error(LoggerUtils.HANDLER_LIFECYCLE, "Encountered an exception while decoding.", cause);
     ctx.fireExceptionCaught(cause);
   }
 
@@ -106,8 +103,7 @@ final class FrameDecoder extends ByteToMessageDecoder {
           }
           copyMessageBody(in);
           out.add(frame);
-          LoggerUtils.debug(LOGGER, MARKER, () -> "Decoded " + frame);
-          LOGGER.debug("FrameDecoder: Decoded and added frame to output: {}", frame);
+          LOGGER.debug(LoggerUtils.TRANSPORT, "Decoded {}", frame);
           frame = new Frame();
           offset = 0;
           decoderState = DecoderState.HEADER_PREAMBLE;

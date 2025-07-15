@@ -9,13 +9,10 @@ import com.lucimber.dbus.type.DBusBoolean;
 import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * A decoder which unmarshals a boolean from the byte stream format used by D-Bus.
@@ -25,19 +22,12 @@ import org.slf4j.MarkerFactory;
  */
 public final class BooleanDecoder implements Decoder<ByteBuffer, DBusBoolean> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
-
-  private static void logResult(DBusBoolean value, int offset, int padding, int consumedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "BOOLEAN: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
-      return String.format(s, value, offset, padding, consumedBytes);
-    });
-  }
+  private static final Logger LOGGER = LoggerFactory.getLogger(BooleanDecoder.class);
 
   @Override
   public DecoderResult<DBusBoolean> decode(ByteBuffer buffer, int offset) throws DecoderException {
     Objects.requireNonNull(buffer, "buffer must not be null");
+
     try {
       int consumedBytes = 0;
 
@@ -61,7 +51,10 @@ public final class BooleanDecoder implements Decoder<ByteBuffer, DBusBoolean> {
       }
 
       DecoderResult<DBusBoolean> result = new DecoderResultImpl<>(consumedBytes, decodedValue);
-      logResult(decodedValue, offset, padding, consumedBytes);
+
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "BOOLEAN: {}; Offset: {}; Padding: {}; Consumed bytes: {};",
+              decodedValue, offset, padding, consumedBytes);
 
       return result;
     } catch (Throwable t) {

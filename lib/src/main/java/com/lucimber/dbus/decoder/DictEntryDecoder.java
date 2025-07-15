@@ -13,14 +13,11 @@ import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeCode;
 import com.lucimber.dbus.type.TypeUtils;
 import com.lucimber.dbus.util.LoggerUtils;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * A decoder which unmarshals a key-value pair from the byte stream format used by D-Bus.
@@ -31,8 +28,7 @@ import org.slf4j.MarkerFactory;
 public final class DictEntryDecoder<KeyT extends DBusBasicType, ValueT extends DBusType>
         implements Decoder<ByteBuffer, DBusDictEntry<KeyT, ValueT>> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_DATA_UNMARSHALLING);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DictEntryDecoder.class);
 
   private final DBusSignature signature;
 
@@ -53,13 +49,6 @@ public final class DictEntryDecoder<KeyT extends DBusBasicType, ValueT extends D
     if (children.get(1).isDictionaryEntry()) {
       throw new DecoderException("Nested dict-entry is not allowed.");
     }
-  }
-
-  private static void logResult(DBusSignature signature, int offset, int padding, int consumedBytes) {
-    LoggerUtils.debug(LOGGER, MARKER, () -> {
-      String s = "DICT_ENTRY: %s; Offset: %d; Padding: %d, Consumed bytes: %d;";
-      return String.format(s, signature, offset, padding, consumedBytes);
-    });
   }
 
   @Override
@@ -89,7 +78,10 @@ public final class DictEntryDecoder<KeyT extends DBusBasicType, ValueT extends D
       DBusDictEntry<KeyT, ValueT> entry = new DBusDictEntry<>(signature, keyResult.getValue(), valueResult.getValue());
       DecoderResult<DBusDictEntry<KeyT, ValueT>> result = new DecoderResultImpl<>(consumedBytes, entry);
 
-      logResult(signature, offset, padding, consumedBytes);
+      LOGGER.debug(LoggerUtils.MARSHALLING,
+              "DICT_ENTRY: {}; Offset: {}; Padding: {}; Consumed bytes: {};",
+              signature, offset, padding, consumedBytes);
+
       return result;
     } catch (Throwable t) {
       throw new DecoderException("Could not decode DICT_ENTRY.", t);

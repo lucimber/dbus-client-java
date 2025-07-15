@@ -16,6 +16,7 @@ import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.message.OutboundMethodReturn;
 import com.lucimber.dbus.message.OutboundSignal;
 import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusVariant;
 import com.lucimber.dbus.type.Type;
@@ -24,7 +25,6 @@ import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToMessageEncoder;
-import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -33,8 +33,6 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 /**
  * Encodes {@link OutboundMessage}s to the D-Bus marshalling format.
@@ -42,12 +40,11 @@ import org.slf4j.MarkerFactory;
 final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessage> {
 
   private static final ByteOrder BYTE_ORDER = ByteOrder.BIG_ENDIAN;
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final Marker MARKER = MarkerFactory.getMarker(LoggerUtils.MARKER_CONNECTION_OUTBOUND);
+  private static final Logger LOGGER = LoggerFactory.getLogger(OutboundMessageEncoder.class);
   private static final int PROTOCOL_VERSION = 1;
 
   private static EncoderResult<ByteBuffer> encodeBody(List<DBusType> payload) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Encoding message body.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Encoding message body.");
 
     int totalSize = 0;
     List<ByteBuffer> values = new ArrayList<>();
@@ -68,7 +65,8 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
   }
 
   private static MessageType determineMessageType(OutboundMessage msg) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Determining message type.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Determining message type.");
+
     if (msg instanceof OutboundError) {
       return MessageType.ERROR;
     } else if (msg instanceof OutboundMethodCall) {
@@ -83,7 +81,8 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
   }
 
   private static Map<HeaderField, DBusVariant> buildHeaderFields(OutboundMessage msg) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Building header fields.");
+
     if (msg instanceof OutboundError) {
       return buildHeaderFieldsForError((OutboundError) msg);
     } else if (msg instanceof OutboundMethodCall) {
@@ -98,7 +97,8 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
   }
 
   private static Map<HeaderField, DBusVariant> buildHeaderFieldsForSignal(OutboundSignal msg) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields for signal message.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Building header fields for signal message.");
+
     HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>();
     DBusVariant pathVariant = DBusVariant.valueOf(msg.getObjectPath());
     headerFields.put(HeaderField.PATH, pathVariant);
@@ -114,11 +114,13 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
       DBusVariant signatureVariant = DBusVariant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
     });
+
     return headerFields;
   }
 
   private static Map<HeaderField, DBusVariant> buildHeaderFieldsForMethodReturn(OutboundMethodReturn msg) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields for method return message.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Building header fields for method return message.");
+
     HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>();
     DBusVariant replySerialVariant = DBusVariant.valueOf(msg.getReplySerial());
     headerFields.put(HeaderField.REPLY_SERIAL, replySerialVariant);
@@ -130,11 +132,13 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
       DBusVariant signatureVariant = DBusVariant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
     });
+
     return headerFields;
   }
 
   private static Map<HeaderField, DBusVariant> buildHeaderFieldsForMethodCall(OutboundMethodCall msg) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields for method call message.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Building header fields for method call message.");
+
     HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>();
     DBusVariant pathVariant = DBusVariant.valueOf(msg.getObjectPath());
     headerFields.put(HeaderField.PATH, pathVariant);
@@ -152,11 +156,13 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
       DBusVariant signatureVariant = DBusVariant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
     });
+
     return headerFields;
   }
 
   private static Map<HeaderField, DBusVariant> buildHeaderFieldsForError(OutboundError msg) {
-    LoggerUtils.trace(LOGGER, MARKER, () -> "Building header fields for error message.");
+    LOGGER.trace(LoggerUtils.MARSHALLING, "Building header fields for error message.");
+
     HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>();
     DBusVariant errorNameVariant = DBusVariant.valueOf(msg.getErrorName());
     headerFields.put(HeaderField.ERROR_NAME, errorNameVariant);
@@ -170,13 +176,14 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
       DBusVariant signatureVariant = DBusVariant.valueOf(signature);
       headerFields.put(HeaderField.SIGNATURE, signatureVariant);
     });
+
     return headerFields;
   }
 
   private static void validatePayload(List<DBusType> payload, DBusSignature signature) {
     boolean matching = isPayloadMatchingWithSignature(payload, signature);
     if (matching) {
-      LoggerUtils.debug(LOGGER, () -> "Payload matches signature in message.");
+      LOGGER.debug(LoggerUtils.MARSHALLING, "Payload matches signature in message.");
     } else {
       throw new EncoderException("Mismatch between signature and payload.");
     }
@@ -206,15 +213,15 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
               .orElseThrow(() -> new Exception("can not map char to type: " + c));
       return signatureType.getCode() == object.getType().getCode();
     } catch (Exception ex) {
-      LOGGER.warn("Object isn't matching with signature.", ex);
+      LOGGER.warn(LoggerUtils.MARSHALLING, "Object isn't matching with signature.", ex);
       return false;
     }
   }
 
   @Override
   protected void encode(ChannelHandlerContext ctx, OutboundMessage msg, List<Object> out) {
-    LOGGER.debug("[OutboundMessageEncoder] Encoding {}: destination={}, serial={}", 
-        msg.getClass().getSimpleName(), getDestination(msg), msg.getSerial());
+    LOGGER.debug(LoggerUtils.MARSHALLING, "Encoding {}: destination={}, serial={}",
+            msg.getClass().getSimpleName(), getDestination(msg), msg.getSerial());
     msg.getSignature().ifPresent(signature -> validatePayload(msg.getPayload(), signature));
     Frame frame = new Frame();
     frame.setByteOrder(BYTE_ORDER);
@@ -227,13 +234,13 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     Map<HeaderField, DBusVariant> headerFields = buildHeaderFields(msg);
     frame.setHeaderFields(headerFields);
     out.add(frame);
-    LOGGER.debug("[OutboundMessageEncoder] Created frame: type={}, serial={}", 
-        frame.getType(), frame.getSerial());
+    LOGGER.debug(LoggerUtils.MARSHALLING, "Created frame: type={}, serial={}",
+            frame.getType(), frame.getSerial());
   }
 
   private String getDestination(OutboundMessage msg) {
     if (msg instanceof OutboundMethodCall methodCall) {
-      return methodCall.getDestination().map(dest -> dest.getDelegate()).orElse("(none)");
+      return methodCall.getDestination().map(DBusString::getDelegate).orElse("(none)");
     }
     return "(unknown)";
   }

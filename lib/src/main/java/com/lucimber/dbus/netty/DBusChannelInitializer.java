@@ -34,8 +34,10 @@ final class DBusChannelInitializer extends ChannelInitializer<Channel> {
 
   @Override
   protected void initChannel(Channel ch) {
-    LoggerUtils.debug(LOGGER, () -> "Initiating channel.");
+    LOGGER.debug(LoggerUtils.CONNECTION, "Initiating channel.");
+
     ch.attr(DBusChannelAttribute.SERIAL_COUNTER).setIfAbsent(new AtomicLong(1));
+
     ChannelPipeline pipeline = ch.pipeline();
     addSaslRelatedHandlers(pipeline);
     addDbusRelatedHandlers(pipeline);
@@ -43,9 +45,9 @@ final class DBusChannelInitializer extends ChannelInitializer<Channel> {
   }
 
   private void addDbusRelatedHandlers(ChannelPipeline p) {
-    LoggerUtils.debug(LOGGER, () -> "Adding D-Bus related handlers to channel pipeline.");
+    LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE, "Adding D-Bus related handlers to channel pipeline.");
     // Add wire-level logging to see raw bytes sent/received
-    p.addLast("nettyByteLogger", new LoggingHandler("DBUS_WIRE", LogLevel.DEBUG));
+    p.addLast("nettyByteLogger", new LoggingHandler(LoggerUtils.TRANSPORT.getName(), LogLevel.DEBUG));
     p.addLast(FrameEncoder.class.getSimpleName(), new FrameEncoder());
     p.addLast(OutboundMessageEncoder.class.getSimpleName(), new OutboundMessageEncoder());
     p.addLast(FrameDecoder.class.getSimpleName(), new FrameDecoder());
@@ -56,7 +58,7 @@ final class DBusChannelInitializer extends ChannelInitializer<Channel> {
   }
 
   private void addSaslRelatedHandlers(ChannelPipeline p) {
-    LoggerUtils.debug(LOGGER, () -> "Adding SASL related handlers to channel pipeline.");
+    LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE, "Adding SASL related handlers to channel pipeline.");
     p.addLast(SaslInitiationHandler.class.getSimpleName(), new SaslInitiationHandler());
     p.addLast(SaslCodec.class.getSimpleName(), new SaslCodec());
     p.addLast(SaslAuthenticationHandler.class.getSimpleName(), new SaslAuthenticationHandler());

@@ -205,7 +205,7 @@ public class AppLogicHandler extends ChannelDuplexHandler {
 
   private ChannelFuture write(OutboundMessage msg) {
     LOGGER.debug("Writing outbound message (serial {}): {}", msg.getSerial(), msg);
-    return ctx.writeAndFlush(msg).addListener(f -> new DefaultFutureListener<>(LOGGER));
+    return ctx.writeAndFlush(msg).addListener(new WriteOperationListener<>(LOGGER));
   }
 
   @Override

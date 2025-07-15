@@ -68,7 +68,7 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
               .withInterface(DBUS_INTERFACE_NAME)
               .build();
 
-      ctx.writeAndFlush(helloCall).addListener(future -> {
+      ctx.writeAndFlush(helloCall).addListener(new WriteOperationListener<>(LOGGER, future -> {
         if (future.isSuccess()) {
           LOGGER.info("[DBusMandatoryNameHandler] Hello call sent successfully (serial={})", 
               helloCallSerial.getDelegate());
@@ -81,7 +81,7 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
           ctx.pipeline().remove(this); // Remove self on send failure
           ctx.close(); // Critical failure
         }
-      });
+      }));
     } else {
       // Pass on other user events if not handled here
       super.userEventTriggered(ctx, evt);

@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!-- Console appender with enhanced formatting for container environment -->
+    <!-- Pattern includes markers for categorizing D-Bus operations: SASL, DBUS, TRANSPORT, MARSHALLING, etc. -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %logger{36} - %msg%n%ex{full}</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %logger{36} %cyan([%marker]) - %msg%n%ex{full}</pattern>
         </encoder>
         <!-- Ensure output is flushed immediately for container logging -->
         <immediateFlush>true</immediateFlush>
     </appender>
 
     <!-- File appender for container debugging -->
+    <!-- File pattern includes markers for easier filtering and analysis -->
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>/tmp/integration-test.log</file>
         <encoder>
-            <pattern>%d{ISO8601} [%thread] %-5level %logger{36} - %msg%n%ex{full}</pattern>
+            <pattern>%d{ISO8601} [%thread] %-5level %logger{36} [%marker] - %msg%n%ex{full}</pattern>
         </encoder>
         <immediateFlush>true</immediateFlush>
     </appender>
@@ -39,4 +41,20 @@
     <!-- JUnit platform logging -->
     <logger name="org.junit.platform" level="INFO" />
     <logger name="org.junit.jupiter" level="INFO" />
+    
+    <!-- 
+    Available D-Bus logging markers for filtering:
+    - SASL: Authentication processes
+    - DBUS: D-Bus protocol operations (Hello, method calls, etc.)
+    - TRANSPORT: Network transport operations (I/O, frame encoding/decoding)
+    - MARSHALLING: Message marshalling and unmarshalling operations
+    - HANDLER_LIFECYCLE: Handler pipeline management
+    - CONNECTION: Connection state management
+    - HEALTH: Health monitoring
+    
+    Example grep commands for log analysis:
+    grep "\[SASL\]" /tmp/integration-test.log       # Show only SASL authentication
+    grep "\[TRANSPORT\]" /tmp/integration-test.log  # Show only transport operations
+    grep "\[MARSHALLING\]" /tmp/integration-test.log # Show only marshalling operations
+    -->
 </configuration>
