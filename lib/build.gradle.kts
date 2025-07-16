@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 plugins {
     id("java-library")
     id("maven-publish")
