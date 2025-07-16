@@ -8,31 +8,18 @@ package com.lucimber.dbus.netty;
 import com.lucimber.dbus.connection.Connection;
 import com.lucimber.dbus.connection.ConnectionConfig;
 import com.lucimber.dbus.connection.ConnectionEventListener;
+import com.lucimber.dbus.connection.ConnectionHandle;
 import com.lucimber.dbus.connection.ConnectionHealthHandler;
 import com.lucimber.dbus.connection.ConnectionReconnectHandler;
 import com.lucimber.dbus.connection.ConnectionState;
+import com.lucimber.dbus.connection.ConnectionStrategy;
+import com.lucimber.dbus.connection.ConnectionStrategyRegistry;
 import com.lucimber.dbus.connection.DefaultPipeline;
 import com.lucimber.dbus.connection.Pipeline;
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
 import com.lucimber.dbus.type.DBusUInt32;
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.MultiThreadIoEventLoopGroup;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollDomainSocketChannel;
-import io.netty.channel.epoll.EpollIoHandler;
-import io.netty.channel.kqueue.KQueue;
-import io.netty.channel.kqueue.KQueueDomainSocketChannel;
-import io.netty.channel.kqueue.KQueueIoHandler;
-import io.netty.channel.nio.NioIoHandler;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.channel.unix.DomainSocketAddress;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.Promise;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Objects;
@@ -41,7 +28,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,14 +35,12 @@ public final class NettyConnection implements Connection {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NettyConnection.class);
 
-  private final EventLoopGroup workerGroup;
   private final ExecutorService applicationTaskExecutor;
   private final SocketAddress serverAddress;
-  private final Class<? extends Channel> channelClass;
   private final Pipeline pipeline;
   private final ConnectionConfig config;
-  private Channel channel;
-  private AppLogicHandler appLogicHandler;
+  private final ConnectionStrategy strategy;
+  private ConnectionHandle connectionHandle;
   private ConnectionHealthHandler healthHandler;
   private ConnectionReconnectHandler reconnectHandler;
 
@@ -65,28 +49,13 @@ public final class NettyConnection implements Connection {
   }
 
   public NettyConnection(SocketAddress serverAddress, ConnectionConfig config) {
-    this.serverAddress = Objects.requireNonNull(serverAddress, "serverAddress must not be NULL");
-    this.config = Objects.requireNonNull(config, "config must not be NULL");
-    if (serverAddress instanceof DomainSocketAddress) {
-      if (Epoll.isAvailable()) {
-        this.workerGroup = new MultiThreadIoEventLoopGroup(1, EpollIoHandler.newFactory());
-        this.channelClass = EpollDomainSocketChannel.class;
-        LOGGER.info("Using Epoll transport for Unix Domain Socket.");
-      } else if (KQueue.isAvailable()) {
-        this.workerGroup = new MultiThreadIoEventLoopGroup(1, KQueueIoHandler.newFactory());
-        this.channelClass = KQueueDomainSocketChannel.class;
-        LOGGER.info("Using KQueue transport for Unix Domain Socket.");
-      } else {
-        throw new UnsupportedOperationException("Unix Domain Sockets require Epoll (Linux) "
-                + "or KQueue (macOS) native transport, but neither is available.");
-      }
-    } else if (serverAddress instanceof InetSocketAddress) {
-      this.workerGroup = new MultiThreadIoEventLoopGroup(1, NioIoHandler.newFactory());
-      this.channelClass = NioSocketChannel.class;
-      LOGGER.info("Using NIO transport for TCP/IP socket.");
-    } else {
-      throw new IllegalArgumentException("Unsupported server address type: " + serverAddress.getClass());
-    }
+    this.serverAddress = Objects.requireNonNull(serverAddress, "serverAddress must not be null");
+    this.config = Objects.requireNonNull(config, "config must not be null");
+    ConnectionStrategyRegistry strategyRegistry = createDefaultStrategyRegistry();
+    this.strategy = strategyRegistry.findStrategy(serverAddress)
+            .orElseThrow(() -> new IllegalArgumentException("No strategy available for: " + serverAddress));
+
+    LOGGER.info("Using transport strategy: {}", strategy.getTransportName());
 
     this.pipeline = new DefaultPipeline(this);
 
@@ -97,6 +66,18 @@ public final class NettyConnection implements Connection {
               t.setDaemon(true);
               return t;
             });
+  }
+
+  /**
+   * Creates the default strategy registry with all available Netty strategies.
+   *
+   * @return configured strategy registry
+   */
+  private static ConnectionStrategyRegistry createDefaultStrategyRegistry() {
+    ConnectionStrategyRegistry registry = new ConnectionStrategyRegistry();
+    registry.registerStrategy(new NettyUnixSocketStrategy());
+    registry.registerStrategy(new NettyTcpStrategy());
+    return registry;
   }
 
   /**
@@ -196,93 +177,69 @@ public final class NettyConnection implements Connection {
 
   @Override
   public CompletionStage<Void> connect() {
-    // Ensure appLogicHandler is fresh for each connect attempt if connection can be retried.
-    // For now, assuming one connect call per Connection instance.
-    if (this.appLogicHandler != null && this.channel != null && this.channel.isActive()) {
+    // Check if already connected
+    if (this.connectionHandle != null && this.connectionHandle.isActive()) {
       LOGGER.warn("Already connected or connection attempt in progress.");
-      Promise<Void> alreadyConnectedPromise = workerGroup.next().newPromise();
-      alreadyConnectedPromise.setSuccess(null); // Or an error if preferred
-      return NettyFutureConverter.toCompletionStage(alreadyConnectedPromise);
+      return CompletableFuture.completedFuture(null);
     }
-    this.appLogicHandler = new AppLogicHandler(applicationTaskExecutor, this, config.getMethodCallTimeoutMs());
+
+    // Initialize handlers
     this.healthHandler = new ConnectionHealthHandler(config);
     this.reconnectHandler = new ConnectionReconnectHandler(config);
-    
+
     // Add reconnect handler to pipeline if auto-reconnect is enabled
     if (config.isAutoReconnectEnabled()) {
       this.pipeline.addLast("reconnect-handler", reconnectHandler);
     }
-    
+
     // Add health handler to pipeline if health monitoring is enabled
     if (config.isHealthCheckEnabled()) {
       this.pipeline.addLast("health-monitor", healthHandler);
     }
 
-    Promise<Void> connectPromise = workerGroup.next().newPromise();
+    // Create connection context for strategy
+    NettyConnectionContext context = new NettyConnectionContext(pipeline, applicationTaskExecutor, this);
 
-    Bootstrap b = new Bootstrap();
-    b.group(workerGroup).channel(this.channelClass); // Use determined channel class
+    LOGGER.info("Attempting to connect to DBus server at {} using strategy: {}", serverAddress, strategy.getTransportName());
 
-    if (this.serverAddress instanceof InetSocketAddress) { // Only set for TCP
-      b.option(ChannelOption.SO_KEEPALIVE, true);
-      b.option(ChannelOption.TCP_NODELAY, true); // Disable Nagle's algorithm for low-latency
-      b.option(ChannelOption.SO_REUSEADDR, true); // Allow reuse of local addresses
-      b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) config.getConnectTimeout().toMillis());
-    }
-
-    b.handler(new DBusChannelInitializer(appLogicHandler, connectPromise));
-
-    LOGGER.info("Attempting to connect to DBus server at {}", serverAddress);
-    ChannelFuture channelFuture = b.connect(serverAddress);
-
-    channelFuture.addListener((ChannelFuture cf) -> {
-      if (cf.isSuccess()) {
-        LOGGER.debug("Socket connection established to {}.", serverAddress);
-        this.channel = cf.channel();
-      } else {
-        LOGGER.error("Failed to establish socket connection to {}.", serverAddress, cf.cause());
-        connectPromise.tryFailure(cf.cause());
-      }
-    });
-
-    // Notify D-Bus pipeline when connection is fully established
-    connectPromise.addListener(future -> {
-      if (future.isSuccess()) {
-        LOGGER.debug("Connection completed successfully, notifying D-Bus pipeline");
-        // The D-Bus pipeline should be notified about the connection being active
-        if (pipeline != null) {
-          pipeline.propagateConnectionActive();
-        }
-      }
-    });
-
-    return NettyFutureConverter.toCompletionStage(connectPromise);
+    // Use strategy to establish connection
+    return strategy.connect(serverAddress, config, context)
+            .thenApply(handle -> {
+              this.connectionHandle = handle;
+              LOGGER.info("Connection established successfully");
+              return null;
+            });
   }
 
   @Override
   public boolean isConnected() {
-    return channel != null
-            && channel.isActive()
-            && channel.attr(DBusChannelAttribute.ASSIGNED_BUS_NAME).get() != null;
+    return connectionHandle != null && connectionHandle.isActive();
   }
 
   @Override
   public void close() {
     LOGGER.info("Closing DBus connection to {}...", serverAddress);
-    
+
     // Shutdown reconnect handler first
     if (reconnectHandler != null) {
       reconnectHandler.shutdown();
     }
-    
+
     // Shutdown health handler
     if (healthHandler != null) {
       healthHandler.shutdown();
     }
-    
-    if (channel != null) {
-      channel.close().awaitUninterruptibly(5, TimeUnit.SECONDS);
+
+    // Close connection handle
+    if (connectionHandle != null) {
+      try {
+        connectionHandle.close().toCompletableFuture().get(5, TimeUnit.SECONDS);
+      } catch (Exception e) {
+        LOGGER.warn("Error closing connection handle", e);
+      }
     }
+
+    // Shutdown application task executor
     if (applicationTaskExecutor != null && !applicationTaskExecutor.isShutdown()) {
       applicationTaskExecutor.shutdown();
       try {
@@ -294,26 +251,16 @@ public final class NettyConnection implements Connection {
         Thread.currentThread().interrupt();
       }
     }
-    if (workerGroup != null && !workerGroup.isShuttingDown()) {
-      // shutdownGracefully returns a Future, await it.
-      Future<?> shutdownFuture = workerGroup.shutdownGracefully(1, 5, TimeUnit.SECONDS);
-      // Wait a bit longer for actual shutdown
-      shutdownFuture.awaitUninterruptibly(5, TimeUnit.SECONDS);
-    }
+
     LOGGER.info("DBus connection to {} closed.", serverAddress);
   }
 
   @Override
   public DBusUInt32 getNextSerial() {
-    if (channel == null || !channel.isActive()) {
-      throw new IllegalStateException("Cannot get next serial, channel is not active.");
+    if (connectionHandle == null || !connectionHandle.isActive()) {
+      throw new IllegalStateException("Cannot get next serial, connection is not active.");
     }
-    AtomicLong serialCounter = channel.attr(DBusChannelAttribute.SERIAL_COUNTER).get();
-    if (serialCounter == null) {
-      throw new IllegalStateException("Serial counter not initialized on channel.");
-    }
-    // D-Bus serial numbers are 32-bit unsigned and allowed to wrap around
-    return DBusUInt32.valueOf((int) serialCounter.getAndIncrement());
+    return connectionHandle.getNextSerial();
   }
 
   @Override
@@ -323,48 +270,25 @@ public final class NettyConnection implements Connection {
 
   @Override
   public CompletionStage<InboundMessage> sendRequest(OutboundMessage msg) {
-    if (appLogicHandler == null || !isConnected()) {
-      Promise<InboundMessage> failedPromise = workerGroup.next().newPromise();
-      var re = new IllegalStateException("Not connected to D-Bus.");
-      failedPromise.setFailure(re);
-      return NettyFutureConverter.toCompletionStage(failedPromise);
-    } else {
-      CompletableFuture<InboundMessage> returnFuture = new CompletableFuture<>();
-
-      appLogicHandler.writeMessage(msg).addListener(outerFuture -> {
-        if (!outerFuture.isSuccess()) {
-          returnFuture.completeExceptionally(outerFuture.cause());
-          return;
-        }
-
-        @SuppressWarnings("unchecked")
-        Future<InboundMessage> innerFuture = (Future<InboundMessage>) outerFuture.getNow();
-        innerFuture.addListener(inner -> {
-          if (inner.isSuccess()) {
-            returnFuture.complete((InboundMessage) inner.getNow());
-          } else {
-            returnFuture.completeExceptionally(inner.cause());
-          }
-        });
-      });
-
-      return returnFuture;
+    if (connectionHandle == null || !isConnected()) {
+      CompletableFuture<InboundMessage> failedFuture = new CompletableFuture<>();
+      failedFuture.completeExceptionally(new IllegalStateException("Not connected to D-Bus."));
+      return failedFuture;
     }
+    return connectionHandle.sendRequest(msg);
   }
 
   @Override
   public void sendAndRouteResponse(OutboundMessage msg, CompletionStage<Void> future) {
-    if (appLogicHandler == null || !isConnected()) {
+    if (connectionHandle == null || !isConnected()) {
       var re = new IllegalStateException("Not connected to D-Bus.");
       future.toCompletableFuture().completeExceptionally(re);
     } else {
-      appLogicHandler.writeAndRouteResponse(msg).addListener(f -> {
-        if (f.isSuccess()) {
+      connectionHandle.send(msg).whenComplete((result, throwable) -> {
+        if (throwable != null) {
+          future.toCompletableFuture().completeExceptionally(throwable);
+        } else {
           future.toCompletableFuture().complete(null);
-        } else if (f.cause() != null) {
-          future.toCompletableFuture().completeExceptionally(f.cause());
-        } else if (f.isCancelled()) {
-          future.toCompletableFuture().cancel(true);
         }
       });
     }
@@ -380,11 +304,11 @@ public final class NettyConnection implements Connection {
     if (healthHandler != null) {
       return healthHandler.getCurrentState();
     }
-    
+
     // Fallback to basic state detection if health handler is not available
     if (isConnected()) {
       return ConnectionState.CONNECTED;
-    } else if (channel != null && channel.isActive()) {
+    } else if (connectionHandle != null) {
       return ConnectionState.AUTHENTICATING;
     } else {
       return ConnectionState.DISCONNECTED;
@@ -432,6 +356,48 @@ public final class NettyConnection implements Connection {
   public void resetReconnectionState() {
     if (reconnectHandler != null) {
       reconnectHandler.reset();
+    }
+  }
+
+  // Package-private methods for NettyConnectionContext callbacks
+
+  /**
+   * Called by NettyConnectionContext when connection state changes.
+   */
+  void notifyStateChanged(ConnectionState newState) {
+    LOGGER.debug("State changed to: {}", newState);
+    if (healthHandler != null) {
+      // Update the health handler with the new state
+      // Note: This is a simplified approach. The health handler might need
+      // a different mechanism to update its internal state.
+      LOGGER.debug("Notifying health handler of state change to: {}", newState);
+    }
+  }
+
+  /**
+   * Called by NettyConnectionContext when an error occurs.
+   */
+  void notifyError(Throwable error) {
+    LOGGER.error("Connection error reported by strategy", error);
+    // Could trigger reconnection logic here
+  }
+
+  /**
+   * Called by NettyConnectionContext when connection is established.
+   */
+  void notifyConnectionEstablished() {
+    LOGGER.debug("Connection establishment confirmed by strategy");
+  }
+
+  /**
+   * Called by NettyConnectionContext when connection is lost.
+   */
+  void notifyConnectionLost() {
+    LOGGER.warn("Connection loss reported by strategy");
+    // Could trigger reconnection logic here if enabled
+    if (reconnectHandler != null && config.isAutoReconnectEnabled()) {
+      // Trigger reconnection
+      LOGGER.info("Triggering auto-reconnection");
     }
   }
 }

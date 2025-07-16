@@ -32,14 +32,28 @@ dependencies {
 
 ### Step 1: Create a Connection
 
+The library automatically selects the appropriate transport strategy based on the connection type:
+
 ```java
 import com.lucimber.dbus.connection.Connection;
 import com.lucimber.dbus.netty.NettyConnection;
+import io.netty.channel.unix.DomainSocketAddress;
+import java.net.InetSocketAddress;
 
 public class QuickStartExample {
     public static void main(String[] args) throws Exception {
-        // Create a connection to the system bus
+        // Option 1: System bus (Unix domain socket - automatic)
         Connection connection = NettyConnection.newSystemBusConnection();
+        
+        // Option 2: Manual Unix domain socket
+        // Connection connection = new NettyConnection(
+        //     new DomainSocketAddress("/var/run/dbus/system_bus_socket")
+        // );
+        
+        // Option 3: TCP connection (for remote D-Bus or containers)
+        // Connection connection = new NettyConnection(
+        //     new InetSocketAddress("localhost", 12345)
+        // );
         
         // Connect asynchronously
         connection.connect().toCompletableFuture().get();
@@ -206,6 +220,65 @@ DBusDict<DBusString, DBusInt32> dictionary = new DBusDict<>(dictSignature);
 dictionary.put(DBusString.valueOf("key1"), DBusInt32.valueOf(100));
 dictionary.put(DBusString.valueOf("key2"), DBusInt32.valueOf(200));
 ```
+
+## Transport Options
+
+The library supports multiple transport types through a pluggable strategy pattern:
+
+### Unix Domain Sockets (Recommended for Local Connections)
+
+```java
+import io.netty.channel.unix.DomainSocketAddress;
+
+// System bus
+Connection systemBus = NettyConnection.newSystemBusConnection();
+
+// Session bus  
+Connection sessionBus = NettyConnection.newSessionBusConnection();
+
+// Custom Unix socket
+Connection customUnix = new NettyConnection(
+    new DomainSocketAddress("/path/to/custom/socket")
+);
+```
+
+**Benefits:**
+- High performance with native transports (Epoll on Linux, KQueue on macOS)
+- Standard D-Bus authentication (EXTERNAL mechanism)
+- Lower latency than TCP
+
+### TCP/IP Connections (For Remote or Container Environments)
+
+```java
+import java.net.InetSocketAddress;
+
+// Remote D-Bus server
+Connection remoteConnection = new NettyConnection(
+    new InetSocketAddress("dbus-server.example.com", 12345)
+);
+
+// Local TCP (useful in containers)
+Connection localTcp = new NettyConnection(
+    new InetSocketAddress("localhost", 12345)
+);
+```
+
+**Benefits:**
+- Works across network boundaries
+- Platform independent (uses NIO)
+- Suitable for containerized environments
+
+### Automatic Strategy Selection
+
+The library automatically selects the appropriate transport strategy:
+
+1. **Unix Domain Socket → NettyUnixSocketStrategy**
+   - Uses native transports when available
+   - Falls back gracefully if native transport unavailable
+
+2. **TCP Address → NettyTcpStrategy** 
+   - Uses NIO transport with TCP optimizations
+   - Configures connection timeouts and keep-alive
 
 ## Testing Your Application
 

@@ -10,7 +10,7 @@ The D-Bus Client Java library is designed as a high-performance, asynchronous D-
 2. **Type Safety**: Strong typing prevents D-Bus marshalling errors at compile time
 3. **Extensibility**: Handler-based pipeline allows custom message processing
 4. **Performance**: Built on Netty for high-performance networking
-5. **Cross-Platform**: Works reliably across different operating systems
+5. **Cross-Platform**: Works reliably across different operating systems with multiple transport options
 
 ### Quality Attributes
 
@@ -46,8 +46,8 @@ The D-Bus Client Java library is designed as a high-performance, asynchronous D-
 ├─────────────────────────────────────────────────────────────┤
 │                   Transport Layer                           │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │    Netty    │  │    SASL     │  │     Framing         │  │
-│  │ Transport   │  │    Auth     │  │                     │  │
+│  │ Transport   │  │    SASL     │  │     Framing         │  │
+│  │ Strategies  │  │    Auth     │  │                     │  │
 │  └─────────────┘  └─────────────┘  └─────────────────────┘  │
 ├─────────────────────────────────────────────────────────────┤
 │                    Network Layer                            │
@@ -71,7 +71,8 @@ The D-Bus Client Java library is designed as a high-performance, asynchronous D-
 - `Pipeline`: Handler chain for message processing
 
 **Design Patterns**:
-- **Factory Pattern**: Connection creation through static factory methods
+- **Factory Pattern**: Connection creation through static factory methods  
+- **Strategy Pattern**: Pluggable transport implementations (Unix sockets, TCP)
 - **Builder Pattern**: Configuration construction
 - **Observer Pattern**: Connection event listeners
 
@@ -155,6 +156,36 @@ DBusType (interface)
 - **Pipeline Pattern**: Netty channel pipeline
 - **Handler Pattern**: Individual pipeline handlers
 - **State Machine**: SASL authentication flow
+
+## Transport Strategy Architecture
+
+The library uses the Strategy pattern to support multiple transport types in a clean, extensible way:
+
+### Strategy Components
+
+1. **ConnectionStrategy**: Abstract interface for transport implementations
+2. **ConnectionStrategyRegistry**: Automatic strategy selection based on address type
+3. **ConnectionHandle**: Transport-agnostic connection operations
+4. **ConnectionContext**: Bridge between strategy and connection management
+
+### Available Strategies
+
+- **NettyUnixSocketStrategy**: Unix domain sockets with native transports (Epoll/KQueue)
+- **NettyTcpStrategy**: TCP/IP connections with NIO transport
+
+### Strategy Selection Flow
+
+```
+SocketAddress → Registry → Strategy.supports() → Strategy.isAvailable() → Selected Strategy
+```
+
+The strategy pattern eliminates conditional transport logic and provides:
+- **Extensibility**: Easy addition of new transport types (WebSocket, HTTP/2, etc.)
+- **Separation of Concerns**: Transport logic isolated from connection management
+- **Platform Independence**: Core logic doesn't depend on specific transports
+- **Testability**: Each strategy tested independently
+
+See [transport-strategies.md](transport-strategies.md) for detailed strategy documentation.
 
 ## Pipeline Architecture
 

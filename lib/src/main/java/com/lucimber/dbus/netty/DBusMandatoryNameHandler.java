@@ -70,13 +70,13 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
 
       ctx.writeAndFlush(helloCall).addListener(new WriteOperationListener<>(LOGGER, future -> {
         if (future.isSuccess()) {
-          LOGGER.info("[DBusMandatoryNameHandler] Hello call sent successfully (serial={})", 
-              helloCallSerial.getDelegate());
+          LOGGER.info("[DBusMandatoryNameHandler] Hello call sent successfully (serial={})",
+                  helloCallSerial.getDelegate());
           currentState = State.AWAITING_HELLO_REPLY;
           startHelloTimeout(ctx);
         } else {
-          LOGGER.error("[DBusMandatoryNameHandler] Failed to send Hello call (serial={}): {}", 
-              helloCallSerial.getDelegate(), future.cause().getMessage());
+          LOGGER.error("[DBusMandatoryNameHandler] Failed to send Hello call (serial={}): {}",
+                  helloCallSerial.getDelegate(), future.cause().getMessage());
           ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
           ctx.pipeline().remove(this); // Remove self on send failure
           ctx.close(); // Critical failure
@@ -99,16 +99,16 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
     if (msg instanceof InboundMethodReturn methodReturn) {
       if (methodReturn.getReplySerial().equals(helloCallSerial)) {
         handled = true;
-        LOGGER.info("[DBusMandatoryNameHandler] Received Hello reply (serial={})", 
-            methodReturn.getSerial().getDelegate());
+        LOGGER.info("[DBusMandatoryNameHandler] Received Hello reply (serial={})",
+                methodReturn.getSerial().getDelegate());
         handleHelloReply(ctx, methodReturn);
         ReferenceCountUtil.release(msg); // Release message after handling
       }
     } else if (msg instanceof InboundError error) {
       if (error.getReplySerial().equals(helloCallSerial)) {
         handled = true;
-        LOGGER.error("[DBusMandatoryNameHandler] Received Hello error (serial={}): {}", 
-            error.getSerial().getDelegate(), error.getErrorName());
+        LOGGER.error("[DBusMandatoryNameHandler] Received Hello error (serial={}): {}",
+                error.getSerial().getDelegate(), error.getErrorName());
         handleHelloError(ctx, error);
         ReferenceCountUtil.release(msg); // Release message after handling
       }
@@ -122,13 +122,13 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
 
   private void handleHelloReply(ChannelHandlerContext ctx, InboundMethodReturn reply) {
     cancelHelloTimeout();
-    
+
     List<DBusType> payload = reply.getPayload();
 
     if (!payload.isEmpty() && payload.get(0) instanceof DBusString assignedName) {
       LOGGER.info("[DBusMandatoryNameHandler] Successfully acquired bus name: {}", assignedName);
       ctx.channel().attr(DBusChannelAttribute.ASSIGNED_BUS_NAME).set(assignedName);
-      
+
       // Remove handler first, then propagate event so all handlers can react
       try {
         ctx.pipeline().remove(this);
@@ -136,11 +136,11 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
       } catch (NoSuchElementException ignored) {
         LOGGER.warn("Failed to remove myself as {} from pipeline.", this.getClass().getSimpleName());
       }
-      
+
       ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUIRED);
     } else {
       LOGGER.error("[DBusMandatoryNameHandler] Invalid Hello reply payload: {}", payload);
-      
+
       // Remove handler first, then propagate event so all handlers can react
       try {
         ctx.pipeline().remove(this);
@@ -148,17 +148,17 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
       } catch (NoSuchElementException ignored) {
         LOGGER.warn("Failed to remove myself as {} from pipeline.", this.getClass().getSimpleName());
       }
-      
+
       ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
     }
   }
 
   private void handleHelloError(ChannelHandlerContext ctx, InboundError error) {
     cancelHelloTimeout();
-    
+
     LOGGER.error("Received error reply for Hello call (serial {}): Name: {}, Message: {}",
             helloCallSerial.getDelegate(), error.getErrorName(), error.getPayload());
-    
+
     // Remove handler first, then propagate event so all handlers can react
     try {
       ctx.pipeline().remove(this);
@@ -166,7 +166,7 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
     } catch (NoSuchElementException ignored) {
       LOGGER.warn("Failed to remove myself as {} from pipeline after error.", this.getClass().getSimpleName());
     }
-    
+
     ctx.fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
   }
 
@@ -176,7 +176,7 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
     // Ensure we signal failure if we were awaiting reply
     if (currentState == State.AWAITING_HELLO_REPLY) {
       cancelHelloTimeout();
-      
+
       // Remove handler first, then propagate event so all handlers can react
       try {
         ctx.pipeline().remove(this);
@@ -184,7 +184,7 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
       } catch (NoSuchElementException ignored) {
         LOGGER.warn("Failed to remove myself as {} from pipeline after exception.", this.getClass().getSimpleName());
       }
-      
+
       ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
     }
   }
@@ -204,7 +204,7 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
     helloTimeoutFuture = ctx.executor().schedule(() -> {
       if (currentState == State.AWAITING_HELLO_REPLY) {
         LOGGER.error("[DBusMandatoryNameHandler] Hello call timed out after {} seconds", HELLO_TIMEOUT_SECONDS);
-        
+
         // Remove handler first, then propagate event so all handlers can react
         try {
           ctx.pipeline().remove(this);
@@ -212,7 +212,7 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
         } catch (NoSuchElementException ignored) {
           LOGGER.warn("Failed to remove myself as {} from pipeline after timeout.", this.getClass().getSimpleName());
         }
-        
+
         ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
       }
     }, HELLO_TIMEOUT_SECONDS, TimeUnit.SECONDS);

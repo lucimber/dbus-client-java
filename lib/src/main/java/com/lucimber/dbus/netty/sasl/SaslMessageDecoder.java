@@ -24,20 +24,6 @@ public class SaslMessageDecoder extends ByteToMessageDecoder {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SaslMessageDecoder.class);
 
-  @Override
-  public void handlerAdded(ChannelHandlerContext ctx) {
-    LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE,
-            "Added to pipeline using context name '{}'.",
-            ctx.name());
-  }
-
-  @Override
-  protected void handlerRemoved0(ChannelHandlerContext ctx) {
-    LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE,
-            "Removed from pipeline using context name '{}'.",
-            ctx.name());
-  }
-
   private static int findEndOfLine(ByteBuf buffer) {
     LOGGER.trace("Finding end of line (CRLF) in buffer.");
 
@@ -50,6 +36,20 @@ public class SaslMessageDecoder extends ByteToMessageDecoder {
       }
     }
     return -1;
+  }
+
+  @Override
+  public void handlerAdded(ChannelHandlerContext ctx) {
+    LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE,
+            "Added to pipeline using context name '{}'.",
+            ctx.name());
+  }
+
+  @Override
+  protected void handlerRemoved0(ChannelHandlerContext ctx) {
+    LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE,
+            "Removed from pipeline using context name '{}'.",
+            ctx.name());
   }
 
   @Override

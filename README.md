@@ -2,8 +2,9 @@
 This software is a framework that enables a Java based
 application to interact with a D-Bus instance in the role
 of a client. The D-Bus instance can be a system or
-session bus. As of now, only Unix sockets are supported
-as transport by this framework. The type system, the wire
+session bus. The framework supports multiple transport types
+including Unix domain sockets and TCP/IP connections through
+a pluggable strategy pattern. The type system, the wire
 format and the message protocol are fully implemented as
 of D-Bus Specification 0.41.
 

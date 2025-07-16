@@ -118,8 +118,8 @@ public class AppLogicHandler extends ChannelDuplexHandler {
    *
    * @param msg the outbound message to send (must have a preassigned unique serial number).
    * @return a {@code Future} that completes with another {@code Future<InboundMessage>}:
-   *     the outer future completes when the message is written;
-   *     the inner future completes when the reply arrives.
+   * the outer future completes when the message is written;
+   * the inner future completes when the reply arrives.
    */
   public Future<Future<InboundMessage>> writeMessage(OutboundMessage msg) {
     if (ctx == null || !ctx.channel().isActive()) {
@@ -138,7 +138,7 @@ public class AppLogicHandler extends ChannelDuplexHandler {
         long timeoutMs = methodCall.getTimeout()
                 .map(Duration::toMillis)
                 .orElse(methodCallTimeoutMs);
-        
+
         ScheduledFuture<?> timeoutFuture = ctx.executor().schedule(() -> {
           PendingMethodCall pendingCall = pendingMethodCalls.remove(msg.getSerial());
           if (pendingCall != null && !pendingCall.promise().isDone()) {
@@ -147,7 +147,7 @@ public class AppLogicHandler extends ChannelDuplexHandler {
                     "Method call with serial " + msg.getSerial() + " timed out after " + timeoutMs + "ms"));
           }
         }, timeoutMs, TimeUnit.MILLISECONDS);
-        
+
         pendingMethodCalls.put(msg.getSerial(), new PendingMethodCall(replyPromise, timeoutFuture));
       } else {
         replyPromise.trySuccess(null);
@@ -189,7 +189,7 @@ public class AppLogicHandler extends ChannelDuplexHandler {
    *
    * @param msg the outbound message to send.
    * @return a {@link Future} that completes when the message has been successfully written,
-   *     or exceptionally if an error occurs during transmission.
+   * or exceptionally if an error occurs during transmission.
    */
   public Future<Void> writeAndRouteResponse(OutboundMessage msg) {
     if (ctx == null || !ctx.channel().isActive()) {
