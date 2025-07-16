@@ -23,6 +23,7 @@ public final class ConnectionConfig {
   private static final Duration DEFAULT_RECONNECT_INITIAL_DELAY = Duration.ofSeconds(1);
   private static final Duration DEFAULT_RECONNECT_MAX_DELAY = Duration.ofMinutes(5);
   private static final int DEFAULT_MAX_RECONNECT_ATTEMPTS = 10;
+  private static final Duration DEFAULT_CLOSE_TIMEOUT = Duration.ofSeconds(5);
 
   private final Duration methodCallTimeout;
   private final Duration connectTimeout;
@@ -36,6 +37,7 @@ public final class ConnectionConfig {
   private final Duration reconnectMaxDelay;
   private final double reconnectBackoffMultiplier;
   private final int maxReconnectAttempts;
+  private final Duration closeTimeout;
 
   private ConnectionConfig(Builder builder) {
     this.methodCallTimeout = builder.methodCallTimeout;
@@ -50,6 +52,7 @@ public final class ConnectionConfig {
     this.reconnectMaxDelay = builder.reconnectMaxDelay;
     this.reconnectBackoffMultiplier = builder.reconnectBackoffMultiplier;
     this.maxReconnectAttempts = builder.maxReconnectAttempts;
+    this.closeTimeout = builder.closeTimeout;
   }
 
   /**
@@ -214,6 +217,15 @@ public final class ConnectionConfig {
     return maxReconnectAttempts;
   }
 
+  /**
+   * Gets the timeout for connection close operations.
+   *
+   * @return The close timeout duration
+   */
+  public Duration getCloseTimeout() {
+    return closeTimeout;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -234,7 +246,8 @@ public final class ConnectionConfig {
             && Objects.equals(healthCheckInterval, that.healthCheckInterval)
             && Objects.equals(healthCheckTimeout, that.healthCheckTimeout)
             && Objects.equals(reconnectInitialDelay, that.reconnectInitialDelay)
-            && Objects.equals(reconnectMaxDelay, that.reconnectMaxDelay);
+            && Objects.equals(reconnectMaxDelay, that.reconnectMaxDelay)
+            && Objects.equals(closeTimeout, that.closeTimeout);
   }
 
   @Override
@@ -242,7 +255,7 @@ public final class ConnectionConfig {
     return Objects.hash(methodCallTimeout, connectTimeout, readTimeout, writeTimeout,
             healthCheckEnabled, healthCheckInterval, healthCheckTimeout,
             autoReconnectEnabled, reconnectInitialDelay, reconnectMaxDelay,
-            reconnectBackoffMultiplier, maxReconnectAttempts);
+            reconnectBackoffMultiplier, maxReconnectAttempts, closeTimeout);
   }
 
   @Override
@@ -260,6 +273,7 @@ public final class ConnectionConfig {
             + ", reconnectMaxDelay=" + reconnectMaxDelay
             + ", reconnectBackoffMultiplier=" + reconnectBackoffMultiplier
             + ", maxReconnectAttempts=" + maxReconnectAttempts
+            + ", closeTimeout=" + closeTimeout
             + '}';
   }
 
@@ -279,6 +293,7 @@ public final class ConnectionConfig {
     private Duration reconnectMaxDelay = DEFAULT_RECONNECT_MAX_DELAY;
     private double reconnectBackoffMultiplier = 2.0;
     private int maxReconnectAttempts = DEFAULT_MAX_RECONNECT_ATTEMPTS;
+    private Duration closeTimeout = DEFAULT_CLOSE_TIMEOUT;
 
     private Builder() {
     }
@@ -460,6 +475,22 @@ public final class ConnectionConfig {
         throw new IllegalArgumentException("Max reconnect attempts must be >= 0");
       }
       this.maxReconnectAttempts = attempts;
+      return this;
+    }
+
+    /**
+     * Sets the timeout for connection close operations.
+     *
+     * @param timeout The close timeout duration (must be positive)
+     * @return This builder instance
+     * @throws IllegalArgumentException if timeout is null or not positive
+     */
+    public Builder withCloseTimeout(Duration timeout) {
+      Objects.requireNonNull(timeout, "Close timeout cannot be null");
+      if (timeout.isNegative() || timeout.isZero()) {
+        throw new IllegalArgumentException("Close timeout must be positive");
+      }
+      this.closeTimeout = timeout;
       return this;
     }
 

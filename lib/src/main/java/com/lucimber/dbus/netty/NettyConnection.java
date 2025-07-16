@@ -284,7 +284,8 @@ public final class NettyConnection implements Connection {
       ConnectionHandle handle = connectionHandle.getAndSet(null);
       if (handle != null) {
         try {
-          handle.close().toCompletableFuture().get(5, TimeUnit.SECONDS);
+          long timeoutMs = config.getCloseTimeout().toMillis();
+          handle.close().toCompletableFuture().get(timeoutMs, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
           LOGGER.warn("Error closing connection handle", e);
         }
@@ -294,7 +295,8 @@ public final class NettyConnection implements Connection {
       if (applicationTaskExecutor != null && !applicationTaskExecutor.isShutdown()) {
         applicationTaskExecutor.shutdown();
         try {
-          if (!applicationTaskExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+          long timeoutMs = config.getCloseTimeout().toMillis();
+          if (!applicationTaskExecutor.awaitTermination(timeoutMs, TimeUnit.MILLISECONDS)) {
             applicationTaskExecutor.shutdownNow();
           }
         } catch (InterruptedException ie) {

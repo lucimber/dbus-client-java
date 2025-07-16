@@ -72,7 +72,7 @@ public final class NettyUnixSocketStrategy implements ConnectionStrategy {
       if (future.isSuccess()) {
         LOGGER.debug("Unix domain socket connection established to {}", address);
         // Create handle but wait for D-Bus handshake completion before resolving the future
-        NettyConnectionHandle handle = new NettyConnectionHandle(channelFuture.channel(), workerGroup);
+        NettyConnectionHandle handle = new NettyConnectionHandle(channelFuture.channel(), workerGroup, config);
 
         // The nettyConnectPromise will be completed by ConnectionCompletionHandler
         // when MANDATORY_NAME_ACQUIRED event is received

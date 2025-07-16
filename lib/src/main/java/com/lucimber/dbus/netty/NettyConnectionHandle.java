@@ -5,6 +5,7 @@
 
 package com.lucimber.dbus.netty;
 
+import com.lucimber.dbus.connection.ConnectionConfig;
 import com.lucimber.dbus.connection.ConnectionHandle;
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
@@ -32,11 +33,13 @@ public final class NettyConnectionHandle implements ConnectionHandle {
 
   private final Channel channel;
   private final EventLoopGroup eventLoopGroup;
+  private final ConnectionConfig config;
   private final AtomicBoolean closing = new AtomicBoolean(false);
 
-  public NettyConnectionHandle(Channel channel, EventLoopGroup eventLoopGroup) {
+  public NettyConnectionHandle(Channel channel, EventLoopGroup eventLoopGroup, ConnectionConfig config) {
     this.channel = channel;
     this.eventLoopGroup = eventLoopGroup;
+    this.config = config;
   }
 
   @Override
@@ -113,7 +116,9 @@ public final class NettyConnectionHandle implements ConnectionHandle {
     if (channel != null) {
       channel.close().addListener(channelFuture -> {
         if (eventLoopGroup != null && !eventLoopGroup.isShuttingDown()) {
-          Future<?> shutdownFuture = eventLoopGroup.shutdownGracefully(1, 5, TimeUnit.SECONDS);
+          long quietPeriod = Math.min(1000, config.getCloseTimeout().toMillis() / 10);
+          long timeout = config.getCloseTimeout().toMillis();
+          Future<?> shutdownFuture = eventLoopGroup.shutdownGracefully(quietPeriod, timeout, TimeUnit.MILLISECONDS);
           shutdownFuture.addListener(groupFuture -> {
             if (groupFuture.isSuccess()) {
               closeFuture.complete(null);
