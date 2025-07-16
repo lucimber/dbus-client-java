@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,10 @@ import org.slf4j.LoggerFactory;
 public final class ConnectionHealthHandler extends AbstractDuplexHandler {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHealthHandler.class);
+  
+  // Resource limits to prevent exhaustion
+  private static final int MAX_PENDING_HEALTH_CHECKS = 100;
+  private static final int MAX_CONSECUTIVE_FAILURES = 10;
 
   private final ConnectionConfig config;
   private final ScheduledExecutorService scheduler;
@@ -62,6 +67,7 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
   private final AtomicReference<Instant> lastSuccessfulCheck = new AtomicReference<>();
   private final AtomicReference<ConnectionState> currentState = new AtomicReference<>(ConnectionState.DISCONNECTED);
   private final AtomicReference<Context> contextRef = new AtomicReference<>();
+  private final AtomicInteger consecutiveFailures = new AtomicInteger(0);
 
   /**
    * Creates a new connection health handler with the specified configuration.
@@ -228,6 +234,22 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
       return;
     }
 
+    // Check for too many consecutive failures
+    if (consecutiveFailures.get() >= MAX_CONSECUTIVE_FAILURES) {
+      LOGGER.error("Too many consecutive health check failures ({}), stopping health monitoring", 
+                   consecutiveFailures.get());
+      updateState(ConnectionState.FAILED);
+      stopHealthMonitoring();
+      return;
+    }
+
+    // Check for too many pending health checks
+    if (pendingHealthChecks.size() >= MAX_PENDING_HEALTH_CHECKS) {
+      LOGGER.warn("Too many pending health checks ({}), skipping this check", 
+                  pendingHealthChecks.size());
+      return;
+    }
+
     try {
       LOGGER.debug("Performing health check...");
 
@@ -263,7 +285,8 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
 
                 if (throwable != null) {
                   // Health check failed
-                  LOGGER.warn("Health check failed: {}", throwable.getMessage());
+                  int failures = consecutiveFailures.incrementAndGet();
+                  LOGGER.warn("Health check failed (consecutive failures: {}): {}", failures, throwable.getMessage());
                   fireConnectionEvent(ConnectionEvent.healthCheckFailure(throwable));
 
                   // Update state to unhealthy if we were connected
@@ -272,6 +295,7 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
                   }
                 } else {
                   // Health check succeeded
+                  consecutiveFailures.set(0); // Reset failure counter
                   lastSuccessfulCheck.set(Instant.now());
                   fireConnectionEvent(ConnectionEvent.healthCheckSuccess());
 
@@ -285,7 +309,8 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
               });
 
     } catch (Exception e) {
-      LOGGER.error("Error performing health check", e);
+      int failures = consecutiveFailures.incrementAndGet();
+      LOGGER.error("Error performing health check (consecutive failures: {})", failures, e);
       fireConnectionEvent(ConnectionEvent.healthCheckFailure(e));
 
       if (currentState.get() == ConnectionState.CONNECTED) {
