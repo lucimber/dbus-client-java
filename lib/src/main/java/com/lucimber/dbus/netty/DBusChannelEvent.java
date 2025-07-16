@@ -29,5 +29,17 @@ public enum DBusChannelEvent {
   /**
    * Fired by {@link DBusMandatoryNameHandler} if acquiring the mandatory bus name fails.
    */
-  MANDATORY_NAME_ACQUISITION_FAILED
+  MANDATORY_NAME_ACQUISITION_FAILED,
+  
+  /**
+   * Fired when a reconnection process is about to start.
+   * Handlers should prepare for reconnection by resetting their state.
+   */
+  RECONNECTION_STARTING,
+  
+  /**
+   * Fired when handlers that were removed during connection setup need to be re-added.
+   * This allows for proper pipeline reconstruction during reconnection.
+   */
+  RECONNECTION_HANDLERS_READD_REQUIRED
 }

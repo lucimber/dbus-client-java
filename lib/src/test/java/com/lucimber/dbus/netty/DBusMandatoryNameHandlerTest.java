@@ -66,6 +66,7 @@ class DBusMandatoryNameHandlerTest {
     channel.writeInbound(reply);
 
     assertEquals(name, channel.attr(DBusChannelAttribute.ASSIGNED_BUS_NAME).get());
+    // Handler should be removed after completion
     assertTrue(channel.pipeline().toMap().values().stream()
           .noneMatch(h -> h instanceof DBusMandatoryNameHandler));
   }
@@ -84,7 +85,7 @@ class DBusMandatoryNameHandlerTest {
 
     channel.writeInbound(reply);
 
-    // No bus name assigned, handler removed, failure event fired
+    // No bus name assigned, handler removed after failure
     assertNull(channel.attr(DBusChannelAttribute.ASSIGNED_BUS_NAME).get());
     assertTrue(channel.pipeline().toMap().values().stream()
           .noneMatch(h -> h instanceof DBusMandatoryNameHandler));
@@ -121,7 +122,7 @@ class DBusMandatoryNameHandlerTest {
     channel.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
     channel.finish(); // triggers channelInactive
 
-    // Handler should be gone, failure triggered
+    // Handler should be gone when channel becomes inactive and pipeline is torn down
     assertTrue(channel.pipeline().toMap().values().stream()
           .noneMatch(h -> h instanceof DBusMandatoryNameHandler));
   }

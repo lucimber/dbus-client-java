@@ -17,7 +17,6 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.ScheduledFuture;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
@@ -50,7 +49,14 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
   private ScheduledFuture<?> helloTimeoutFuture;
 
   @Override
-  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+    // Handle reconnection events
+    if (evt == DBusChannelEvent.RECONNECTION_STARTING) {
+      reset();
+      ctx.fireUserEventTriggered(evt);
+      return;
+    }
+
     if (evt == DBusChannelEvent.SASL_AUTH_COMPLETE && currentState == State.IDLE) {
       LOGGER.info("[DBusMandatoryNameHandler] SASL authentication complete, sending Hello method call");
 
@@ -84,12 +90,12 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
       }));
     } else {
       // Pass on other user events if not handled here
-      super.userEventTriggered(ctx, evt);
+      ctx.fireUserEventTriggered(evt);
     }
   }
 
   @Override
-  public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+  public void channelRead(ChannelHandlerContext ctx, Object msg) {
     if (currentState != State.AWAITING_HELLO_REPLY) {
       ctx.fireChannelRead(msg);
       return;
@@ -129,27 +135,21 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
       LOGGER.info("[DBusMandatoryNameHandler] Successfully acquired bus name: {}", assignedName);
       ctx.channel().attr(DBusChannelAttribute.ASSIGNED_BUS_NAME).set(assignedName);
 
-      // Remove handler first, then propagate event so all handlers can react
-      try {
-        ctx.pipeline().remove(this);
-        LOGGER.debug("Removed myself as {} from pipeline.", this.getClass().getSimpleName());
-      } catch (NoSuchElementException ignored) {
-        LOGGER.warn("Failed to remove myself as {} from pipeline.", this.getClass().getSimpleName());
-      }
-
+      // Fire event before removing self
       ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUIRED);
+      
+      // Remove this handler from the pipeline as its job is done
+      ctx.pipeline().remove(this);
+      LOGGER.debug("Removed DBusMandatoryNameHandler from pipeline as name acquisition is complete.");
     } else {
       LOGGER.error("[DBusMandatoryNameHandler] Invalid Hello reply payload: {}", payload);
 
-      // Remove handler first, then propagate event so all handlers can react
-      try {
-        ctx.pipeline().remove(this);
-        LOGGER.debug("Removed myself as {} from pipeline.", this.getClass().getSimpleName());
-      } catch (NoSuchElementException ignored) {
-        LOGGER.warn("Failed to remove myself as {} from pipeline.", this.getClass().getSimpleName());
-      }
-
+      // Fire event before removing self
       ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
+      
+      // Remove this handler from the pipeline after failure
+      ctx.pipeline().remove(this);
+      LOGGER.debug("Removed DBusMandatoryNameHandler from pipeline after failure.");
     }
   }
 
@@ -159,15 +159,12 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
     LOGGER.error("Received error reply for Hello call (serial {}): Name: {}, Message: {}",
             helloCallSerial.getDelegate(), error.getErrorName(), error.getPayload());
 
-    // Remove handler first, then propagate event so all handlers can react
-    try {
-      ctx.pipeline().remove(this);
-      LOGGER.debug("Removed myself as {} from pipeline after error.", this.getClass().getSimpleName());
-    } catch (NoSuchElementException ignored) {
-      LOGGER.warn("Failed to remove myself as {} from pipeline after error.", this.getClass().getSimpleName());
-    }
-
+    // Fire event before removing self
     ctx.fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
+    
+    // Remove this handler from the pipeline after error
+    ctx.pipeline().remove(this);
+    LOGGER.debug("Removed DBusMandatoryNameHandler from pipeline after error.");
   }
 
   @Override
@@ -177,15 +174,12 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
     if (currentState == State.AWAITING_HELLO_REPLY) {
       cancelHelloTimeout();
 
-      // Remove handler first, then propagate event so all handlers can react
-      try {
-        ctx.pipeline().remove(this);
-        LOGGER.debug("Removed myself as {} from pipeline after exception.", this.getClass().getSimpleName());
-      } catch (NoSuchElementException ignored) {
-        LOGGER.warn("Failed to remove myself as {} from pipeline after exception.", this.getClass().getSimpleName());
-      }
-
+      // Fire event before removing self
       ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
+      
+      // Remove this handler from the pipeline after exception
+      ctx.pipeline().remove(this);
+      LOGGER.debug("Removed DBusMandatoryNameHandler from pipeline after exception.");
     }
   }
 
@@ -205,15 +199,12 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
       if (currentState == State.AWAITING_HELLO_REPLY) {
         LOGGER.error("[DBusMandatoryNameHandler] Hello call timed out after {} seconds", HELLO_TIMEOUT_SECONDS);
 
-        // Remove handler first, then propagate event so all handlers can react
-        try {
-          ctx.pipeline().remove(this);
-          LOGGER.debug("Removed myself as {} from pipeline after timeout.", this.getClass().getSimpleName());
-        } catch (NoSuchElementException ignored) {
-          LOGGER.warn("Failed to remove myself as {} from pipeline after timeout.", this.getClass().getSimpleName());
-        }
-
+        // Fire event before removing self
         ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
+        
+        // Remove this handler from the pipeline after timeout
+        ctx.pipeline().remove(this);
+        LOGGER.debug("Removed DBusMandatoryNameHandler from pipeline after timeout.");
       }
     }, HELLO_TIMEOUT_SECONDS, TimeUnit.SECONDS);
   }
@@ -222,6 +213,22 @@ public final class DBusMandatoryNameHandler extends ChannelInboundHandlerAdapter
     if (helloTimeoutFuture != null && !helloTimeoutFuture.isDone()) {
       helloTimeoutFuture.cancel(false);
     }
+  }
+
+  /**
+   * Resets the mandatory name handler to its initial state for reconnection.
+   * This method is called when the connection needs to be re-established.
+   */
+  public void reset() {
+    LOGGER.debug("Resetting DBusMandatoryNameHandler for reconnection");
+
+    // Reset state
+    currentState = State.IDLE;
+    helloCallSerial = null;
+
+    // Cancel any pending timeout
+    cancelHelloTimeout();
+    helloTimeoutFuture = null;
   }
 
   private enum State {

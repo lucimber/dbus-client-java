@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  */
 class ConnectionCompletionHandler extends ChannelInboundHandlerAdapter {
   private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionCompletionHandler.class);
-  private final Promise<Void> connectPromise;
+  private Promise<Void> connectPromise;
 
   public ConnectionCompletionHandler(Promise<Void> connectPromise) {
     this.connectPromise = connectPromise;
@@ -29,7 +29,9 @@ class ConnectionCompletionHandler extends ChannelInboundHandlerAdapter {
         LOGGER.debug("Connection process complete (mandatory name acquired). "
                 + "Fulfilled connect promise.");
       }
+      // Remove this handler from the pipeline as connection is complete
       ctx.pipeline().remove(this);
+      LOGGER.debug("Removed ConnectionCompletionHandler from pipeline as connection is complete.");
     } else if (evt == DBusChannelEvent.SASL_AUTH_FAILED
             || evt == DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED) {
       String failureReason = "DBus connection setup failed: " + evt;
@@ -37,7 +39,9 @@ class ConnectionCompletionHandler extends ChannelInboundHandlerAdapter {
         LOGGER.warn("Connection process failed at SASL or Mandatory Name stage. "
                 + "Failed connect promise.");
       }
+      // Remove this handler from the pipeline after failure
       ctx.pipeline().remove(this);
+      LOGGER.debug("Removed ConnectionCompletionHandler from pipeline after failure.");
     } else {
       super.userEventTriggered(ctx, evt);
     }
@@ -60,5 +64,16 @@ class ConnectionCompletionHandler extends ChannelInboundHandlerAdapter {
     // Don't remove self here, let the pipeline manage error propagation
     // The channel will likely be closed by a tail handler or by Sasl/MandatoryName handlers.
     super.exceptionCaught(ctx, cause);
+  }
+
+  /**
+   * Resets the connection completion handler to its initial state for reconnection.
+   * This method is called when the connection needs to be re-established.
+   * 
+   * @param newConnectPromise the new promise to use for the reconnection attempt
+   */
+  public void reset(Promise<Void> newConnectPromise) {
+    LOGGER.debug("Resetting ConnectionCompletionHandler for reconnection");
+    this.connectPromise = newConnectPromise;
   }
 }

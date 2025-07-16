@@ -30,7 +30,6 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
   private SaslMechanism currentMechanism;
   private List<String> serverSupportedMechanisms;
   private int currentMechanismAttemptIndex = 0;
-  private boolean completed = false;
 
   public SaslAuthenticationHandler(List<SaslMechanism> preferredClientMechanisms) {
     Objects.requireNonNull(preferredClientMechanisms, "Client mechanisms list cannot be null.");
@@ -45,8 +44,9 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
 
   @Override
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-    // Pass through events if SASL is already completed
-    if (completed) {
+    // Handle reconnection events
+    if (evt == DBusChannelEvent.RECONNECTION_STARTING) {
+      reset();
       ctx.fireUserEventTriggered(evt);
       return;
     }
@@ -63,12 +63,6 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
 
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) {
-    // Pass through messages if SASL is already completed
-    if (completed) {
-      ctx.fireChannelRead(msg);
-      return;
-    }
-    
     if (msg instanceof SaslMessage saslMessage) {
       switch (currentState) {
         case AWAITING_SERVER_MECHS, NEGOTIATING -> handleSaslServerResponse(ctx, saslMessage);
@@ -233,12 +227,7 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
   private void cleanupAndSignalCompletion(ChannelHandlerContext ctx, boolean success) {
     disposeCurrentMechanism();
 
-    // Mark as completed instead of removing from pipeline to support reconnection
-    completed = true;
-    LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE,
-            "Marked SASL handler as completed, staying in pipeline for reconnection support.");
-
-    // Fire the event to notify other handlers
+    // Fire the event to notify other handlers before removing self
     if (success) {
       LOGGER.info(LoggerUtils.SASL, "Authentication completed successfully.");
       ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_COMPLETE);
@@ -246,6 +235,11 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
       LOGGER.error(LoggerUtils.SASL, "Authentication failed.");
       ctx.pipeline().fireUserEventTriggered(DBusChannelEvent.SASL_AUTH_FAILED);
     }
+    
+    // Remove this handler from the pipeline as SASL phase is complete
+    ctx.pipeline().remove(this);
+    LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE,
+            "Removed SASL authentication handler from pipeline as SASL phase is complete.");
   }
 
   private void disposeCurrentMechanism() {
@@ -270,7 +264,6 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
     
     // Reset state
     currentState = SaslState.IDLE;
-    completed = false;
     currentMechanismAttemptIndex = 0;
     serverSupportedMechanisms = null;
     
