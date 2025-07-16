@@ -26,9 +26,16 @@ public class SaslInitiationHandler extends ChannelInboundHandlerAdapter {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SaslInitiationHandler.class);
   private static final byte[] NUL_BYTE_ARRAY = new byte[]{0};
+  private boolean completed = false;
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) {
+    // Skip if already completed
+    if (completed) {
+      ctx.fireChannelActive();
+      return;
+    }
+    
     LOGGER.debug("Channel active. Sending SASL NUL byte to {}.", ctx.channel().remoteAddress());
 
     // Send the NUL byte
@@ -38,14 +45,23 @@ public class SaslInitiationHandler extends ChannelInboundHandlerAdapter {
                 LOGGER.debug("SASL NUL byte sent successfully.");
                 // Fire event to signal the next stage of SASL can begin
                 ctx.fireUserEventTriggered(DBusChannelEvent.SASL_NUL_BYTE_SENT);
-                // Remove this handler from the pipeline as its job is done
-                ctx.pipeline().remove(this);
-                LOGGER.debug("SaslInitiationHandler removed from pipeline.");
+                // Mark as completed instead of removing from pipeline
+                completed = true;
+                LOGGER.debug("SaslInitiationHandler marked as completed, staying in pipeline for reconnection support.");
               } else {
                 LOGGER.error("Failed to send SASL NUL byte. Closing channel.", future.cause());
                 ctx.close(); // Close channel on failure to send critical initial byte
               }
             }));
+  }
+
+  /**
+   * Resets the SASL initiation handler to its initial state for reconnection.
+   * This method is called when the connection needs to be re-established.
+   */
+  public void reset() {
+    LOGGER.debug("Resetting SASL initiation handler for reconnection");
+    completed = false;
   }
 
   @Override

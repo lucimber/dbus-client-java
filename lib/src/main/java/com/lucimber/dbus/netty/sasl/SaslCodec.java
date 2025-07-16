@@ -18,6 +18,7 @@ public final class SaslCodec extends ChannelDuplexHandler {
   static final String SASL_MSG_DECODER_NAME = "saslMessageDecoder";
   static final String SASL_MSG_ENCODER_NAME = "saslMessageEncoder";
   private static final Logger LOGGER = LoggerFactory.getLogger(SaslCodec.class);
+  private boolean completed = false;
 
   @Override
   public void handlerAdded(ChannelHandlerContext ctx) {
@@ -46,7 +47,7 @@ public final class SaslCodec extends ChannelDuplexHandler {
 
   @Override
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-    if (evt == DBusChannelEvent.SASL_AUTH_COMPLETE) {
+    if (evt == DBusChannelEvent.SASL_AUTH_COMPLETE && !completed) {
       handleSaslAuthCompleteEvent(ctx);
       ctx.fireUserEventTriggered(evt);
     } else {
@@ -55,15 +56,18 @@ public final class SaslCodec extends ChannelDuplexHandler {
   }
 
   private void handleSaslAuthCompleteEvent(ChannelHandlerContext ctx) {
-    try {
-      ctx.pipeline().remove(this);
-      LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE,
-              "Removed myself from pipeline using context name '{}'.",
-              ctx.name());
-    } catch (NoSuchElementException ignored) {
-      LOGGER.warn(LoggerUtils.HANDLER_LIFECYCLE,
-              "Failed to remove myself from pipeline using context name '{}'.",
-              ctx.name());
-    }
+    // Mark as completed instead of removing from pipeline to support reconnection
+    completed = true;
+    LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE,
+            "Marked SASL codec as completed, staying in pipeline for reconnection support.");
+  }
+
+  /**
+   * Resets the SASL codec to its initial state for reconnection.
+   * This method is called when the connection needs to be re-established.
+   */
+  public void reset() {
+    LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE, "Resetting SASL codec for reconnection");
+    completed = false;
   }
 }
