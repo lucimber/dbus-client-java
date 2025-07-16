@@ -114,23 +114,45 @@ public final class NettyConnectionHandle implements ConnectionHandle {
     CompletableFuture<Void> closeFuture = new CompletableFuture<>();
 
     if (channel != null) {
-      channel.close().addListener(channelFuture -> {
-        if (eventLoopGroup != null && !eventLoopGroup.isShuttingDown()) {
-          long quietPeriod = Math.min(1000, config.getCloseTimeout().toMillis() / 10);
-          long timeout = config.getCloseTimeout().toMillis();
-          Future<?> shutdownFuture = eventLoopGroup.shutdownGracefully(quietPeriod, timeout, TimeUnit.MILLISECONDS);
-          shutdownFuture.addListener(groupFuture -> {
-            if (groupFuture.isSuccess()) {
-              closeFuture.complete(null);
-            } else {
-              closeFuture.completeExceptionally(groupFuture.cause());
+      try {
+        channel.close().addListener(channelFuture -> {
+          if (channelFuture.isSuccess()) {
+            LOGGER.debug("Channel closed successfully");
+          } else {
+            LOGGER.warn("Error closing channel", channelFuture.cause());
+          }
+          
+          if (eventLoopGroup != null && !eventLoopGroup.isShuttingDown()) {
+            try {
+              long quietPeriod = Math.min(1000, config.getCloseTimeout().toMillis() / 10);
+              long timeout = config.getCloseTimeout().toMillis();
+              Future<?> shutdownFuture = eventLoopGroup.shutdownGracefully(quietPeriod, timeout, TimeUnit.MILLISECONDS);
+              shutdownFuture.addListener(groupFuture -> {
+                if (groupFuture.isSuccess()) {
+                  LOGGER.debug("EventLoopGroup shut down successfully");
+                  closeFuture.complete(null);
+                } else {
+                  LOGGER.error("Error shutting down EventLoopGroup", groupFuture.cause());
+                  closeFuture.completeExceptionally(groupFuture.cause());
+                }
+              });
+            } catch (Exception e) {
+              LOGGER.error("Error initiating EventLoopGroup shutdown", e);
+              closeFuture.completeExceptionally(e);
             }
-          });
-        } else {
-          closeFuture.complete(null);
-        }
-      });
+          } else {
+            if (eventLoopGroup != null) {
+              LOGGER.debug("EventLoopGroup already shutting down, skipping shutdown");
+            }
+            closeFuture.complete(null);
+          }
+        });
+      } catch (Exception e) {
+        LOGGER.error("Error initiating channel close", e);
+        closeFuture.completeExceptionally(e);
+      }
     } else {
+      LOGGER.debug("Channel is null, nothing to close");
       closeFuture.complete(null);
     }
 

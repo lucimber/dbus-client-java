@@ -261,13 +261,21 @@ public final class NettyConnection implements Connection {
 
     LOGGER.info("Closing DBus connection to {}...", serverAddress);
 
+    Exception shutdownException = null;
+    
     try {
       // Shutdown reconnect handler first
       if (reconnectHandler != null) {
         try {
           reconnectHandler.shutdown();
+          LOGGER.debug("Reconnect handler shut down successfully");
         } catch (Exception e) {
-          LOGGER.warn("Error shutting down reconnect handler", e);
+          LOGGER.error("Error shutting down reconnect handler", e);
+          if (shutdownException == null) {
+            shutdownException = e;
+          } else {
+            shutdownException.addSuppressed(e);
+          }
         }
       }
 
@@ -275,8 +283,14 @@ public final class NettyConnection implements Connection {
       if (healthHandler != null) {
         try {
           healthHandler.shutdown();
+          LOGGER.debug("Health handler shut down successfully");
         } catch (Exception e) {
-          LOGGER.warn("Error shutting down health handler", e);
+          LOGGER.error("Error shutting down health handler", e);
+          if (shutdownException == null) {
+            shutdownException = e;
+          } else {
+            shutdownException.addSuppressed(e);
+          }
         }
       }
 
@@ -286,26 +300,57 @@ public final class NettyConnection implements Connection {
         try {
           long timeoutMs = config.getCloseTimeout().toMillis();
           handle.close().toCompletableFuture().get(timeoutMs, TimeUnit.MILLISECONDS);
+          LOGGER.debug("Connection handle closed successfully");
         } catch (Exception e) {
-          LOGGER.warn("Error closing connection handle", e);
+          LOGGER.error("Error closing connection handle", e);
+          if (shutdownException == null) {
+            shutdownException = e;
+          } else {
+            shutdownException.addSuppressed(e);
+          }
         }
       }
 
       // Shutdown application task executor
       if (applicationTaskExecutor != null && !applicationTaskExecutor.isShutdown()) {
-        applicationTaskExecutor.shutdown();
         try {
+          applicationTaskExecutor.shutdown();
           long timeoutMs = config.getCloseTimeout().toMillis();
           if (!applicationTaskExecutor.awaitTermination(timeoutMs, TimeUnit.MILLISECONDS)) {
+            LOGGER.warn("Application task executor did not terminate within timeout, forcing shutdown");
             applicationTaskExecutor.shutdownNow();
+            // Give it a brief moment to shutdown forcefully
+            if (!applicationTaskExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
+              LOGGER.error("Application task executor failed to shut down completely");
+            }
+          } else {
+            LOGGER.debug("Application task executor shut down successfully");
           }
         } catch (InterruptedException ie) {
+          LOGGER.warn("Interrupted while waiting for application task executor shutdown, forcing shutdown");
           applicationTaskExecutor.shutdownNow();
           Thread.currentThread().interrupt();
+          if (shutdownException == null) {
+            shutdownException = new RuntimeException("Connection close interrupted", ie);
+          } else {
+            shutdownException.addSuppressed(ie);
+          }
+        } catch (Exception e) {
+          LOGGER.error("Error shutting down application task executor", e);
+          if (shutdownException == null) {
+            shutdownException = e;
+          } else {
+            shutdownException.addSuppressed(e);
+          }
         }
       }
 
-      LOGGER.info("DBus connection to {} closed.", serverAddress);
+      // Log final status
+      if (shutdownException != null) {
+        LOGGER.warn("DBus connection to {} closed with errors (see above for details)", serverAddress);
+      } else {
+        LOGGER.info("DBus connection to {} closed successfully", serverAddress);
+      }
     } finally {
       // Ensure closing flag is reset even if an exception occurs
       closing.set(false);
