@@ -44,6 +44,7 @@ public final class NettyConnection implements Connection {
   private final ConnectionStrategy strategy;
   private final AtomicReference<ConnectionHandle> connectionHandle = new AtomicReference<>();
   private final AtomicBoolean connecting = new AtomicBoolean(false);
+  private final AtomicBoolean closing = new AtomicBoolean(false);
   private ConnectionHealthHandler healthHandler;
   private ConnectionReconnectHandler reconnectHandler;
 
@@ -180,6 +181,12 @@ public final class NettyConnection implements Connection {
 
   @Override
   public CompletionStage<Void> connect() {
+    // Don't allow connection if we're closing
+    if (closing.get()) {
+      LOGGER.warn("Cannot connect while connection is being closed.");
+      return CompletableFuture.failedFuture(new IllegalStateException("Connection is being closed"));
+    }
+    
     // Atomic check-and-set to prevent race conditions
     if (!connecting.compareAndSet(false, true)) {
       LOGGER.warn("Connection attempt already in progress.");
@@ -236,49 +243,71 @@ public final class NettyConnection implements Connection {
 
   @Override
   public boolean isConnected() {
+    // Don't report as connected if we're in the process of closing
+    if (closing.get()) {
+      return false;
+    }
     ConnectionHandle handle = connectionHandle.get();
     return handle != null && handle.isActive();
   }
 
   @Override
   public void close() {
+    // Atomic check-and-set to prevent concurrent close operations
+    if (!closing.compareAndSet(false, true)) {
+      LOGGER.debug("Close operation already in progress, skipping duplicate close");
+      return;
+    }
+
     LOGGER.info("Closing DBus connection to {}...", serverAddress);
 
-    // Shutdown reconnect handler first
-    if (reconnectHandler != null) {
-      reconnectHandler.shutdown();
-    }
-
-    // Shutdown health handler
-    if (healthHandler != null) {
-      healthHandler.shutdown();
-    }
-
-    // Close connection handle
-    ConnectionHandle handle = connectionHandle.get();
-    if (handle != null) {
-      try {
-        handle.close().toCompletableFuture().get(5, TimeUnit.SECONDS);
-      } catch (Exception e) {
-        LOGGER.warn("Error closing connection handle", e);
-      }
-      connectionHandle.set(null);
-    }
-
-    // Shutdown application task executor
-    if (applicationTaskExecutor != null && !applicationTaskExecutor.isShutdown()) {
-      applicationTaskExecutor.shutdown();
-      try {
-        if (!applicationTaskExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-          applicationTaskExecutor.shutdownNow();
+    try {
+      // Shutdown reconnect handler first
+      if (reconnectHandler != null) {
+        try {
+          reconnectHandler.shutdown();
+        } catch (Exception e) {
+          LOGGER.warn("Error shutting down reconnect handler", e);
         }
-      } catch (InterruptedException ie) {
-        applicationTaskExecutor.shutdownNow();
-        Thread.currentThread().interrupt();
       }
-    }
 
-    LOGGER.info("DBus connection to {} closed.", serverAddress);
+      // Shutdown health handler
+      if (healthHandler != null) {
+        try {
+          healthHandler.shutdown();
+        } catch (Exception e) {
+          LOGGER.warn("Error shutting down health handler", e);
+        }
+      }
+
+      // Close connection handle
+      ConnectionHandle handle = connectionHandle.getAndSet(null);
+      if (handle != null) {
+        try {
+          handle.close().toCompletableFuture().get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+          LOGGER.warn("Error closing connection handle", e);
+        }
+      }
+
+      // Shutdown application task executor
+      if (applicationTaskExecutor != null && !applicationTaskExecutor.isShutdown()) {
+        applicationTaskExecutor.shutdown();
+        try {
+          if (!applicationTaskExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+            applicationTaskExecutor.shutdownNow();
+          }
+        } catch (InterruptedException ie) {
+          applicationTaskExecutor.shutdownNow();
+          Thread.currentThread().interrupt();
+        }
+      }
+
+      LOGGER.info("DBus connection to {} closed.", serverAddress);
+    } finally {
+      // Ensure closing flag is reset even if an exception occurs
+      closing.set(false);
+    }
   }
 
   @Override

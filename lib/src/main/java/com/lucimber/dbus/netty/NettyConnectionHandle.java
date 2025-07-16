@@ -15,6 +15,7 @@ import io.netty.util.concurrent.Future;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ public final class NettyConnectionHandle implements ConnectionHandle {
 
   private final Channel channel;
   private final EventLoopGroup eventLoopGroup;
+  private final AtomicBoolean closing = new AtomicBoolean(false);
 
   public NettyConnectionHandle(Channel channel, EventLoopGroup eventLoopGroup) {
     this.channel = channel;
@@ -39,6 +41,10 @@ public final class NettyConnectionHandle implements ConnectionHandle {
 
   @Override
   public boolean isActive() {
+    // Don't report as active if we're closing
+    if (closing.get()) {
+      return false;
+    }
     return channel != null
             && channel.isActive()
             && channel.attr(DBusChannelAttribute.ASSIGNED_BUS_NAME).get() != null;
@@ -94,6 +100,12 @@ public final class NettyConnectionHandle implements ConnectionHandle {
 
   @Override
   public CompletionStage<Void> close() {
+    // Atomic check-and-set to prevent concurrent close operations
+    if (!closing.compareAndSet(false, true)) {
+      LOGGER.debug("Close operation already in progress, returning completed future");
+      return CompletableFuture.completedFuture(null);
+    }
+
     LOGGER.info("Closing Netty connection handle");
 
     CompletableFuture<Void> closeFuture = new CompletableFuture<>();
