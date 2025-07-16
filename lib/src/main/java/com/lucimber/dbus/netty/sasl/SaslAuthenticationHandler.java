@@ -92,7 +92,8 @@ public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
     String args = msg.getCommandArgs().orElse("");
     switch (command) {
       case OK -> {
-        LOGGER.info(LoggerUtils.SASL, "Server send OK. GUID: {}. Sending BEGIN.", args);
+        LOGGER.info(LoggerUtils.SASL, "Server send OK. Sending BEGIN.");
+        LOGGER.debug(LoggerUtils.SASL, "Server GUID: {}", args);
         SaslMessage beginMsg = new SaslMessage(SaslCommandName.BEGIN, null);
         ctx.writeAndFlush(beginMsg).addListener(new WriteOperationListener<>(LOGGER, future -> {
           if (future.isSuccess()) {
