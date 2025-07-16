@@ -78,29 +78,81 @@ final class InboundUtils {
     return flags;
   }
 
-  static Map<HeaderField, DBusVariant> mapHeaderFields(List<DBusStruct> headerFields) {
+  static Map<HeaderField, DBusVariant> mapHeaderFields(List<DBusStruct> headerFields) throws DecoderException {
+    Objects.requireNonNull(headerFields, "headerFields must not be null");
     Map<HeaderField, DBusVariant> map = new HashMap<>();
+    
     for (DBusStruct struct : headerFields) {
+      if (struct == null) {
+        throw new DecoderException("Header field struct cannot be null");
+      }
+      
       List<DBusType> structList = struct.getDelegate();
-      DBusByte dbusByte = (DBusByte) structList.get(0);
+      if (structList == null || structList.size() < 2) {
+        throw new DecoderException("Header field struct must contain at least 2 elements");
+      }
+      
+      // Validate and extract header field code
+      DBusType firstElement = structList.get(0);
+      if (!(firstElement instanceof DBusByte)) {
+        throw new DecoderException("Header field code must be a DBusByte, got: " + 
+                                   (firstElement != null ? firstElement.getClass().getSimpleName() : "null"));
+      }
+      
+      DBusByte dbusByte = (DBusByte) firstElement;
       HeaderField headerField = HeaderField.fromCode(dbusByte.getDelegate());
-      DBusVariant variant = (DBusVariant) structList.get(1);
+      if (headerField == null) {
+        throw new DecoderException("Unknown header field code: " + dbusByte.getDelegate());
+      }
+      
+      // Validate and extract header field variant
+      DBusType secondElement = structList.get(1);
+      if (!(secondElement instanceof DBusVariant)) {
+        throw new DecoderException("Header field value must be a DBusVariant, got: " + 
+                                   (secondElement != null ? secondElement.getClass().getSimpleName() : "null"));
+      }
+      
+      DBusVariant variant = (DBusVariant) secondElement;
       map.put(headerField, variant);
     }
+    
     return map;
   }
 
   static boolean isMessageTooLong(final int headerLength, final int bodyLength) {
+    // Validate input parameters to prevent integer overflow attacks
+    if (headerLength < 0) {
+      throw new IllegalArgumentException("Header length cannot be negative: " + headerLength);
+    }
+    if (bodyLength < 0) {
+      throw new IllegalArgumentException("Body length cannot be negative: " + bodyLength);
+    }
+    
     final int signature = 0x0C;
     final int headerSignature = 0x08;
     final int headerAlignment = 0x08;
     final int headerRemainder = Integer.remainderUnsigned(headerLength, headerAlignment);
     final int headerPadding = headerAlignment - headerRemainder;
-    int messageLength = signature + headerSignature + headerLength;
+    
+    // Check for potential integer overflow before performing arithmetic
+    int messageLength = signature + headerSignature;
+    if (Integer.MAX_VALUE - messageLength < headerLength) {
+      return true; // Would overflow, so message is too long
+    }
+    messageLength += headerLength;
+    
     if (Integer.compareUnsigned(headerRemainder, ZERO) > 0) {
+      if (Integer.MAX_VALUE - messageLength < headerPadding) {
+        return true; // Would overflow, so message is too long
+      }
       messageLength += headerPadding;
     }
+    
+    if (Integer.MAX_VALUE - messageLength < bodyLength) {
+      return true; // Would overflow, so message is too long
+    }
     messageLength += bodyLength;
+    
     return Integer.compareUnsigned(messageLength, MAX_MSG_LENGTH) > 0;
   }
 }
