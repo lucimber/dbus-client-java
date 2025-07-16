@@ -28,6 +28,8 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +42,8 @@ public final class NettyConnection implements Connection {
   private final Pipeline pipeline;
   private final ConnectionConfig config;
   private final ConnectionStrategy strategy;
-  private ConnectionHandle connectionHandle;
+  private final AtomicReference<ConnectionHandle> connectionHandle = new AtomicReference<>();
+  private final AtomicBoolean connecting = new AtomicBoolean(false);
   private ConnectionHealthHandler healthHandler;
   private ConnectionReconnectHandler reconnectHandler;
 
@@ -177,9 +180,17 @@ public final class NettyConnection implements Connection {
 
   @Override
   public CompletionStage<Void> connect() {
+    // Atomic check-and-set to prevent race conditions
+    if (!connecting.compareAndSet(false, true)) {
+      LOGGER.warn("Connection attempt already in progress.");
+      return CompletableFuture.completedFuture(null);
+    }
+    
     // Check if already connected
-    if (this.connectionHandle != null && this.connectionHandle.isActive()) {
-      LOGGER.warn("Already connected or connection attempt in progress.");
+    ConnectionHandle currentHandle = this.connectionHandle.get();
+    if (currentHandle != null && currentHandle.isActive()) {
+      connecting.set(false); // Reset connecting state
+      LOGGER.warn("Already connected.");
       return CompletableFuture.completedFuture(null);
     }
 
@@ -203,17 +214,30 @@ public final class NettyConnection implements Connection {
     LOGGER.info("Attempting to connect to DBus server at {} using strategy: {}", serverAddress, strategy.getTransportName());
 
     // Use strategy to establish connection
-    return strategy.connect(serverAddress, config, context)
-            .thenApply(handle -> {
-              this.connectionHandle = handle;
-              LOGGER.info("Connection established successfully");
-              return null;
-            });
+    CompletionStage<ConnectionHandle> connectionFuture = strategy.connect(serverAddress, config, context);
+    
+    CompletableFuture<Void> resultFuture = new CompletableFuture<>();
+    
+    connectionFuture.whenComplete((handle, throwable) -> {
+      if (throwable != null) {
+        connecting.set(false); // Reset connecting state on failure
+        LOGGER.error("Failed to establish connection", throwable);
+        resultFuture.completeExceptionally(throwable);
+      } else {
+        this.connectionHandle.set(handle);
+        connecting.set(false); // Reset connecting state on success
+        LOGGER.info("Connection established successfully");
+        resultFuture.complete(null);
+      }
+    });
+    
+    return resultFuture;
   }
 
   @Override
   public boolean isConnected() {
-    return connectionHandle != null && connectionHandle.isActive();
+    ConnectionHandle handle = connectionHandle.get();
+    return handle != null && handle.isActive();
   }
 
   @Override
@@ -231,12 +255,14 @@ public final class NettyConnection implements Connection {
     }
 
     // Close connection handle
-    if (connectionHandle != null) {
+    ConnectionHandle handle = connectionHandle.get();
+    if (handle != null) {
       try {
-        connectionHandle.close().toCompletableFuture().get(5, TimeUnit.SECONDS);
+        handle.close().toCompletableFuture().get(5, TimeUnit.SECONDS);
       } catch (Exception e) {
         LOGGER.warn("Error closing connection handle", e);
       }
+      connectionHandle.set(null);
     }
 
     // Shutdown application task executor
@@ -257,10 +283,11 @@ public final class NettyConnection implements Connection {
 
   @Override
   public DBusUInt32 getNextSerial() {
-    if (connectionHandle == null || !connectionHandle.isActive()) {
+    ConnectionHandle handle = connectionHandle.get();
+    if (handle == null || !handle.isActive()) {
       throw new IllegalStateException("Cannot get next serial, connection is not active.");
     }
-    return connectionHandle.getNextSerial();
+    return handle.getNextSerial();
   }
 
   @Override
@@ -270,21 +297,23 @@ public final class NettyConnection implements Connection {
 
   @Override
   public CompletionStage<InboundMessage> sendRequest(OutboundMessage msg) {
-    if (connectionHandle == null || !isConnected()) {
+    ConnectionHandle handle = connectionHandle.get();
+    if (handle == null || !handle.isActive()) {
       CompletableFuture<InboundMessage> failedFuture = new CompletableFuture<>();
       failedFuture.completeExceptionally(new IllegalStateException("Not connected to D-Bus."));
       return failedFuture;
     }
-    return connectionHandle.sendRequest(msg);
+    return handle.sendRequest(msg);
   }
 
   @Override
   public void sendAndRouteResponse(OutboundMessage msg, CompletionStage<Void> future) {
-    if (connectionHandle == null || !isConnected()) {
+    ConnectionHandle handle = connectionHandle.get();
+    if (handle == null || !handle.isActive()) {
       var re = new IllegalStateException("Not connected to D-Bus.");
       future.toCompletableFuture().completeExceptionally(re);
     } else {
-      connectionHandle.send(msg).whenComplete((result, throwable) -> {
+      handle.send(msg).whenComplete((result, throwable) -> {
         if (throwable != null) {
           future.toCompletableFuture().completeExceptionally(throwable);
         } else {
@@ -308,7 +337,7 @@ public final class NettyConnection implements Connection {
     // Fallback to basic state detection if health handler is not available
     if (isConnected()) {
       return ConnectionState.CONNECTED;
-    } else if (connectionHandle != null) {
+    } else if (connectionHandle.get() != null) {
       return ConnectionState.AUTHENTICATING;
     } else {
       return ConnectionState.DISCONNECTED;
