@@ -32,6 +32,19 @@ import org.slf4j.LoggerFactory;
  *
  * <p>This handler integrates with the connection pipeline and manages connection state
  * transitions, health checks, and event firing to registered listeners.
+ *
+ * <p>The health monitoring is performed using the standard D-Bus Peer.Ping method,
+ * which is supported by all D-Bus implementations. The handler automatically starts
+ * monitoring when the connection becomes active and stops when it becomes inactive.
+ *
+ * <p>Connection state transitions are tracked and notified to registered listeners
+ * through the {@link ConnectionEventListener} interface.
+ *
+ * @see ConnectionState
+ * @see ConnectionEvent
+ * @see ConnectionEventListener
+ * @see ConnectionConfig
+ * @since 1.0.0
  */
 public final class ConnectionHealthHandler extends AbstractDuplexHandler {
 
@@ -50,6 +63,13 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
   private final AtomicReference<ConnectionState> currentState = new AtomicReference<>(ConnectionState.DISCONNECTED);
   private final AtomicReference<Context> contextRef = new AtomicReference<>();
 
+  /**
+   * Creates a new connection health handler with the specified configuration.
+   *
+   * @param config the connection configuration, must not be null
+   * @throws NullPointerException if config is null
+   * @since 1.0.0
+   */
   public ConnectionHealthHandler(ConnectionConfig config) {
     this.config = Objects.requireNonNull(config, "Config cannot be null");
     this.scheduler = Executors.newScheduledThreadPool(1, r -> {
@@ -67,7 +87,8 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
   /**
    * Adds a connection event listener.
    *
-   * @param listener The listener to add
+   * @param listener the listener to add, ignored if null
+   * @since 1.0.0
    */
   public void addConnectionEventListener(ConnectionEventListener listener) {
     if (listener != null) {
@@ -78,7 +99,8 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
   /**
    * Removes a connection event listener.
    *
-   * @param listener The listener to remove
+   * @param listener the listener to remove
+   * @since 1.0.0
    */
   public void removeConnectionEventListener(ConnectionEventListener listener) {
     listeners.remove(listener);
@@ -87,7 +109,8 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
   /**
    * Gets the current connection state.
    *
-   * @return The current connection state
+   * @return the current connection state
+   * @since 1.0.0
    */
   public ConnectionState getCurrentState() {
     return currentState.get();
@@ -96,7 +119,8 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
   /**
    * Gets the timestamp of the last successful health check.
    *
-   * @return The timestamp of the last successful health check, or null if none
+   * @return the timestamp of the last successful health check, or null if none
+   * @since 1.0.0
    */
   public Instant getLastSuccessfulCheck() {
     return lastSuccessfulCheck.get();
@@ -300,7 +324,11 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
   /**
    * Manually triggers a health check.
    *
-   * @return A CompletableFuture that indicates when the health check is triggered
+   * <p>If the handler is not active or no context is available, this method
+   * returns a completed future immediately.
+   *
+   * @return a CompletableFuture that indicates when the health check is triggered
+   * @since 1.0.0
    */
   public CompletableFuture<Void> triggerHealthCheck() {
     Context ctx = contextRef.get();
@@ -313,6 +341,12 @@ public final class ConnectionHealthHandler extends AbstractDuplexHandler {
 
   /**
    * Shuts down the health monitor and its executors.
+   *
+   * <p>This method stops all health monitoring, cancels pending health checks,
+   * and shuts down the internal thread pools. It should be called when the
+   * handler is no longer needed to prevent resource leaks.
+   *
+   * @since 1.0.0
    */
   public void shutdown() {
     stopHealthMonitoring();

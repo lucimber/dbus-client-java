@@ -19,6 +19,21 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Internal tail handler that processes messages that reach the end of the pipeline.
+ *
+ * <p>This handler is automatically added to the tail of every pipeline and serves
+ * as a final fallback for unhandled messages. It handles method calls by sending
+ * appropriate error replies and logs other unhandled messages.
+ *
+ * <p>For unhandled method calls that expect a reply, this handler will automatically
+ * send a {@code org.freedesktop.DBus.Error.Failed} error response to inform the
+ * caller that no handler was able to process the request.
+ *
+ * @see Pipeline
+ * @see Context
+ * @since 1.0.0
+ */
 final class InternalTailHandler extends AbstractDuplexHandler implements InboundHandler, OutboundHandler {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(InternalTailHandler.class);
@@ -29,6 +44,21 @@ final class InternalTailHandler extends AbstractDuplexHandler implements Inbound
     return LOGGER;
   }
 
+  /**
+   * Handles inbound messages that reach the end of the pipeline.
+   *
+   * <p>This method processes different types of messages:
+   * <ul>
+   * <li>Method calls expecting a reply: sends an error response</li>
+   * <li>Method calls not expecting a reply: logs and ignores</li>
+   * <li>Method returns and errors: logs as warnings since they should have been handled</li>
+   * <li>Signals and other messages: logs and ignores</li>
+   * </ul>
+   *
+   * @param ctx the {@link Context} this handler is bound to
+   * @param msg the {@link InboundMessage} being processed
+   * @since 1.0.0
+   */
   @Override
   public void handleInboundMessage(Context ctx, InboundMessage msg) {
     Objects.requireNonNull(msg);
@@ -46,6 +76,16 @@ final class InternalTailHandler extends AbstractDuplexHandler implements Inbound
     }
   }
 
+  /**
+   * Sends an error reply for an unhandled method call.
+   *
+   * <p>This method constructs a standard D-Bus error response indicating that
+   * no handler was able to process the method call.
+   *
+   * @param ctx  the {@link Context} this handler is bound to
+   * @param call the {@link InboundMethodCall} that was not handled
+   * @since 1.0.0
+   */
   private void sendErrorReply(Context ctx, InboundMethodCall call) {
     LOGGER.debug("Sending error reply for unhandled method call: {}", call);
 

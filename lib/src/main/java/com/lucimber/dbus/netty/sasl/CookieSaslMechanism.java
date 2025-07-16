@@ -97,7 +97,29 @@ public final class CookieSaslMechanism implements SaslMechanism {
   }
 
   private String readCookieValue(String context, String cookieId) throws IOException {
-    Path cookieFile = Paths.get(System.getProperty("user.home"), ".dbus-keyrings", context);
+    // Validate context to prevent path traversal attacks
+    if (context == null || context.isEmpty()) {
+      throw new IOException("Cookie context cannot be null or empty");
+    }
+    
+    // Sanitize context - only allow alphanumeric characters, dots, hyphens, and underscores
+    if (!context.matches("^[a-zA-Z0-9._-]+$")) {
+      throw new IOException("Invalid cookie context format: contains illegal characters");
+    }
+    
+    // Prevent path traversal sequences
+    if (context.contains("..") || context.contains("/") || context.contains("\\")) {
+      throw new IOException("Cookie context contains path traversal sequences");
+    }
+    
+    Path dbusKeyringsDir = Paths.get(System.getProperty("user.home"), ".dbus-keyrings");
+    Path cookieFile = dbusKeyringsDir.resolve(context);
+    
+    // Ensure the resolved path is still within the .dbus-keyrings directory
+    if (!cookieFile.startsWith(dbusKeyringsDir)) {
+      throw new IOException("Cookie file path is outside the .dbus-keyrings directory");
+    }
+    
     if (!Files.exists(cookieFile) || !Files.isReadable(cookieFile)) {
       LOGGER.warn("Cookie file not found or unreadable: {}", cookieFile);
       return null;

@@ -18,10 +18,15 @@ import org.slf4j.Logger;
  * for inbound and outbound processing. This class is useful for handlers that need to
  * observe or manipulate both directions of message flow.
  *
+ * <p>The default implementations of all methods simply propagate events through the pipeline
+ * without any additional processing, making this class suitable as a base for handlers that
+ * only need to override specific methods.
+ *
  * @see InboundHandler
  * @see OutboundHandler
  * @see Pipeline
  * @see Context
+ * @since 1.0.0
  */
 public abstract class AbstractDuplexHandler implements InboundHandler, OutboundHandler {
 
