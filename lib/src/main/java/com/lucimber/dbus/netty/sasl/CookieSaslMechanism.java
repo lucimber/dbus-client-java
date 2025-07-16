@@ -21,6 +21,20 @@ import java.security.SecureRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * SASL mechanism implementation for D-Bus COOKIE_SHA1 authentication.
+ * 
+ * <p><strong>Security Warning:</strong> This mechanism uses SHA-1 hashing as mandated by the
+ * D-Bus specification. While SHA-1 is cryptographically weak, it cannot be replaced without
+ * breaking compatibility with the D-Bus protocol standard.
+ * 
+ * <p>The DBUS_COOKIE_SHA1 mechanism is defined in the D-Bus specification and requires
+ * SHA-1 for compatibility with all D-Bus implementations. This is a protocol-level
+ * requirement, not an implementation choice.
+ * 
+ * @see <a href="https://dbus.freedesktop.org/doc/dbus-specification.html#auth-mechanisms-sha">D-Bus Authentication Mechanisms</a>
+ * @since 1.0.0
+ */
 public final class CookieSaslMechanism implements SaslMechanism {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CookieSaslMechanism.class);
@@ -82,6 +96,9 @@ public final class CookieSaslMechanism implements SaslMechanism {
         }
 
         String combined = serverChallenge + ":" + clientChallenge + ":" + cookieValue;
+        
+        // NOTE: SHA-1 is required by D-Bus COOKIE_SHA1 specification - cannot be changed
+        // without breaking protocol compatibility. This is a protocol requirement.
         MessageDigest digest = MessageDigest.getInstance("SHA-1");
         String responseHash = SaslUtil.hexEncode(digest.digest(combined.getBytes(StandardCharsets.UTF_8)));
 
