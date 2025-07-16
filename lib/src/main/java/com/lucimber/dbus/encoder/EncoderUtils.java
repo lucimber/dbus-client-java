@@ -7,25 +7,14 @@ package com.lucimber.dbus.encoder;
 
 import com.lucimber.dbus.type.DBusArray;
 import com.lucimber.dbus.type.DBusBasicType;
-import com.lucimber.dbus.type.DBusBoolean;
-import com.lucimber.dbus.type.DBusByte;
 import com.lucimber.dbus.type.DBusContainerType;
 import com.lucimber.dbus.type.DBusDict;
 import com.lucimber.dbus.type.DBusDictEntry;
-import com.lucimber.dbus.type.DBusDouble;
-import com.lucimber.dbus.type.DBusInt16;
-import com.lucimber.dbus.type.DBusInt32;
-import com.lucimber.dbus.type.DBusInt64;
-import com.lucimber.dbus.type.DBusObjectPath;
 import com.lucimber.dbus.type.DBusSignature;
-import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusStruct;
 import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.DBusUInt16;
-import com.lucimber.dbus.type.DBusUInt32;
-import com.lucimber.dbus.type.DBusUInt64;
-import com.lucimber.dbus.type.DBusUnixFD;
 import com.lucimber.dbus.type.DBusVariant;
+import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeAlignment;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -35,6 +24,8 @@ import java.util.Objects;
  * Various methods used by the ByteBuffer-based implementations of the encoders.
  */
 public final class EncoderUtils {
+
+  private static final EncoderFactory ENCODER_FACTORY = new DefaultEncoderFactory();
 
   private EncoderUtils() {
     // Utility class
@@ -68,35 +59,9 @@ public final class EncoderUtils {
 
   private static EncoderResult<ByteBuffer> encodeBasicType(DBusBasicType value, int offset, ByteOrder order)
           throws EncoderException {
-    if (value instanceof DBusBoolean b) {
-      return new BooleanEncoder(order).encode(b, offset);
-    } else if (value instanceof DBusByte b) {
-      return new ByteEncoder().encode(b, offset);
-    } else if (value instanceof DBusDouble d) {
-      return new DoubleEncoder(order).encode(d, offset);
-    } else if (value instanceof DBusInt16 i16) {
-      return new Int16Encoder(order).encode(i16, offset);
-    } else if (value instanceof DBusInt32 i32) {
-      return new Int32Encoder(order).encode(i32, offset);
-    } else if (value instanceof DBusInt64 i64) {
-      return new Int64Encoder(order).encode(i64, offset);
-    } else if (value instanceof DBusUInt16 u16) {
-      return new UInt16Encoder(order).encode(u16, offset);
-    } else if (value instanceof DBusUInt32 u32) {
-      return new UInt32Encoder(order).encode(u32, offset);
-    } else if (value instanceof DBusUInt64 u64) {
-      return new UInt64Encoder(order).encode(u64, offset);
-    } else if (value instanceof DBusString str) {
-      return new StringEncoder(order).encode(str, offset);
-    } else if (value instanceof DBusObjectPath path) {
-      return new ObjectPathEncoder(order).encode(path, offset);
-    } else if (value instanceof DBusSignature sig) {
-      return new SignatureEncoder().encode(sig, offset);
-    } else if (value instanceof DBusUnixFD fd) {
-      return new UnixFdEncoder(order).encode(fd, offset);
-    } else {
-      throw new EncoderException("Unsupported basic type: " + value.getClass().getName());
-    }
+    Type type = value.getType();
+    Encoder<DBusType, ByteBuffer> encoder = ENCODER_FACTORY.createEncoder(type, order);
+    return encoder.encode(value, offset);
   }
 
   @SuppressWarnings("unchecked")

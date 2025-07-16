@@ -26,6 +26,7 @@ public final class DecoderUtils {
 
   static final int MAX_ARRAY_LENGTH = 67108864;
   private static final Logger LOGGER = LoggerFactory.getLogger(DecoderUtils.class);
+  private static final DecoderFactory DECODER_FACTORY = new DefaultDecoderFactory();
 
   private DecoderUtils() {
     // Utility class
@@ -152,26 +153,13 @@ public final class DecoderUtils {
    * @return decoded basic type
    * @throws DecoderException if decoding fails
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static <R extends DBusBasicType> DecoderResult<R> decodeBasicType(TypeCode code,
                                                                            ByteBuffer buffer,
                                                                            int offset)
           throws DecoderException {
-    return switch (code) {
-      case BOOLEAN -> (DecoderResult<R>) new BooleanDecoder().decode(buffer, offset);
-      case BYTE -> (DecoderResult<R>) new ByteDecoder().decode(buffer, offset);
-      case DOUBLE -> (DecoderResult<R>) new DoubleDecoder().decode(buffer, offset);
-      case INT16 -> (DecoderResult<R>) new Int16Decoder().decode(buffer, offset);
-      case INT32 -> (DecoderResult<R>) new Int32Decoder().decode(buffer, offset);
-      case INT64 -> (DecoderResult<R>) new Int64Decoder().decode(buffer, offset);
-      case OBJECT_PATH -> (DecoderResult<R>) new ObjectPathDecoder().decode(buffer, offset);
-      case SIGNATURE -> (DecoderResult<R>) new SignatureDecoder().decode(buffer, offset);
-      case STRING -> (DecoderResult<R>) new StringDecoder().decode(buffer, offset);
-      case UINT16 -> (DecoderResult<R>) new UInt16Decoder().decode(buffer, offset);
-      case UINT32 -> (DecoderResult<R>) new UInt32Decoder().decode(buffer, offset);
-      case UINT64 -> (DecoderResult<R>) new UInt64Decoder().decode(buffer, offset);
-      case UNIX_FD -> (DecoderResult<R>) new UnixFdDecoder().decode(buffer, offset);
-      default -> throw new DecoderException("Unsupported basic type: " + code);
-    };
+    Decoder<ByteBuffer, DBusType> decoder = DECODER_FACTORY.createDecoder(code);
+    DecoderResult result = decoder.decode(buffer, offset);
+    return (DecoderResult<R>) result;
   }
 }
