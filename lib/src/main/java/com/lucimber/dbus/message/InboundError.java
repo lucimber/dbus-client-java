@@ -82,4 +82,84 @@ public final class InboundError extends AbstractReply implements InboundReply {
     var sig = getSignature().map(DBusSignature::toString).orElse("");
     return String.format(s, sender, getSerial(), getReplySerial(), errorName, sig);
   }
+
+  public static class Builder {
+    private DBusUInt32 serial;
+    private DBusUInt32 replySerial;
+    private DBusString sender;
+    private DBusString errorName;
+    private DBusSignature signature;
+    private List<? extends DBusType> payload;
+
+    private Builder() {
+    }
+
+    public static Builder create() {
+      return new Builder();
+    }
+
+    public Builder withSerial(DBusUInt32 serial) {
+      this.serial = serial;
+      return this;
+    }
+
+    public Builder withReplySerial(DBusUInt32 replySerial) {
+      this.replySerial = replySerial;
+      return this;
+    }
+
+    public Builder withSender(DBusString sender) {
+      this.sender = sender;
+      return this;
+    }
+
+    public Builder withErrorName(DBusString errorName) {
+      this.errorName = errorName;
+      return this;
+    }
+
+    public Builder withBody(DBusSignature signature, List<? extends DBusType> payload) {
+      this.signature = signature;
+      this.payload = payload;
+      return this;
+    }
+
+    public InboundError build() {
+      validate();
+      return new InboundError(
+              serial,
+              replySerial,
+              sender,
+              errorName,
+              signature,
+              payload
+      );
+    }
+
+    private void validate() {
+      if (serial == null) {
+        throw new InvalidMessageException("Serial must not be null.");
+      }
+      if (replySerial == null) {
+        throw new InvalidMessageException("Reply serial must not be null.");
+      }
+      if (sender == null) {
+        throw new InvalidMessageException("Sender must not be null.");
+      } else if (sender.getDelegate().isBlank()) {
+        throw new InvalidMessageException("Sender must not be blank.");
+      }
+      if (errorName == null) {
+        throw new InvalidMessageException("Error name must not be null.");
+      } else if (errorName.getDelegate().isBlank()) {
+        throw new InvalidMessageException("Error name must not be blank.");
+      }
+      if (signature == null && payload != null) {
+        throw new InvalidMessageException("Payload is present, but signature is missing "
+                + "– both must be set together or left null.");
+      } else if (signature != null && payload == null) {
+        throw new InvalidMessageException("Signature is present, but payload is missing "
+                + "– both must be set together or left null.");
+      }
+    }
+  }
 }

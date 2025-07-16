@@ -56,13 +56,12 @@ class DBusMandatoryNameHandlerTest {
     DBusUInt32 sentSerial = sent.getSerial();
 
     DBusString name = DBusString.valueOf(":1.101");
-    InboundMethodReturn reply = new InboundMethodReturn(
-          DBusUInt32.valueOf(0),
-          sentSerial,
-          SENDER,
-          DBusSignature.valueOf("s"), // signature
-          List.of(name)
-    );
+    InboundMethodReturn reply = InboundMethodReturn.Builder.create()
+          .withSerial(DBusUInt32.valueOf(0))
+          .withReplySerial(sentSerial)
+          .withSender(SENDER)
+          .withBody(DBusSignature.valueOf("s"), List.of(name))
+          .build();
 
     channel.writeInbound(reply);
 
@@ -77,11 +76,11 @@ class DBusMandatoryNameHandlerTest {
     OutboundMethodCall sent = channel.readOutbound();
     DBusUInt32 sentSerial = sent.getSerial();
 
-    InboundMethodReturn reply = new InboundMethodReturn(
-          DBusUInt32.valueOf(0),
-          sentSerial,
-          SENDER
-    );
+    InboundMethodReturn reply = InboundMethodReturn.Builder.create()
+          .withSerial(DBusUInt32.valueOf(0))
+          .withReplySerial(sentSerial)
+          .withSender(SENDER)
+          .build();
 
     channel.writeInbound(reply);
 
@@ -105,12 +104,12 @@ class DBusMandatoryNameHandlerTest {
       }
     });
 
-    InboundError error = new InboundError(
-          DBusUInt32.valueOf(0),
-          sentSerial,
-          SENDER,
-          DBusString.valueOf("org.freedesktop.DBus.Error.Failed")
-    );
+    InboundError error = InboundError.Builder.create()
+          .withSerial(DBusUInt32.valueOf(0))
+          .withReplySerial(sentSerial)
+          .withSender(SENDER)
+          .withErrorName(DBusString.valueOf("org.freedesktop.DBus.Error.Failed"))
+          .build();
 
     channel.writeInbound(error);
 

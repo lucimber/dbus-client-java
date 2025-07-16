@@ -66,4 +66,72 @@ public final class InboundMethodReturn extends AbstractReply implements InboundR
     var sig = getSignature().map(DBusSignature::toString).orElse("");
     return String.format(s, sender, getSerial(), getReplySerial(), sig);
   }
+
+  public static class Builder {
+    private DBusUInt32 serial;
+    private DBusUInt32 replySerial;
+    private DBusString sender;
+    private DBusSignature signature;
+    private List<? extends DBusType> payload;
+
+    private Builder() {
+    }
+
+    public static Builder create() {
+      return new Builder();
+    }
+
+    public Builder withSerial(DBusUInt32 serial) {
+      this.serial = serial;
+      return this;
+    }
+
+    public Builder withReplySerial(DBusUInt32 replySerial) {
+      this.replySerial = replySerial;
+      return this;
+    }
+
+    public Builder withSender(DBusString sender) {
+      this.sender = sender;
+      return this;
+    }
+
+    public Builder withBody(DBusSignature signature, List<? extends DBusType> payload) {
+      this.signature = signature;
+      this.payload = payload;
+      return this;
+    }
+
+    public InboundMethodReturn build() {
+      validate();
+      return new InboundMethodReturn(
+              serial,
+              replySerial,
+              sender,
+              signature,
+              payload
+      );
+    }
+
+    private void validate() {
+      if (serial == null) {
+        throw new InvalidMessageException("Serial must not be null.");
+      }
+      if (replySerial == null) {
+        throw new InvalidMessageException("Reply serial must not be null.");
+      }
+      if (sender == null) {
+        throw new InvalidMessageException("Sender must not be null.");
+      } else if (sender.getDelegate().isBlank()) {
+        throw new InvalidMessageException("Sender must not be blank.");
+      }
+      if (signature == null && payload != null) {
+        throw new InvalidMessageException("Payload is present, but signature is missing "
+                + "– both must be set together or left null.");
+      } else if (signature != null && payload == null) {
+        throw new InvalidMessageException("Signature is present, but payload is missing "
+                + "– both must be set together or left null.");
+      }
+    }
+  }
 }

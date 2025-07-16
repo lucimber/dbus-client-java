@@ -166,11 +166,22 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
     }
     Optional<DBusSignature> sig = getSignatureFromHeader(headerFields);
     List<DBusType> payload = null;
-    if (sig.isPresent() && frame.getBody().hasRemaining()) {
-      payload = decodeFrameBody(frame.getBody(), sig.get());
+    if (sig.isPresent()) {
+      if (frame.getBody().hasRemaining()) {
+        payload = decodeFrameBody(frame.getBody(), sig.get());
+      } else {
+        payload = new ArrayList<>();
+      }
     }
-    return new InboundError(serial, replySerial, sender, errorName.get(),
-            sig.orElse(null), payload);
+    var builder = InboundError.Builder.create()
+            .withSerial(serial)
+            .withReplySerial(replySerial)
+            .withSender(sender)
+            .withErrorName(errorName.get());
+    if (sig.isPresent()) {
+      builder.withBody(sig.get(), payload);
+    }
+    return builder.build();
   }
 
   private static InboundMethodCall mapToMethodCall(Frame frame) {
@@ -184,11 +195,26 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
     Optional<DBusString> iface = getInterfaceNameFromHeader(headerFields);
     Optional<DBusSignature> sig = getSignatureFromHeader(headerFields);
     List<DBusType> payload = null;
-    if (sig.isPresent() && frame.getBody().hasRemaining()) {
-      payload = decodeFrameBody(frame.getBody(), sig.get());
+    if (sig.isPresent()) {
+      if (frame.getBody().hasRemaining()) {
+        payload = decodeFrameBody(frame.getBody(), sig.get());
+      } else {
+        payload = new ArrayList<>();
+      }
     }
-    return new InboundMethodCall(serial, sender, path, member, replyExpected,
-            iface.orElse(null), sig.orElse(null), payload);
+    var builder = InboundMethodCall.Builder.create()
+            .withSerial(serial)
+            .withSender(sender)
+            .withObjectPath(path)
+            .withMember(member)
+            .withReplyExpected(replyExpected);
+    if (iface.isPresent()) {
+      builder.withInterfaceName(iface.get());
+    }
+    if (sig.isPresent()) {
+      builder.withBody(sig.get(), payload);
+    }
+    return builder.build();
   }
 
   private static InboundMethodReturn mapToMethodReturn(Frame frame) {
@@ -199,11 +225,21 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
     DBusString sender = getSenderFromHeader(headerFields);
     Optional<DBusSignature> sig = getSignatureFromHeader(headerFields);
     List<DBusType> payload = null;
-    if (sig.isPresent() && frame.getBody().hasRemaining()) {
-      payload = decodeFrameBody(frame.getBody(), sig.get());
+    if (sig.isPresent()) {
+      if (frame.getBody().hasRemaining()) {
+        payload = decodeFrameBody(frame.getBody(), sig.get());
+      } else {
+        payload = new ArrayList<>();
+      }
     }
-    return new InboundMethodReturn(serial, replySerial, sender,
-            sig.orElse(null), payload);
+    var builder = InboundMethodReturn.Builder.create()
+            .withSerial(serial)
+            .withReplySerial(replySerial)
+            .withSender(sender);
+    if (sig.isPresent()) {
+      builder.withBody(sig.get(), payload);
+    }
+    return builder.build();
   }
 
   private static InboundSignal mapToSignal(Frame frame) {
@@ -220,11 +256,23 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
     DBusString member = getMemberFromHeader(headerFields);
     Optional<DBusSignature> sig = getSignatureFromHeader(headerFields);
     List<DBusType> payload = null;
-    if (sig.isPresent() && frame.getBody().hasRemaining()) {
-      payload = decodeFrameBody(frame.getBody(), sig.get());
+    if (sig.isPresent()) {
+      if (frame.getBody().hasRemaining()) {
+        payload = decodeFrameBody(frame.getBody(), sig.get());
+      } else {
+        payload = new ArrayList<>();
+      }
     }
-    return new InboundSignal(serial, sender, path, iface.get(), member,
-            sig.orElse(null), payload);
+    var builder = InboundSignal.Builder.create()
+            .withSerial(serial)
+            .withSender(sender)
+            .withObjectPath(path)
+            .withInterfaceName(iface.get())
+            .withMember(member);
+    if (sig.isPresent()) {
+      builder.withBody(sig.get(), payload);
+    }
+    return builder.build();
   }
 
   private static List<DBusType> decodeFrameBody(ByteBuffer body, DBusSignature sig) {

@@ -50,16 +50,14 @@ final class InternalTailHandlerTest {
 
   @Test
   void testUnhandledMethodCallWithReplyExpectedSendsError() {
-    InboundMethodCall call = new InboundMethodCall(
-            DBusUInt32.valueOf(1),
-            DBusString.valueOf("org.test.Sender"),
-            DBusObjectPath.valueOf("/test"),
-            DBusString.valueOf("UnknownMethod"),
-            true,
-            DBusString.valueOf("org.test.Interface"),
-            null,
-            null
-    );
+    InboundMethodCall call = InboundMethodCall.Builder.create()
+            .withSerial(DBusUInt32.valueOf(1))
+            .withSender(DBusString.valueOf("org.test.Sender"))
+            .withObjectPath(DBusObjectPath.valueOf("/test"))
+            .withMember(DBusString.valueOf("UnknownMethod"))
+            .withReplyExpected(true)
+            .withInterfaceName(DBusString.valueOf("org.test.Interface"))
+            .build();
 
     doAnswer(inv -> {
       Object msg = inv.getArgument(0);
@@ -85,16 +83,14 @@ final class InternalTailHandlerTest {
 
   @Test
   void testUnhandledMethodCallWithoutReplyExpectedDoesNotSendError() {
-    InboundMethodCall call = new InboundMethodCall(
-            DBusUInt32.valueOf(2),
-            DBusString.valueOf("org.test.Sender"),
-            DBusObjectPath.valueOf("/test"),
-            DBusString.valueOf("NoReplyMethod"),
-            false,
-            DBusString.valueOf("org.test.Interface"),
-            null,
-            null
-    );
+    InboundMethodCall call = InboundMethodCall.Builder.create()
+            .withSerial(DBusUInt32.valueOf(2))
+            .withSender(DBusString.valueOf("org.test.Sender"))
+            .withObjectPath(DBusObjectPath.valueOf("/test"))
+            .withMember(DBusString.valueOf("NoReplyMethod"))
+            .withReplyExpected(false)
+            .withInterfaceName(DBusString.valueOf("org.test.Interface"))
+            .build();
 
     handler.handleInboundMessage(mockCtx, call);
     verify(mockCtx, never()).propagateOutboundMessage(any(), any());
@@ -102,13 +98,11 @@ final class InternalTailHandlerTest {
 
   @Test
   void testUnhandledMethodReturnIsLoggedAndIgnored() {
-    InboundMethodReturn reply = new InboundMethodReturn(
-            DBusUInt32.valueOf(3),
-            DBusUInt32.valueOf(1),
-            DBusString.valueOf("org.test.Sender"),
-            null,
-            null
-    );
+    InboundMethodReturn reply = InboundMethodReturn.Builder.create()
+            .withSerial(DBusUInt32.valueOf(3))
+            .withReplySerial(DBusUInt32.valueOf(1))
+            .withSender(DBusString.valueOf("org.test.Sender"))
+            .build();
 
     handler.handleInboundMessage(mockCtx, reply);
     verify(mockCtx, never()).propagateOutboundMessage(any(), any());
@@ -116,14 +110,12 @@ final class InternalTailHandlerTest {
 
   @Test
   void testUnhandledErrorReplyIsLoggedAndIgnored() {
-    InboundError error = new InboundError(
-            DBusUInt32.valueOf(4),
-            DBusUInt32.valueOf(1),
-            DBusString.valueOf("org.test.Sender"),
-            DBusString.valueOf("org.test.Error"),
-            null,
-            null
-    );
+    InboundError error = InboundError.Builder.create()
+            .withSerial(DBusUInt32.valueOf(4))
+            .withReplySerial(DBusUInt32.valueOf(1))
+            .withSender(DBusString.valueOf("org.test.Sender"))
+            .withErrorName(DBusString.valueOf("org.test.Error"))
+            .build();
 
     handler.handleInboundMessage(mockCtx, error);
     verify(mockCtx, never()).propagateOutboundMessage(any(), any());
@@ -131,13 +123,13 @@ final class InternalTailHandlerTest {
 
   @Test
   void testUnhandledSignalOrUnknownMessageIsIgnored() {
-    InboundSignal signal = new InboundSignal(
-            DBusUInt32.valueOf(5),
-            DBusString.valueOf("org.test.Sender"),
-            DBusObjectPath.valueOf("/unit/test"),
-            DBusString.valueOf("org.example.Interface"),
-            DBusString.valueOf("TestSignal")
-    );
+    InboundSignal signal = InboundSignal.Builder.create()
+            .withSerial(DBusUInt32.valueOf(5))
+            .withSender(DBusString.valueOf("org.test.Sender"))
+            .withObjectPath(DBusObjectPath.valueOf("/unit/test"))
+            .withInterfaceName(DBusString.valueOf("org.example.Interface"))
+            .withMember(DBusString.valueOf("TestSignal"))
+            .build();
 
     handler.handleInboundMessage(mockCtx, signal);
     verify(mockCtx, never()).propagateOutboundMessage(any(), any());

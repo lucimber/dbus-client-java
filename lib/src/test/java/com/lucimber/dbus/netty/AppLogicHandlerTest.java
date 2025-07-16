@@ -103,8 +103,11 @@ class AppLogicHandlerTest {
     channel.flushOutbound();
 
     // Simulate reply
-    InboundMethodReturn reply = new InboundMethodReturn(
-          DBusUInt32.valueOf(5), serial, dst, null, null);
+    InboundMethodReturn reply = InboundMethodReturn.Builder.create()
+          .withSerial(DBusUInt32.valueOf(5))
+          .withReplySerial(serial)
+          .withSender(dst)
+          .build();
     channel.writeInbound(reply);
 
     var replyFuture = future.getNow();
@@ -131,14 +134,12 @@ class AppLogicHandlerTest {
     var future = handler.writeMessage(msg);
     channel.flushOutbound();
 
-    InboundError error = new InboundError(
-          DBusUInt32.valueOf(5),
-          DBusUInt32.valueOf(202),
-          dst,
-          DBusString.valueOf("org.freedesktop.DBus.Error.Failed"),
-          null,
-          null
-    );
+    InboundError error = InboundError.Builder.create()
+          .withSerial(DBusUInt32.valueOf(5))
+          .withReplySerial(DBusUInt32.valueOf(202))
+          .withSender(dst)
+          .withErrorName(DBusString.valueOf("org.freedesktop.DBus.Error.Failed"))
+          .build();
 
     channel.writeInbound(error);
 
