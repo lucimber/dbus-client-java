@@ -131,9 +131,30 @@ final class FrameDecoder extends ByteToMessageDecoder {
       return false;
     }
 
+    // Validate fieldsLen to prevent integer overflow
+    if (fieldsLen < 0) {
+      throw new CorruptedFrameException("Invalid header fields length: " + fieldsLen);
+    }
+    
+    // Check for potential integer overflow in offset + 4 + fieldsLen
+    if (fieldsLen > Integer.MAX_VALUE - offset - 4) {
+      throw new TooLongFrameException("Header fields length too large: " + fieldsLen);
+    }
+
     int padding = (offset + 4 + fieldsLen) % HEADER_ALIGNMENT;
+    
+    // Check for potential integer overflow in fieldsLen + padding
+    if (fieldsLen > Integer.MAX_VALUE - padding) {
+      throw new TooLongFrameException("Header fields length with padding too large: " + fieldsLen + " + " + padding);
+    }
+    
     if (InboundUtils.isMessageTooLong(fieldsLen + padding, frame.getBodyLength().intValue())) {
       throw new TooLongFrameException();
+    }
+
+    // Check for potential integer overflow in 4 + fieldsLen
+    if (fieldsLen > Integer.MAX_VALUE - 4) {
+      throw new TooLongFrameException("Header fields length too large for buffer check: " + fieldsLen);
     }
 
     return in.readableBytes() >= 4 + fieldsLen;
@@ -187,6 +208,17 @@ final class FrameDecoder extends ByteToMessageDecoder {
 
   private void copyMessageBody(ByteBuf in) {
     int bodyLength = frame.getBodyLength().intValue();
+    
+    // Validate body length to prevent buffer overflow
+    if (bodyLength < 0) {
+      throw new CorruptedFrameException("Invalid body length: " + bodyLength);
+    }
+    
+    // Check if body length exceeds reasonable limits
+    if (bodyLength > 128 * 1024 * 1024) { // 128MB limit
+      throw new TooLongFrameException("Body length too large: " + bodyLength);
+    }
+    
     ByteBuffer body = ByteBuffer.allocate(bodyLength);
     body.put(in.nioBuffer(in.readerIndex(), bodyLength));
     body.flip(); // Reset position to 0 and set limit for reading
