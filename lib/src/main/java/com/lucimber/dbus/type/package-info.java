@@ -124,6 +124,7 @@
  * <p>D-Bus type signatures describe the structure of data using a compact string format:
  * 
  * <table border="1">
+ * <caption>D-Bus Type Signatures</caption>
  * <tr><th>Type</th><th>Signature</th><th>Java Type</th></tr>
  * <tr><td>Byte</td><td>y</td><td>{@link DBusByte}</td></tr>
  * <tr><td>Boolean</td><td>b</td><td>{@link DBusBoolean}</td></tr>

@@ -233,7 +233,6 @@
  * }</pre>
  *
  * @see NettyConnection
- * @see NettyConnectionConfig
  * @see com.lucimber.dbus.connection.Connection
  * @see com.lucimber.dbus.connection.ConnectionConfig
  * @since 1.0
