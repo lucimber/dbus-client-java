@@ -195,7 +195,7 @@ The heart of the library is the **dual-pipeline architecture**, with both public
 
 1. **Public API Pipeline**: High-level message processing for application logic
 2. **Netty Pipeline**: Low-level protocol handling and transport management
-3. **AppLogicHandler Bridge**: Coordinates between both pipelines with proper thread isolation
+3. **RealityCheckpoint Bridge**: Coordinates between both pipelines with proper thread isolation
 
 ### Key Features
 
@@ -210,7 +210,7 @@ The heart of the library is the **dual-pipeline architecture**, with both public
 Public API Pipeline (Application Thread Pool):
 HEAD → User Handlers → TAIL
  ↕
-AppLogicHandler (Bridge with Thread Switching)
+RealityCheckpoint (Bridge with Thread Switching)
  ↕
 Netty Pipeline (Event Loop Thread):
 SASL → Protocol → Management → Bridge

@@ -28,9 +28,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class AppLogicHandlerTest {
+class RealityCheckpointTest {
 
-  private AppLogicHandler handler;
+  private RealityCheckpoint handler;
   private Pipeline pipeline;
   private EmbeddedChannel channel;
   private ExecutorService executorService;
@@ -42,7 +42,7 @@ class AppLogicHandlerTest {
     when(connection.getPipeline()).thenReturn(pipeline);
 
     executorService = Executors.newSingleThreadExecutor();
-    handler = new AppLogicHandler(executorService, connection);
+    handler = new RealityCheckpoint(executorService, connection);
     channel = new EmbeddedChannel(handler);
     channel.attr(DBusChannelAttribute.SERIAL_COUNTER).setIfAbsent(new AtomicLong(1));
   }
@@ -185,7 +185,7 @@ class AppLogicHandlerTest {
     // Use a short timeout for testing
     executorService.shutdown();
     executorService = Executors.newSingleThreadExecutor();
-    handler = new AppLogicHandler(executorService, mock(Connection.class), 100); // 100ms timeout
+    handler = new RealityCheckpoint(executorService, mock(Connection.class), 100); // 100ms timeout
     channel = new EmbeddedChannel(handler);
     channel.attr(DBusChannelAttribute.SERIAL_COUNTER).setIfAbsent(new AtomicLong(1));
 
@@ -217,7 +217,7 @@ class AppLogicHandlerTest {
     // Shutdown existing executor and create new handler with short default timeout  
     executorService.shutdown();
     executorService = Executors.newSingleThreadExecutor();
-    handler = new AppLogicHandler(executorService, mock(Connection.class), 5000); // 5s default
+    handler = new RealityCheckpoint(executorService, mock(Connection.class), 5000); // 5s default
     channel = new EmbeddedChannel(handler);
     channel.attr(DBusChannelAttribute.SERIAL_COUNTER).setIfAbsent(new AtomicLong(1));
 

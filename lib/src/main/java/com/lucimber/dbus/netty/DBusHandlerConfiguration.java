@@ -34,7 +34,7 @@ public final class DBusHandlerConfiguration {
    * SASL handlers are added first, followed by D-Bus protocol handlers.
    */
   private static Map<String, Supplier<ChannelHandler>> createHandlerMap(
-          Promise<Void> connectPromise, AppLogicHandler appLogicHandler) {
+          Promise<Void> connectPromise, RealityCheckpoint appLogicHandler) {
     
     Map<String, Supplier<ChannelHandler>> handlers = new LinkedHashMap<>();
     
@@ -59,7 +59,7 @@ public final class DBusHandlerConfiguration {
     
     // Application logic handler (always last)
     if (appLogicHandler != null) {
-      handlers.put("AppLogicHandler", () -> appLogicHandler);
+      handlers.put("RealityCheckpoint", () -> appLogicHandler);
     }
     
     return handlers;
@@ -74,7 +74,7 @@ public final class DBusHandlerConfiguration {
    */
   public static void initializePipeline(ChannelPipeline pipeline, 
                                       Promise<Void> connectPromise, 
-                                      AppLogicHandler appLogicHandler) {
+                                      RealityCheckpoint appLogicHandler) {
     LOGGER.debug(LoggerUtils.HANDLER_LIFECYCLE, "Initializing D-Bus pipeline with centralized configuration");
     
     Map<String, Supplier<ChannelHandler>> handlers = createHandlerMap(connectPromise, appLogicHandler);
@@ -118,7 +118,7 @@ public final class DBusHandlerConfiguration {
       DBusHandlerNames.DBUS_MANDATORY_NAME_HANDLER,
       DBusHandlerNames.CONNECTION_COMPLETION_HANDLER,
       "ReconnectionHandlerManager",
-      "AppLogicHandler"
+      "RealityCheckpoint"
     };
   }
 

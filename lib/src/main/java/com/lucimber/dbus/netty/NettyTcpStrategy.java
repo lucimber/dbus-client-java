@@ -56,7 +56,7 @@ public final class NettyTcpStrategy implements ConnectionStrategy {
             .option(ChannelOption.SO_REUSEADDR, true)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) config.getConnectTimeout().toMillis())
             .handler(new DBusChannelInitializer(
-                    createAppLogicHandler(context, config),
+                    createRealityCheckpoint(context, config),
                     nettyConnectPromise));
 
     LOGGER.info("Attempting TCP connection to {}", address);
@@ -106,7 +106,7 @@ public final class NettyTcpStrategy implements ConnectionStrategy {
     return new MultiThreadIoEventLoopGroup(1, NioIoHandler.newFactory());
   }
 
-  private AppLogicHandler createAppLogicHandler(ConnectionContext context, ConnectionConfig config) {
+  private RealityCheckpoint createRealityCheckpoint(ConnectionContext context, ConnectionConfig config) {
     // Extract the connection from the context - this requires the context to provide access
     if (!(context instanceof NettyConnectionContext nettyContext)) {
       throw new IllegalArgumentException("TCP strategy requires NettyConnectionContext");
@@ -123,6 +123,6 @@ public final class NettyTcpStrategy implements ConnectionStrategy {
 
     // Get the connection from context - this will need to be added to NettyConnectionContext
     Connection connection = nettyContext.getConnection();
-    return new AppLogicHandler(executor, connection, config.getMethodCallTimeoutMs());
+    return new RealityCheckpoint(executor, connection, config.getMethodCallTimeoutMs());
   }
 }

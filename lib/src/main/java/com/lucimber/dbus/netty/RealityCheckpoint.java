@@ -33,11 +33,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Handles inbound and outbound messages and routes them to the bound connection and pipeline (not netty).
+ * The critical bridge between the Netty pipeline and public API pipeline systems.
+ * 
+ * <p>This handler serves as the reality checkpoint where messages transition between 
+ * the low-level transport layer (Netty) and the high-level application layer (public API).
+ * It manages request-response correlation, timeouts, and ensures proper thread isolation
+ * by routing messages to the appropriate execution contexts.</p>
+ * 
+ * <p>Named after the brilliant drum & bass track "Reality Checkpoint" by Logistics,
+ * because like that track, this class represents a moment of transition and clarity
+ * in the complex flow of D-Bus message processing.</p>
  */
-public class AppLogicHandler extends ChannelDuplexHandler {
+public class RealityCheckpoint extends ChannelDuplexHandler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AppLogicHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(RealityCheckpoint.class);
   private static final long DEFAULT_METHOD_CALL_TIMEOUT_MS = 30_000; // 30 seconds
 
   private final ConcurrentHashMap<DBusUInt32, PendingMethodCall> pendingMethodCalls;
@@ -55,7 +64,7 @@ public class AppLogicHandler extends ChannelDuplexHandler {
    *                                (not recommended for blocking user code).
    * @param connection              An active D-Bus connection.
    */
-  public AppLogicHandler(ExecutorService applicationTaskExecutor, Connection connection) {
+  public RealityCheckpoint(ExecutorService applicationTaskExecutor, Connection connection) {
     this(applicationTaskExecutor, connection, DEFAULT_METHOD_CALL_TIMEOUT_MS);
   }
 
@@ -70,7 +79,7 @@ public class AppLogicHandler extends ChannelDuplexHandler {
    * @param methodCallTimeoutMs     Timeout in milliseconds for method calls before they are considered stale
    *                                and removed from pending calls map.
    */
-  public AppLogicHandler(ExecutorService applicationTaskExecutor, Connection connection, long methodCallTimeoutMs) {
+  public RealityCheckpoint(ExecutorService applicationTaskExecutor, Connection connection, long methodCallTimeoutMs) {
     this.applicationTaskExecutor = Objects.requireNonNull(applicationTaskExecutor,
             "ApplicationTaskExecutor cannot be null. Provide one for offloading user code.");
     this.connection = Objects.requireNonNull(connection, "connection must not be null");

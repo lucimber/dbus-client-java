@@ -20,7 +20,7 @@ The D-Bus client implements a **sophisticated dual-pipeline system** with clear 
 │  │  Thread: Application Task Executor                                     │    │
 │  └─────────────────────────────────────────────────────────────────────────┘    │
 │                                       │                                          │
-│                                       │ AppLogicHandler (Bridge)                 │
+│                                       │ RealityCheckpoint (Bridge)                 │
 │                                       ▼                                          │
 │  ┌─────────────────────────────────────────────────────────────────────────┐    │
 │  │                        Netty Pipeline                                  │    │
@@ -101,7 +101,7 @@ The pipeline is configured through centralized components:
 SaslInitiationHandler → SaslCodec → SaslAuthenticationHandler →
 NettyByteLogger → FrameEncoder → OutboundMessageEncoder → 
 FrameDecoder → InboundMessageDecoder → DBusMandatoryNameHandler → 
-ConnectionCompletionHandler → ReconnectionHandlerManager → AppLogicHandler
+ConnectionCompletionHandler → ReconnectionHandlerManager → RealityCheckpoint
 ```
 
 #### **Handler Categories**
@@ -119,7 +119,7 @@ ConnectionCompletionHandler → ReconnectionHandlerManager → AppLogicHandler
 3. **Management Handlers** (Permanent):
    - `ConnectionCompletionHandler` - Connection establishment
    - `ReconnectionHandlerManager` - Reconnection support
-   - `AppLogicHandler` - Bridge to public API
+   - `RealityCheckpoint` - Bridge to public API
 
 #### **Event Types**
 
@@ -136,12 +136,12 @@ DBusChannelEvent.RECONNECTION_HANDLERS_READD_REQUIRED
 
 ## Pipeline Coordination and Bridge Architecture
 
-### AppLogicHandler - The Critical Bridge
+### RealityCheckpoint - The Critical Bridge
 
-The `AppLogicHandler` serves as the crucial bridge between the Netty pipeline and the public API pipeline, ensuring proper message routing and event translation.
+The `RealityCheckpoint` serves as the crucial bridge between the Netty pipeline and the public API pipeline, ensuring proper message routing and event translation.
 
 ```java
-public final class AppLogicHandler extends ChannelDuplexHandler {
+public final class RealityCheckpoint extends ChannelDuplexHandler {
     
     // Inbound message bridging
     @Override
@@ -211,7 +211,7 @@ The bridge handles multiple types of event translation:
    - `InboundMessageDecoder` → Deserializes to `InboundMessage`
    - `DBusMandatoryNameHandler` → Handles name acquisition messages
    - `ConnectionCompletionHandler` → Handles connection establishment
-   - `AppLogicHandler` → Routes to public API
+   - `RealityCheckpoint` → Routes to public API
 3. **Thread Switch**: Netty Event Loop → Application Task Executor
 4. **Public API Pipeline Processing**:
    - `InternalHeadHandler` → Entry point
@@ -227,7 +227,7 @@ The bridge handles multiple types of event translation:
    - User handlers → Custom processing
    - `InternalHeadHandler` → Routes to connection
 3. **Connection Layer**: `connection.sendAndRouteResponse()`
-4. **AppLogicHandler**: Message correlation and timeout management
+4. **RealityCheckpoint**: Message correlation and timeout management
 5. **Netty Pipeline Processing**:
    - `OutboundMessageEncoder` → Serializes message
    - `FrameEncoder` → Creates D-Bus frames
@@ -312,7 +312,7 @@ Events in the Netty pipeline follow specific lifecycle patterns:
 1. **Generation**: Events created by protocol handlers
 2. **Propagation**: Events flow through pipeline using `fireUserEventTriggered()`
 3. **Interception**: Handlers can intercept and process events
-4. **Translation**: `AppLogicHandler` translates to public API events
+4. **Translation**: `RealityCheckpoint` translates to public API events
 5. **Consumption**: Final handlers may consume events
 
 ## Threading Model and Thread Safety
@@ -368,7 +368,7 @@ public final class ConnectionEvent {
 private final ConcurrentHashMap<String, InternalContext> handlerMap = new ConcurrentHashMap<>();
 private final ConcurrentLinkedQueue<ConnectionEventListener> listeners = new ConcurrentLinkedQueue<>();
 
-// AppLogicHandler
+// RealityCheckpoint
 private final ConcurrentHashMap<DBusUInt32, PendingMethodCall> pendingMethodCalls = new ConcurrentHashMap<>();
 ```
 
@@ -442,7 +442,7 @@ public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
 // DBusHandlerConfiguration
 public static void initializePipeline(ChannelPipeline pipeline, 
                                     Promise<Void> connectPromise, 
-                                    AppLogicHandler appLogicHandler) {
+                                    RealityCheckpoint appLogicHandler) {
     Map<String, Supplier<ChannelHandler>> handlers = createHandlerMap(connectPromise, appLogicHandler);
     
     for (Map.Entry<String, Supplier<ChannelHandler>> entry : handlers.entrySet()) {
@@ -458,7 +458,7 @@ public static void initializePipeline(ChannelPipeline pipeline,
 #### **Method Call Management**
 
 ```java
-// AppLogicHandler method call correlation
+// RealityCheckpoint method call correlation
 private void handleOutboundMethodCall(OutboundMethodCall call, ChannelPromise promise) {
     if (call.isReplyExpected()) {
         PendingMethodCall pendingCall = new PendingMethodCall(call, promise);
@@ -533,7 +533,7 @@ public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 #### **Error Translation and Recovery**
 
 ```java
-// AppLogicHandler error translation
+// RealityCheckpoint error translation
 @Override
 public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     // Translate Netty exceptions to public API exceptions

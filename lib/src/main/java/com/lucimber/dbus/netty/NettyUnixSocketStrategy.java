@@ -62,7 +62,7 @@ public final class NettyUnixSocketStrategy implements ConnectionStrategy {
     bootstrap.group(workerGroup)
             .channel(getChannelClass())
             .handler(new DBusChannelInitializer(
-                    createAppLogicHandler(context, config),
+                    createRealityCheckpoint(context, config),
                     nettyConnectPromise));
 
     LOGGER.info("Attempting Unix domain socket connection to {}", address);
@@ -135,7 +135,7 @@ public final class NettyUnixSocketStrategy implements ConnectionStrategy {
     }
   }
 
-  private AppLogicHandler createAppLogicHandler(ConnectionContext context, ConnectionConfig config) {
+  private RealityCheckpoint createRealityCheckpoint(ConnectionContext context, ConnectionConfig config) {
     // Extract the connection from the context - this requires the context to provide access
     if (!(context instanceof NettyConnectionContext nettyContext)) {
       throw new IllegalArgumentException("Unix socket strategy requires NettyConnectionContext");
@@ -152,6 +152,6 @@ public final class NettyUnixSocketStrategy implements ConnectionStrategy {
 
     // Get the connection from context - this will need to be added to NettyConnectionContext
     Connection connection = nettyContext.getConnection();
-    return new AppLogicHandler(executor, connection, config.getMethodCallTimeoutMs());
+    return new RealityCheckpoint(executor, connection, config.getMethodCallTimeoutMs());
   }
 }

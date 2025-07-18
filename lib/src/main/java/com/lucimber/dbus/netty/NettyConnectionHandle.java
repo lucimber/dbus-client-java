@@ -81,7 +81,7 @@ public final class NettyConnectionHandle implements ConnectionHandle {
     }
 
     // TODO: Implement request-response correlation
-    // This would need to work with AppLogicHandler to correlate requests and responses
+    // This would need to work with RealityCheckpoint to correlate requests and responses
     CompletableFuture<InboundMessage> future = new CompletableFuture<>();
     future.completeExceptionally(new UnsupportedOperationException("Request-response not yet implemented"));
     return future;

@@ -18,10 +18,10 @@ import org.slf4j.LoggerFactory;
 final class DBusChannelInitializer extends ChannelInitializer<Channel> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private final AppLogicHandler appLogicHandler;
+  private final RealityCheckpoint appLogicHandler;
   private final Promise<Void> connectPromise;
 
-  DBusChannelInitializer(AppLogicHandler appLogicHandler, Promise<Void> connectPromise) {
+  DBusChannelInitializer(RealityCheckpoint appLogicHandler, Promise<Void> connectPromise) {
     this.appLogicHandler = Objects.requireNonNull(appLogicHandler);
     this.connectPromise = Objects.requireNonNull(connectPromise);
   }

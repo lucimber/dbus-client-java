@@ -2,7 +2,7 @@
 
 The handler architecture is the core extensibility mechanism of the D-Bus client library. This document explains how handlers work, how to create custom handlers, and best practices for handler development.
 
-> **Note**: This document focuses on handler development and usage patterns. For comprehensive coverage of the **dual-pipeline architecture**, **event propagation**, **threading models**, and **AppLogicHandler bridge**, see [pipeline-event-architecture.md](pipeline-event-architecture.md).
+> **Note**: This document focuses on handler development and usage patterns. For comprehensive coverage of the **dual-pipeline architecture**, **event propagation**, **threading models**, and **RealityCheckpoint bridge**, see [pipeline-event-architecture.md](pipeline-event-architecture.md).
 
 ## Handler Overview
 

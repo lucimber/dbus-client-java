@@ -30,7 +30,7 @@ The D-Bus client library uses a sophisticated dual-pipeline architecture with st
 │  }                                                              │
 └─────────────────────────────────────────────────────────────────┘
                                  │
-                                 │ AppLogicHandler Bridge
+                                 │ RealityCheckpoint Bridge
                                  │ (Thread switching happens here)
                                  ▼
 ┌─────────────────────────────────────────────────────────────────┐
