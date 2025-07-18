@@ -1,4 +1,4 @@
-# GitHub Configuration
+# GitHub Workflows & Configuration
 
 This directory contains GitHub-specific configuration files for automation, templates, and workflows.
 
