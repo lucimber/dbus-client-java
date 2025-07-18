@@ -1,7 +1,7 @@
 # D-Bus Client Java
 
-[![Build Status](https://github.com/lucimber/dbus-client-java/workflows/Java%20CI%20with%20Gradle/badge.svg)](https://github.com/lucimber/dbus-client-java/actions)
-[![CodeQL](https://github.com/lucimber/dbus-client-java/workflows/CodeQL/badge.svg)](https://github.com/lucimber/dbus-client-java/actions)
+[![Build Status](https://github.com/lucimber/dbus-client-java/workflows/Continuous%20Integration/badge.svg)](https://github.com/lucimber/dbus-client-java/actions)
+[![CodeQL](https://github.com/lucimber/dbus-client-java/workflows/Code%20Analysis/badge.svg)](https://github.com/lucimber/dbus-client-java/actions)
 [![codecov](https://codecov.io/gh/lucimber/dbus-client-java/branch/main/graph/badge.svg)](https://codecov.io/gh/lucimber/dbus-client-java)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
