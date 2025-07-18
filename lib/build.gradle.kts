@@ -81,51 +81,6 @@ tasks.named<Test>("test") {
     finalizedBy(tasks.jacocoTestReport)
 }
 
-// Integration tests (host-based, may fail on some platforms due to SASL issues)
-tasks.register<Test>("integrationTest") {
-    useJUnitPlatform {
-        includeTags("integration")
-    }
-    group = "verification"
-    description = "Runs integration tests on host (use integrationTestContainer for reliable testing)"
-    
-    // Skip expensive static analysis tasks for faster execution
-    dependsOn(tasks.compileJava, tasks.compileTestJava)
-    
-    systemProperty("testcontainers.reuse.enable", "true")
-    
-    // Configure test logging based on verbose flag
-    testLogging {
-        events("passed", "skipped", "failed")
-        
-        // Show detailed output if verbose mode is enabled
-        if (project.hasProperty("showOutput") || project.hasProperty("verbose")) {
-            events("passed", "skipped", "failed", "standardOut", "standardError")
-            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-            showStandardStreams = true
-        }
-    }
-    
-    // Don't fail the build if host-based integration tests fail
-    ignoreFailures = true
-    
-    finalizedBy("integrationTestHostSummary")
-}
-
-// Summary for host-based integration tests
-tasks.register("integrationTestHostSummary") {
-    group = "verification"
-    description = "Shows host-based integration test results summary"
-    
-    doLast {
-        println("""
-        |=== Host-based Integration Test Results ===
-        |⚠️  Host-based tests may fail due to cross-platform SASL issues
-        |✅ For reliable testing, use: ./gradlew integrationTestContainer
-        |📋 Container-based tests solve all SASL authentication problems
-        """.trimMargin())
-    }
-}
 
 // Performance tests
 tasks.register<Test>("performanceTest") {
@@ -186,20 +141,45 @@ pmd {
     rulesMinimumPriority.set(2)
 }
 
-// Container-based integration testing - the reliable way to run D-Bus integration tests
-tasks.register<Exec>("integrationTestContainer") {
+// Integration test task for running inside container
+tasks.register<Test>("integrationTestContainer") {
+    useJUnitPlatform {
+        includeTags("integration")
+    }
     group = "verification"
-    description = "Runs integration tests inside a Linux container for comprehensive SASL testing"
+    description = "Runs integration tests inside container (for internal use)"
+    
+    testClassesDirs = tasks.test.get().testClassesDirs
+    classpath = tasks.test.get().classpath
+    
+    // Container-specific JVM settings
+    maxHeapSize = "4g"
+    jvmArgs("-XX:+UseG1GC", "-XX:MaxMetaspaceSize=512m")
+    
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
+}
+
+// Container-based integration testing - the only reliable way to run D-Bus integration tests
+tasks.register<Exec>("integrationTest") {
+    group = "verification"
+    description = "Runs integration tests inside a Linux container (single entry point for all environments)"
     
     // Skip expensive build tasks - only compile what we need
     dependsOn(tasks.compileJava, tasks.compileTestJava)
     
+    // Dynamically detect Gradle version from wrapper properties
+    val gradleVersion = gradle.gradleVersion
+    
     // Build and run the test container in one step
-    commandLine("docker", "build", "-f", "../Dockerfile.test", "-t", "dbus-integration-test", "..")
+    commandLine("docker", "build", "-f", "../Dockerfile.test", "-t", "dbus-integration-test", "--build-arg", "GRADLE_VERSION=$gradleVersion", "..")
     
     doLast {
         println("🐳 Running integration tests inside Linux container...")
-        println("📋 This will test D-Bus SASL authentication in a native Linux environment")
+        println("📋 Single entry point for consistent testing across all environments")
+        println("⚙️  Using Gradle version: $gradleVersion")
         
         // Check if verbose flag is provided
         val showFullOutput = project.hasProperty("showOutput") || project.hasProperty("verbose")
@@ -224,14 +204,21 @@ tasks.register<Exec>("integrationTestContainer") {
             ))
         }
         
+        // Add volume mount to copy test results back
+        val testResultsMount = listOf(
+            "-v", "${project.projectDir}/build/test-results:/app/lib/build/test-results",
+            "-v", "${project.projectDir}/build/reports:/app/lib/build/reports"
+        )
+        
         // Run the container and execute tests
         val result = if (showFullOutput) {
             // Use direct exec with complete output shown
             project.exec {
-                commandLine(listOf("docker", "run", "--rm", 
+                commandLine = listOf("docker", "run", "--rm", 
                             "--name", "dbus-integration-test-run") + 
+                            testResultsMount +
                             containerEnvVars + 
-                            listOf("dbus-integration-test"))
+                            listOf("dbus-integration-test")
                 standardOutput = System.out
                 errorOutput = System.err
                 isIgnoreExitValue = true
@@ -239,10 +226,11 @@ tasks.register<Exec>("integrationTestContainer") {
         } else {
             // Use exec with limited output filtering
             project.exec {
-                commandLine(listOf("docker", "run", "--rm", 
+                commandLine = listOf("docker", "run", "--rm", 
                             "--name", "dbus-integration-test-run") + 
+                            testResultsMount +
                             containerEnvVars + 
-                            listOf("dbus-integration-test"))
+                            listOf("dbus-integration-test")
                 if (showDebugLogs) {
                     standardOutput = System.out
                     errorOutput = System.err
@@ -253,9 +241,11 @@ tasks.register<Exec>("integrationTestContainer") {
         
         println("")
         if (result.exitValue == 0) {
-            println("✅ Container-based integration tests completed successfully!")
+            println("✅ Integration tests completed successfully!")
+            println("📋 Test results available in: build/test-results/integrationTest/")
+            println("📊 Test reports available in: build/reports/tests/integrationTest/")
         } else {
-            println("❌ Container-based integration tests failed with exit code: ${result.exitValue}")
+            println("❌ Integration tests failed with exit code: ${result.exitValue}")
             println("📋 Check the test output above for details")
             throw GradleException("Integration tests failed in container")
         }

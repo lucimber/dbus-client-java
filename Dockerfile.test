@@ -1,8 +1,11 @@
 # Multi-stage Dockerfile for running D-Bus integration tests in a Linux container
 # This solves cross-platform SASL authentication issues by running everything in Linux
 
+# Accept Gradle version as build argument
+ARG GRADLE_VERSION=8.14.2
+
 # Stage 1: Build the Java application
-FROM gradle:8.14.2-jdk17 AS builder
+FROM gradle:${GRADLE_VERSION}-jdk17 AS builder
 
 # Set encoding environment variables for consistent Java compilation
 ENV LANG=en_US.UTF-8
@@ -24,6 +27,9 @@ RUN gradle compileJava compileTestJava \
 # Stage 2: Test execution environment
 FROM ubuntu:22.04
 
+# Accept Gradle version as build argument
+ARG GRADLE_VERSION=8.14.2
+
 # Install required packages and configure locale
 RUN apt-get update && apt-get install -y \
     openjdk-17-jdk-headless \
@@ -31,7 +37,18 @@ RUN apt-get update && apt-get install -y \
     dbus-x11 \
     netcat-openbsd \
     locales \
+    wget \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Gradle dynamically based on version argument
+RUN wget -q https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -O /tmp/gradle.zip \
+    && unzip -q /tmp/gradle.zip -d /opt \
+    && ln -s /opt/gradle-${GRADLE_VERSION} /opt/gradle \
+    && rm /tmp/gradle.zip
+
+# Add Gradle to PATH
+ENV PATH="/opt/gradle/bin:${PATH}"
 
 # Configure UTF-8 locale to fix Java compilation encoding issues
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
@@ -44,15 +61,14 @@ ENV LC_ALL=en_US.UTF-8
 # Create test user with specific UID for consistent EXTERNAL auth
 RUN useradd -u 1000 -m -s /bin/bash testuser
 
-# Copy built application and dependencies from builder stage
-COPY --from=builder /app/lib/build /app/lib/build
-COPY --from=builder /app/gradle /app/gradle
-COPY --from=builder /app/gradlew /app/
-COPY --from=builder /app/gradlew.bat /app/
-COPY --from=builder /app/settings.gradle.kts /app/
-COPY --from=builder /app/lib/build.gradle.kts /app/lib/
-COPY --from=builder /app/lib/src /app/lib/src
-COPY --from=builder /root/.gradle /root/.gradle
+# Copy source code and build files
+COPY . /app/
+
+# Ensure gradle wrapper is executable
+RUN chmod +x /app/gradlew
+
+# Set working directory
+WORKDIR /app
 
 # Create D-Bus configuration for comprehensive testing
 RUN mkdir -p /etc/dbus-1/session.d
@@ -219,7 +235,7 @@ java -cp "lib/build/classes/java/main:lib/build/classes/java/test:$(./gradlew :l
      -Dfile.encoding=UTF-8 \
      com.lucimber.dbus.integration.SaslDebugTest 2>/dev/null || echo "Could not run SASL debug test"
 
-# Run the integration tests 
+# Compile and run the integration tests 
 echo "Running integration tests..."
 cd /app
 export GRADLE_USER_HOME=/root/.gradle
@@ -240,13 +256,16 @@ echo ""
 # Ensure UTF-8 encoding for test execution and JVM
 echo "Starting integration tests with enhanced logging..."
 echo "JAVA_OPTS: $JAVA_OPTS"
-./gradlew integrationTest \
+./gradlew lib:integrationTestContainer \
     -Dfile.encoding=UTF-8 \
     -Dconsole.encoding=UTF-8 \
     -Dlogback.configurationFile=lib/src/test/resources/logback-test.xml \
     -Duser.name=root \
     -Duser.home=/root \
     -Dos.name=Linux \
+    -Djunit.jupiter.execution.parallel.enabled=false \
+    -Djunit.jupiter.conditions.deactivate=* \
+    -Djunit.jupiter.extensions.autodetection.enabled=true \
     --no-daemon --console=plain \
     --info
 
@@ -255,14 +274,14 @@ echo "JAVA_OPTS: $JAVA_OPTS"
 TEST_FAILED=false
 FAILURE_DETAILS=""
 
-if [ -d lib/build/test-results/integrationTest ]; then
-    echo "✓ Test results found: lib/build/test-results/integrationTest"
+if [ -d lib/build/test-results/integrationTestContainer ]; then
+    echo "✓ Test results found: lib/build/test-results/integrationTestContainer"
     
     # Check all XML test result files for failures or errors
     TOTAL_FAILURES=0
     TOTAL_ERRORS=0
     
-    for xml_file in lib/build/test-results/integrationTest/*.xml; do
+    for xml_file in lib/build/test-results/integrationTestContainer/*.xml; do
         if [ -f "$xml_file" ]; then
             # Extract failures and errors from XML
             failures=$(grep -o 'failures="[0-9]*"' "$xml_file" | grep -o '[0-9]*')
@@ -292,10 +311,24 @@ else
 fi
 
 # Also check if HTML report exists for additional context
-if [ -f lib/build/reports/tests/integrationTest/index.html ]; then
-    echo "✓ HTML test report generated: lib/build/reports/tests/integrationTest/index.html"
+if [ -f lib/build/reports/tests/integrationTestContainer/index.html ]; then
+    echo "✓ HTML test report generated: lib/build/reports/tests/integrationTestContainer/index.html"
 else
     echo "⚠️  HTML test report not found"
+fi
+
+# Copy test results to expected directory structure for volume mounts
+echo "Preparing test results for local access..."
+if [ -d lib/build/test-results/integrationTestContainer ]; then
+    mkdir -p lib/build/test-results/integrationTest
+    cp -r lib/build/test-results/integrationTestContainer/* lib/build/test-results/integrationTest/
+    echo "✓ Test results copied to lib/build/test-results/integrationTest/"
+fi
+
+if [ -d lib/build/reports/tests/integrationTestContainer ]; then
+    mkdir -p lib/build/reports/tests/integrationTest
+    cp -r lib/build/reports/tests/integrationTestContainer/* lib/build/reports/tests/integrationTest/
+    echo "✓ Test reports copied to lib/build/reports/tests/integrationTest/"
 fi
 
 # Display test results summary
