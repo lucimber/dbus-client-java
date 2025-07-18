@@ -80,9 +80,25 @@ dbus:
 #### Service Layer Integration
 
 ```java
+import com.lucimber.dbus.connection.Connection;
+import com.lucimber.dbus.connection.AbstractInboundHandler;
+import com.lucimber.dbus.connection.Context;
+import com.lucimber.dbus.message.InboundMessage;
+import com.lucimber.dbus.message.OutboundMethodCall;
+import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusUInt32;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
+
 @Service
 public class SystemMonitoringService {
     private final Connection dbusConnection;
+    private final AtomicLong serialCounter = new AtomicLong(1);
     
     public SystemMonitoringService(Connection dbusConnection) {
         this.dbusConnection = dbusConnection;
@@ -102,6 +118,7 @@ public class SystemMonitoringService {
     public CompletableFuture<SystemInfo> getSystemInfo() {
         OutboundMethodCall call = OutboundMethodCall.Builder
             .create()
+            .withSerial(DBusUInt32.valueOf(serialCounter.getAndIncrement()))
             .withPath(DBusObjectPath.valueOf("/org/freedesktop/hostname1"))
             .withMember(DBusString.valueOf("Get"))
             .withDestination(DBusString.valueOf("org.freedesktop.hostname1"))
@@ -117,6 +134,24 @@ public class SystemMonitoringService {
         // Parse D-Bus response into domain object
         return new SystemInfo(/* ... */);
     }
+    
+    private void subscribeToSystemSignals() {
+        // Implementation for signal subscription
+    }
+    
+    // Custom signal handler
+    private static class SystemSignalHandler extends AbstractInboundHandler {
+        @Override
+        public void handleInboundMessage(Context ctx, InboundMessage msg) {
+            // Handle system signals
+            ctx.propagateInboundMessage(msg);
+        }
+    }
+    
+    // DTO class for system information
+    public static class SystemInfo {
+        // System information fields
+    }
 }
 ```
 
@@ -125,9 +160,24 @@ public class SystemMonitoringService {
 #### Health Check Integration
 
 ```java
+import com.lucimber.dbus.connection.Connection;
+import com.lucimber.dbus.message.InboundMessage;
+import com.lucimber.dbus.message.OutboundMethodCall;
+import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusUInt32;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.stereotype.Component;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+
 @Component
 public class DBusHealthIndicator implements HealthIndicator {
     private final Connection dbusConnection;
+    private final AtomicLong serialCounter = new AtomicLong(1);
     
     public DBusHealthIndicator(Connection dbusConnection) {
         this.dbusConnection = dbusConnection;
@@ -158,12 +208,37 @@ public class DBusHealthIndicator implements HealthIndicator {
                 .build();
         }
     }
+    
+    private OutboundMethodCall createPingCall() {
+        return OutboundMethodCall.Builder
+            .create()
+            .withSerial(DBusUInt32.valueOf(serialCounter.getAndIncrement()))
+            .withPath(DBusObjectPath.valueOf("/org/freedesktop/DBus"))
+            .withMember(DBusString.valueOf("Ping"))
+            .withDestination(DBusString.valueOf("org.freedesktop.DBus"))
+            .withInterface(DBusString.valueOf("org.freedesktop.DBus"))
+            .withReplyExpected(true)
+            .build();
+    }
 }
 ```
 
 #### Metrics Integration
 
 ```java
+import com.lucimber.dbus.connection.AbstractDuplexHandler;
+import com.lucimber.dbus.connection.Context;
+import com.lucimber.dbus.message.InboundMessage;
+import com.lucimber.dbus.message.OutboundMessage;
+import com.lucimber.dbus.message.OutboundMethodCall;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
+import io.micrometer.core.instrument.Timer;
+import org.springframework.stereotype.Component;
+
+import java.util.concurrent.CompletableFuture;
+
 @Component
 public class DBusMetricsHandler extends AbstractDuplexHandler {
     private final MeterRegistry meterRegistry;
@@ -216,6 +291,23 @@ public class DBusMetricsHandler extends AbstractDuplexHandler {
 ### Project Reactor Integration
 
 ```java
+import com.lucimber.dbus.connection.AbstractInboundHandler;
+import com.lucimber.dbus.connection.Connection;
+import com.lucimber.dbus.connection.Context;
+import com.lucimber.dbus.message.InboundMessage;
+import com.lucimber.dbus.message.InboundSignal;
+import com.lucimber.dbus.message.OutboundMethodCall;
+import com.lucimber.dbus.type.DBusString;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
+
+import java.time.Duration;
+import java.util.concurrent.TimeoutException;
+
 @Service
 public class ReactiveDBusService {
     private final Connection dbusConnection;
@@ -231,7 +323,7 @@ public class ReactiveDBusService {
             .subscribeOn(scheduler)
             .timeout(Duration.ofSeconds(30))
             .onErrorMap(TimeoutException.class, 
-                ex -> new DBusTimeoutException("Method call timed out", ex));
+                ex -> new RuntimeException("Method call timed out", ex));
     }
     
     public Flux<InboundSignal> signalStream(String interfaceName) {
@@ -279,6 +371,17 @@ public class ReactiveDBusService {
 ### RxJava Integration
 
 ```java
+import com.lucimber.dbus.connection.Connection;
+import com.lucimber.dbus.message.InboundMessage;
+import com.lucimber.dbus.message.InboundSignal;
+import com.lucimber.dbus.message.OutboundMethodCall;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
+
 @Service
 public class RxDBusService {
     private final Connection dbusConnection;

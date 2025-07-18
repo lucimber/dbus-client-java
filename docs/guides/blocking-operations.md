@@ -70,7 +70,20 @@ applicationTaskExecutor = Executors.newFixedThreadPool(
 Database calls are completely safe and straightforward in D-Bus handlers:
 
 ```java
+import com.lucimber.dbus.connection.AbstractInboundHandler;
+import com.lucimber.dbus.connection.Context;
+import com.lucimber.dbus.message.InboundMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class DatabaseHandler extends AbstractInboundHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseHandler.class);
     private final DataSource dataSource;
     
     public DatabaseHandler(DataSource dataSource) {
@@ -128,7 +141,17 @@ public class DatabaseHandler extends AbstractInboundHandler {
 External API calls are also completely safe:
 
 ```java
+import com.lucimber.dbus.connection.AbstractInboundHandler;
+import com.lucimber.dbus.connection.Context;
+import com.lucimber.dbus.message.InboundMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
 public class ExternalApiHandler extends AbstractInboundHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExternalApiHandler.class);
     private final RestTemplate restTemplate;
     private final String apiBaseUrl;
     
@@ -537,6 +560,19 @@ public class ProcessingResult {
 ### Configuration for Blocking Workloads
 
 ```java
+import com.lucimber.dbus.connection.Connection;
+import com.lucimber.dbus.connection.ConnectionConfig;
+import com.lucimber.dbus.netty.NettyConnection;
+import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
+
+import javax.sql.DataSource;
+import java.time.Duration;
+
 @Configuration
 public class DBusConfiguration {
     
