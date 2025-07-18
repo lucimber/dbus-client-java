@@ -41,3 +41,7 @@ jobs:
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false
+    - name: Run integration tests
+      run: ./gradlew integrationTest
+      env:
+        DOCKER_BUILDKIT: 1
