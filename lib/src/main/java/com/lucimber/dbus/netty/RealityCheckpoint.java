@@ -38,7 +38,9 @@ import org.slf4j.LoggerFactory;
  * <p>This handler serves as the reality checkpoint where messages transition between 
  * the low-level transport layer (Netty) and the high-level application layer (public API).
  * It manages request-response correlation, timeouts, and ensures proper thread isolation
- * by routing messages to the appropriate execution contexts.</p>
+ * by routing messages to the appropriate execution contexts. All inbound messages and
+ * connection events are switched from the Netty EventLoop to the ApplicationTaskExecutor
+ * here, enabling safe blocking operations in user handlers.</p>
  * 
  * <p>Named after the brilliant drum & bass track "Reality Checkpoint" by Logistics,
  * because like that track, this class represents a moment of transition and clarity
@@ -100,7 +102,10 @@ public class RealityCheckpoint extends ChannelDuplexHandler {
       LOGGER.info("{} active with bus name: {}. Ready for DBus interactions.",
               this.getClass().getSimpleName(), (localBusName != null ? localBusName : "unknown"));
       // Client is now fully operational. Application can start making calls / expecting signals.
-      connection.getPipeline().propagateConnectionActive();
+      // Switch to ApplicationTaskExecutor for connection events
+      applicationTaskExecutor.submit(() -> {
+        connection.getPipeline().propagateConnectionActive();
+      });
     } else if (evt == DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED) {
       LOGGER.error("Mandatory bus name acquisition failed. Closing the channel.");
       ctx.close();
@@ -233,10 +238,12 @@ public class RealityCheckpoint extends ChannelDuplexHandler {
     } else if (msg instanceof InboundError error) {
       handleInboundReply(error, error.getReplySerial());
     } else {
-      // Propagate inbound message to the connection's pipeline
-      // so that it will be handled there.
-      LOGGER.debug("Propagating inbound message to the connection's pipeline.");
-      connection.getPipeline().propagateInboundMessage(msg);
+      // Propagate inbound message to the connection's pipeline on ApplicationTaskExecutor
+      // This is the critical thread switch from Netty EventLoop to ApplicationTaskExecutor
+      LOGGER.debug("Propagating inbound message to the connection's pipeline on ApplicationTaskExecutor.");
+      applicationTaskExecutor.submit(() -> {
+        connection.getPipeline().propagateInboundMessage(msg);
+      });
     }
   }
 
@@ -257,11 +264,13 @@ public class RealityCheckpoint extends ChannelDuplexHandler {
     }
 
     // If the inbound message wasn't intercepted above,
-    // we propagate it to the connection's pipeline
+    // we propagate it to the connection's pipeline on ApplicationTaskExecutor
     // so that it will be handled there.
-    LOGGER.debug("Propagating inbound reply to the connection's pipeline,"
+    LOGGER.debug("Propagating inbound reply to the connection's pipeline on ApplicationTaskExecutor,"
             + " since it wasn't intercepted.");
-    connection.getPipeline().propagateInboundMessage(msg);
+    applicationTaskExecutor.submit(() -> {
+      connection.getPipeline().propagateInboundMessage(msg);
+    });
   }
 
   @Override
@@ -275,7 +284,10 @@ public class RealityCheckpoint extends ChannelDuplexHandler {
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
     LOGGER.warn("Channel became inactive. Failing all pending D-Bus calls.");
     failAllPendingCalls(new ClosedChannelException());
-    connection.getPipeline().propagateConnectionInactive();
+    // Switch to ApplicationTaskExecutor for connection events
+    applicationTaskExecutor.submit(() -> {
+      connection.getPipeline().propagateConnectionInactive();
+    });
     super.channelInactive(ctx);
   }
 
