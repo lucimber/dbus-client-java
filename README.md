@@ -30,15 +30,19 @@ This framework is based on a non-blocking I/O framework
 called [Netty](https://netty.io). Therefore, it's an asynchronous
 event-driven network application framework.
 
-The application needs to implement specific handlers
-that will get called by this framework. Those handlers
-must be programmed in a non-blocking fashion.
-Using Future and CompletionStage is a good way to do so.
+The framework features a sophisticated dual-pipeline architecture with strict thread isolation.
+**Handlers can safely perform blocking operations** (database calls, REST APIs, file I/O) as they
+run on dedicated thread pools, not the Netty event loop. The RealityCheckpoint bridge ensures
+proper message routing between the transport and application layers.
 
 The type system of D-Bus is implemented by introducing
 wrappers to the data types of Java.
 This choice makes the framework a bit more robust and
 the use of this framework approachable.
+
+## 🚀 Getting Started
+
+**New to the library?** Start with the [Developer Guide](docs/developer-guide.md) for a structured learning path.
 
 ## Dependencies
 * Java Runtime 17 or higher
@@ -100,11 +104,11 @@ CompletionStage<Void> connectStage = connection.connect();
 This method is intended for simple request-response interactions where no additional
 pipeline-based processing is needed.
 ```
-UInt32 serial = connection.getNextSerial();
+DBusUInt32 serial = connection.getNextSerial();
 OutboundMethodCall msg = OutboundMethodCall.Builder
     .create()
     .withSerial(serial)
-    .withPath(ObjectPath.valueOf("/"))
+    .withPath(DBusObjectPath.valueOf("/"))
     .withMember(DBusString.valueOf("GetManagedObjects"))
     .withDestination(DBusString.valueOf("org.bluez"))
     .withInterface(DBusString.valueOf("org.freedesktop.DBus.ObjectManager"))
@@ -160,7 +164,7 @@ public final class DbusPeerHandler extends AbstractInboundHandler implements Inb
   }
 
   private void respondWithMachineId(Context ctx, InboundMethodCall methodCall) {
-    Signature sig = Signature.valueOf("s");
+    DBusSignature sig = DBusSignature.valueOf("s");
     List<DBusType> payload = new ArrayList<>();
     payload.add(DBusString.valueOf(machineId.toString()));
     
