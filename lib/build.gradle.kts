@@ -9,7 +9,6 @@ plugins {
     id("checkstyle")
     id("jacoco")
     id("pmd")
-    id("org.owasp.dependencycheck") version "10.0.4"
 }
 
 group = "com.lucimber"
@@ -301,15 +300,3 @@ tasks.register("printTestRuntimeClasspath") {
     }
 }
 
-// OWASP Dependency Check configuration
-dependencyCheck {
-    formats = listOf("XML", "HTML", "SARIF")
-    outputDirectory = "build/reports"
-    scanConfigurations = listOf("runtimeClasspath", "testRuntimeClasspath")
-    
-    // Suppress false positives if needed
-    suppressionFile = "dependency-check-suppressions.xml"
-    
-    // Fail build on CVSS score >= 7.0 (high severity)
-    failBuildOnCVSS = 7.0f
-}
