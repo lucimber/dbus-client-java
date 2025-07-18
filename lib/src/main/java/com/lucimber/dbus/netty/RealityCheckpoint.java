@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * connection events are switched from the Netty EventLoop to the ApplicationTaskExecutor
  * here, enabling safe blocking operations in user handlers.</p>
  * 
- * <p>Named after the brilliant drum & bass track "Reality Checkpoint" by Logistics,
+ * <p>Named after the brilliant drum &amp; bass track "Reality Checkpoint" by Logistics,
  * because like that track, this class represents a moment of transition and clarity
  * in the complex flow of D-Bus message processing.</p>
  */
