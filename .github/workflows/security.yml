@@ -23,11 +23,27 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+        cache: 'gradle'
+    
+    - name: Cache OWASP dependency check data
+      uses: actions/cache@v4
+      with:
+        path: ~/.gradle/dependency-check-data
+        key: dependency-check-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts') }}
+        restore-keys: |
+          dependency-check-${{ runner.os }}-
     
     - name: Run dependency vulnerability scan
-      uses: gradle/gradle-build-action@v3
+      uses: actions/setup-gradle@v4
       with:
-        arguments: dependencyCheckAnalyze --info
+        cache-disabled: false
+        gradle-version: wrapper
+    
+    - name: Execute dependency check
+      run: |
+        cd lib
+        ../gradlew dependencyCheckAnalyze --info --continue
+      timeout-minutes: 10
     
     - name: Upload dependency check results
       uses: github/codeql-action/upload-sarif@v3

@@ -26,14 +26,16 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+        cache: 'gradle'
+    - name: Set up Gradle
+      uses: actions/setup-gradle@v4
+      with:
+        cache-disabled: false
+        gradle-version: wrapper
     - name: Build and run tests with detailed output
-      uses: gradle/gradle-build-action@v3
-      with:
-        arguments: build --console=plain --info --stacktrace
+      run: ./gradlew build --console=plain --info --stacktrace
     - name: Generate code coverage report
-      uses: gradle/gradle-build-action@v3
-      with:
-        arguments: jacocoTestReport
+      run: ./gradlew jacocoTestReport
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4
       with:
@@ -41,7 +43,9 @@ jobs:
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false
-    - name: Run integration tests
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Run integration tests with Docker caching
       run: ./gradlew integrationTest
       env:
         DOCKER_BUILDKIT: 1
