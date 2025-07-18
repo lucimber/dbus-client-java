@@ -212,6 +212,7 @@ tasks.register<Exec>("integrationTest") {
         )
         
         // Run the container and execute tests
+        @Suppress("DEPRECATION")
         val result = if (showFullOutput) {
             // Use direct exec with complete output shown
             project.exec {
@@ -301,7 +302,4 @@ dependencyCheck {
     
     // Fail build on CVSS score >= 7.0 (high severity)
     failBuildOnCVSS = 7.0f
-    
-    // Check for updates weekly
-    cveValidForHours = 168 // 7 days
 }
