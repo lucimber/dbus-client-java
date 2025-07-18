@@ -251,52 +251,51 @@ echo "JAVA_OPTS: $JAVA_OPTS"
     --info
 
 # Since integrationTest task has ignoreFailures=true, we need to check actual test results
-# Check if test report exists and parse it for failures
+# Check XML test results for failures - XML is more reliable than HTML parsing
 TEST_FAILED=false
 FAILURE_DETAILS=""
 
-if [ -f lib/build/reports/tests/integrationTest/index.html ]; then
-    echo "✓ Test report generated: lib/build/reports/tests/integrationTest/index.html"
+if [ -d lib/build/test-results/integrationTest ]; then
+    echo "✓ Test results found: lib/build/test-results/integrationTest"
     
-    # Check for test failures in the HTML report
-    if grep -q "failures.*[1-9]" lib/build/reports/tests/integrationTest/index.html; then
-        TEST_FAILED=true
-        
-        # Extract failure count and details
-        FAILURE_COUNT=$(grep -o "failures.*[0-9]" lib/build/reports/tests/integrationTest/index.html | grep -o "[0-9]")
-        echo "⚠️  Found $FAILURE_COUNT test failure(s)"
-        
-        # Try to find specific failed test information
-        if [ -d lib/build/reports/tests/integrationTest/classes ]; then
-            echo ""
-            echo "=== Failed Test Details ==="
-            for html_file in lib/build/reports/tests/integrationTest/classes/*.html; do
-                if [ -f "$html_file" ] && grep -q "failures" "$html_file"; then
-                    # Extract class name from filename
-                    class_name=$(basename "$html_file" .html)
-                    echo "❌ Failed: $class_name"
-                    
-                    # Try to extract failure message from the HTML
-                    if grep -q "testBasicConnectionLifecycle" "$html_file"; then
-                        echo "   Test: testBasicConnectionLifecycle()"
-                        # Extract failure reason if possible
-                        failure_text=$(grep -A 20 "failure" "$html_file" | head -5 | sed 's/<[^>]*>//g' | sed 's/&[^;]*;//g' | grep -v "^$" | head -2)
-                        if [ -n "$failure_text" ]; then
-                            echo "   Reason: $failure_text"
-                        fi
-                    fi
-                fi
-            done
+    # Check all XML test result files for failures or errors
+    TOTAL_FAILURES=0
+    TOTAL_ERRORS=0
+    
+    for xml_file in lib/build/test-results/integrationTest/*.xml; do
+        if [ -f "$xml_file" ]; then
+            # Extract failures and errors from XML
+            failures=$(grep -o 'failures="[0-9]*"' "$xml_file" | grep -o '[0-9]*')
+            errors=$(grep -o 'errors="[0-9]*"' "$xml_file" | grep -o '[0-9]*')
+            
+            if [ -n "$failures" ] && [ "$failures" -gt 0 ]; then
+                TOTAL_FAILURES=$((TOTAL_FAILURES + failures))
+                echo "⚠️  Found $failures failure(s) in $(basename "$xml_file")"
+            fi
+            
+            if [ -n "$errors" ] && [ "$errors" -gt 0 ]; then
+                TOTAL_ERRORS=$((TOTAL_ERRORS + errors))
+                echo "⚠️  Found $errors error(s) in $(basename "$xml_file")"
+            fi
         fi
-    fi
+    done
     
-    # Also check for 0% success rate as additional indicator
-    if grep -q "0%" lib/build/reports/tests/integrationTest/index.html; then
+    if [ "$TOTAL_FAILURES" -gt 0 ] || [ "$TOTAL_ERRORS" -gt 0 ]; then
         TEST_FAILED=true
+        echo "❌ Total failures: $TOTAL_FAILURES, Total errors: $TOTAL_ERRORS"
+    else
+        echo "✅ All tests passed: 0 failures, 0 errors"
     fi
 else
-    echo "❌ Test report not found - tests may have failed to run"
+    echo "❌ Test results directory not found - tests may have failed to run"
     TEST_FAILED=true
+fi
+
+# Also check if HTML report exists for additional context
+if [ -f lib/build/reports/tests/integrationTest/index.html ]; then
+    echo "✓ HTML test report generated: lib/build/reports/tests/integrationTest/index.html"
+else
+    echo "⚠️  HTML test report not found"
 fi
 
 # Display test results summary
