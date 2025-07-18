@@ -136,6 +136,9 @@ public final class ConnectionEvent {
     return sb.toString();
   }
   
+  /**
+   * Builder for creating {@link ConnectionEvent} instances.
+   */
   public static final class Builder {
     private final ConnectionEventType type;
     private ConnectionState oldState;

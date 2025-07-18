@@ -139,10 +139,12 @@ import java.util.function.Predicate;
  * }</pre>
  *
  * <h2>Thread Safety</h2>
+ *
  * <p>This class is thread-safe and can be used in concurrent tests. All methods can be called
  * from multiple threads without external synchronization.
  *
  * <h2>Cleanup</h2>
+ *
  * <p>Always call {@link #close()} when done testing to clean up resources:
  * <pre>{@code
  * @Test
@@ -438,8 +440,8 @@ public class DummyConnection implements Connection {
             .filter(OutboundMethodCall.class::isInstance)
             .map(OutboundMethodCall.class::cast)
             .anyMatch(call ->
-                    call.getInterfaceName().map(DBusString::toString).orElse("").equals(interfaceName) &&
-                            call.getMember().toString().equals(methodName));
+                    call.getInterfaceName().map(DBusString::toString).orElse("").equals(interfaceName)
+                            && call.getMember().toString().equals(methodName));
   }
 
   /**
@@ -454,8 +456,8 @@ public class DummyConnection implements Connection {
             .filter(OutboundMethodCall.class::isInstance)
             .map(OutboundMethodCall.class::cast)
             .filter(call ->
-                    call.getInterfaceName().map(DBusString::toString).orElse("").equals(interfaceName) &&
-                            call.getMember().toString().equals(methodName))
+                    call.getInterfaceName().map(DBusString::toString).orElse("").equals(interfaceName)
+                            && call.getMember().toString().equals(methodName))
             .count();
   }
 
@@ -724,18 +726,22 @@ public class DummyConnection implements Connection {
     private record HandlerEntry(String name, Handler handler) {
 
       @Override
-          public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-            HandlerEntry that = (HandlerEntry) obj;
-            return Objects.equals(name, that.name);
-          }
-
-          @Override
-          public int hashCode() {
-            return Objects.hash(name);
-          }
+      public boolean equals(Object obj) {
+        if (this == obj) {
+          return true;
         }
+        if (obj == null || getClass() != obj.getClass()) {
+          return false;
+        }
+        HandlerEntry that = (HandlerEntry) obj;
+        return Objects.equals(name, that.name);
+      }
+
+      @Override
+      public int hashCode() {
+        return Objects.hash(name);
+      }
+    }
   }
 
   /**

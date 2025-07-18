@@ -67,6 +67,9 @@ public final class InboundMethodReturn extends AbstractReply implements InboundR
     return String.format(s, sender, getSerial(), getReplySerial(), sig);
   }
 
+  /**
+   * Builder for creating {@link InboundMethodReturn} instances.
+   */
   public static class Builder {
     private DBusUInt32 serial;
     private DBusUInt32 replySerial;
