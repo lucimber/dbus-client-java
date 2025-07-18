@@ -82,6 +82,16 @@ tasks.named<Test>("test") {
     finalizedBy(tasks.jacocoTestReport)
 }
 
+// JaCoCo configuration to generate XML reports for Codecov
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+}
+
 
 // Performance tests
 tasks.register<Test>("performanceTest") {
