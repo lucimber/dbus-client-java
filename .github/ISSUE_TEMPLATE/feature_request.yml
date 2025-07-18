@@ -1,0 +1,126 @@
+name: Feature Request
+description: Suggest an idea or enhancement for the D-Bus client
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest a new feature! Please provide as much detail as possible to help us understand your use case and requirements.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem? Please describe the problem you're trying to solve.
+      placeholder: A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see implemented.
+      placeholder: A clear and concise description of what you want to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Describe any alternative solutions or features you've considered.
+      placeholder: A clear and concise description of any alternative solutions or features you've considered.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: What category does this feature request fall into?
+      options:
+        - Connection Management
+        - Message Handling
+        - SASL Authentication
+        - Transport Layer
+        - Performance
+        - Documentation
+        - Developer Experience
+        - API Design
+        - Testing
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority Level
+      description: How important is this feature to you?
+      options:
+        - Low - Nice to have
+        - Medium - Would be helpful
+        - High - Important for my use case
+        - Critical - Blocking my project
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Describe your specific use case and how this feature would help.
+      placeholder: |
+        Example:
+        - I'm building a desktop application that needs to...
+        - This feature would allow me to...
+        - Currently I have to work around this by...
+    validations:
+      required: true
+
+  - type: textarea
+    id: api-design
+    attributes:
+      label: API Design (if applicable)
+      description: If you have ideas about how the API should look, please share them here.
+      placeholder: |
+        ```java
+        // Example API design
+        connection.newFeature()
+            .withOption(value)
+            .execute();
+        ```
+      render: java
+
+  - type: checkboxes
+    id: compatibility
+    attributes:
+      label: Compatibility Requirements
+      description: Please check all that apply
+      options:
+        - label: This feature should maintain backward compatibility
+        - label: This feature can be a breaking change if necessary
+        - label: This feature should work with all transport types (TCP, Unix sockets)
+        - label: This feature should work with all authentication mechanisms
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, or examples about the feature request here.
+      placeholder: Any additional information that might be helpful...
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission Checklist
+      description: Please check the following before submitting
+      options:
+        - label: I have searched for existing feature requests that might be related
+          required: true
+        - label: I have provided all the requested information above
+          required: true
+        - label: I understand this is a feature request, not a bug report
+          required: true
