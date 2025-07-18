@@ -1,4 +1,10 @@
 # A D-Bus Framework for Java based Applications
+
+[![Build Status](https://github.com/lucimber/dbus-client-java/workflows/Java%20CI%20with%20Gradle/badge.svg)](https://github.com/lucimber/dbus-client-java/actions)
+[![CodeQL](https://github.com/lucimber/dbus-client-java/workflows/CodeQL/badge.svg)](https://github.com/lucimber/dbus-client-java/actions)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
+
 This software is a framework that enables a Java based
 application to interact with a D-Bus instance in the role
 of a client. The D-Bus instance can be a system or
