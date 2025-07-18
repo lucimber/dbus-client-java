@@ -2,9 +2,11 @@
 
 The handler architecture is the core extensibility mechanism of the D-Bus client library. This document explains how handlers work, how to create custom handlers, and best practices for handler development.
 
+> **Note**: This document focuses on handler development and usage patterns. For comprehensive coverage of the **dual-pipeline architecture**, **event propagation**, **threading models**, and **AppLogicHandler bridge**, see [pipeline-event-architecture.md](pipeline-event-architecture.md).
+
 ## Handler Overview
 
-Handlers are processing units in the message pipeline that can intercept, modify, or respond to D-Bus messages. The handler architecture is inspired by Netty's pipeline design but adapted specifically for D-Bus message processing patterns.
+Handlers are processing units in the message pipeline that can intercept, modify, or respond to D-Bus messages. The D-Bus client uses a **dual-pipeline architecture** with handlers in both the **public API pipeline** and the **Netty pipeline**, coordinated through sophisticated event propagation and thread isolation mechanisms.
 
 ## Handler Types
 

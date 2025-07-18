@@ -189,23 +189,34 @@ See [transport-strategies.md](transport-strategies.md) for detailed strategy doc
 
 ## Pipeline Architecture
 
-The heart of the library is the handler pipeline, inspired by Netty's design but adapted for D-Bus message processing.
+The heart of the library is the **dual-pipeline architecture**, with both public API and Netty implementation layers having their own sophisticated pipeline systems for message and event processing.
 
-### Handler Types
+### Dual-Pipeline Overview
 
-1. **Inbound Handlers**: Process messages coming from the D-Bus daemon
-2. **Outbound Handlers**: Process messages being sent to the D-Bus daemon
-3. **Duplex Handlers**: Handle both inbound and outbound messages
+1. **Public API Pipeline**: High-level message processing for application logic
+2. **Netty Pipeline**: Low-level protocol handling and transport management
+3. **AppLogicHandler Bridge**: Coordinates between both pipelines with proper thread isolation
+
+### Key Features
+
+- **Thread Safety**: Comprehensive thread isolation and concurrent collections
+- **Event Propagation**: Sophisticated event system with proper translation between layers
+- **Performance**: Optimized for both throughput and latency
+- **Extensibility**: Multiple extension points for custom handlers and events
 
 ### Pipeline Flow
 
 ```
-Inbound Flow:
-Network → Frame Decoder → Message Decoder → User Handlers → Application
-
-Outbound Flow:
-Application → User Handlers → Message Encoder → Frame Encoder → Network
+Public API Pipeline (Application Thread Pool):
+HEAD → User Handlers → TAIL
+ ↕
+AppLogicHandler (Bridge with Thread Switching)
+ ↕
+Netty Pipeline (Event Loop Thread):
+SASL → Protocol → Management → Bridge
 ```
+
+For detailed information about the pipeline architecture, event propagation, threading models, and performance characteristics, see [pipeline-event-architecture.md](pipeline-event-architecture.md).
 
 ### Handler Lifecycle
 

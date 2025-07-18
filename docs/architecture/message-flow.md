@@ -2,15 +2,17 @@
 
 This document details how D-Bus messages flow through the library, from network bytes to application code and back. Understanding this flow is essential for developing custom handlers and troubleshooting integration issues.
 
+> **Note**: This document focuses on the traditional message flow view. For comprehensive coverage of the **dual-pipeline architecture**, **event propagation**, **threading models**, and **performance characteristics**, see [pipeline-event-architecture.md](pipeline-event-architecture.md).
+
 ## Overview
 
-The D-Bus client library processes messages through a multi-layered pipeline that handles:
-- Network-level byte streams
-- D-Bus protocol framing
-- Message parsing and validation
-- Type marshalling/unmarshalling
-- Handler pipeline processing
-- Application-level message delivery
+The D-Bus client library processes messages through a **dual-pipeline architecture** that handles:
+- **Netty Pipeline**: Network-level byte streams, D-Bus protocol framing, SASL authentication
+- **Public API Pipeline**: Message parsing, type marshalling, handler processing
+- **Bridge Layer**: Thread-safe coordination between pipeline layers
+- **Application Layer**: Final message delivery and user code execution
+
+The message flow involves sophisticated coordination between these layers with proper thread isolation and event propagation.
 
 ## Complete Message Flow Diagram
 
