@@ -1,4 +1,8 @@
-name: Release
+name: Release Automation
+
+# Automated release pipeline triggered by version tags
+# Creates GitHub releases with built artifacts and JavaDoc
+# Runs full test suite before release
 
 on:
   push:

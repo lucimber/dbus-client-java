@@ -1,4 +1,8 @@
-name: Security
+name: Security Scanning
+
+# Dependency vulnerability scanning using OWASP Dependency Check
+# Runs on push/PR to main and weekly scheduled scans
+# Results are uploaded to GitHub Security tab
 
 on:
   push:
