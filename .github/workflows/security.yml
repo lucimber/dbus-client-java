@@ -38,7 +38,7 @@ jobs:
           dependency-check-${{ runner.os }}-
     
     - name: Run dependency vulnerability scan
-      uses: actions/setup-gradle@v4
+      uses: gradle/actions/setup-gradle@v4
       with:
         cache-disabled: false
         gradle-version: wrapper

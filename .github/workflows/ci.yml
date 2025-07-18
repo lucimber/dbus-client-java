@@ -31,7 +31,7 @@ jobs:
         distribution: 'temurin'
         cache: 'gradle'
     - name: Set up Gradle
-      uses: actions/setup-gradle@v4
+      uses: gradle/actions/setup-gradle@v4
       with:
         cache-disabled: false
         gradle-version: wrapper
