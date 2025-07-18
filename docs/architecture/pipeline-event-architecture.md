@@ -641,3 +641,9 @@ The architecture's key strengths include:
 5. **Reliability**: Comprehensive error handling and recovery mechanisms
 
 This design enables developers to build robust D-Bus applications while maintaining the flexibility to extend and customize the library for specific use cases.
+
+## Related Documentation
+
+- [Blocking Operations Guide](../guides/blocking-operations.md) - Comprehensive guide for handling database calls, REST APIs, and file I/O in D-Bus handlers
+- [Handler Architecture](handler-architecture.md) - Detailed handler development patterns and best practices
+- [Message Flow Architecture](message-flow.md) - Traditional view of message processing through the library

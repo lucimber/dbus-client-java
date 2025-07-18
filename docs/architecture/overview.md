@@ -218,6 +218,8 @@ SASL → Protocol → Management → Bridge
 
 For detailed information about the pipeline architecture, event propagation, threading models, and performance characteristics, see [pipeline-event-architecture.md](pipeline-event-architecture.md).
 
+For guidance on implementing blocking operations (database calls, REST APIs, file I/O) in D-Bus handlers, see [blocking-operations.md](../guides/blocking-operations.md).
+
 ### Handler Lifecycle
 
 1. **Handler Added**: Handler is added to the pipeline

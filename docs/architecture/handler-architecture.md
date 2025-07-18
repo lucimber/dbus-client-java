@@ -609,3 +609,9 @@ public class StatefulHandler extends AbstractInboundHandler {
 ```
 
 The handler architecture provides a powerful and flexible way to extend the D-Bus client library. By following these patterns and best practices, you can create robust and maintainable message processing logic that integrates seamlessly with the library's core functionality.
+
+## Related Documentation
+
+- [Blocking Operations Guide](../guides/blocking-operations.md) - **Essential reading** for implementing database calls, REST APIs, and file I/O in handlers
+- [Pipeline and Event Architecture](pipeline-event-architecture.md) - Comprehensive coverage of the dual-pipeline system and threading models
+- [Message Flow Architecture](message-flow.md) - Understanding how messages flow through the system
