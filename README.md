@@ -65,28 +65,24 @@ to compile and test the code.
 ```
 
 ### Integration Tests
-For reliable cross-platform D-Bus integration testing:
+For reliable cross-platform D-Bus integration testing (single entry point):
 ```bash
-# Recommended: Container-based testing (works on any platform)
-./test-container.sh
-
-# With verbose output to see detailed test results
-./test-container.sh --verbose
-
-# Alternative: Gradle task
-./gradlew integrationTestContainer
-
-# With verbose output
-./gradlew integrationTestContainer -PshowOutput
-```
-
-For host-based testing (may fail on non-Linux platforms):
-```bash
+# Main integration test command (works on any platform)
 ./gradlew integrationTest
 
-# With verbose output
+# With verbose output to see detailed test results
 ./gradlew integrationTest -PshowOutput
+
+# With debug logs
+./gradlew integrationTest -Pdebug
 ```
+
+**Note:** Integration tests always run in a Linux container to ensure consistent SASL authentication across all platforms. The `integrationTest` task automatically:
+- Sets up a Linux container with D-Bus daemon
+- Copies source code and compiles it inside the container
+- Runs tests with proper SASL authentication
+- Copies test results back to your local project
+
 
 See [docs/testing-guide.md](docs/testing-guide.md) for detailed testing documentation.
 

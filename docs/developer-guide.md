@@ -222,9 +222,22 @@ Test your D-Bus integration effectively.
 
 ### Testing Strategies
 - Unit testing with mocks
-- Integration testing with test containers
+- Integration testing with containerized D-Bus daemon (single entry point)
 - Performance testing
 - Memory testing
+
+### Single Entry Point
+The library provides a single, reliable entry point for integration testing:
+```bash
+./gradlew integrationTest
+```
+
+This command automatically:
+- Sets up a Linux container with D-Bus daemon
+- Copies your source code into the container
+- Compiles and runs tests with proper SASL authentication
+- Copies test results back to your local project structure
+- Works consistently on all platforms (Windows, macOS, Linux)
 
 ### Debugging Tools
 - Connection health checks

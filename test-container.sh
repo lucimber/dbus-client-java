@@ -29,56 +29,42 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-echo "🐳 Building and running D-Bus integration tests in container..."
+echo "🐳 Running D-Bus integration tests via Gradle..."
+echo "📋 This script now uses the single entry point: ./gradlew integrationTest"
 echo ""
 
-# Build the container
-echo "📦 Building Docker container..."
-if [ "$SHOW_BUILD_OUTPUT" = true ]; then
-    docker build -f Dockerfile.test -t dbus-integration-test .
+# Build the Gradle command based on options
+GRADLE_ARGS=("integrationTest")
+
+if [ "$VERBOSE" = true ]; then
+    echo "📊 Verbose mode enabled - showing full test output"
+    GRADLE_ARGS+=("-PshowOutput")
 else
-    docker build -f Dockerfile.test -t dbus-integration-test . --quiet
+    echo "💡 Use -v or --verbose to see detailed test output"
 fi
 
-if [ $? -eq 0 ]; then
-    echo "✅ Container built successfully"
-else
-    echo "❌ Container build failed"
-    exit 1
+if [ "$SHOW_BUILD_OUTPUT" = true ]; then
+    echo "📦 Build output enabled"
+    GRADLE_ARGS+=("-Pdebug")
 fi
 
 echo ""
 echo "🧪 Running integration tests..."
-if [ "$VERBOSE" = true ]; then
-    echo "📊 Verbose mode enabled - showing full test output"
-else
-    echo "💡 Use -v or --verbose to see detailed test output"
-fi
+echo "⚙️  Command: ./gradlew ${GRADLE_ARGS[*]}"
 echo ""
 
-# Run the container and capture output
-if [ "$VERBOSE" = true ]; then
-    docker run --rm --name dbus-integration-test-run dbus-integration-test
-    CONTAINER_EXIT_CODE=$?
-else
-    # Use a temporary file to capture the full output, then filter it
-    TEMP_OUTPUT=$(mktemp)
-    docker run --rm --name dbus-integration-test-run dbus-integration-test > "$TEMP_OUTPUT" 2>&1
-    CONTAINER_EXIT_CODE=$?
-    
-    # Show filtered output with more test details
-    grep -E "(=== D-Bus Integration Test|✓|❌|ERROR|FAILED|BUILD|Test:|Found [0-9]+ test|Running integration tests|testBasic|ConnectionIntegrationTest)" "$TEMP_OUTPUT"
-    
-    # Clean up temp file
-    rm "$TEMP_OUTPUT"
-fi
+# Run the Gradle task
+./gradlew "${GRADLE_ARGS[@]}"
+GRADLE_EXIT_CODE=$?
 
 echo ""
-if [ $CONTAINER_EXIT_CODE -eq 0 ]; then
+if [ $GRADLE_EXIT_CODE -eq 0 ]; then
     echo "✅ Integration tests completed successfully!"
     echo "📋 D-Bus SASL authentication working correctly in Linux container"
+    echo "📊 Test results: lib/build/test-results/integrationTest/"
+    echo "📋 Test reports: lib/build/reports/tests/integrationTest/"
 else
-    echo "❌ Integration tests failed with exit code: $CONTAINER_EXIT_CODE"
+    echo "❌ Integration tests failed with exit code: $GRADLE_EXIT_CODE"
     echo "📋 Check the test output above for details"
 fi
 
@@ -86,4 +72,4 @@ echo ""
 echo "🎯 For more details, see: docs/testing-guide.md"
 echo ""
 
-exit $CONTAINER_EXIT_CODE
+exit $GRADLE_EXIT_CODE
