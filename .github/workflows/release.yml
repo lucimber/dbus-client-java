@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Build project
+      uses: gradle/gradle-build-action@v3
+      with:
+        arguments: build
+    
+    - name: Run tests
+      uses: gradle/gradle-build-action@v3
+      with:
+        arguments: test
+    
+    - name: Run integration tests
+      run: ./gradlew integrationTest
+      env:
+        DOCKER_BUILDKIT: 1
+    
+    - name: Generate JavaDoc
+      uses: gradle/gradle-build-action@v3
+      with:
+        arguments: javadoc
+    
+    - name: Create release archive
+      run: |
+        mkdir -p release
+        cp -r lib/build/libs/*.jar release/
+        cp -r lib/build/docs/javadoc release/
+        cp README.md LICENSE release/
+        tar -czf dbus-client-java-${GITHUB_REF#refs/tags/}.tar.gz -C release .
+    
+    - name: Extract release notes
+      id: extract_notes
+      run: |
+        if [ -f CHANGELOG.md ]; then
+          # Extract section for this version from CHANGELOG.md
+          awk '/^## \[/{if(found) exit; if($0 ~ /\['"${GITHUB_REF#refs/tags/v}"'\]/) found=1; next} found' CHANGELOG.md > release_notes.txt
+        else
+          # Generate basic release notes
+          echo "Release ${GITHUB_REF#refs/tags/}" > release_notes.txt
+          echo "" >> release_notes.txt
+          echo "## Changes" >> release_notes.txt
+          git log --oneline $(git describe --tags --abbrev=0 HEAD^)..HEAD >> release_notes.txt
+        fi
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dbus-client-java-*.tar.gz
+        body_path: release_notes.txt
+        draft: false
+        prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
