@@ -3,6 +3,7 @@
 [![Build Status](https://github.com/lucimber/dbus-client-java/workflows/Continuous%20Integration/badge.svg)](https://github.com/lucimber/dbus-client-java/actions)
 [![CodeQL](https://github.com/lucimber/dbus-client-java/workflows/Code%20Analysis/badge.svg)](https://github.com/lucimber/dbus-client-java/actions)
 [![codecov](https://codecov.io/gh/lucimber/dbus-client-java/branch/main/graph/badge.svg)](https://codecov.io/gh/lucimber/dbus-client-java)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://lucimber.github.io/dbus-client-java/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
 
@@ -16,6 +17,14 @@ A high-performance, asynchronous D-Bus client library for Java applications. Bui
 - **Complete Type System**: All D-Bus types with proper marshalling/unmarshalling
 - **Cross-Platform**: Containerized integration tests for consistent behavior
 - **Production Ready**: Comprehensive testing, monitoring, and error handling
+
+## 📚 Documentation
+
+Complete API documentation is available on GitHub Pages with version support:
+
+- **🔗 [Full Documentation](https://lucimber.github.io/dbus-client-java/)** - Comprehensive guides and API reference
+- **📖 [Latest API](https://lucimber.github.io/dbus-client-java/latest/)** - Current development documentation
+- **🏷️ [Version History](https://lucimber.github.io/dbus-client-java/)** - Documentation for all releases
 
 ## Quick Start
 
