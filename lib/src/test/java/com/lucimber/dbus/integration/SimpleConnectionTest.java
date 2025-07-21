@@ -55,7 +55,7 @@ public class SimpleConnectionTest {
       try {
         connectFuture.get(15, TimeUnit.SECONDS);
         long duration = System.currentTimeMillis() - startTime;
-        LOGGER.info("✅ Connection successful after {}ms", duration);
+        LOGGER.info("Connection successful after {}ms", duration);
         LOGGER.info("Connection state: {}", connection.getState());
         LOGGER.info("Is connected: {}", connection.isConnected());
         
@@ -64,7 +64,7 @@ public class SimpleConnectionTest {
         
       } catch (Exception e) {
         long duration = System.currentTimeMillis() - startTime;
-        LOGGER.error("❌ Connection failed after {}ms", duration);
+        LOGGER.error("Connection failed after {}ms", duration);
         LOGGER.error("Exception: {}: {}", e.getClass().getSimpleName(), e.getMessage());
         if (e.getCause() != null) {
           LOGGER.error("Caused by: {}: {}", e.getCause().getClass().getSimpleName(), e.getCause().getMessage());
@@ -76,7 +76,7 @@ public class SimpleConnectionTest {
       }
       
     } catch (Exception e) {
-      LOGGER.error("❌ Failed to create connection: {}", e.getMessage(), e);
+      LOGGER.error("Failed to create connection: {}", e.getMessage(), e);
     }
     
     LOGGER.info("=== Simple D-Bus Connection Test Complete ===");

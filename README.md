@@ -18,13 +18,13 @@ A high-performance, asynchronous D-Bus client library for Java applications. Bui
 - **Cross-Platform**: Containerized integration tests for consistent behavior
 - **Production Ready**: Comprehensive testing, monitoring, and error handling
 
-## 📚 Documentation
+## Documentation
 
 Complete API documentation is available on GitHub Pages with version support:
 
-- **🔗 [Full Documentation](https://lucimber.github.io/dbus-client-java/)** - Comprehensive guides and API reference
-- **📖 [Latest API](https://lucimber.github.io/dbus-client-java/latest/)** - Current development documentation
-- **🏷️ [Version History](https://lucimber.github.io/dbus-client-java/)** - Documentation for all releases
+- **[Full Documentation](https://lucimber.github.io/dbus-client-java/)** - Comprehensive guides and API reference
+- **[Latest API](https://lucimber.github.io/dbus-client-java/latest/)** - Current development documentation
+- **[Version History](https://lucimber.github.io/dbus-client-java/)** - Documentation for all releases
 
 ## Quick Start
 
