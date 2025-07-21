@@ -157,7 +157,7 @@ class ErrorHandlingIntegrationTest extends DBusIntegrationTestBase {
 
     CompletableFuture<Void> connectFuture = connection.connect().toCompletableFuture();
     
-    assertThrows(ExecutionException.class, () -> {
+    assertThrows(TimeoutException.class, () -> {
       connectFuture.get(5, TimeUnit.SECONDS);
     }, "Connection should timeout and fail");
     
