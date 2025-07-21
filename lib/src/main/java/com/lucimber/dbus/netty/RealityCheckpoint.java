@@ -15,6 +15,9 @@ import com.lucimber.dbus.message.OutboundMessage;
 import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusUInt32;
+import com.lucimber.dbus.util.ErrorRecoveryManager;
+import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreaker;
+import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreakerConfig;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -57,6 +60,8 @@ public class RealityCheckpoint extends ChannelDuplexHandler {
   private final Connection connection;
   private final long methodCallTimeoutMs;
   private ChannelHandlerContext ctx;
+  private final ErrorRecoveryManager errorRecoveryManager;
+  private final CircuitBreaker methodCallCircuitBreaker;
 
   /**
    * Creates a new instance.
@@ -88,6 +93,18 @@ public class RealityCheckpoint extends ChannelDuplexHandler {
     this.connection = Objects.requireNonNull(connection, "connection must not be null");
     this.methodCallTimeoutMs = methodCallTimeoutMs > 0 ? methodCallTimeoutMs : DEFAULT_METHOD_CALL_TIMEOUT_MS;
     pendingMethodCalls = new ConcurrentHashMap<>();
+    
+    // Initialize error recovery components
+    this.errorRecoveryManager = new ErrorRecoveryManager();
+    
+    // Create circuit breaker for method call operations
+    CircuitBreakerConfig cbConfig = CircuitBreakerConfig.builder()
+            .failureThreshold(5)
+            .recoveryTimeout(Duration.ofSeconds(30))
+            .successThreshold(3)
+            .build();
+    this.methodCallCircuitBreaker = errorRecoveryManager.createCircuitBreaker(
+            "method-calls-" + System.identityHashCode(this), cbConfig);
   }
 
   @Override

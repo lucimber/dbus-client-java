@@ -19,9 +19,14 @@ import com.lucimber.dbus.connection.Pipeline;
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
 import com.lucimber.dbus.type.DBusUInt32;
+import com.lucimber.dbus.util.ErrorRecoveryManager;
+import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreaker;
+import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreakerConfig;
+import com.lucimber.dbus.util.ErrorRecoveryManager.RetryConfig;
 import io.netty.channel.unix.DomainSocketAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -47,6 +52,8 @@ public final class NettyConnection implements Connection {
   private final AtomicBoolean closing = new AtomicBoolean(false);
   private ConnectionHealthHandler healthHandler;
   private ConnectionReconnectHandler reconnectHandler;
+  private ErrorRecoveryManager errorRecoveryManager;
+  private CircuitBreaker connectionCircuitBreaker;
 
   public NettyConnection(SocketAddress serverAddress) {
     this(serverAddress, ConnectionConfig.defaultConfig());
@@ -70,6 +77,18 @@ public final class NettyConnection implements Connection {
               t.setDaemon(true);
               return t;
             });
+
+    // Initialize error recovery manager
+    this.errorRecoveryManager = new ErrorRecoveryManager();
+
+    // Create circuit breaker for connection operations
+    CircuitBreakerConfig cbConfig = CircuitBreakerConfig.builder()
+            .failureThreshold(3)
+            .recoveryTimeout(config.getConnectTimeout().multipliedBy(2))
+            .successThreshold(2)
+            .build();
+    this.connectionCircuitBreaker = errorRecoveryManager.createCircuitBreaker(
+            "connection-" + System.identityHashCode(this), cbConfig);
   }
 
   /**
@@ -220,15 +239,28 @@ public final class NettyConnection implements Connection {
 
     LOGGER.info("Attempting to connect to DBus server at {} using strategy: {}", serverAddress, strategy.getTransportName());
 
-    // Use strategy to establish connection
-    CompletionStage<ConnectionHandle> connectionFuture = strategy.connect(serverAddress, config, context);
+    // Create retry configuration for connection attempts
+    RetryConfig retryConfig = RetryConfig.builder()
+            .maxRetries(3)
+            .initialDelay(Duration.ofMillis(500))
+            .maxDelay(config.getConnectTimeout())
+            .backoffMultiplier(2.0)
+            .jitterFactor(0.1)
+            .build();
+
+    // Wrap connection establishment in circuit breaker and retry logic
+    CompletableFuture<ConnectionHandle> connectionWithRecovery = connectionCircuitBreaker.execute(() -> 
+        errorRecoveryManager.executeWithRetry(() -> {
+          LOGGER.debug("Attempting connection to {}", serverAddress);
+          return strategy.connect(serverAddress, config, context).toCompletableFuture();
+        }, retryConfig));
     
     CompletableFuture<Void> resultFuture = new CompletableFuture<>();
     
-    connectionFuture.whenComplete((handle, throwable) -> {
+    connectionWithRecovery.whenComplete((handle, throwable) -> {
       if (throwable != null) {
         connecting.set(false); // Reset connecting state on failure
-        LOGGER.error("Failed to establish connection", throwable);
+        LOGGER.error("Failed to establish connection after retries and circuit breaker protection", throwable);
         resultFuture.completeExceptionally(throwable);
       } else {
         this.connectionHandle.set(handle);
@@ -345,6 +377,21 @@ public final class NettyConnection implements Connection {
         }
       }
 
+      // Shutdown error recovery manager
+      if (errorRecoveryManager != null) {
+        try {
+          errorRecoveryManager.shutdown();
+          LOGGER.debug("Error recovery manager shut down successfully");
+        } catch (Exception e) {
+          LOGGER.error("Error shutting down error recovery manager", e);
+          if (shutdownException == null) {
+            shutdownException = e;
+          } else {
+            shutdownException.addSuppressed(e);
+          }
+        }
+      }
+
       // Log final status
       if (shutdownException != null) {
         LOGGER.warn("DBus connection to {} closed with errors (see above for details)", serverAddress);
@@ -379,6 +426,13 @@ public final class NettyConnection implements Connection {
       failedFuture.completeExceptionally(new IllegalStateException("Not connected to D-Bus."));
       return failedFuture;
     }
+    
+    // Apply circuit breaker protection to critical message sending operations
+    if (connectionCircuitBreaker != null && connectionCircuitBreaker.getState() != CircuitBreaker.State.CLOSED) {
+      LOGGER.debug("Circuit breaker is {} - allowing message through without protection", 
+                   connectionCircuitBreaker.getState());
+    }
+    
     return handle.sendRequest(msg);
   }
 

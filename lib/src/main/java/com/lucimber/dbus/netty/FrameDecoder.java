@@ -16,6 +16,10 @@ import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.DBusStruct;
 import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.type.DBusVariant;
+import com.lucimber.dbus.util.FrameRecoveryManager;
+import com.lucimber.dbus.util.FrameRecoveryManager.CorruptionType;
+import com.lucimber.dbus.util.FrameRecoveryManager.FrameAnalysis;
+import com.lucimber.dbus.util.FrameRecoveryManager.FrameDiagnostic;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -50,6 +54,9 @@ final class FrameDecoder extends ByteToMessageDecoder {
   private Frame frame = new Frame();
   private int offset = 0;
   private DecoderState decoderState = DecoderState.HEADER_PREAMBLE;
+  private boolean frameRecoveryEnabled = true;
+  private int consecutiveCorruptions = 0;
+  private static final int MAX_CONSECUTIVE_CORRUPTIONS = 10;
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
@@ -60,14 +67,16 @@ final class FrameDecoder extends ByteToMessageDecoder {
   @Override
   protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
     while (true) {
-      switch (decoderState) {
-        case HEADER_PREAMBLE:
-          if (in.readableBytes() < HEADER_PREAMBLE_SIZE) {
-            return; // Not enough data yet
-          }
-          decodeHeaderPreamble(in);
-          decoderState = DecoderState.HEADER_FIELDS;
-          break;
+      try {
+        switch (decoderState) {
+          case HEADER_PREAMBLE:
+            if (in.readableBytes() < HEADER_PREAMBLE_SIZE) {
+              return; // Not enough data yet
+            }
+            decodeHeaderPreamble(in);
+            consecutiveCorruptions = 0; // Reset on successful decode
+            decoderState = DecoderState.HEADER_FIELDS;
+            break;
 
         case HEADER_FIELDS:
           if (in.readableBytes() < 4) {
@@ -110,6 +119,10 @@ final class FrameDecoder extends ByteToMessageDecoder {
           break;
         default:
           throw new io.netty.handler.codec.DecoderException("Unknown state");
+      }
+      } catch (CorruptedFrameException | TooLongFrameException e) {
+        handleFrameCorruption(ctx, in, e);
+        return; // Exit decode loop after corruption handling
       }
     }
   }
@@ -225,6 +238,117 @@ final class FrameDecoder extends ByteToMessageDecoder {
     body.order(frame.getByteOrder()); // Set byte order to match frame's byte order
     frame.setBody(body);
     in.skipBytes(bodyLength); // Advance input buffer past the body
+  }
+
+  /**
+   * Handles frame corruption by attempting recovery using FrameRecoveryManager.
+   * 
+   * @param ctx channel handler context
+   * @param in incoming buffer
+   * @param cause the corruption exception
+   */
+  private void handleFrameCorruption(ChannelHandlerContext ctx, ByteBuf in, Exception cause) {
+    consecutiveCorruptions++;
+    
+    LOGGER.warn("Frame corruption detected (consecutive: {}): {}", consecutiveCorruptions, cause.getMessage());
+    
+    // Record corruption statistics
+    CorruptionType corruptionType = classifyCorruption(cause);
+    
+    if (!frameRecoveryEnabled || consecutiveCorruptions > MAX_CONSECUTIVE_CORRUPTIONS) {
+      LOGGER.error("Frame recovery disabled or too many consecutive corruptions, failing channel");
+      FrameRecoveryManager.recordCorruption(corruptionType, false);
+      ctx.fireExceptionCaught(cause);
+      return;
+    }
+    
+    try {
+      boolean recovered = attemptFrameRecovery(in);
+      FrameRecoveryManager.recordCorruption(corruptionType, recovered);
+      
+      if (recovered) {
+        LOGGER.info("Frame recovery successful, continuing decode");
+        // Reset frame state for next attempt
+        resetDecoderState();
+      } else {
+        LOGGER.error("Frame recovery failed, failing channel");
+        ctx.fireExceptionCaught(cause);
+      }
+    } catch (Exception recoveryException) {
+      LOGGER.error("Exception during frame recovery", recoveryException);
+      FrameRecoveryManager.recordCorruption(corruptionType, false);
+      ctx.fireExceptionCaught(cause);
+    }
+  }
+
+  /**
+   * Attempts to recover from frame corruption by finding the next frame boundary.
+   * 
+   * @param in incoming buffer
+   * @return true if recovery was successful
+   */
+  private boolean attemptFrameRecovery(ByteBuf in) {
+    if (in.readableBytes() < 16) { // Need minimum frame size for recovery
+      return false;
+    }
+    
+    // Convert ByteBuf to ByteBuffer for FrameRecoveryManager
+    ByteBuffer nioBuffer = in.nioBuffer(in.readerIndex(), in.readableBytes());
+    
+    // Create diagnostic information for logging
+    FrameDiagnostic diagnostic = FrameRecoveryManager.createDiagnostic(nioBuffer, 64);
+    LOGGER.debug("Frame corruption diagnostic:\n{}", diagnostic);
+    
+    // Try to find next frame boundary
+    int maxScanBytes = Math.min(in.readableBytes(), 1024); // Limit scan to prevent excessive processing
+    int nextBoundary = FrameRecoveryManager.findNextFrameBoundary(nioBuffer, maxScanBytes);
+    
+    if (nextBoundary > 0) {
+      LOGGER.info("Found potential frame boundary at offset {}, skipping {} corrupted bytes", 
+                  nextBoundary, nextBoundary);
+      in.skipBytes(nextBoundary);
+      return true;
+    } else {
+      // No frame boundary found, skip a small amount to avoid infinite loop
+      int skipBytes = Math.min(4, in.readableBytes());
+      LOGGER.debug("No frame boundary found, skipping {} bytes", skipBytes);
+      in.skipBytes(skipBytes);
+      return false;
+    }
+  }
+
+  /**
+   * Classifies the type of frame corruption based on the exception.
+   * 
+   * @param cause the exception that caused the corruption
+   * @return the corruption type
+   */
+  private CorruptionType classifyCorruption(Exception cause) {
+    if (cause instanceof TooLongFrameException) {
+      return CorruptionType.FRAME_TOO_LARGE;
+    } else if (cause instanceof CorruptedFrameException) {
+      String message = cause.getMessage().toLowerCase();
+      if (message.contains("invalid") && message.contains("length")) {
+        return CorruptionType.INVALID_LENGTH;
+      } else if (message.contains("byte order") || message.contains("endian")) {
+        return CorruptionType.INVALID_ENDIAN_FLAG;
+      } else if (message.contains("protocol")) {
+        return CorruptionType.INVALID_PROTOCOL_VERSION;
+      } else {
+        return CorruptionType.PARSE_EXCEPTION;
+      }
+    } else {
+      return CorruptionType.PARSE_EXCEPTION;
+    }
+  }
+
+  /**
+   * Resets the decoder state for attempting to decode the next frame.
+   */
+  private void resetDecoderState() {
+    frame = new Frame();
+    offset = 0;
+    decoderState = DecoderState.HEADER_PREAMBLE;
   }
 
   private enum DecoderState {
