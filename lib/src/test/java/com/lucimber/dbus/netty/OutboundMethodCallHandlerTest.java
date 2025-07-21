@@ -23,73 +23,73 @@ final class OutboundMethodCallHandlerTest {
 
   @Test
   void encodeSuccessfully() {
-    OutboundMessageEncoder handler = new OutboundMessageEncoder();
-    EmbeddedChannel channel = new EmbeddedChannel(handler);
+  OutboundMessageEncoder handler = new OutboundMessageEncoder();
+  EmbeddedChannel channel = new EmbeddedChannel(handler);
 
-    DBusUInt32 serial = DBusUInt32.valueOf(1);
-    DBusObjectPath path = DBusObjectPath.valueOf("/unit_test");
-    DBusString member = DBusString.valueOf("UnitTest");
-    boolean replyExpected = true;
-    DBusString dst = DBusString.valueOf("io.lucimber.test.destination");
-    DBusString iface = DBusString.valueOf("io.lucimber.test");
-    DBusSignature sig = DBusSignature.valueOf("s");
-    List<DBusType> payload = new ArrayList<>();
-    payload.add(DBusString.valueOf("testArg"));
-    OutboundMethodCall methodCall = OutboundMethodCall.Builder
-            .create()
-            .withSerial(serial)
-            .withPath(path)
-            .withMember(member)
-            .withReplyExpected(replyExpected)
-            .withDestination(dst)
-            .withInterface(iface)
-            .withBody(sig, payload)
-            .build();
+  DBusUInt32 serial = DBusUInt32.valueOf(1);
+  DBusObjectPath path = DBusObjectPath.valueOf("/unit_test");
+  DBusString member = DBusString.valueOf("UnitTest");
+  boolean replyExpected = true;
+  DBusString dst = DBusString.valueOf("io.lucimber.test.destination");
+  DBusString iface = DBusString.valueOf("io.lucimber.test");
+  DBusSignature sig = DBusSignature.valueOf("s");
+  List<DBusType> payload = new ArrayList<>();
+  payload.add(DBusString.valueOf("testArg"));
+  OutboundMethodCall methodCall = OutboundMethodCall.Builder
+      .create()
+      .withSerial(serial)
+      .withPath(path)
+      .withMember(member)
+      .withReplyExpected(replyExpected)
+      .withDestination(dst)
+      .withInterface(iface)
+      .withBody(sig, payload)
+      .build();
 
-    assertTrue(channel.writeOutbound(methodCall));
-    assertTrue(channel.finish());
-    Frame frame = channel.readOutbound();
+  assertTrue(channel.writeOutbound(methodCall));
+  assertTrue(channel.finish());
+  Frame frame = channel.readOutbound();
 
-    Assertions.assertEquals(ByteOrder.BIG_ENDIAN, frame.getByteOrder(), "Byte order");
-    Assertions.assertEquals(MessageType.METHOD_CALL, frame.getType(), "Message type");
-    assertTrue(frame.getFlags().isEmpty());
-    assertEquals(1, frame.getProtocolVersion(), "Protocol version");
-    int bodyLength = 12;
-    assertEquals(bodyLength, frame.getBody().remaining(), "Body length");
-    assertEquals(serial, frame.getSerial(), "Serial number");
+  Assertions.assertEquals(ByteOrder.BIG_ENDIAN, frame.getByteOrder(), "Byte order");
+  Assertions.assertEquals(MessageType.METHOD_CALL, frame.getType(), "Message type");
+  assertTrue(frame.getFlags().isEmpty());
+  assertEquals(1, frame.getProtocolVersion(), "Protocol version");
+  int bodyLength = 12;
+  assertEquals(bodyLength, frame.getBody().remaining(), "Body length");
+  assertEquals(serial, frame.getSerial(), "Serial number");
   }
 
   @Test
   void encodeHelloSuccessfully() {
-    OutboundMessageEncoder handler = new OutboundMessageEncoder();
-    EmbeddedChannel channel = new EmbeddedChannel(handler);
+  OutboundMessageEncoder handler = new OutboundMessageEncoder();
+  EmbeddedChannel channel = new EmbeddedChannel(handler);
 
 
-    DBusUInt32 serial = DBusUInt32.valueOf(1);
-    DBusObjectPath path = DBusObjectPath.valueOf("/org/freedesktop/DBus");
+  DBusUInt32 serial = DBusUInt32.valueOf(1);
+  DBusObjectPath path = DBusObjectPath.valueOf("/org/freedesktop/DBus");
 
-    DBusString member = DBusString.valueOf("Hello");
-    DBusString dst = DBusString.valueOf("org.freedesktop.DBus");
-    DBusString iface = DBusString.valueOf("org.freedesktop.DBus");
-    OutboundMethodCall methodCall = OutboundMethodCall.Builder
-            .create()
-            .withSerial(serial)
-            .withPath(path)
-            .withMember(member)
-            .withDestination(dst)
-            .withInterface(iface)
-            .build();
+  DBusString member = DBusString.valueOf("Hello");
+  DBusString dst = DBusString.valueOf("org.freedesktop.DBus");
+  DBusString iface = DBusString.valueOf("org.freedesktop.DBus");
+  OutboundMethodCall methodCall = OutboundMethodCall.Builder
+      .create()
+      .withSerial(serial)
+      .withPath(path)
+      .withMember(member)
+      .withDestination(dst)
+      .withInterface(iface)
+      .build();
 
-    assertTrue(channel.writeOutbound(methodCall));
-    assertTrue(channel.finish());
-    Frame frame = channel.readOutbound();
+  assertTrue(channel.writeOutbound(methodCall));
+  assertTrue(channel.finish());
+  Frame frame = channel.readOutbound();
 
-    assertEquals(ByteOrder.BIG_ENDIAN, frame.getByteOrder(), "Byte order");
-    Assertions.assertEquals(MessageType.METHOD_CALL, frame.getType(), "Message type");
-    assertTrue(frame.getFlags().isEmpty());
-    assertEquals(1, frame.getProtocolVersion(), "Protocol version");
-    int bodyLength = 0;
-    assertEquals(bodyLength, frame.getBody().remaining(), "Body length");
-    assertEquals(serial, frame.getSerial(), "Serial number");
+  assertEquals(ByteOrder.BIG_ENDIAN, frame.getByteOrder(), "Byte order");
+  Assertions.assertEquals(MessageType.METHOD_CALL, frame.getType(), "Message type");
+  assertTrue(frame.getFlags().isEmpty());
+  assertEquals(1, frame.getProtocolVersion(), "Protocol version");
+  int bodyLength = 0;
+  assertEquals(bodyLength, frame.getBody().remaining(), "Body length");
+  assertEquals(serial, frame.getSerial(), "Serial number");
   }
 }

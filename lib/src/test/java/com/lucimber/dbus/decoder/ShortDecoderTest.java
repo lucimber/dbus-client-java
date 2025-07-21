@@ -22,16 +22,16 @@ final class ShortDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeSignedShort(ByteOrder byteOrder) {
-    ByteBuffer buffer = ByteBuffer.allocate(2).order(byteOrder);
-    short value = (short) 0x8000; // -32768
-    buffer.putShort(value);
-    buffer.flip();
+  ByteBuffer buffer = ByteBuffer.allocate(2).order(byteOrder);
+  short value = (short) 0x8000; // -32768
+  buffer.putShort(value);
+  buffer.flip();
 
-    Int16Decoder decoder = new Int16Decoder();
-    DecoderResult<DBusInt16> result = decoder.decode(buffer, 0);
+  Int16Decoder decoder = new Int16Decoder();
+  DecoderResult<DBusInt16> result = decoder.decode(buffer, 0);
 
-    assertEquals(2, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
-    assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    assertEquals(value, result.getValue().getDelegate());
+  assertEquals(2, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+  assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
+  assertEquals(value, result.getValue().getDelegate());
   }
 }

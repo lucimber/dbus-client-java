@@ -29,7 +29,7 @@ final class EntryDecoderTest {
   private static final String VALID_BYTE_VARIANT = "{yv}";
 
   private static Stream<Arguments> createInvalidKeySignatures() {
-    return Stream.of(
+  return Stream.of(
           Arguments.of(ByteOrder.BIG_ENDIAN, INVALID_KEY_ARRAY),
           Arguments.of(ByteOrder.BIG_ENDIAN, INVALID_KEY_DICT_ENTRY),
           Arguments.of(ByteOrder.BIG_ENDIAN, INVALID_KEY_STRUCT),
@@ -38,48 +38,48 @@ final class EntryDecoderTest {
           Arguments.of(ByteOrder.LITTLE_ENDIAN, INVALID_KEY_DICT_ENTRY),
           Arguments.of(ByteOrder.LITTLE_ENDIAN, INVALID_KEY_STRUCT),
           Arguments.of(ByteOrder.LITTLE_ENDIAN, INVALID_KEY_VARIANT)
-    );
+  );
   }
 
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeDictEntry(ByteOrder byteOrder) throws DecoderException, SignatureException {
-    DBusSignature signature = DBusSignature.valueOf(VALID_BYTE_VARIANT);
-    String variantSignature = "i";
-    byte[] sigBytes = variantSignature.getBytes(StandardCharsets.UTF_8);
+  DBusSignature signature = DBusSignature.valueOf(VALID_BYTE_VARIANT);
+  String variantSignature = "i";
+  byte[] sigBytes = variantSignature.getBytes(StandardCharsets.UTF_8);
 
-    int entrySize = 1 + 1 + sigBytes.length + 1 + 4;
-    ByteBuffer buffer = ByteBuffer.allocate(entrySize).order(byteOrder);
+  int entrySize = 1 + 1 + sigBytes.length + 1 + 4;
+  ByteBuffer buffer = ByteBuffer.allocate(entrySize).order(byteOrder);
 
-    buffer.put((byte) 0x7F);                     // key: BYTE
-    buffer.put((byte) sigBytes.length);         // signature length
-    buffer.put(sigBytes);                       // signature "i"
-    buffer.put((byte) 0x00);                    // NUL byte
-    buffer.putInt(Integer.MAX_VALUE); // INT32 value
+  buffer.put((byte) 0x7F);                     // key: BYTE
+  buffer.put((byte) sigBytes.length);         // signature length
+  buffer.put(sigBytes);                       // signature "i"
+  buffer.put((byte) 0x00);                    // NUL byte
+  buffer.putInt(Integer.MAX_VALUE); // INT32 value
 
-    buffer.flip();
+  buffer.flip();
 
-    DictEntryDecoder<DBusByte, DBusVariant> decoder = new DictEntryDecoder<>(signature);
-    DecoderResult<DBusDictEntry<DBusByte, DBusVariant>> result = decoder.decode(buffer, 0);
+  DictEntryDecoder<DBusByte, DBusVariant> decoder = new DictEntryDecoder<>(signature);
+  DecoderResult<DBusDictEntry<DBusByte, DBusVariant>> result = decoder.decode(buffer, 0);
 
-    assertEquals(buffer.limit(), result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
-    assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
+  assertEquals(buffer.limit(), result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+  assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
 
-    DBusDictEntry<DBusByte, DBusVariant> entry = result.getValue();
-    assertEquals(Byte.MAX_VALUE, entry.getKey().getDelegate());
-    DBusInt32 int32 = (DBusInt32) entry.getValue().getDelegate();
-    assertEquals(Integer.MAX_VALUE, int32.getDelegate());
+  DBusDictEntry<DBusByte, DBusVariant> entry = result.getValue();
+  assertEquals(Byte.MAX_VALUE, entry.getKey().getDelegate());
+  DBusInt32 int32 = (DBusInt32) entry.getValue().getDelegate();
+  assertEquals(Integer.MAX_VALUE, int32.getDelegate());
   }
 
   @ParameterizedTest
   @MethodSource("createInvalidKeySignatures")
   void failDueToInvalidKey(ByteOrder byteOrder, String rawSignature) throws SignatureException {
-    DBusSignature signature = DBusSignature.valueOf(rawSignature);
-    ByteBuffer buffer = ByteBuffer.allocate(0).order(byteOrder);
+  DBusSignature signature = DBusSignature.valueOf(rawSignature);
+  ByteBuffer buffer = ByteBuffer.allocate(0).order(byteOrder);
 
-    assertThrows(DecoderException.class, () -> {
+  assertThrows(DecoderException.class, () -> {
       DictEntryDecoder<DBusByte, DBusVariant> decoder = new DictEntryDecoder<>(signature);
       decoder.decode(buffer, 0);
-    });
+  });
   }
 }

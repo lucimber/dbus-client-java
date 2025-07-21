@@ -43,140 +43,140 @@ class ConnectionIntegrationTest extends DBusIntegrationTestBase {
 
   @Test
   void testBasicConnectionLifecycle() throws Exception {
-    LOGGER.info("D-Bus host: {}, port: {}", getDBusHost(), getDBusPort());
-    LOGGER.info("Operating system: {}", System.getProperty("os.name"));
-    LOGGER.info("Running in container: {}", isRunningInContainer());
-    LOGGER.info("Should prefer Unix socket: {}", shouldPreferUnixSocket());
-    LOGGER.info("D-Bus session bus address: {}", System.getenv("DBUS_SESSION_BUS_ADDRESS"));
-    
-    ConnectionConfig config = ConnectionConfig.builder()
-        .withConnectTimeout(Duration.ofSeconds(30))  // Increased timeout
-        .build();
-    
-    Connection connection = null;
-    Exception lastException = null;
-    
-    // Try TCP connection first when in container mode (skip Unix socket for now)
-    // This is a temporary workaround to isolate the connection issue
-    if (isRunningInContainer()) {
+  LOGGER.info("D-Bus host: {}, port: {}", getDBusHost(), getDBusPort());
+  LOGGER.info("Operating system: {}", System.getProperty("os.name"));
+  LOGGER.info("Running in container: {}", isRunningInContainer());
+  LOGGER.info("Should prefer Unix socket: {}", shouldPreferUnixSocket());
+  LOGGER.info("D-Bus session bus address: {}", System.getenv("DBUS_SESSION_BUS_ADDRESS"));
+  
+  ConnectionConfig config = ConnectionConfig.builder()
+    .withConnectTimeout(Duration.ofSeconds(30))  // Increased timeout
+    .build();
+  
+  Connection connection = null;
+  Exception lastException = null;
+  
+  // Try TCP connection first when in container mode (skip Unix socket for now)
+  // This is a temporary workaround to isolate the connection issue
+  if (isRunningInContainer()) {
       LOGGER.info("Running in container mode - trying TCP connection first");
       // Skip Unix socket for now
-    } else if (shouldPreferUnixSocket()) {
+  } else if (shouldPreferUnixSocket()) {
       try {
-        LOGGER.info("Attempting Unix socket connection to D-Bus daemon");
-        connection = new NettyConnection(
-            new DomainSocketAddress("/tmp/dbus-test-socket"),
-            config
-        );
+    LOGGER.info("Attempting Unix socket connection to D-Bus daemon");
+    connection = new NettyConnection(
+      new DomainSocketAddress("/tmp/dbus-test-socket"),
+      config
+    );
 
-        CompletableFuture<Void> connectFuture = connection.connect().toCompletableFuture();
-        connectFuture.get(DEFAULT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
-        
-        assertTrue(connection.isConnected());
-        assertEquals(ConnectionState.CONNECTED, connection.getState());
-        
-        LOGGER.info("✓ Successfully connected via Unix socket with EXTERNAL authentication");
-        
+    CompletableFuture<Void> connectFuture = connection.connect().toCompletableFuture();
+    connectFuture.get(DEFAULT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+    
+    assertTrue(connection.isConnected());
+    assertEquals(ConnectionState.CONNECTED, connection.getState());
+    
+    LOGGER.info("✓ Successfully connected via Unix socket with EXTERNAL authentication");
+    
       } catch (Exception e) {
-        lastException = e;
-        LOGGER.error("Unix socket connection failed: {}", e.getMessage(), e);
-        
-        if (connection != null) {
+    lastException = e;
+    LOGGER.error("Unix socket connection failed: {}", e.getMessage(), e);
+    
+    if (connection != null) {
           try {
-            connection.close();
+      connection.close();
           } catch (Exception closeException) {
-            LOGGER.debug("Error closing failed connection", closeException);
+      LOGGER.debug("Error closing failed connection", closeException);
           }
           connection = null;
-        }
-      }
     }
-    
-    // Try TCP connection if Unix socket failed or not preferred
-    if (connection == null) {
+      }
+  }
+  
+  // Try TCP connection if Unix socket failed or not preferred
+  if (connection == null) {
       try {
-        String host = getDBusHost();
-        int port = getDBusPort();
-        LOGGER.info("Attempting TCP connection to D-Bus daemon at {}:{}", host, port);
-        
-        // Test basic TCP connectivity first
-        try (java.net.Socket testSocket = new java.net.Socket()) {
+    String host = getDBusHost();
+    int port = getDBusPort();
+    LOGGER.info("Attempting TCP connection to D-Bus daemon at {}:{}", host, port);
+    
+    // Test basic TCP connectivity first
+    try (java.net.Socket testSocket = new java.net.Socket()) {
           testSocket.connect(new java.net.InetSocketAddress(host, port), 5000);
           LOGGER.info("✓ Basic TCP socket connection successful");
-        } catch (Exception e) {
+    } catch (Exception e) {
           LOGGER.error("Basic TCP socket connection failed: {}", e.getMessage());
           throw e;
-        }
-        
-        connection = new NettyConnection(
-            new InetSocketAddress(host, port),
-            config
-        );
+    }
+    
+    connection = new NettyConnection(
+      new InetSocketAddress(host, port),
+      config
+    );
 
-        LOGGER.info("Starting D-Bus connection handshake...");
-        CompletableFuture<Void> connectFuture = connection.connect().toCompletableFuture();
-        connectFuture.get(DEFAULT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
-        
-        assertTrue(connection.isConnected());
-        assertEquals(ConnectionState.CONNECTED, connection.getState());
-        
-        LOGGER.info("✓ Successfully connected via TCP");
-        
+    LOGGER.info("Starting D-Bus connection handshake...");
+    CompletableFuture<Void> connectFuture = connection.connect().toCompletableFuture();
+    connectFuture.get(DEFAULT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+    
+    assertTrue(connection.isConnected());
+    assertEquals(ConnectionState.CONNECTED, connection.getState());
+    
+    LOGGER.info("✓ Successfully connected via TCP");
+    
       } catch (Exception e) {
-        lastException = e;
-        LOGGER.error("TCP connection failed: {}", e.getMessage(), e);
-        
-        if (connection != null) {
+    lastException = e;
+    LOGGER.error("TCP connection failed: {}", e.getMessage(), e);
+    
+    if (connection != null) {
           try {
-            connection.close();
+      connection.close();
           } catch (Exception closeException) {
-            LOGGER.debug("Error closing failed connection", closeException);
+      LOGGER.debug("Error closing failed connection", closeException);
           }
           connection = null;
-        }
-      }
     }
-    
-    // If all connection attempts failed, throw an assertion error
-    if (connection == null && lastException != null) {
+      }
+  }
+  
+  // If all connection attempts failed, throw an assertion error
+  if (connection == null && lastException != null) {
       throw new AssertionError("All connection attempts failed. Last error: " + lastException.getMessage(), lastException);
-    }
-    
-    // Clean up
-    if (connection != null) {
+  }
+  
+  // Clean up
+  if (connection != null) {
       try {
-        connection.close();
-        LOGGER.info("✓ Connection closed successfully");
+    connection.close();
+    LOGGER.info("✓ Connection closed successfully");
       } finally {
-        // Ensure connection is closed
+    // Ensure connection is closed
       }
-    }
+  }
   }
 
   //@Test
   void testConnectionWithHealthMonitoring() throws Exception {
-    ConnectionConfig config = ConnectionConfig.builder()
-        .withHealthCheckEnabled(true)
-        .withHealthCheckInterval(Duration.ofSeconds(2))
-        .withHealthCheckTimeout(Duration.ofSeconds(1))
-        .build();
+  ConnectionConfig config = ConnectionConfig.builder()
+    .withHealthCheckEnabled(true)
+    .withHealthCheckInterval(Duration.ofSeconds(2))
+    .withHealthCheckTimeout(Duration.ofSeconds(1))
+    .build();
 
-    Connection connection = new NettyConnection(
-        new InetSocketAddress(getDBusHost(), getDBusPort()),
-        config
-    );
+  Connection connection = new NettyConnection(
+    new InetSocketAddress(getDBusHost(), getDBusPort()),
+    config
+  );
 
-    CountDownLatch healthCheckLatch = new CountDownLatch(1);
-    AtomicReference<ConnectionEvent> healthEvent = new AtomicReference<>();
+  CountDownLatch healthCheckLatch = new CountDownLatch(1);
+  AtomicReference<ConnectionEvent> healthEvent = new AtomicReference<>();
 
-    ConnectionEventListener listener = (conn, event) -> {
+  ConnectionEventListener listener = (conn, event) -> {
       if (event.getType() == ConnectionEventType.HEALTH_CHECK_SUCCESS) {
-        healthEvent.set(event);
-        healthCheckLatch.countDown();
+    healthEvent.set(event);
+    healthCheckLatch.countDown();
       }
-    };
+  };
 
-    try {
+  try {
       connection.addConnectionEventListener(listener);
 
       // Connect
@@ -186,19 +186,19 @@ class ConnectionIntegrationTest extends DBusIntegrationTestBase {
       assertTrue(healthCheckLatch.await(10, TimeUnit.SECONDS), "Health check should succeed");
       assertNotNull(healthEvent.get());
 
-    } finally {
+  } finally {
       connection.close();
-    }
+  }
   }
 
   //@Test
   void testDBusMethodCall() throws Exception {
-    Connection connection = new NettyConnection(
-        new InetSocketAddress(getDBusHost(), getDBusPort()),
-        ConnectionConfig.defaultConfig()
-    );
+  Connection connection = new NettyConnection(
+    new InetSocketAddress(getDBusHost(), getDBusPort()),
+    ConnectionConfig.defaultConfig()
+  );
 
-    try {
+  try {
       // Connect
       connection.connect().toCompletableFuture().get(DEFAULT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 
@@ -220,36 +220,36 @@ class ConnectionIntegrationTest extends DBusIntegrationTestBase {
       assertNotNull(response);
       assertNotNull(response.getSerial());
 
-    } finally {
+  } finally {
       connection.close();
-    }
+  }
   }
 
   //@Test
   void testConnectionReconnection() throws Exception {
-    ConnectionConfig config = ConnectionConfig.builder()
-        .withAutoReconnectEnabled(true)
-        .withReconnectInitialDelay(Duration.ofMillis(100))
-        .withReconnectMaxDelay(Duration.ofSeconds(2))
-        .withMaxReconnectAttempts(3)
-        .build();
+  ConnectionConfig config = ConnectionConfig.builder()
+    .withAutoReconnectEnabled(true)
+    .withReconnectInitialDelay(Duration.ofMillis(100))
+    .withReconnectMaxDelay(Duration.ofSeconds(2))
+    .withMaxReconnectAttempts(3)
+    .build();
 
-    Connection connection = new NettyConnection(
-        new InetSocketAddress(getDBusHost(), getDBusPort()),
-        config
-    );
+  Connection connection = new NettyConnection(
+    new InetSocketAddress(getDBusHost(), getDBusPort()),
+    config
+  );
 
-    CountDownLatch reconnectLatch = new CountDownLatch(1);
-    AtomicReference<ConnectionEvent> reconnectEvent = new AtomicReference<>();
+  CountDownLatch reconnectLatch = new CountDownLatch(1);
+  AtomicReference<ConnectionEvent> reconnectEvent = new AtomicReference<>();
 
-    ConnectionEventListener listener = (conn, event) -> {
+  ConnectionEventListener listener = (conn, event) -> {
       if (event.getType() == ConnectionEventType.RECONNECTION_ATTEMPT) {
-        reconnectEvent.set(event);
-        reconnectLatch.countDown();
+    reconnectEvent.set(event);
+    reconnectLatch.countDown();
       }
-    };
+  };
 
-    try {
+  try {
       connection.addConnectionEventListener(listener);
 
       // Connect initially
@@ -261,25 +261,25 @@ class ConnectionIntegrationTest extends DBusIntegrationTestBase {
       // For now, we just verify reconnection configuration is working
       assertEquals(0, connection.getReconnectAttemptCount());
 
-    } finally {
+  } finally {
       connection.close();
-    }
+  }
   }
 
   //@Test
   void testConcurrentConnections() throws Exception {
-    int connectionCount = 5;
-    Connection[] connections = new Connection[connectionCount];
-    CompletableFuture<Void>[] connectFutures = new CompletableFuture[connectionCount];
+  int connectionCount = 5;
+  Connection[] connections = new Connection[connectionCount];
+  CompletableFuture<Void>[] connectFutures = new CompletableFuture[connectionCount];
 
-    try {
+  try {
       // Create multiple connections
       for (int i = 0; i < connectionCount; i++) {
-        connections[i] = new NettyConnection(
-            new InetSocketAddress(getDBusHost(), getDBusPort()),
-            ConnectionConfig.defaultConfig()
-        );
-        connectFutures[i] = connections[i].connect().toCompletableFuture();
+    connections[i] = new NettyConnection(
+      new InetSocketAddress(getDBusHost(), getDBusPort()),
+      ConnectionConfig.defaultConfig()
+    );
+    connectFutures[i] = connections[i].connect().toCompletableFuture();
       }
 
       // Wait for all connections to establish
@@ -288,33 +288,33 @@ class ConnectionIntegrationTest extends DBusIntegrationTestBase {
 
       // Verify all connections are established
       for (Connection connection : connections) {
-        assertTrue(connection.isConnected());
+    assertTrue(connection.isConnected());
       }
 
-    } finally {
+  } finally {
       // Close all connections
       for (Connection connection : connections) {
-        if (connection != null) {
+    if (connection != null) {
           connection.close();
-        }
-      }
     }
+      }
+  }
   }
 
   //@Test
   void testConnectionConfigValidation() {
-    // Test invalid configurations
-    assertThrows(IllegalArgumentException.class, () ->
-        ConnectionConfig.builder().withConnectTimeout(Duration.ZERO).build());
+  // Test invalid configurations
+  assertThrows(IllegalArgumentException.class, () ->
+    ConnectionConfig.builder().withConnectTimeout(Duration.ZERO).build());
 
-    assertThrows(IllegalArgumentException.class, () ->
-        ConnectionConfig.builder().withHealthCheckInterval(Duration.ofSeconds(-1)).build());
+  assertThrows(IllegalArgumentException.class, () ->
+    ConnectionConfig.builder().withHealthCheckInterval(Duration.ofSeconds(-1)).build());
 
-    assertThrows(IllegalArgumentException.class, () ->
-        ConnectionConfig.builder().withMaxReconnectAttempts(-1).build());
+  assertThrows(IllegalArgumentException.class, () ->
+    ConnectionConfig.builder().withMaxReconnectAttempts(-1).build());
 
-    // Test valid configuration
-    assertDoesNotThrow(() -> {
+  // Test valid configuration
+  assertDoesNotThrow(() -> {
       ConnectionConfig config = ConnectionConfig.builder()
           .withConnectTimeout(Duration.ofSeconds(5))
           .withHealthCheckEnabled(true)
@@ -324,30 +324,30 @@ class ConnectionIntegrationTest extends DBusIntegrationTestBase {
           .build();
 
       assertNotNull(config);
-    });
+  });
   }
 
   //@Test
   void testConnectionStateTransitions() throws Exception {
-    Connection connection = new NettyConnection(
-        new InetSocketAddress(getDBusHost(), getDBusPort()),
-        ConnectionConfig.defaultConfig()
-    );
+  Connection connection = new NettyConnection(
+    new InetSocketAddress(getDBusHost(), getDBusPort()),
+    ConnectionConfig.defaultConfig()
+  );
 
-    CountDownLatch stateChangeLatch = new CountDownLatch(1);
-    AtomicReference<ConnectionState> finalState = new AtomicReference<>();
+  CountDownLatch stateChangeLatch = new CountDownLatch(1);
+  AtomicReference<ConnectionState> finalState = new AtomicReference<>();
 
-    ConnectionEventListener listener = (conn, event) -> {
+  ConnectionEventListener listener = (conn, event) -> {
       if (event.getType() == ConnectionEventType.STATE_CHANGED) {
-        ConnectionState newState = event.getNewState().orElse(null);
-        if (newState == ConnectionState.CONNECTED) {
+    ConnectionState newState = event.getNewState().orElse(null);
+    if (newState == ConnectionState.CONNECTED) {
           finalState.set(newState);
           stateChangeLatch.countDown();
-        }
+    }
       }
-    };
+  };
 
-    try {
+  try {
       connection.addConnectionEventListener(listener);
 
       // Initial state should be DISCONNECTED
@@ -360,8 +360,8 @@ class ConnectionIntegrationTest extends DBusIntegrationTestBase {
       assertEquals(ConnectionState.CONNECTED, finalState.get());
       assertEquals(ConnectionState.CONNECTED, connection.getState());
 
-    } finally {
+  } finally {
       connection.close();
-    }
+  }
   }
 }

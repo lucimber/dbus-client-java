@@ -23,76 +23,76 @@ final class BooleanEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeBooleanFalse(ByteOrder byteOrder) {
-    Encoder<DBusBoolean, ByteBuffer> encoder = new BooleanEncoder(byteOrder);
-    EncoderResult<ByteBuffer> result = encoder.encode(DBusBoolean.valueOf(false), 0);
-    int expectedNumOfBytes = 4;
-    assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
-    ByteBuffer buffer = result.getBuffer();
-    assertEquals(expectedNumOfBytes, buffer.remaining(), READABLE_BYTES);
-    byte[] expectedBytes = {0x00, 0x00, 0x00, 0x00};
-    byte[] actualBytes = new byte[buffer.remaining()];
-    buffer.get(0, actualBytes);
-    assertArrayEquals(expectedBytes, actualBytes);
+  Encoder<DBusBoolean, ByteBuffer> encoder = new BooleanEncoder(byteOrder);
+  EncoderResult<ByteBuffer> result = encoder.encode(DBusBoolean.valueOf(false), 0);
+  int expectedNumOfBytes = 4;
+  assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
+  ByteBuffer buffer = result.getBuffer();
+  assertEquals(expectedNumOfBytes, buffer.remaining(), READABLE_BYTES);
+  byte[] expectedBytes = {0x00, 0x00, 0x00, 0x00};
+  byte[] actualBytes = new byte[buffer.remaining()];
+  buffer.get(0, actualBytes);
+  assertArrayEquals(expectedBytes, actualBytes);
   }
 
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeBooleanFalseWithOffset(ByteOrder byteOrder) {
-    Encoder<DBusBoolean, ByteBuffer> encoder = new BooleanEncoder(byteOrder);
-    int offset = 5;
-    EncoderResult<ByteBuffer> result = encoder.encode(DBusBoolean.valueOf(false), offset);
-    int expectedNumOfBytes = 7;
-    assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
-    ByteBuffer buffer = result.getBuffer();
-    assertEquals(expectedNumOfBytes, buffer.remaining(), READABLE_BYTES);
-    byte[] expectedBytes = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    byte[] actualBytes = new byte[buffer.remaining()];
-    buffer.get(0, actualBytes);
-    assertArrayEquals(expectedBytes, actualBytes);
+  Encoder<DBusBoolean, ByteBuffer> encoder = new BooleanEncoder(byteOrder);
+  int offset = 5;
+  EncoderResult<ByteBuffer> result = encoder.encode(DBusBoolean.valueOf(false), offset);
+  int expectedNumOfBytes = 7;
+  assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
+  ByteBuffer buffer = result.getBuffer();
+  assertEquals(expectedNumOfBytes, buffer.remaining(), READABLE_BYTES);
+  byte[] expectedBytes = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+  byte[] actualBytes = new byte[buffer.remaining()];
+  buffer.get(0, actualBytes);
+  assertArrayEquals(expectedBytes, actualBytes);
   }
 
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeBooleanTrue(ByteOrder byteOrder) {
-    Encoder<DBusBoolean, ByteBuffer> encoder = new BooleanEncoder(byteOrder);
-    EncoderResult<ByteBuffer> result = encoder.encode(DBusBoolean.valueOf(true), 0);
-    int expectedNumOfBytes = 4;
-    assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
-    ByteBuffer buffer = result.getBuffer();
-    assertEquals(expectedNumOfBytes, buffer.remaining(), READABLE_BYTES);
-    if (byteOrder == ByteOrder.BIG_ENDIAN) {
+  Encoder<DBusBoolean, ByteBuffer> encoder = new BooleanEncoder(byteOrder);
+  EncoderResult<ByteBuffer> result = encoder.encode(DBusBoolean.valueOf(true), 0);
+  int expectedNumOfBytes = 4;
+  assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
+  ByteBuffer buffer = result.getBuffer();
+  assertEquals(expectedNumOfBytes, buffer.remaining(), READABLE_BYTES);
+  if (byteOrder == ByteOrder.BIG_ENDIAN) {
       byte[] expectedBytes = {0x00, 0x00, 0x00, 0x01};
       byte[] actualBytes = new byte[buffer.remaining()];
       buffer.get(0, actualBytes);
       assertArrayEquals(expectedBytes, actualBytes, "Big Endian");
-    } else {
+  } else {
       byte[] expectedBytes = {0x01, 0x00, 0x00, 0x00};
       byte[] actualBytes = new byte[buffer.remaining()];
       buffer.get(0, actualBytes);
       assertArrayEquals(expectedBytes, actualBytes, "Little Endian");
-    }
+  }
   }
 
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeBooleanTrueWithOffset(ByteOrder byteOrder) {
-    Encoder<DBusBoolean, ByteBuffer> encoder = new BooleanEncoder(byteOrder);
-    int offset = 5;
-    EncoderResult<ByteBuffer> result = encoder.encode(DBusBoolean.valueOf(true), offset);
-    int expectedNumOfBytes = 7;
-    assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
-    ByteBuffer buffer = result.getBuffer();
-    assertEquals(expectedNumOfBytes, buffer.remaining(), READABLE_BYTES);
-    if (byteOrder == ByteOrder.BIG_ENDIAN) {
+  Encoder<DBusBoolean, ByteBuffer> encoder = new BooleanEncoder(byteOrder);
+  int offset = 5;
+  EncoderResult<ByteBuffer> result = encoder.encode(DBusBoolean.valueOf(true), offset);
+  int expectedNumOfBytes = 7;
+  assertEquals(expectedNumOfBytes, result.getProducedBytes(), PRODUCED_BYTES);
+  ByteBuffer buffer = result.getBuffer();
+  assertEquals(expectedNumOfBytes, buffer.remaining(), READABLE_BYTES);
+  if (byteOrder == ByteOrder.BIG_ENDIAN) {
       byte[] expectedBytes = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
       byte[] actualBytes = new byte[buffer.remaining()];
       buffer.get(0, actualBytes);
       assertArrayEquals(expectedBytes, actualBytes, "Big Endian");
-    } else {
+  } else {
       byte[] expectedBytes = {0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00};
       byte[] actualBytes = new byte[buffer.remaining()];
       buffer.get(0, actualBytes);
       assertArrayEquals(expectedBytes, actualBytes, "Little Endian");
-    }
+  }
   }
 }

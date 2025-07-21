@@ -37,218 +37,218 @@ class RealityCheckpointTest {
 
   @BeforeEach
   void setUp() {
-    Connection connection = mock(Connection.class);
-    pipeline = mock(Pipeline.class);
-    when(connection.getPipeline()).thenReturn(pipeline);
+  Connection connection = mock(Connection.class);
+  pipeline = mock(Pipeline.class);
+  when(connection.getPipeline()).thenReturn(pipeline);
 
-    executorService = Executors.newSingleThreadExecutor();
-    handler = new RealityCheckpoint(executorService, connection);
-    channel = new EmbeddedChannel(handler);
-    channel.attr(DBusChannelAttribute.SERIAL_COUNTER).setIfAbsent(new AtomicLong(1));
+  executorService = Executors.newSingleThreadExecutor();
+  handler = new RealityCheckpoint(executorService, connection);
+  channel = new EmbeddedChannel(handler);
+  channel.attr(DBusChannelAttribute.SERIAL_COUNTER).setIfAbsent(new AtomicLong(1));
   }
 
   @AfterEach
   void tearDown() throws InterruptedException {
-    if (channel != null) {
+  if (channel != null) {
       channel.close();
-    }
-    if (executorService != null) {
+  }
+  if (executorService != null) {
       executorService.shutdown();
       if (!executorService.awaitTermination(1, TimeUnit.SECONDS)) {
-        executorService.shutdownNow();
+    executorService.shutdownNow();
       }
-    }
+  }
   }
 
   @Test
   void testSendMessageWithoutReply() {
-    OutboundMethodCall msg = OutboundMethodCall.Builder
-            .create()
-            .withSerial(DBusUInt32.valueOf(1))
-            .withPath(DBusObjectPath.valueOf("/object"))
-            .withMember(DBusString.valueOf("Ping"))
-            .withDestination(DBusString.valueOf("some.destination"))
-            .withInterface(DBusString.valueOf("org.example.Interface"))
-            .build();
+  OutboundMethodCall msg = OutboundMethodCall.Builder
+      .create()
+      .withSerial(DBusUInt32.valueOf(1))
+      .withPath(DBusObjectPath.valueOf("/object"))
+      .withMember(DBusString.valueOf("Ping"))
+      .withDestination(DBusString.valueOf("some.destination"))
+      .withInterface(DBusString.valueOf("org.example.Interface"))
+      .build();
 
-    var outerFuture = handler.writeMessage(msg);
+  var outerFuture = handler.writeMessage(msg);
 
-    // Now allow Netty to process scheduled tasks (like the listener)
-    channel.runPendingTasks();
-    channel.flushOutbound();
+  // Now allow Netty to process scheduled tasks (like the listener)
+  channel.runPendingTasks();
+  channel.flushOutbound();
 
-    assertTrue(outerFuture.isSuccess(), "Outer future should complete successfully");
-    Future<InboundMessage> innerFuture = outerFuture.getNow();
-    assertNotNull(innerFuture, "Inner future should be present");
-    assertTrue(innerFuture.isDone(), "No reply expected, so inner future should complete successfully");
+  assertTrue(outerFuture.isSuccess(), "Outer future should complete successfully");
+  Future<InboundMessage> innerFuture = outerFuture.getNow();
+  assertNotNull(innerFuture, "Inner future should be present");
+  assertTrue(innerFuture.isDone(), "No reply expected, so inner future should complete successfully");
   }
 
   @Test
   void testSendMessageWithReplyAndReceiveReturn() {
-    DBusUInt32 serial = DBusUInt32.valueOf(101);
-    DBusString dst = DBusString.valueOf("some.dst");
-    OutboundMethodCall msg = OutboundMethodCall.Builder
-            .create()
-            .withSerial(serial)
-            .withPath(DBusObjectPath.valueOf("/service"))
-            .withMember(DBusString.valueOf("Echo"))
-            .withReplyExpected(true)
-            .withDestination(dst)
-            .withInterface(DBusString.valueOf("org.example"))
-            .build();
+  DBusUInt32 serial = DBusUInt32.valueOf(101);
+  DBusString dst = DBusString.valueOf("some.dst");
+  OutboundMethodCall msg = OutboundMethodCall.Builder
+      .create()
+      .withSerial(serial)
+      .withPath(DBusObjectPath.valueOf("/service"))
+      .withMember(DBusString.valueOf("Echo"))
+      .withReplyExpected(true)
+      .withDestination(dst)
+      .withInterface(DBusString.valueOf("org.example"))
+      .build();
 
-    var future = handler.writeMessage(msg);
+  var future = handler.writeMessage(msg);
 
-    channel.runPendingTasks();
-    channel.flushOutbound();
+  channel.runPendingTasks();
+  channel.flushOutbound();
 
-    // Simulate reply
-    InboundMethodReturn reply = InboundMethodReturn.Builder.create()
+  // Simulate reply
+  InboundMethodReturn reply = InboundMethodReturn.Builder.create()
           .withSerial(DBusUInt32.valueOf(5))
           .withReplySerial(serial)
           .withSender(dst)
           .build();
-    channel.writeInbound(reply);
+  channel.writeInbound(reply);
 
-    var replyFuture = future.getNow();
-    replyFuture.addListener(f -> {
+  var replyFuture = future.getNow();
+  replyFuture.addListener(f -> {
       assertTrue(f.isSuccess());
       assertEquals(reply, f.getNow());
-    });
+  });
   }
 
   @Test
   void testSendMessageWithReplyAndReceiveError() {
-    DBusUInt32 serial = DBusUInt32.valueOf(202);
-    DBusString dst = DBusString.valueOf("some.destination");
-    OutboundMethodCall msg = OutboundMethodCall.Builder
-            .create()
-            .withSerial(serial)
-            .withPath(DBusObjectPath.valueOf("/error"))
-            .withMember(DBusString.valueOf("Fail"))
-            .withReplyExpected(true)
-            .withDestination(dst)
-            .withInterface(DBusString.valueOf("org.example"))
-            .build();
+  DBusUInt32 serial = DBusUInt32.valueOf(202);
+  DBusString dst = DBusString.valueOf("some.destination");
+  OutboundMethodCall msg = OutboundMethodCall.Builder
+      .create()
+      .withSerial(serial)
+      .withPath(DBusObjectPath.valueOf("/error"))
+      .withMember(DBusString.valueOf("Fail"))
+      .withReplyExpected(true)
+      .withDestination(dst)
+      .withInterface(DBusString.valueOf("org.example"))
+      .build();
 
-    var future = handler.writeMessage(msg);
-    channel.flushOutbound();
+  var future = handler.writeMessage(msg);
+  channel.flushOutbound();
 
-    InboundError error = InboundError.Builder.create()
+  InboundError error = InboundError.Builder.create()
           .withSerial(DBusUInt32.valueOf(5))
           .withReplySerial(DBusUInt32.valueOf(202))
           .withSender(dst)
           .withErrorName(DBusString.valueOf("org.freedesktop.DBus.Error.Failed"))
           .build();
 
-    channel.writeInbound(error);
+  channel.writeInbound(error);
 
-    var replyFuture = future.getNow();
-    replyFuture.addListener(f -> {
+  var replyFuture = future.getNow();
+  replyFuture.addListener(f -> {
       assertTrue(f.isSuccess()); // Still a success, error handled later by consumer
       assertInstanceOf(InboundError.class, f.getNow());
-    });
+  });
   }
 
   @Test
   void testChannelInactiveFailsAllPending() {
-    OutboundMethodCall msg = OutboundMethodCall.Builder
-            .create()
-            .withSerial(DBusUInt32.valueOf(99))
-            .withPath(DBusObjectPath.valueOf("/fail"))
-            .withMember(DBusString.valueOf("Call"))
-            .withReplyExpected(true)
-            .withDestination(DBusString.valueOf("some.test.destination"))
-            .withInterface(DBusString.valueOf("org.test"))
-            .build();
+  OutboundMethodCall msg = OutboundMethodCall.Builder
+      .create()
+      .withSerial(DBusUInt32.valueOf(99))
+      .withPath(DBusObjectPath.valueOf("/fail"))
+      .withMember(DBusString.valueOf("Call"))
+      .withReplyExpected(true)
+      .withDestination(DBusString.valueOf("some.test.destination"))
+      .withInterface(DBusString.valueOf("org.test"))
+      .build();
 
-    var future = handler.writeMessage(msg);
-    channel.close();
+  var future = handler.writeMessage(msg);
+  channel.close();
 
-    var replyFuture = future.getNow();
-    replyFuture.addListener(f ->
+  var replyFuture = future.getNow();
+  replyFuture.addListener(f ->
           assertTrue(f.isCancelled() || f.cause() instanceof ClosedChannelException));
   }
 
   @Test
   void testConnectionEvents() throws InterruptedException {
-    handler.userEventTriggered(channel.pipeline().context(handler), DBusChannelEvent.MANDATORY_NAME_ACQUIRED);
-    
-    // Wait for asynchronous execution on ApplicationTaskExecutor
-    Thread.sleep(50);
-    verify(pipeline).propagateConnectionActive();
+  handler.userEventTriggered(channel.pipeline().context(handler), DBusChannelEvent.MANDATORY_NAME_ACQUIRED);
+  
+  // Wait for asynchronous execution on ApplicationTaskExecutor
+  Thread.sleep(50);
+  verify(pipeline).propagateConnectionActive();
 
-    handler.userEventTriggered(channel.pipeline().context(handler), DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
-    assertFalse(channel.isActive());
+  handler.userEventTriggered(channel.pipeline().context(handler), DBusChannelEvent.MANDATORY_NAME_ACQUISITION_FAILED);
+  assertFalse(channel.isActive());
   }
 
   @Test
   void testMethodCallTimeout() throws InterruptedException {
-    // Use a short timeout for testing
-    executorService.shutdown();
-    executorService = Executors.newSingleThreadExecutor();
-    handler = new RealityCheckpoint(executorService, mock(Connection.class), 100); // 100ms timeout
-    channel = new EmbeddedChannel(handler);
-    channel.attr(DBusChannelAttribute.SERIAL_COUNTER).setIfAbsent(new AtomicLong(1));
+  // Use a short timeout for testing
+  executorService.shutdown();
+  executorService = Executors.newSingleThreadExecutor();
+  handler = new RealityCheckpoint(executorService, mock(Connection.class), 100); // 100ms timeout
+  channel = new EmbeddedChannel(handler);
+  channel.attr(DBusChannelAttribute.SERIAL_COUNTER).setIfAbsent(new AtomicLong(1));
 
-    OutboundMethodCall msg = OutboundMethodCall.Builder
-            .create()
-            .withSerial(DBusUInt32.valueOf(123))
-            .withPath(DBusObjectPath.valueOf("/timeout"))
-            .withMember(DBusString.valueOf("TimeoutMethod"))
-            .withReplyExpected(true)
-            .withDestination(DBusString.valueOf("some.destination"))
-            .withInterface(DBusString.valueOf("org.example"))
-            .build();
+  OutboundMethodCall msg = OutboundMethodCall.Builder
+      .create()
+      .withSerial(DBusUInt32.valueOf(123))
+      .withPath(DBusObjectPath.valueOf("/timeout"))
+      .withMember(DBusString.valueOf("TimeoutMethod"))
+      .withReplyExpected(true)
+      .withDestination(DBusString.valueOf("some.destination"))
+      .withInterface(DBusString.valueOf("org.example"))
+      .build();
 
-    var future = handler.writeMessage(msg);
-    channel.runPendingTasks();
-    channel.flushOutbound();
+  var future = handler.writeMessage(msg);
+  channel.runPendingTasks();
+  channel.flushOutbound();
 
-    // Wait for timeout to occur
-    Thread.sleep(150); // Wait longer than timeout
-    channel.runScheduledPendingTasks();
+  // Wait for timeout to occur
+  Thread.sleep(150); // Wait longer than timeout
+  channel.runScheduledPendingTasks();
 
-    var replyFuture = future.getNow();
-    assertTrue(replyFuture.isDone(), "Reply future should be done after timeout");
-    assertInstanceOf(TimeoutException.class, replyFuture.cause(), "Should fail with TimeoutException");
+  var replyFuture = future.getNow();
+  assertTrue(replyFuture.isDone(), "Reply future should be done after timeout");
+  assertInstanceOf(TimeoutException.class, replyFuture.cause(), "Should fail with TimeoutException");
   }
 
   @Test
   void testPerCallTimeoutOverride() throws InterruptedException {
-    // Shutdown existing executor and create new handler with short default timeout  
-    executorService.shutdown();
-    executorService = Executors.newSingleThreadExecutor();
-    handler = new RealityCheckpoint(executorService, mock(Connection.class), 5000); // 5s default
-    channel = new EmbeddedChannel(handler);
-    channel.attr(DBusChannelAttribute.SERIAL_COUNTER).setIfAbsent(new AtomicLong(1));
+  // Shutdown existing executor and create new handler with short default timeout  
+  executorService.shutdown();
+  executorService = Executors.newSingleThreadExecutor();
+  handler = new RealityCheckpoint(executorService, mock(Connection.class), 5000); // 5s default
+  channel = new EmbeddedChannel(handler);
+  channel.attr(DBusChannelAttribute.SERIAL_COUNTER).setIfAbsent(new AtomicLong(1));
 
-    // Create message with shorter per-call timeout override
-    OutboundMethodCall msg = OutboundMethodCall.Builder
-            .create()
-            .withSerial(DBusUInt32.valueOf(456))
-            .withPath(DBusObjectPath.valueOf("/override"))
-            .withMember(DBusString.valueOf("FastTimeout"))
-            .withReplyExpected(true)
-            .withDestination(DBusString.valueOf("some.destination"))
-            .withInterface(DBusString.valueOf("org.example"))
-            .withTimeout(Duration.ofMillis(50)) // Override with 50ms timeout
-            .build();
+  // Create message with shorter per-call timeout override
+  OutboundMethodCall msg = OutboundMethodCall.Builder
+      .create()
+      .withSerial(DBusUInt32.valueOf(456))
+      .withPath(DBusObjectPath.valueOf("/override"))
+      .withMember(DBusString.valueOf("FastTimeout"))
+      .withReplyExpected(true)
+      .withDestination(DBusString.valueOf("some.destination"))
+      .withInterface(DBusString.valueOf("org.example"))
+      .withTimeout(Duration.ofMillis(50)) // Override with 50ms timeout
+      .build();
 
-    var future = handler.writeMessage(msg);
-    channel.runPendingTasks();
-    channel.flushOutbound();
+  var future = handler.writeMessage(msg);
+  channel.runPendingTasks();
+  channel.flushOutbound();
 
-    // Wait for timeout to occur (should happen in 50ms, not 5000ms)
-    Thread.sleep(100); // Wait longer than the override timeout
-    channel.runScheduledPendingTasks();
+  // Wait for timeout to occur (should happen in 50ms, not 5000ms)
+  Thread.sleep(100); // Wait longer than the override timeout
+  channel.runScheduledPendingTasks();
 
-    var replyFuture = future.getNow();
-    assertTrue(replyFuture.isDone(), "Reply future should be done after per-call timeout");
-    assertInstanceOf(TimeoutException.class, replyFuture.cause(), "Should fail with TimeoutException from override");
-    
-    // Verify the timeout message mentions the override timeout value
-    String errorMessage = replyFuture.cause().getMessage();
-    assertTrue(errorMessage.contains("50"), "Error message should mention the override timeout duration");
+  var replyFuture = future.getNow();
+  assertTrue(replyFuture.isDone(), "Reply future should be done after per-call timeout");
+  assertInstanceOf(TimeoutException.class, replyFuture.cause(), "Should fail with TimeoutException from override");
+  
+  // Verify the timeout message mentions the override timeout value
+  String errorMessage = replyFuture.cause().getMessage();
+  assertTrue(errorMessage.contains("50"), "Error message should mention the override timeout duration");
   }
 }

@@ -21,10 +21,10 @@ class NettyConnectionStrategyIntegrationTest {
 
   @Test
   void testUnixSocketStrategySelection() {
-    SocketAddress unixAddress = new DomainSocketAddress("/tmp/test-socket");
-    
-    // This should not throw an exception during construction
-    assertDoesNotThrow(() -> {
+  SocketAddress unixAddress = new DomainSocketAddress("/tmp/test-socket");
+  
+  // This should not throw an exception during construction
+  assertDoesNotThrow(() -> {
       NettyConnection connection = new NettyConnection(unixAddress, ConnectionConfig.defaultConfig());
       assertNotNull(connection);
       
@@ -35,15 +35,15 @@ class NettyConnectionStrategyIntegrationTest {
       assertNotNull(connection.getConfig());
       
       connection.close();
-    });
+  });
   }
 
   @Test
   void testTcpStrategySelection() {
-    SocketAddress tcpAddress = new InetSocketAddress("localhost", 12345);
-    
-    // This should not throw an exception during construction
-    assertDoesNotThrow(() -> {
+  SocketAddress tcpAddress = new InetSocketAddress("localhost", 12345);
+  
+  // This should not throw an exception during construction
+  assertDoesNotThrow(() -> {
       NettyConnection connection = new NettyConnection(tcpAddress, ConnectionConfig.defaultConfig());
       assertNotNull(connection);
       
@@ -52,65 +52,65 @@ class NettyConnectionStrategyIntegrationTest {
       assertNotNull(connection.getConfig());
       
       connection.close();
-    });
+  });
   }
 
   @Test
   void testUnsupportedAddressType() {
-    // Create a custom SocketAddress that no strategy supports
-    SocketAddress unsupportedAddress = new SocketAddress() {
+  // Create a custom SocketAddress that no strategy supports
+  SocketAddress unsupportedAddress = new SocketAddress() {
       @Override
       public String toString() {
-        return "UnsupportedAddress";
+    return "UnsupportedAddress";
       }
-    };
-    
-    // This should throw an IllegalArgumentException
-    assertThrows(IllegalArgumentException.class, () -> {
+  };
+  
+  // This should throw an IllegalArgumentException
+  assertThrows(IllegalArgumentException.class, () -> {
       new NettyConnection(unsupportedAddress, ConnectionConfig.defaultConfig());
-    });
+  });
   }
 
   @Test
   void testFactoryMethods() {
-    // Test that factory methods still work with strategy pattern
-    // Note: These will fail if system D-Bus is not available, but should not fail due to strategy pattern
-    
-    assertDoesNotThrow(() -> {
+  // Test that factory methods still work with strategy pattern
+  // Note: These will fail if system D-Bus is not available, but should not fail due to strategy pattern
+  
+  assertDoesNotThrow(() -> {
       try {
-        NettyConnection systemConnection = NettyConnection.newSystemBusConnection();
-        assertNotNull(systemConnection);
-        systemConnection.close();
+    NettyConnection systemConnection = NettyConnection.newSystemBusConnection();
+    assertNotNull(systemConnection);
+    systemConnection.close();
       } catch (UnsupportedOperationException | IllegalStateException e) {
-        // Expected if native transport or D-Bus is not available
-        // The important thing is that it doesn't fail due to strategy pattern issues
+    // Expected if native transport or D-Bus is not available
+    // The important thing is that it doesn't fail due to strategy pattern issues
       }
-    });
-    
-    // Session bus test - will fail if DBUS_SESSION_BUS_ADDRESS is not set
-    assertDoesNotThrow(() -> {
+  });
+  
+  // Session bus test - will fail if DBUS_SESSION_BUS_ADDRESS is not set
+  assertDoesNotThrow(() -> {
       try {
-        NettyConnection sessionConnection = NettyConnection.newSessionBusConnection();
-        assertNotNull(sessionConnection);
-        sessionConnection.close();
+    NettyConnection sessionConnection = NettyConnection.newSessionBusConnection();
+    assertNotNull(sessionConnection);
+    sessionConnection.close();
       } catch (IllegalStateException | UnsupportedOperationException e) {
-        // Expected if environment variable is not set or native transport not available
+    // Expected if environment variable is not set or native transport not available
       }
-    });
+  });
   }
 
   @Test
   void testConnectionState() {
-    SocketAddress address = new InetSocketAddress("localhost", 12345);
-    NettyConnection connection = new NettyConnection(address, ConnectionConfig.defaultConfig());
-    
-    // Test initial state
-    assertFalse(connection.isConnected());
-    assertNotNull(connection.getState());
-    
-    // Test that we can get next serial should throw exception when not connected
-    assertThrows(IllegalStateException.class, connection::getNextSerial);
-    
-    connection.close();
+  SocketAddress address = new InetSocketAddress("localhost", 12345);
+  NettyConnection connection = new NettyConnection(address, ConnectionConfig.defaultConfig());
+  
+  // Test initial state
+  assertFalse(connection.isConnected());
+  assertNotNull(connection.getState());
+  
+  // Test that we can get next serial should throw exception when not connected
+  assertThrows(IllegalStateException.class, connection::getNextSerial);
+  
+  connection.close();
   }
 }

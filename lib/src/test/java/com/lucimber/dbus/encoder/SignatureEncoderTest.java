@@ -24,47 +24,47 @@ final class SignatureEncoderTest {
 
   @Test
   void encodeValidSignature() {
-    DBusSignature signature = DBusSignature.valueOf(VALID_SIGNATURE);
-    Encoder<DBusSignature, ByteBuffer> encoder = new SignatureEncoder();
-    EncoderResult<ByteBuffer> result = encoder.encode(signature, 0);
-    int expectedBytes = 7;
-    assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
-    ByteBuffer buffer = result.getBuffer();
-    assertEquals(expectedBytes, buffer.remaining(), READABLE_BYTES);
-    int length = VALID_SIGNATURE.length();
-    assertEquals(length, buffer.get(0), "Signature length");
-    assertEquals((byte) 0x00, buffer.get(length + 1), "Trailing NUL byte");
+  DBusSignature signature = DBusSignature.valueOf(VALID_SIGNATURE);
+  Encoder<DBusSignature, ByteBuffer> encoder = new SignatureEncoder();
+  EncoderResult<ByteBuffer> result = encoder.encode(signature, 0);
+  int expectedBytes = 7;
+  assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
+  ByteBuffer buffer = result.getBuffer();
+  assertEquals(expectedBytes, buffer.remaining(), READABLE_BYTES);
+  int length = VALID_SIGNATURE.length();
+  assertEquals(length, buffer.get(0), "Signature length");
+  assertEquals((byte) 0x00, buffer.get(length + 1), "Trailing NUL byte");
   }
 
   @Test
   void encodeValidComplexSignature() {
-    DBusSignature signature = DBusSignature.valueOf(COMPLEX_VALID_SIGNATURE);
-    Encoder<DBusSignature, ByteBuffer> encoder = new SignatureEncoder();
-    EncoderResult<ByteBuffer> result = encoder.encode(signature, 0);
-    int expectedBytes = 30;
-    assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
-    ByteBuffer buffer = result.getBuffer();
-    assertEquals(expectedBytes, buffer.remaining(), READABLE_BYTES);
-    int length = COMPLEX_VALID_SIGNATURE.length();
-    assertEquals(length, buffer.get(0), "Signature length");
-    assertEquals((byte) 0x00, buffer.get(length + 1), "Trailing NUL byte");
+  DBusSignature signature = DBusSignature.valueOf(COMPLEX_VALID_SIGNATURE);
+  Encoder<DBusSignature, ByteBuffer> encoder = new SignatureEncoder();
+  EncoderResult<ByteBuffer> result = encoder.encode(signature, 0);
+  int expectedBytes = 30;
+  assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
+  ByteBuffer buffer = result.getBuffer();
+  assertEquals(expectedBytes, buffer.remaining(), READABLE_BYTES);
+  int length = COMPLEX_VALID_SIGNATURE.length();
+  assertEquals(length, buffer.get(0), "Signature length");
+  assertEquals((byte) 0x00, buffer.get(length + 1), "Trailing NUL byte");
   }
 
   @Test
   void failDueToInvalidChar() {
-    Encoder<DBusSignature, ByteBuffer> encoder = new SignatureEncoder();
-    assertThrows(Exception.class, () -> {
+  Encoder<DBusSignature, ByteBuffer> encoder = new SignatureEncoder();
+  assertThrows(Exception.class, () -> {
       DBusSignature signature = DBusSignature.valueOf(INVALID_CHAR_SIGNATURE);
       encoder.encode(signature, 0);
-    });
+  });
   }
 
   @Test
   void failDueToInvalidBracketCount() {
-    Encoder<DBusSignature, ByteBuffer> encoder = new SignatureEncoder();
-    assertThrows(Exception.class, () -> {
+  Encoder<DBusSignature, ByteBuffer> encoder = new SignatureEncoder();
+  assertThrows(Exception.class, () -> {
       DBusSignature signature = DBusSignature.valueOf(INVALID_BRACKET_SIGNATURE);
       encoder.encode(signature, 0);
-    });
+  });
   }
 }

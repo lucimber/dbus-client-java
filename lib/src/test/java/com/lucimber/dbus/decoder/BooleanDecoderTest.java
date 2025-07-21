@@ -20,61 +20,61 @@ final class BooleanDecoderTest {
 
   @Test
   void decodeFalseOnBigEndian() throws DecoderException {
-    byte[] bytes = {0x00, 0x00, 0x00, 0x00};
-    ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN);
-    BooleanDecoder decoder = new BooleanDecoder();
-    DecoderResult<DBusBoolean> result = decoder.decode(buffer, 0);
-    assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
-    assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    assertFalse(result.getValue().getDelegate());
+  byte[] bytes = {0x00, 0x00, 0x00, 0x00};
+  ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN);
+  BooleanDecoder decoder = new BooleanDecoder();
+  DecoderResult<DBusBoolean> result = decoder.decode(buffer, 0);
+  assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+  assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
+  assertFalse(result.getValue().getDelegate());
   }
 
   @Test
   void decodeFalseOnLittleEndian() throws DecoderException {
-    byte[] bytes = {0x00, 0x00, 0x00, 0x00};
-    ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
-    BooleanDecoder decoder = new BooleanDecoder();
-    DecoderResult<DBusBoolean> result = decoder.decode(buffer, 0);
-    assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
-    assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    assertFalse(result.getValue().getDelegate());
+  byte[] bytes = {0x00, 0x00, 0x00, 0x00};
+  ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
+  BooleanDecoder decoder = new BooleanDecoder();
+  DecoderResult<DBusBoolean> result = decoder.decode(buffer, 0);
+  assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+  assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
+  assertFalse(result.getValue().getDelegate());
   }
 
   @Test
   void decodeTrueOnBigEndian() throws DecoderException {
-    byte[] bytes = {0x00, 0x00, 0x00, 0x01};
-    ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN);
-    BooleanDecoder decoder = new BooleanDecoder();
-    DecoderResult<DBusBoolean> result = decoder.decode(buffer, 0);
-    assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
-    assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    assertTrue(result.getValue().getDelegate());
+  byte[] bytes = {0x00, 0x00, 0x00, 0x01};
+  ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN);
+  BooleanDecoder decoder = new BooleanDecoder();
+  DecoderResult<DBusBoolean> result = decoder.decode(buffer, 0);
+  assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+  assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
+  assertTrue(result.getValue().getDelegate());
   }
 
   @Test
   void decodeTrueOnLittleEndian() throws DecoderException {
-    byte[] bytes = {0x01, 0x00, 0x00, 0x00};
-    ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
-    BooleanDecoder decoder = new BooleanDecoder();
-    DecoderResult<DBusBoolean> result = decoder.decode(buffer, 0);
-    assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
-    assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    assertTrue(result.getValue().getDelegate());
+  byte[] bytes = {0x01, 0x00, 0x00, 0x00};
+  ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
+  BooleanDecoder decoder = new BooleanDecoder();
+  DecoderResult<DBusBoolean> result = decoder.decode(buffer, 0);
+  assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+  assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
+  assertTrue(result.getValue().getDelegate());
   }
 
   @Test
   void failOnBigEndian() {
-    byte[] bytes = {0x01, 0x00, 0x00, 0x01};
-    ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN);
-    BooleanDecoder decoder = new BooleanDecoder();
-    assertThrows(DecoderException.class, () -> decoder.decode(buffer, 0));
+  byte[] bytes = {0x01, 0x00, 0x00, 0x01};
+  ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN);
+  BooleanDecoder decoder = new BooleanDecoder();
+  assertThrows(DecoderException.class, () -> decoder.decode(buffer, 0));
   }
 
   @Test
   void failOnLittleEndian() {
-    byte[] bytes = {0x01, 0x00, 0x00, 0x01};
-    ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
-    BooleanDecoder decoder = new BooleanDecoder();
-    assertThrows(DecoderException.class, () -> decoder.decode(buffer, 0));
+  byte[] bytes = {0x01, 0x00, 0x00, 0x01};
+  ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
+  BooleanDecoder decoder = new BooleanDecoder();
+  assertThrows(DecoderException.class, () -> decoder.decode(buffer, 0));
   }
 }

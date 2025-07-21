@@ -26,63 +26,63 @@ final class SignatureDecoderTest {
 
   @Test
   void decodeValidSignature() {
-    byte[] bytes = VALID_SIGNATURE.getBytes(StandardCharsets.UTF_8);
-    ByteBuffer buffer = ByteBuffer.allocate(1 + bytes.length + 1);
-    buffer.put((byte) bytes.length);
-    buffer.put(bytes);
-    buffer.put((byte) 0x00);
-    buffer.flip();
+  byte[] bytes = VALID_SIGNATURE.getBytes(StandardCharsets.UTF_8);
+  ByteBuffer buffer = ByteBuffer.allocate(1 + bytes.length + 1);
+  buffer.put((byte) bytes.length);
+  buffer.put(bytes);
+  buffer.put((byte) 0x00);
+  buffer.flip();
 
-    SignatureDecoder decoder = new SignatureDecoder();
-    DecoderResult<DBusSignature> result = decoder.decode(buffer, 0);
+  SignatureDecoder decoder = new SignatureDecoder();
+  DecoderResult<DBusSignature> result = decoder.decode(buffer, 0);
 
-    assertEquals(buffer.limit(), result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
-    assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    assertEquals(VALID_SIGNATURE, result.getValue().toString());
-    assertEquals(2, result.getValue().getQuantity());
+  assertEquals(buffer.limit(), result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+  assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
+  assertEquals(VALID_SIGNATURE, result.getValue().toString());
+  assertEquals(2, result.getValue().getQuantity());
   }
 
   @Test
   void decodeComplexValidSignature() {
-    byte[] bytes = COMPLEX_VALID_SIGNATURE.getBytes(StandardCharsets.UTF_8);
-    ByteBuffer buffer = ByteBuffer.allocate(1 + bytes.length + 1);
-    buffer.put((byte) bytes.length);
-    buffer.put(bytes);
-    buffer.put((byte) 0x00);
-    buffer.flip();
+  byte[] bytes = COMPLEX_VALID_SIGNATURE.getBytes(StandardCharsets.UTF_8);
+  ByteBuffer buffer = ByteBuffer.allocate(1 + bytes.length + 1);
+  buffer.put((byte) bytes.length);
+  buffer.put(bytes);
+  buffer.put((byte) 0x00);
+  buffer.flip();
 
-    SignatureDecoder decoder = new SignatureDecoder();
-    DecoderResult<DBusSignature> result = decoder.decode(buffer, 0);
+  SignatureDecoder decoder = new SignatureDecoder();
+  DecoderResult<DBusSignature> result = decoder.decode(buffer, 0);
 
-    assertEquals(buffer.limit(), result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
-    assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    assertEquals(COMPLEX_VALID_SIGNATURE, result.getValue().toString());
-    assertEquals(7, result.getValue().getQuantity());
+  assertEquals(buffer.limit(), result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+  assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
+  assertEquals(COMPLEX_VALID_SIGNATURE, result.getValue().toString());
+  assertEquals(7, result.getValue().getQuantity());
   }
 
   @Test
   void decodeInvalidCharSignature() {
-    byte[] bytes = INVALID_CHAR_SIGNATURE.getBytes(StandardCharsets.UTF_8);
-    ByteBuffer buffer = ByteBuffer.allocate(1 + bytes.length + 1);
-    buffer.put((byte) bytes.length);
-    buffer.put(bytes);
-    buffer.put((byte) 0x00);
-    buffer.flip();
+  byte[] bytes = INVALID_CHAR_SIGNATURE.getBytes(StandardCharsets.UTF_8);
+  ByteBuffer buffer = ByteBuffer.allocate(1 + bytes.length + 1);
+  buffer.put((byte) bytes.length);
+  buffer.put(bytes);
+  buffer.put((byte) 0x00);
+  buffer.flip();
 
-    SignatureDecoder decoder = new SignatureDecoder();
-    assertThrows(DecoderException.class, () -> decoder.decode(buffer, 0));
+  SignatureDecoder decoder = new SignatureDecoder();
+  assertThrows(DecoderException.class, () -> decoder.decode(buffer, 0));
   }
 
   @Test
   void decodeInvalidBracketSignature() {
-    byte[] bytes = INVALID_BRACKET_SIGNATURE.getBytes(StandardCharsets.UTF_8);
-    ByteBuffer buffer = ByteBuffer.allocate(1 + bytes.length + 1);
-    buffer.put((byte) bytes.length);
-    buffer.put(bytes);
-    buffer.put((byte) 0x00);
-    buffer.flip();
+  byte[] bytes = INVALID_BRACKET_SIGNATURE.getBytes(StandardCharsets.UTF_8);
+  ByteBuffer buffer = ByteBuffer.allocate(1 + bytes.length + 1);
+  buffer.put((byte) bytes.length);
+  buffer.put(bytes);
+  buffer.put((byte) 0x00);
+  buffer.flip();
 
-    SignatureDecoder decoder = new SignatureDecoder();
-    assertThrows(DecoderException.class, () -> decoder.decode(buffer, 0));
+  SignatureDecoder decoder = new SignatureDecoder();
+  assertThrows(DecoderException.class, () -> decoder.decode(buffer, 0));
   }
 }

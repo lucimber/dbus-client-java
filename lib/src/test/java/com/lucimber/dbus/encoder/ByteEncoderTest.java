@@ -19,26 +19,26 @@ final class ByteEncoderTest {
 
   @Test
   void encodeByteOfMinValue() {
-    Encoder<DBusByte, ByteBuffer> encoder = new ByteEncoder();
-    DBusByte dbusByte = DBusByte.valueOf((byte) 0);
-    EncoderResult<ByteBuffer> result = encoder.encode(dbusByte, 0);
-    int expectedBytes = 1;
-    assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
-    ByteBuffer buffer = result.getBuffer();
-    assertEquals(expectedBytes, buffer.remaining(), READABLE_BYTES);
-    assertEquals((byte) 0x00, buffer.get(0));
+  Encoder<DBusByte, ByteBuffer> encoder = new ByteEncoder();
+  DBusByte dbusByte = DBusByte.valueOf((byte) 0);
+  EncoderResult<ByteBuffer> result = encoder.encode(dbusByte, 0);
+  int expectedBytes = 1;
+  assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
+  ByteBuffer buffer = result.getBuffer();
+  assertEquals(expectedBytes, buffer.remaining(), READABLE_BYTES);
+  assertEquals((byte) 0x00, buffer.get(0));
   }
 
   @Test
   void encodeByteOfMaxValue() {
-    Encoder<DBusByte, ByteBuffer> encoder = new ByteEncoder();
-    DBusByte dbusByte = DBusByte.valueOf((byte) 255);
-    EncoderResult<ByteBuffer> result = encoder.encode(dbusByte, 0);
-    int expectedBytes = 1;
-    assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
-    ByteBuffer buffer = result.getBuffer();
-    assertEquals(expectedBytes, buffer.remaining(), READABLE_BYTES);
-    byte byteMaxValue = (byte) 0xFF;
-    assertEquals(byteMaxValue, buffer.get(0));
+  Encoder<DBusByte, ByteBuffer> encoder = new ByteEncoder();
+  DBusByte dbusByte = DBusByte.valueOf((byte) 255);
+  EncoderResult<ByteBuffer> result = encoder.encode(dbusByte, 0);
+  int expectedBytes = 1;
+  assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
+  ByteBuffer buffer = result.getBuffer();
+  assertEquals(expectedBytes, buffer.remaining(), READABLE_BYTES);
+  byte byteMaxValue = (byte) 0xFF;
+  assertEquals(byteMaxValue, buffer.get(0));
   }
 }

@@ -21,29 +21,29 @@ final class OutboundMethodReturnHandlerTest {
 
   @Test
   void encodeSuccessfully() {
-    OutboundMessageEncoder handler = new OutboundMessageEncoder();
-    EmbeddedChannel channel = new EmbeddedChannel(handler);
+  OutboundMessageEncoder handler = new OutboundMessageEncoder();
+  EmbeddedChannel channel = new EmbeddedChannel(handler);
 
-    DBusUInt32 serial = DBusUInt32.valueOf(2);
-    DBusUInt32 replySerial = DBusUInt32.valueOf(1);
-    DBusString dst = DBusString.valueOf("io.lucimber.test.destination");
-    OutboundMethodReturn methodReturn = OutboundMethodReturn.Builder
-            .create()
-            .withSerial(serial)
-            .withReplySerial(replySerial)
-            .withDestination(dst)
-            .build();
+  DBusUInt32 serial = DBusUInt32.valueOf(2);
+  DBusUInt32 replySerial = DBusUInt32.valueOf(1);
+  DBusString dst = DBusString.valueOf("io.lucimber.test.destination");
+  OutboundMethodReturn methodReturn = OutboundMethodReturn.Builder
+      .create()
+      .withSerial(serial)
+      .withReplySerial(replySerial)
+      .withDestination(dst)
+      .build();
 
-    assertTrue(channel.writeOutbound(methodReturn));
-    assertTrue(channel.finish());
-    Frame frame = channel.readOutbound();
+  assertTrue(channel.writeOutbound(methodReturn));
+  assertTrue(channel.finish());
+  Frame frame = channel.readOutbound();
 
-    Assertions.assertEquals(ByteOrder.BIG_ENDIAN, frame.getByteOrder(), "Byte order");
-    Assertions.assertEquals(MessageType.METHOD_RETURN, frame.getType(), "Message type");
-    assertTrue(frame.getFlags().isEmpty());
-    assertEquals(1, frame.getProtocolVersion(), "Protocol version");
-    int bodyLength = 0;
-    assertEquals(bodyLength, frame.getBody().remaining(), "Body length");
-    Assertions.assertEquals(serial, frame.getSerial(), "Serial number");
+  Assertions.assertEquals(ByteOrder.BIG_ENDIAN, frame.getByteOrder(), "Byte order");
+  Assertions.assertEquals(MessageType.METHOD_RETURN, frame.getType(), "Message type");
+  assertTrue(frame.getFlags().isEmpty());
+  assertEquals(1, frame.getProtocolVersion(), "Protocol version");
+  int bodyLength = 0;
+  assertEquals(bodyLength, frame.getBody().remaining(), "Body length");
+  Assertions.assertEquals(serial, frame.getSerial(), "Serial number");
   }
 }

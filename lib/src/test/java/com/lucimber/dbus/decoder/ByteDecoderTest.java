@@ -19,17 +19,17 @@ final class ByteDecoderTest {
 
   @Test
   void decodeByte() {
-    byte maxValue = (byte) 0xFF;
-    ByteBuffer buffer = ByteBuffer.allocate(1);
-    buffer.put(maxValue);
-    buffer.flip();
+  byte maxValue = (byte) 0xFF;
+  ByteBuffer buffer = ByteBuffer.allocate(1);
+  buffer.put(maxValue);
+  buffer.flip();
 
-    ByteDecoder decoder = new ByteDecoder();
-    DecoderResult<DBusByte> result = decoder.decode(buffer, 0);
+  ByteDecoder decoder = new ByteDecoder();
+  DecoderResult<DBusByte> result = decoder.decode(buffer, 0);
 
-    assertEquals(1, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
-    assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    byte expected = -1;
-    assertEquals(expected, result.getValue().getDelegate());
+  assertEquals(1, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+  assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
+  byte expected = -1;
+  assertEquals(expected, result.getValue().getDelegate());
   }
 }

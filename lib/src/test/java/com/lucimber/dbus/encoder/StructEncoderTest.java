@@ -22,42 +22,42 @@ final class StructEncoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSimpleStruct(ByteOrder byteOrder) {
-    DBusSignature signature = DBusSignature.valueOf("(ibv)");
-    Encoder<DBusStruct, ByteBuffer> encoder = new StructEncoder(byteOrder, signature);
-    DBusInt32 int32 = DBusInt32.valueOf(1);
-    DBusBoolean dBusBoolean = DBusBoolean.valueOf(true);
-    DBusVariant variant = DBusVariant.valueOf(DBusDouble.valueOf(2.5));
-    DBusStruct struct = new DBusStruct(signature, int32, dBusBoolean, variant);
-    EncoderResult<ByteBuffer> result = encoder.encode(struct, 0);
-    int expectedBytes = 24; // 4 byte + 4 byte + 3 byte + 5 byte + 8 byte
-    assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
-    ByteBuffer buffer = result.getBuffer();
-    assertEquals(expectedBytes, buffer.remaining(), READABLE_BYTES);
+  DBusSignature signature = DBusSignature.valueOf("(ibv)");
+  Encoder<DBusStruct, ByteBuffer> encoder = new StructEncoder(byteOrder, signature);
+  DBusInt32 int32 = DBusInt32.valueOf(1);
+  DBusBoolean dBusBoolean = DBusBoolean.valueOf(true);
+  DBusVariant variant = DBusVariant.valueOf(DBusDouble.valueOf(2.5));
+  DBusStruct struct = new DBusStruct(signature, int32, dBusBoolean, variant);
+  EncoderResult<ByteBuffer> result = encoder.encode(struct, 0);
+  int expectedBytes = 24; // 4 byte + 4 byte + 3 byte + 5 byte + 8 byte
+  assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
+  ByteBuffer buffer = result.getBuffer();
+  assertEquals(expectedBytes, buffer.remaining(), READABLE_BYTES);
   }
 
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void encodeSimpleStructWithOffset(ByteOrder byteOrder) {
-    DBusSignature signature = DBusSignature.valueOf("(ibv)");
-    Encoder<DBusStruct, ByteBuffer> encoder = new StructEncoder(byteOrder, signature);
-    DBusInt32 int32 = DBusInt32.valueOf(1);
-    DBusBoolean dBusBoolean = DBusBoolean.valueOf(true);
-    DBusVariant variant = DBusVariant.valueOf(DBusDouble.valueOf(2.5));
-    DBusStruct struct = new DBusStruct(signature, int32, dBusBoolean, variant);
-    int offset = 5;
-    EncoderResult<ByteBuffer> result = encoder.encode(struct, offset);
+  DBusSignature signature = DBusSignature.valueOf("(ibv)");
+  Encoder<DBusStruct, ByteBuffer> encoder = new StructEncoder(byteOrder, signature);
+  DBusInt32 int32 = DBusInt32.valueOf(1);
+  DBusBoolean dBusBoolean = DBusBoolean.valueOf(true);
+  DBusVariant variant = DBusVariant.valueOf(DBusDouble.valueOf(2.5));
+  DBusStruct struct = new DBusStruct(signature, int32, dBusBoolean, variant);
+  int offset = 5;
+  EncoderResult<ByteBuffer> result = encoder.encode(struct, offset);
 
-    // Offset 5 → +3 struct padding → start at 8
-    // Int32: 4 bytes (8–11)
-    // Boolean: 4 bytes (12–15)
-    // Variant:
-    //   - Signature: 3 bytes ("d" + NUL)
-    //   - Padding: 5 bytes (align to 8-byte boundary at 24)
-    //   - Double: 8 bytes (24–31)
-    int expectedBytes = 3 + 4 + 4 + 3 + 5 + 8; // = 27
+  // Offset 5 → +3 struct padding → start at 8
+  // Int32: 4 bytes (8–11)
+  // Boolean: 4 bytes (12–15)
+  // Variant:
+  //   - Signature: 3 bytes ("d" + NUL)
+  //   - Padding: 5 bytes (align to 8-byte boundary at 24)
+  //   - Double: 8 bytes (24–31)
+  int expectedBytes = 3 + 4 + 4 + 3 + 5 + 8; // = 27
 
-    assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
-    ByteBuffer buffer = result.getBuffer();
-    assertEquals(expectedBytes, buffer.remaining(), READABLE_BYTES);
+  assertEquals(expectedBytes, result.getProducedBytes(), PRODUCED_BYTES);
+  ByteBuffer buffer = result.getBuffer();
+  assertEquals(expectedBytes, buffer.remaining(), READABLE_BYTES);
   }
 }

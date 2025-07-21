@@ -25,34 +25,34 @@ final class StringDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeString(ByteOrder byteOrder) {
-    byte[] stringBytes = VALID_STRING.getBytes(StandardCharsets.UTF_8);
-    int length = stringBytes.length;
-    ByteBuffer buffer = ByteBuffer.allocate(4 + length + 1).order(byteOrder);
-    buffer.putInt(length);
-    buffer.put(stringBytes);
-    buffer.put((byte) 0x00);
-    buffer.flip();
+  byte[] stringBytes = VALID_STRING.getBytes(StandardCharsets.UTF_8);
+  int length = stringBytes.length;
+  ByteBuffer buffer = ByteBuffer.allocate(4 + length + 1).order(byteOrder);
+  buffer.putInt(length);
+  buffer.put(stringBytes);
+  buffer.put((byte) 0x00);
+  buffer.flip();
 
-    StringDecoder decoder = new StringDecoder();
-    DecoderResult<DBusString> result = decoder.decode(buffer, 0);
+  StringDecoder decoder = new StringDecoder();
+  DecoderResult<DBusString> result = decoder.decode(buffer, 0);
 
-    assertEquals(buffer.limit(), result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
-    assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    assertEquals(VALID_STRING, result.getValue().getDelegate());
+  assertEquals(buffer.limit(), result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+  assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
+  assertEquals(VALID_STRING, result.getValue().getDelegate());
   }
 
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void failDueToIndexLimitation(ByteOrder byteOrder) {
-    byte[] stringBytes = VALID_STRING.getBytes(StandardCharsets.UTF_8);
-    ByteBuffer buffer = ByteBuffer.allocate(4 + stringBytes.length + 1).order(byteOrder);
-    // Write unsigned 2147483648 as signed int = -2147483648
-    buffer.putInt(Integer.MIN_VALUE);
-    buffer.put(stringBytes);
-    buffer.put((byte) 0x00);
-    buffer.flip();
+  byte[] stringBytes = VALID_STRING.getBytes(StandardCharsets.UTF_8);
+  ByteBuffer buffer = ByteBuffer.allocate(4 + stringBytes.length + 1).order(byteOrder);
+  // Write unsigned 2147483648 as signed int = -2147483648
+  buffer.putInt(Integer.MIN_VALUE);
+  buffer.put(stringBytes);
+  buffer.put((byte) 0x00);
+  buffer.flip();
 
-    StringDecoder decoder = new StringDecoder();
-    assertThrows(DecoderException.class, () -> decoder.decode(buffer, 0));
+  StringDecoder decoder = new StringDecoder();
+  assertThrows(DecoderException.class, () -> decoder.decode(buffer, 0));
   }
 }

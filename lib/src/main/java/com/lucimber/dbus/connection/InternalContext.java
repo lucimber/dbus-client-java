@@ -198,6 +198,7 @@ final class InternalContext implements Context {
         try {
           pipeline.getConnection().close();
         } catch (Exception ignored) {
+          // Intentionally ignoring exception during emergency close
         }
       }
     } else {
@@ -216,6 +217,7 @@ final class InternalContext implements Context {
         try {
           pipeline.getConnection().close();
         } catch (Exception ignored) {
+          // Intentionally ignoring exception during emergency close
         }
       }
     } else {
@@ -232,6 +234,7 @@ final class InternalContext implements Context {
       try {
         pipeline.getConnection().close();
       } catch (Exception ignored) {
+        // Intentionally ignoring exception during emergency close
       }
     }
   }
@@ -245,6 +248,7 @@ final class InternalContext implements Context {
       try {
         pipeline.getConnection().close();
       } catch (Exception ignored) {
+        // Intentionally ignoring exception during emergency close
       }
     }
   }
@@ -258,6 +262,7 @@ final class InternalContext implements Context {
       try {
         pipeline.getConnection().close();
       } catch (Exception ignored) {
+        // Intentionally ignoring exception during emergency close
       }
     }
   }

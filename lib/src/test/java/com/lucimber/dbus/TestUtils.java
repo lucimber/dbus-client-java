@@ -12,13 +12,13 @@ import java.util.stream.Stream;
 
 public class TestUtils {
   private TestUtils() {
-    // Prevent instantiation
+  // Prevent instantiation
   }
 
   static Stream<Arguments> byteOrderProvider() {
-    return Stream.of(
+  return Stream.of(
           Arguments.of(ByteOrder.BIG_ENDIAN),
           Arguments.of(ByteOrder.LITTLE_ENDIAN)
-    );
+  );
   }
 }

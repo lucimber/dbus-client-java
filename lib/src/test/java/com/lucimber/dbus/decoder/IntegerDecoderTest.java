@@ -22,18 +22,18 @@ final class IntegerDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeSignedInteger(ByteOrder byteOrder) {
-    int testValue = -1024;
-    int testValueHex = 0xFFFFFC00;
+  int testValue = -1024;
+  int testValueHex = 0xFFFFFC00;
 
-    ByteBuffer buffer = ByteBuffer.allocate(4).order(byteOrder);
-    buffer.putInt(testValueHex);
-    buffer.flip();
+  ByteBuffer buffer = ByteBuffer.allocate(4).order(byteOrder);
+  buffer.putInt(testValueHex);
+  buffer.flip();
 
-    Int32Decoder decoder = new Int32Decoder();
-    DecoderResult<DBusInt32> result = decoder.decode(buffer, 0);
+  Int32Decoder decoder = new Int32Decoder();
+  DecoderResult<DBusInt32> result = decoder.decode(buffer, 0);
 
-    assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
-    assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    assertEquals(testValue, result.getValue().getDelegate());
+  assertEquals(4, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+  assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
+  assertEquals(testValue, result.getValue().getDelegate());
   }
 }

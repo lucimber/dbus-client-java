@@ -22,16 +22,16 @@ final class LongDecoderTest {
   @ParameterizedTest
   @MethodSource("com.lucimber.dbus.TestUtils#byteOrderProvider")
   void decodeSignedLong(ByteOrder byteOrder) {
-    long value = -9223372036854775808L;
-    ByteBuffer buffer = ByteBuffer.allocate(8).order(byteOrder);
-    buffer.putLong(value);
-    buffer.flip();
+  long value = -9223372036854775808L;
+  ByteBuffer buffer = ByteBuffer.allocate(8).order(byteOrder);
+  buffer.putLong(value);
+  buffer.flip();
 
-    Int64Decoder decoder = new Int64Decoder();
-    DecoderResult<DBusInt64> result = decoder.decode(buffer, 0);
+  Int64Decoder decoder = new Int64Decoder();
+  DecoderResult<DBusInt64> result = decoder.decode(buffer, 0);
 
-    assertEquals(8, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
-    assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-    assertEquals(value, result.getValue().getDelegate());
+  assertEquals(8, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+  assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
+  assertEquals(value, result.getValue().getDelegate());
   }
 }

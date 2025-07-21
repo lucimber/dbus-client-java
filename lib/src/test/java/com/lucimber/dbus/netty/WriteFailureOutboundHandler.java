@@ -21,11 +21,11 @@ final class WriteFailureOutboundHandler extends ChannelOutboundHandlerAdapter {
   private final Throwable cause;
 
   WriteFailureOutboundHandler(final Throwable cause) {
-    this.cause = Objects.requireNonNull(cause);
+  this.cause = Objects.requireNonNull(cause);
   }
 
   @Override
   public void write(final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise) {
-    promise.tryFailure(cause);
+  promise.tryFailure(cause);
   }
 }
