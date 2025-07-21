@@ -10,6 +10,12 @@
  * D-Bus connections. It implements a pipeline-based architecture that allows
  * for extensible message processing through custom handlers.
  * 
+ * <h2>Getting Started</h2>
+ * 
+ * <p><strong>For first-time users:</strong> Start with {@link Connection} interface documentation,
+ * then see {@link com.lucimber.dbus.netty.NettyConnection} for the concrete implementation.
+ * The {@link ConnectionConfig} class shows all available configuration options.</p>
+ * 
  * <h2>Core Concepts</h2>
  * 
  * <h3>Connection</h3>

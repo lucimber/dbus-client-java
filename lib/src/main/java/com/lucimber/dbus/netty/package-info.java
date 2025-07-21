@@ -16,6 +16,12 @@
  * low-level transport details including connection management, message framing,
  * and protocol handling.
  *
+ * <h2>Getting Started</h2>
+ *
+ * <p><strong>For first-time users:</strong> The main class you'll use is {@link NettyConnection}.
+ * Use {@link NettyConnection#newSystemBusConnection()} or {@link NettyConnection#newSessionBusConnection()}
+ * to create connections. Most other classes in this package are internal implementation details.</p>
+ *
  * <h2>Core Components</h2>
  *
  * <h3>Connection Implementation</h3>

@@ -10,6 +10,12 @@
  * All D-Bus interactions are based on four fundamental message types, each with
  * specific purposes and structures.
  * 
+ * <h2>Getting Started</h2>
+ * 
+ * <p><strong>For first-time users:</strong> Start with {@link OutboundMethodCall.Builder} to create
+ * method calls, and learn to handle {@link InboundMethodReturn} and {@link InboundError} responses.
+ * For event-driven programming, explore {@link OutboundSignal} and {@link InboundSignal}.</p>
+ * 
  * <h2>Message Types</h2>
  * 
  * <h3>Method Calls ({@link OutboundMethodCall})</h3>

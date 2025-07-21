@@ -15,6 +15,12 @@
  * used throughout the D-Bus client library. These utilities handle tasks like
  * byte manipulation, string processing, validation, and other cross-cutting concerns.
  * 
+ * <h2>Getting Started</h2>
+ * 
+ * <p><strong>For first-time users:</strong> Most utilities in this package are used internally.
+ * However, {@link LoggerUtils} can be helpful for debugging, and {@link ByteBufferPoolManager}
+ * is useful if you need to optimize memory usage in high-throughput scenarios.</p>
+ * 
  * <h2>Key Utilities</h2>
  * 
  * <h3>Byte Operations</h3>

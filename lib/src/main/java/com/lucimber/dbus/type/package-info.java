@@ -15,6 +15,13 @@
  * that ensure type safety and prevent marshalling errors. All D-Bus types are
  * represented as immutable Java objects that can be safely used across threads.
  * 
+ * <h2>Getting Started</h2>
+ * 
+ * <p><strong>For first-time users:</strong> Start with common types like {@link DBusString},
+ * {@link DBusInt32}, and {@link DBusBoolean}. For paths use {@link DBusObjectPath}, and for
+ * collections use {@link DBusArray} and {@link DBusDict}. All types use static factory methods
+ * like {@code DBusString.valueOf("hello")}.</p>
+ * 
  * <h2>Type Hierarchy</h2>
  * 
  * <p>All D-Bus types implement the {@link DBusType} interface and are organized

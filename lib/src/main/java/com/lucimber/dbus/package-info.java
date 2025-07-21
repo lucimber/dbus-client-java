@@ -23,6 +23,12 @@
  * <li><strong>Cross-Platform:</strong> Works reliably across different operating systems</li>
  * </ul>
  * 
+ * <h2>Getting Started</h2>
+ * 
+ * <p><strong>For first-time users:</strong> Start with {@link com.lucimber.dbus.netty.NettyConnection}
+ * to create a connection, then explore {@link com.lucimber.dbus.message.OutboundMethodCall} for
+ * making D-Bus method calls. The examples in the project repository provide practical demonstrations.</p>
+ * 
  * <h2>Quick Start</h2>
  * 
  * <p>Basic connection and method call example:

@@ -16,6 +16,12 @@
  * follow the official D-Bus specification and provide type-safe access to
  * standard D-Bus functionality.
  * 
+ * <h2>Getting Started</h2>
+ * 
+ * <p><strong>For first-time users:</strong> The {@link Properties} interface is commonly used
+ * for accessing D-Bus object properties. This package will expand as more standard interfaces
+ * are implemented. Most D-Bus interactions use custom interfaces specific to each service.</p>
+ * 
  * <h2>Standard Interfaces</h2>
  * 
  * <h3>Introspection Interface</h3>
