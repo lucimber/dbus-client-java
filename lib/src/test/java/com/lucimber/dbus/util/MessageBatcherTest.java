@@ -157,7 +157,8 @@ class MessageBatcherTest {
   
   // Batch should be empty after shutdown
   List<OutboundMessage> flushed = batcher.flushBatch(mockContext);
-  assertNull(flushed);
+  assertNotNull(flushed);
+  assertTrue(flushed.isEmpty());
   }
   
   @Test
