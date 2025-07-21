@@ -91,25 +91,29 @@ public final class NettyConnectionHandle implements ConnectionHandle {
     // Use RealityCheckpoint for request-response correlation
     CompletableFuture<InboundMessage> resultFuture = new CompletableFuture<>();
     
-    Future<Future<InboundMessage>> writeResult = realityCheckpoint.writeMessage(message);
-    
-    writeResult.addListener(writeFuture -> {
-      if (writeFuture.isSuccess()) {
-        // Message was successfully written, now wait for the reply
-        @SuppressWarnings("unchecked")
-        Future<InboundMessage> replyFuture = (Future<InboundMessage>) writeFuture.getNow();
-        replyFuture.addListener(replyResult -> {
-          if (replyResult.isSuccess()) {
-            resultFuture.complete((InboundMessage) replyResult.getNow());
-          } else {
-            resultFuture.completeExceptionally(replyResult.cause());
-          }
-        });
-      } else {
-        // Failed to write the message
-        resultFuture.completeExceptionally(writeFuture.cause());
-      }
-    });
+    try {
+      Future<Future<InboundMessage>> writeResult = realityCheckpoint.writeMessage(message);
+      
+      writeResult.addListener(writeFuture -> {
+        if (writeFuture.isSuccess()) {
+          // Message was successfully written, now wait for the reply
+          @SuppressWarnings("unchecked")
+          Future<InboundMessage> replyFuture = (Future<InboundMessage>) writeFuture.getNow();
+          replyFuture.addListener(replyResult -> {
+            if (replyResult.isSuccess()) {
+              resultFuture.complete((InboundMessage) replyResult.getNow());
+            } else {
+              resultFuture.completeExceptionally(replyResult.cause());
+            }
+          });
+        } else {
+          // Failed to write the message
+          resultFuture.completeExceptionally(writeFuture.cause());
+        }
+      });
+    } catch (Exception e) {
+      resultFuture.completeExceptionally(e);
+    }
     
     return resultFuture;
   }
