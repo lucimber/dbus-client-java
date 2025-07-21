@@ -16,6 +16,7 @@ import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.DBusStruct;
 import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.type.DBusVariant;
+import com.lucimber.dbus.util.ByteBufferPoolManager;
 import com.lucimber.dbus.util.FrameRecoveryManager;
 import com.lucimber.dbus.util.FrameRecoveryManager.CorruptionType;
 import com.lucimber.dbus.util.FrameRecoveryManager.FrameAnalysis;
@@ -232,10 +233,23 @@ final class FrameDecoder extends ByteToMessageDecoder {
       throw new TooLongFrameException("Body length too large: " + bodyLength);
     }
     
-    ByteBuffer body = ByteBuffer.allocate(bodyLength);
+    // Handle empty body case
+    if (bodyLength == 0) {
+      frame.setBody(ByteBuffer.allocate(0).order(frame.getByteOrder()));
+      return;
+    }
+    
+    // Use buffer pool for allocation
+    ByteBufferPoolManager poolManager = ByteBufferPoolManager.getInstance();
+    ByteBuffer body = poolManager.acquire(bodyLength, frame.getByteOrder());
+    
+    // Ensure buffer has exact capacity needed
+    if (body.capacity() > bodyLength) {
+      body.limit(bodyLength);
+    }
+    
     body.put(in.nioBuffer(in.readerIndex(), bodyLength));
     body.flip(); // Reset position to 0 and set limit for reading
-    body.order(frame.getByteOrder()); // Set byte order to match frame's byte order
     frame.setBody(body);
     in.skipBytes(bodyLength); // Advance input buffer past the body
   }

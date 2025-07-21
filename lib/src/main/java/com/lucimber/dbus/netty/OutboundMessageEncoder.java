@@ -21,7 +21,9 @@ import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusVariant;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeUtils;
+import com.lucimber.dbus.util.ByteBufferPoolManager;
 import com.lucimber.dbus.util.LoggerUtils;
+import com.lucimber.dbus.util.MemoryOptimizer;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToMessageEncoder;
@@ -47,7 +49,8 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
     LOGGER.trace(LoggerUtils.MARSHALLING, "Encoding message body.");
 
     int totalSize = 0;
-    List<ByteBuffer> values = new ArrayList<>();
+    int estimatedCapacity = MemoryOptimizer.suggestCollectionCapacity(payload.size(), 32);
+    List<ByteBuffer> values = new ArrayList<>(estimatedCapacity);
 
     for (DBusType value : payload) {
       EncoderResult<ByteBuffer> result = EncoderUtils.encode(value, totalSize, BYTE_ORDER);
@@ -55,7 +58,20 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
       values.add(result.getBuffer());
     }
 
-    ByteBuffer buffer = ByteBuffer.allocate(totalSize).order(OutboundMessageEncoder.BYTE_ORDER);
+    // Handle empty body case
+    if (totalSize == 0) {
+      return new EncoderResultImpl<>(0, ByteBuffer.allocate(0).order(BYTE_ORDER));
+    }
+    
+    // Use buffer pool for allocation
+    ByteBufferPoolManager poolManager = ByteBufferPoolManager.getInstance();
+    ByteBuffer buffer = poolManager.acquire(totalSize, BYTE_ORDER);
+    
+    // Ensure buffer has exact capacity needed
+    if (buffer.capacity() > totalSize) {
+      buffer.limit(totalSize);
+    }
+    
     for (ByteBuffer bb : values) {
       buffer.put(bb);
     }
@@ -99,7 +115,8 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
   private static Map<HeaderField, DBusVariant> buildHeaderFieldsForSignal(OutboundSignal msg) {
     LOGGER.trace(LoggerUtils.MARSHALLING, "Building header fields for signal message.");
 
-    HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>();
+    // Pre-size map: 3 required fields + 2 optional
+    HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>(MemoryOptimizer.suggestCollectionCapacity(5, 64));
     DBusVariant pathVariant = DBusVariant.valueOf(msg.getObjectPath());
     headerFields.put(HeaderField.PATH, pathVariant);
     DBusVariant interfaceVariant = DBusVariant.valueOf(msg.getInterfaceName());
@@ -121,7 +138,8 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
   private static Map<HeaderField, DBusVariant> buildHeaderFieldsForMethodReturn(OutboundMethodReturn msg) {
     LOGGER.trace(LoggerUtils.MARSHALLING, "Building header fields for method return message.");
 
-    HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>();
+    // Pre-size map: 1 required field + 2 optional
+    HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>(MemoryOptimizer.suggestCollectionCapacity(3, 64));
     DBusVariant replySerialVariant = DBusVariant.valueOf(msg.getReplySerial());
     headerFields.put(HeaderField.REPLY_SERIAL, replySerialVariant);
     msg.getDestination().ifPresent(destination -> {
@@ -139,7 +157,8 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
   private static Map<HeaderField, DBusVariant> buildHeaderFieldsForMethodCall(OutboundMethodCall msg) {
     LOGGER.trace(LoggerUtils.MARSHALLING, "Building header fields for method call message.");
 
-    HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>();
+    // Pre-size map: 2 required fields + 3 optional
+    HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>(MemoryOptimizer.suggestCollectionCapacity(5, 64));
     DBusVariant pathVariant = DBusVariant.valueOf(msg.getObjectPath());
     headerFields.put(HeaderField.PATH, pathVariant);
     DBusVariant memberVariant = DBusVariant.valueOf(msg.getMember());
@@ -163,7 +182,8 @@ final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessa
   private static Map<HeaderField, DBusVariant> buildHeaderFieldsForError(OutboundError msg) {
     LOGGER.trace(LoggerUtils.MARSHALLING, "Building header fields for error message.");
 
-    HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>();
+    // Pre-size map: 2 required fields + 2 optional
+    HashMap<HeaderField, DBusVariant> headerFields = new HashMap<>(MemoryOptimizer.suggestCollectionCapacity(4, 64));
     DBusVariant errorNameVariant = DBusVariant.valueOf(msg.getErrorName());
     headerFields.put(HeaderField.ERROR_NAME, errorNameVariant);
     DBusVariant replySerialVariant = DBusVariant.valueOf(msg.getReplySerial());
