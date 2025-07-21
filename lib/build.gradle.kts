@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import org.gradle.external.javadoc.StandardJavadocDocletOptions
+
 plugins {
     id("java-library")
     id("maven-publish")
@@ -136,8 +138,20 @@ tasks.named<JavaCompile>("compileTestJava") {
 }
 
 tasks.named<Javadoc>("javadoc") {
-    options.windowTitle = project.name
-    options.encoding = "UTF-8"
+    (options as StandardJavadocDocletOptions).apply {
+        windowTitle = "D-Bus Client Java API ${project.version}"
+        docTitle = "D-Bus Client Java API Documentation"
+        header = "<b>D-Bus Client Java ${project.version}</b>"
+        // footer option is deprecated in newer Java versions
+        encoding = "UTF-8"
+        charSet = "UTF-8"
+        author(true)
+        version(true)
+        use(true)
+        splitIndex(true)
+        addBooleanOption("Xdoclint:none", true)
+        addStringOption("Xmaxwarns", "1")
+    }
 }
 
 tasks.named<Jar>("jar") {
