@@ -42,7 +42,6 @@ class ServiceInteractionIntegrationTest extends DBusIntegrationTestBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceInteractionIntegrationTest.class);
 
     @Test
-    @Disabled("Requires sendRequest() implementation - TODO: remove when request-response correlation is implemented")
     void testServiceDiscovery() throws Exception {
         Connection connection = createConnection();
         
@@ -93,7 +92,6 @@ class ServiceInteractionIntegrationTest extends DBusIntegrationTestBase {
     }
 
     @Test
-    @Disabled("Requires sendRequest() implementation - TODO: remove when request-response correlation is implemented")
     void testServiceActivation() throws Exception {
         Connection connection = createConnection();
         
@@ -138,7 +136,6 @@ class ServiceInteractionIntegrationTest extends DBusIntegrationTestBase {
     }
 
     @Test
-    @Disabled("Requires sendRequest() implementation - TODO: remove when request-response correlation is implemented")
     void testDetailedIntrospection() throws Exception {
         Connection connection = createConnection();
         
@@ -196,7 +193,6 @@ class ServiceInteractionIntegrationTest extends DBusIntegrationTestBase {
     }
 
     @Test
-    @Disabled("Requires sendRequest() implementation - TODO: remove when request-response correlation is implemented")
     void testServiceOwnership() throws Exception {
         Connection connection = createConnection();
         
@@ -284,7 +280,6 @@ class ServiceInteractionIntegrationTest extends DBusIntegrationTestBase {
     }
 
     @Test
-    @Disabled("Requires sendRequest() implementation - TODO: remove when request-response correlation is implemented")
     void testConnectionUniqueName() throws Exception {
         Connection connection = createConnection();
         
@@ -349,7 +344,6 @@ class ServiceInteractionIntegrationTest extends DBusIntegrationTestBase {
     }
 
     @Test
-    @Disabled("Requires sendRequest() implementation - TODO: remove when request-response correlation is implemented")
     void testMultipleObjectPaths() throws Exception {
         Connection connection = createConnection();
         

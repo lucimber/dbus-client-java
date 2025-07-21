@@ -34,12 +34,14 @@ public final class NettyConnectionHandle implements ConnectionHandle {
   private final Channel channel;
   private final EventLoopGroup eventLoopGroup;
   private final ConnectionConfig config;
+  private final RealityCheckpoint realityCheckpoint;
   private final AtomicBoolean closing = new AtomicBoolean(false);
 
-  public NettyConnectionHandle(Channel channel, EventLoopGroup eventLoopGroup, ConnectionConfig config) {
+  public NettyConnectionHandle(Channel channel, EventLoopGroup eventLoopGroup, ConnectionConfig config, RealityCheckpoint realityCheckpoint) {
     this.channel = channel;
     this.eventLoopGroup = eventLoopGroup;
     this.config = config;
+    this.realityCheckpoint = realityCheckpoint;
   }
 
   @Override
@@ -80,11 +82,36 @@ public final class NettyConnectionHandle implements ConnectionHandle {
       return future;
     }
 
-    // TODO: Implement request-response correlation
-    // This would need to work with RealityCheckpoint to correlate requests and responses
-    CompletableFuture<InboundMessage> future = new CompletableFuture<>();
-    future.completeExceptionally(new UnsupportedOperationException("Request-response not yet implemented"));
-    return future;
+    if (realityCheckpoint == null) {
+      CompletableFuture<InboundMessage> future = new CompletableFuture<>();
+      future.completeExceptionally(new IllegalStateException("RealityCheckpoint not available"));
+      return future;
+    }
+
+    // Use RealityCheckpoint for request-response correlation
+    CompletableFuture<InboundMessage> resultFuture = new CompletableFuture<>();
+    
+    Future<Future<InboundMessage>> writeResult = realityCheckpoint.writeMessage(message);
+    
+    writeResult.addListener(writeFuture -> {
+      if (writeFuture.isSuccess()) {
+        // Message was successfully written, now wait for the reply
+        @SuppressWarnings("unchecked")
+        Future<InboundMessage> replyFuture = (Future<InboundMessage>) writeFuture.getNow();
+        replyFuture.addListener(replyResult -> {
+          if (replyResult.isSuccess()) {
+            resultFuture.complete((InboundMessage) replyResult.getNow());
+          } else {
+            resultFuture.completeExceptionally(replyResult.cause());
+          }
+        });
+      } else {
+        // Failed to write the message
+        resultFuture.completeExceptionally(writeFuture.cause());
+      }
+    });
+    
+    return resultFuture;
   }
 
   @Override

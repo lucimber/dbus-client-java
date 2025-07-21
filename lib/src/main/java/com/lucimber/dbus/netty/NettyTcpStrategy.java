@@ -48,6 +48,8 @@ public final class NettyTcpStrategy implements ConnectionStrategy {
     Promise<Void> nettyConnectPromise = workerGroup.next().newPromise();
     CompletableFuture<ConnectionHandle> handleFuture = new CompletableFuture<>();
 
+    RealityCheckpoint realityCheckpoint = createRealityCheckpoint(context, config);
+
     Bootstrap bootstrap = new Bootstrap();
     bootstrap.group(workerGroup)
             .channel(NioSocketChannel.class)
@@ -56,7 +58,7 @@ public final class NettyTcpStrategy implements ConnectionStrategy {
             .option(ChannelOption.SO_REUSEADDR, true)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) config.getConnectTimeout().toMillis())
             .handler(new DBusChannelInitializer(
-                    createRealityCheckpoint(context, config),
+                    realityCheckpoint,
                     nettyConnectPromise));
 
     LOGGER.info("Attempting TCP connection to {}", address);
@@ -66,7 +68,7 @@ public final class NettyTcpStrategy implements ConnectionStrategy {
       if (future.isSuccess()) {
         LOGGER.debug("TCP connection established to {}", address);
         // Create handle but wait for D-Bus handshake completion before resolving the future
-        NettyConnectionHandle handle = new NettyConnectionHandle(channelFuture.channel(), workerGroup, config);
+        NettyConnectionHandle handle = new NettyConnectionHandle(channelFuture.channel(), workerGroup, config, realityCheckpoint);
 
         // The nettyConnectPromise will be completed by ConnectionCompletionHandler
         // when MANDATORY_NAME_ACQUIRED event is received

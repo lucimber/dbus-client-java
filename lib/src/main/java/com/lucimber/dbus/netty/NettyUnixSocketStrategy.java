@@ -58,11 +58,13 @@ public final class NettyUnixSocketStrategy implements ConnectionStrategy {
     Promise<Void> nettyConnectPromise = workerGroup.next().newPromise();
     CompletableFuture<ConnectionHandle> handleFuture = new CompletableFuture<>();
 
+    RealityCheckpoint realityCheckpoint = createRealityCheckpoint(context, config);
+
     Bootstrap bootstrap = new Bootstrap();
     bootstrap.group(workerGroup)
             .channel(getChannelClass())
             .handler(new DBusChannelInitializer(
-                    createRealityCheckpoint(context, config),
+                    realityCheckpoint,
                     nettyConnectPromise));
 
     LOGGER.info("Attempting Unix domain socket connection to {}", address);
@@ -72,7 +74,7 @@ public final class NettyUnixSocketStrategy implements ConnectionStrategy {
       if (future.isSuccess()) {
         LOGGER.debug("Unix domain socket connection established to {}", address);
         // Create handle but wait for D-Bus handshake completion before resolving the future
-        NettyConnectionHandle handle = new NettyConnectionHandle(channelFuture.channel(), workerGroup, config);
+        NettyConnectionHandle handle = new NettyConnectionHandle(channelFuture.channel(), workerGroup, config, realityCheckpoint);
 
         // The nettyConnectPromise will be completed by ConnectionCompletionHandler
         // when MANDATORY_NAME_ACQUIRED event is received

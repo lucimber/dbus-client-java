@@ -45,7 +45,6 @@ class PerformanceIntegrationTest extends DBusIntegrationTestBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(PerformanceIntegrationTest.class);
 
     @Test
-    @Disabled("Requires sendRequest() implementation - TODO: remove when request-response correlation is implemented")
     void testConcurrentConnections() throws Exception {
         int connectionCount = 10;
         List<Connection> connections = new ArrayList<>();
@@ -122,7 +121,6 @@ class PerformanceIntegrationTest extends DBusIntegrationTestBase {
     }
 
     @Test
-    @Disabled("Requires sendRequest() implementation - TODO: remove when request-response correlation is implemented")
     void testHighThroughputRequests() throws Exception {
         Connection connection = createConnection();
         
@@ -198,7 +196,6 @@ class PerformanceIntegrationTest extends DBusIntegrationTestBase {
     }
 
     @Test
-    @Disabled("Requires sendRequest() implementation - TODO: remove when request-response correlation is implemented")
     void testConnectionPooling() throws Exception {
         int poolSize = 5;
         int requestsPerConnection = 20;
@@ -292,7 +289,6 @@ class PerformanceIntegrationTest extends DBusIntegrationTestBase {
     }
 
     @Test
-    @Disabled("Requires sendRequest() implementation - TODO: remove when request-response correlation is implemented")
     void testMemoryUsageUnderLoad() throws Exception {
         // Force garbage collection before test
         System.gc();
@@ -359,7 +355,6 @@ class PerformanceIntegrationTest extends DBusIntegrationTestBase {
     }
 
     @Test
-    @Disabled("Requires sendRequest() implementation - TODO: remove when request-response correlation is implemented")
     void testConnectionRecoveryUnderLoad() throws Exception {
         ConnectionConfig config = ConnectionConfig.builder()
             .withConnectTimeout(Duration.ofSeconds(30))
