@@ -292,8 +292,9 @@ class PerformanceIntegrationTest extends DBusIntegrationTestBase {
     }
 
     @Test
+    @SuppressWarnings("PMD.DoNotCallGarbageCollectionExplicitly")
     void testMemoryUsageUnderLoad() throws Exception {
-        // Force garbage collection before test
+        // Force garbage collection before test - intentional for memory benchmarking
         System.gc();
         Thread.sleep(1000);
         
