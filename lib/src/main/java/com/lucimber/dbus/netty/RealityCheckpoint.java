@@ -50,6 +50,7 @@ public class RealityCheckpoint extends ChannelDuplexHandler {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RealityCheckpoint.class);
   private static final long DEFAULT_METHOD_CALL_TIMEOUT_MS = 30_000; // 30 seconds
+  private static final int MAX_PENDING_METHOD_CALLS = 1000; // Prevent unbounded memory growth
 
   private final ConcurrentHashMap<DBusUInt32, PendingMethodCall> pendingMethodCalls;
   private final ExecutorService applicationTaskExecutor; // For offloading user code
@@ -162,7 +163,13 @@ public class RealityCheckpoint extends ChannelDuplexHandler {
           }
         }, timeoutMs, TimeUnit.MILLISECONDS);
 
-        pendingMethodCalls.put(msg.getSerial(), new PendingMethodCall(replyPromise, timeoutFuture));
+        // Check if we're approaching memory limit and clean up old entries if needed
+        if (pendingMethodCalls.size() >= MAX_PENDING_METHOD_CALLS) {
+          LOGGER.warn("Pending method calls limit reached ({}), cleaning up oldest entries", MAX_PENDING_METHOD_CALLS);
+          cleanupOldestPendingCalls();
+        }
+        
+        pendingMethodCalls.put(msg.getSerial(), new PendingMethodCall(replyPromise, timeoutFuture, System.currentTimeMillis()));
       } else {
         replyPromise.trySuccess(null);
       }
@@ -309,8 +316,32 @@ public class RealityCheckpoint extends ChannelDuplexHandler {
   }
 
   /**
-   * Record for tracking pending method calls with their timeout futures.
+   * Cleanup the oldest pending method calls when approaching memory limit.
+   * Removes up to 10% of entries, targeting the oldest ones first.
    */
-  private record PendingMethodCall(Promise<InboundMessage> promise, ScheduledFuture<?> timeoutFuture) {
+  private void cleanupOldestPendingCalls() {
+    int targetRemovalCount = Math.max(1, pendingMethodCalls.size() / 10);
+    long cutoffTime = System.currentTimeMillis() - (methodCallTimeoutMs / 2); // Cleanup calls older than half timeout
+    
+    pendingMethodCalls.entrySet().removeIf(entry -> {
+      PendingMethodCall pendingCall = entry.getValue();
+      if (pendingCall.timestamp() < cutoffTime || pendingCall.promise().isDone()) {
+        pendingCall.timeoutFuture().cancel(false);
+        if (!pendingCall.promise().isDone()) {
+          pendingCall.promise().tryFailure(new TimeoutException("Method call evicted due to memory pressure"));
+        }
+        return true;
+      }
+      return false;
+    });
+    
+    LOGGER.debug("Cleaned up {} old pending method calls, {} remaining", 
+        targetRemovalCount, pendingMethodCalls.size());
+  }
+
+  /**
+   * Record for tracking pending method calls with their timeout futures and timestamps.
+   */
+  private record PendingMethodCall(Promise<InboundMessage> promise, ScheduledFuture<?> timeoutFuture, long timestamp) {
   }
 }

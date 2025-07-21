@@ -170,7 +170,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
       if (frame.getBody().hasRemaining()) {
         payload = decodeFrameBody(frame.getBody(), sig.get());
       } else {
-        payload = new ArrayList<>();
+        payload = new ArrayList<>(0); // Empty payload, size efficiently
       }
     }
     var builder = InboundError.Builder.create()
@@ -199,7 +199,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
       if (frame.getBody().hasRemaining()) {
         payload = decodeFrameBody(frame.getBody(), sig.get());
       } else {
-        payload = new ArrayList<>();
+        payload = new ArrayList<>(0); // Empty payload, size efficiently
       }
     }
     var builder = InboundMethodCall.Builder.create()
@@ -229,7 +229,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
       if (frame.getBody().hasRemaining()) {
         payload = decodeFrameBody(frame.getBody(), sig.get());
       } else {
-        payload = new ArrayList<>();
+        payload = new ArrayList<>(0); // Empty payload, size efficiently
       }
     }
     var builder = InboundMethodReturn.Builder.create()
@@ -260,7 +260,7 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
       if (frame.getBody().hasRemaining()) {
         payload = decodeFrameBody(frame.getBody(), sig.get());
       } else {
-        payload = new ArrayList<>();
+        payload = new ArrayList<>(0); // Empty payload, size efficiently
       }
     }
     var builder = InboundSignal.Builder.create()
@@ -277,7 +277,9 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
 
   private static List<DBusType> decodeFrameBody(ByteBuffer body, DBusSignature sig) {
     LOGGER.trace(LoggerUtils.MARSHALLING, "Decoding frame body.");
-    ArrayList<DBusType> list = new ArrayList<>();
+    // Pre-size the list based on signature quantity for better memory efficiency
+    int expectedSize = sig.getQuantity() > 0 ? sig.getQuantity() : 1;
+    ArrayList<DBusType> list = new ArrayList<>(expectedSize);
     try {
       if (sig.getQuantity() == 1) {
         int offset = 0;
