@@ -1,0 +1,148 @@
+name: Generate and Deploy Javadoc
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  javadoc:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+      
+    - name: Generate Javadoc
+      run: ./gradlew javadoc
+      
+    - name: Determine version and prepare content
+      run: |
+        # Determine version
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "IS_RELEASE=true" >> $GITHUB_ENV
+        else
+          VERSION="latest"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "IS_RELEASE=false" >> $GITHUB_ENV
+        fi
+        
+        # Create version-specific directories
+        mkdir -p _site/$VERSION
+        cp -r lib/build/docs/javadoc/* _site/$VERSION/
+        
+        # For releases, also update 'latest' and create/update version index
+        if [[ $IS_RELEASE == "true" ]]; then
+          # Update latest
+          mkdir -p _site/latest
+          cp -r lib/build/docs/javadoc/* _site/latest/
+          
+          # Create version entry for index
+          echo "$VERSION" >> versions.txt
+        else
+          # For main branch, just update latest
+          mkdir -p _site/latest
+          cp -r lib/build/docs/javadoc/* _site/latest/
+        fi
+        
+    - name: Download existing site (for version history)
+      continue-on-error: true
+      run: |
+        # Try to download existing site to preserve version history
+        curl -s -f -o existing-site.tar.gz \
+          "https://github.com/${{ github.repository }}/archive/gh-pages.tar.gz" || true
+        
+        if [ -f existing-site.tar.gz ]; then
+          tar -xzf existing-site.tar.gz --strip-components=1 || true
+          
+          # Copy existing versions (preserve version history)
+          if [ -d existing_versions ]; then
+            cp -r existing_versions/* _site/ 2>/dev/null || true
+          fi
+          
+          # Merge version lists
+          if [ -f existing_versions.json ]; then
+            cp existing_versions.json _site/ || true
+          fi
+        fi
+        
+    - name: Generate version index and main page
+      run: |
+        # Collect all versions
+        cd _site
+        VERSIONS=$(find . -maxdepth 1 -type d -name 'v*' -o -name 'latest' | sed 's|./||' | sort -V -r)
+        
+        # Generate versions.json for API consumption
+        echo '{"versions": [' > versions.json
+        first=true
+        for version in $VERSIONS; do
+          if [ "$first" = true ]; then
+            first=false
+          else
+            echo ',' >> versions.json
+          fi
+          if [ "$version" = "latest" ]; then
+            echo "  {\"name\": \"latest\", \"url\": \"./latest/\", \"title\": \"Latest (Development)\"}" >> versions.json
+          else
+            echo "  {\"name\": \"$version\", \"url\": \"./$version/\", \"title\": \"Version $version\"}" >> versions.json
+          fi
+        done
+        echo ']}' >> versions.json
+        
+        # Copy the dynamic index page template
+        cp ../docs/index-template.html index.html
+        
+        # Add version switcher to all Javadoc HTML files
+        cp ../docs/version-switcher.js version-switcher.js
+        
+        # Inject version switcher script into all HTML files in version directories
+        for version_dir in */; do
+          if [ -d "$version_dir" ]; then
+            find "$version_dir" -name "*.html" -type f -exec sed -i 's|</body>|<script src="/version-switcher.js"></script></body>|g' {} \;
+          fi
+        done
+        
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '_site'
+        
+  deploy:
+    needs: javadoc
+    if: github.ref == 'refs/heads/main'
+    
+    runs-on: ubuntu-latest
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
