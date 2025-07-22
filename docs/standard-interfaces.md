@@ -2,6 +2,13 @@
 
 This guide explains how to use the standard D-Bus interfaces provided by the library.
 
+## Two Approaches
+
+The library provides two ways to implement standard D-Bus interfaces:
+
+1. **Manual Implementation** - Direct handling of method calls in your handler
+2. **Annotation-Based** - Use annotations and let the framework handle the details
+
 ## Available Standard Interfaces
 
 The library provides Java interfaces for the following standard D-Bus interfaces:
@@ -76,7 +83,7 @@ OutboundMethodCall pingCall = OutboundMethodCall.Builder.create()
 
 ## Server-Side Implementation
 
-### Implementing Standard Interfaces
+### Approach 1: Manual Implementation
 
 While the library provides the interface definitions, you need to handle the method calls in your service:
 
@@ -111,14 +118,62 @@ public class StandardInterfacesHandler implements InboundHandler {
 }
 ```
 
+### Approach 2: Annotation-Based Implementation (Recommended)
+
+Use annotations to define your D-Bus service and let the framework handle standard interfaces:
+
+```java
+@DBusInterface("com.example.MyService")
+public class MyService {
+    
+    @DBusProperty(name = "Version")
+    private String version = "1.0.0";
+    
+    @DBusProperty
+    private int count = 0;
+    
+    @DBusMethod(name = "Echo")
+    public String echo(String message) {
+        count++;
+        return message;
+    }
+    
+    @DBusMethod
+    public void reset() {
+        count = 0;
+    }
+    
+    @DBusSignal(name = "CountChanged")
+    public void emitCountChanged(int oldValue, int newValue) {
+        // Signal emission handled by framework
+    }
+}
+
+// Register the service
+MyService service = new MyService();
+StandardInterfaceHandler handler = new StandardInterfaceHandler(
+    "/com/example/MyService", service);
+connection.getPipeline().addLast("myservice", handler);
+```
+
+The `StandardInterfaceHandler` automatically provides:
+- **Introspectable**: Generates XML from annotations
+- **Properties**: Get/Set/GetAll for `@DBusProperty` fields/methods
+- **Peer**: Standard Ping and GetMachineId implementation
+
 ### Running the Server Example
 
-1. Start the server:
+1. Start the manual implementation server:
 ```bash
 ./gradlew :examples:run -PmainClass=com.lucimber.dbus.examples.StandardInterfacesServer
 ```
 
-2. In another terminal, test with the client:
+2. Or start the annotation-based server:
+```bash
+./gradlew :examples:run -PmainClass=com.lucimber.dbus.examples.AnnotationBasedService
+```
+
+3. In another terminal, test with the client:
 ```bash
 ./gradlew :examples:run -PmainClass=com.lucimber.dbus.examples.StandardInterfacesExample
 ```
