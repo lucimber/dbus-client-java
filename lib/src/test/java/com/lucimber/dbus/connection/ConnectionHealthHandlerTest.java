@@ -12,7 +12,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
 import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -200,28 +202,32 @@ class ConnectionHealthHandlerTest {
   @Test
   void testHealthCheckResponseHandling() {
     handler.onHandlerAdded(mockContext);
+    handler.onConnectionActive(mockContext);
     
     // Create a mock health check response
     InboundMethodReturn healthResponse = mock(InboundMethodReturn.class);
     DBusUInt32 serial = DBusUInt32.valueOf(123);
     when(healthResponse.getReplySerial()).thenReturn(serial);
     
-    handler.onConnectionActive(mockContext);
-    
-    // First trigger a health check to register the serial
-    when(mockConnection.getNextSerial()).thenReturn(serial);
-    handler.triggerHealthCheck();
-    
-    // Small delay to ensure health check is initiated
+    // Manually register the serial as a pending health check
+    // (simulating what would happen during a real health check)
+    CompletableFuture<InboundMessage> future = new CompletableFuture<>();
     try {
-      Thread.sleep(50);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
+      Field pendingField = ConnectionHealthHandler.class.getDeclaredField("pendingHealthChecks");
+      pendingField.setAccessible(true);
+      Map<DBusUInt32, CompletableFuture<InboundMessage>> pendingHealthChecks = 
+          (Map<DBusUInt32, CompletableFuture<InboundMessage>>) pendingField.get(handler);
+      pendingHealthChecks.put(serial, future);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
     
     // Now handle the response - should not propagate
     handler.handleInboundMessage(mockContext, healthResponse);
     verify(mockContext, never()).propagateInboundMessage(any());
+    
+    // Verify the future was completed
+    assertTrue(future.isDone());
   }
 
   @Test

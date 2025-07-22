@@ -5,9 +5,9 @@
 
 package com.lucimber.dbus.netty;
 
-import com.lucimber.dbus.encoder.Encoder;
-import com.lucimber.dbus.encoder.EncoderResult;
-import com.lucimber.dbus.encoder.StringEncoder;
+import com.lucimber.dbus.codec.encoder.Encoder;
+import com.lucimber.dbus.codec.encoder.EncoderResult;
+import com.lucimber.dbus.codec.encoder.StringEncoder;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.type.DBusString;

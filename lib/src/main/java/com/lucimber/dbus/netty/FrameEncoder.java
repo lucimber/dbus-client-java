@@ -8,11 +8,11 @@ package com.lucimber.dbus.netty;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
-import com.lucimber.dbus.encoder.ArrayEncoder;
-import com.lucimber.dbus.encoder.Encoder;
-import com.lucimber.dbus.encoder.EncoderResult;
-import com.lucimber.dbus.encoder.Int32Encoder;
-import com.lucimber.dbus.encoder.UInt32Encoder;
+import com.lucimber.dbus.codec.encoder.ArrayEncoder;
+import com.lucimber.dbus.codec.encoder.Encoder;
+import com.lucimber.dbus.codec.encoder.EncoderResult;
+import com.lucimber.dbus.codec.encoder.Int32Encoder;
+import com.lucimber.dbus.codec.encoder.UInt32Encoder;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.type.DBusArray;

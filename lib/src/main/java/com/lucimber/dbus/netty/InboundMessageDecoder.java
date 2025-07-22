@@ -5,7 +5,7 @@
 
 package com.lucimber.dbus.netty;
 
-import com.lucimber.dbus.decoder.DecoderUtils;
+import com.lucimber.dbus.codec.decoder.DecoderUtils;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.InboundError;
 import com.lucimber.dbus.message.InboundMessage;

@@ -5,9 +5,9 @@
 
 package com.lucimber.dbus.netty;
 
-import com.lucimber.dbus.encoder.EncoderResult;
-import com.lucimber.dbus.encoder.EncoderResultImpl;
-import com.lucimber.dbus.encoder.EncoderUtils;
+import com.lucimber.dbus.codec.encoder.EncoderResult;
+import com.lucimber.dbus.codec.encoder.EncoderResultImpl;
+import com.lucimber.dbus.codec.encoder.EncoderUtils;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.message.OutboundError;

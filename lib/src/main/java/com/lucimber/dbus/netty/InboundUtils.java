@@ -10,7 +10,7 @@
 
 package com.lucimber.dbus.netty;
 
-import com.lucimber.dbus.decoder.DecoderException;
+import com.lucimber.dbus.codec.decoder.DecoderException;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageFlag;
 import com.lucimber.dbus.message.MessageType;

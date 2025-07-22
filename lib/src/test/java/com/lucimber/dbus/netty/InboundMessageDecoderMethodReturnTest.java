@@ -5,9 +5,9 @@
 
 package com.lucimber.dbus.netty;
 
-import com.lucimber.dbus.encoder.EncoderResult;
-import com.lucimber.dbus.encoder.EncoderResultImpl;
-import com.lucimber.dbus.encoder.EncoderUtils;
+import com.lucimber.dbus.codec.encoder.EncoderResult;
+import com.lucimber.dbus.codec.encoder.EncoderResultImpl;
+import com.lucimber.dbus.codec.encoder.EncoderUtils;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.InboundMethodReturn;
 import com.lucimber.dbus.message.MessageType;
@@ -33,7 +33,7 @@ final class InboundMessageDecoderMethodReturnTest {
   int localByteCount = 0;
   List<ByteBuffer> values = new ArrayList<>();
   for (DBusType dbusObject : args) {
-      final com.lucimber.dbus.encoder.EncoderResult<ByteBuffer> result = EncoderUtils.encode(dbusObject, localByteCount, byteOrder);
+      final com.lucimber.dbus.codec.encoder.EncoderResult<ByteBuffer> result = EncoderUtils.encode(dbusObject, localByteCount, byteOrder);
       localByteCount += result.getProducedBytes();
       values.add(result.getBuffer());
   }

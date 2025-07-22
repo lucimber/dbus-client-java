@@ -5,8 +5,8 @@
 
 package com.lucimber.dbus.netty;
 
-import com.lucimber.dbus.encoder.EncoderResult;
-import com.lucimber.dbus.encoder.EncoderUtils;
+import com.lucimber.dbus.codec.encoder.EncoderResult;
+import com.lucimber.dbus.codec.encoder.EncoderUtils;
 import com.lucimber.dbus.message.*;
 import com.lucimber.dbus.type.*;
 import io.netty.channel.embedded.EmbeddedChannel;

@@ -5,11 +5,11 @@
 
 package com.lucimber.dbus.netty;
 
-import com.lucimber.dbus.decoder.ArrayDecoder;
-import com.lucimber.dbus.decoder.Decoder;
-import com.lucimber.dbus.decoder.DecoderException;
-import com.lucimber.dbus.decoder.DecoderResult;
-import com.lucimber.dbus.decoder.UInt32Decoder;
+import com.lucimber.dbus.codec.decoder.ArrayDecoder;
+import com.lucimber.dbus.codec.decoder.Decoder;
+import com.lucimber.dbus.codec.decoder.DecoderException;
+import com.lucimber.dbus.codec.decoder.DecoderResult;
+import com.lucimber.dbus.codec.decoder.UInt32Decoder;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.type.DBusArray;
 import com.lucimber.dbus.type.DBusSignature;
