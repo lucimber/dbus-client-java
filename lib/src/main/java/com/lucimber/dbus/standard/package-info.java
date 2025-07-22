@@ -18,9 +18,11 @@
  * 
  * <h2>Getting Started</h2>
  * 
- * <p><strong>For first-time users:</strong> The {@link Properties} interface is commonly used
- * for accessing D-Bus object properties. This package will expand as more standard interfaces
- * are implemented. Most D-Bus interactions use custom interfaces specific to each service.</p>
+ * <p><strong>For first-time users:</strong> Start with {@link Introspectable} to discover
+ * available interfaces and methods, then use {@link Properties} for property access.
+ * The {@link Peer} interface provides connectivity testing, while {@link ObjectManager}
+ * enables efficient object hierarchy discovery. Most D-Bus interactions use custom
+ * interfaces specific to each service.</p>
  * 
  * <h2>Standard Interfaces</h2>
  * 
@@ -124,6 +126,44 @@
  *     .withDestination(DBusString.valueOf("org.example.Service"))
  *     .withReplyExpected(true)
  *     .build();
+ * }</pre>
+ * 
+ * <h3>ObjectManager Interface</h3>
+ * <p>The {@code org.freedesktop.DBus.ObjectManager} interface provides efficient
+ * enumeration of object hierarchies:
+ * 
+ * <pre>{@code
+ * // Get all managed objects
+ * OutboundMethodCall getManagedObjects = OutboundMethodCall.Builder
+ *     .create()
+ *     .withPath(DBusObjectPath.valueOf("/org/example"))
+ *     .withInterface(DBusString.valueOf("org.freedesktop.DBus.ObjectManager"))
+ *     .withMember(DBusString.valueOf("GetManagedObjects"))
+ *     .withDestination(DBusString.valueOf("org.example.Service"))
+ *     .withReplyExpected(true)
+ *     .build();
+ * 
+ * CompletableFuture<InboundMessage> response = connection.sendRequest(getManagedObjects);
+ * response.thenAccept(reply -> {
+ *     if (reply instanceof InboundMethodReturn) {
+ *         InboundMethodReturn returnMsg = (InboundMethodReturn) reply;
+ *         List<DBusType> body = returnMsg.getBody();
+ *         if (!body.isEmpty()) {
+ *             DBusDict<DBusObjectPath, DBusDict<DBusString, DBusDict<DBusString, DBusVariant>>>
+ *                 managedObjects = (DBusDict) body.get(0);
+ *             
+ *             managedObjects.forEach((path, interfaces) -> {
+ *                 System.out.println("Object: " + path);
+ *                 interfaces.forEach((iface, properties) -> {
+ *                     System.out.println("  Interface: " + iface);
+ *                     properties.forEach((prop, value) -> {
+ *                         System.out.println("    " + prop + " = " + value);
+ *                     });
+ *                 });
+ *             });
+ *         }
+ *     }
+ * });
  * }</pre>
  * 
  * <h2>Bus Interface</h2>
@@ -243,6 +283,56 @@
  *         }
  *     }
  * });
+ * 
+ * // Handle ObjectManager InterfacesAdded/Removed signals
+ * connection.getPipeline().addLast("object-manager-handler", new AbstractInboundHandler() {
+ *     @Override
+ *     public void handleInboundMessage(Context ctx, InboundMessage msg) {
+ *         if (msg instanceof InboundSignal) {
+ *             InboundSignal signal = (InboundSignal) msg;
+ *             String interfaceName = signal.getInterfaceName()
+ *                 .map(DBusString::toString)
+ *                 .orElse("");
+ *             String memberName = signal.getMember().toString();
+ *             
+ *             if ("org.freedesktop.DBus.ObjectManager".equals(interfaceName)) {
+ *                 if ("InterfacesAdded".equals(memberName)) {
+ *                     handleInterfacesAdded(signal);
+ *                 } else if ("InterfacesRemoved".equals(memberName)) {
+ *                     handleInterfacesRemoved(signal);
+ *                 }
+ *             }
+ *         }
+ *         ctx.propagateInboundMessage(msg);
+ *     }
+ *     
+ *     private void handleInterfacesAdded(InboundSignal signal) {
+ *         List<DBusType> arguments = signal.getBody();
+ *         if (arguments.size() >= 2) {
+ *             DBusObjectPath objectPath = (DBusObjectPath) arguments.get(0);
+ *             DBusDict<DBusString, DBusDict<DBusString, DBusVariant>> interfaces = 
+ *                 (DBusDict) arguments.get(1);
+ *             
+ *             System.out.println("Interfaces added to " + objectPath);
+ *             interfaces.forEach((iface, properties) -> {
+ *                 System.out.println("  Interface: " + iface);
+ *             });
+ *         }
+ *     }
+ *     
+ *     private void handleInterfacesRemoved(InboundSignal signal) {
+ *         List<DBusType> arguments = signal.getBody();
+ *         if (arguments.size() >= 2) {
+ *             DBusObjectPath objectPath = (DBusObjectPath) arguments.get(0);
+ *             DBusArray<DBusString> interfaces = (DBusArray) arguments.get(1);
+ *             
+ *             System.out.println("Interfaces removed from " + objectPath);
+ *             interfaces.forEach(iface -> {
+ *                 System.out.println("  Interface: " + iface);
+ *             });
+ *         }
+ *     }
+ * });
  * }</pre>
  * 
  * <h2>Error Handling</h2>
@@ -291,6 +381,7 @@
  * public static final String INTROSPECTABLE_INTERFACE = "org.freedesktop.DBus.Introspectable";
  * public static final String PROPERTIES_INTERFACE = "org.freedesktop.DBus.Properties";
  * public static final String PEER_INTERFACE = "org.freedesktop.DBus.Peer";
+ * public static final String OBJECT_MANAGER_INTERFACE = "org.freedesktop.DBus.ObjectManager";
  * public static final String DBUS_INTERFACE = "org.freedesktop.DBus";
  * 
  * // Helper methods for common operations
