@@ -17,51 +17,51 @@ import java.util.concurrent.atomic.LongAdder;
  * performance metrics to help identify optimization opportunities.</p>
  */
 public final class ByteBufferPoolManager {
+  
+  private static final ByteBufferPoolManager INSTANCE = new ByteBufferPoolManager();
+  
+  private final ByteBufferPool pool;
+  private final LongAdder acquireCount;
+  private final LongAdder releaseCount;
+  private final LongAdder poolHitCount;
+  private final LongAdder poolMissCount;
+  private final AtomicLong totalBytesAllocated;
+  
+  private ByteBufferPoolManager() {
+    this.pool = new ByteBufferPool();
+    this.acquireCount = new LongAdder();
+    this.releaseCount = new LongAdder();
+    this.poolHitCount = new LongAdder();
+    this.poolMissCount = new LongAdder();
+    this.totalBytesAllocated = new AtomicLong();
+  }
+  
+  /**
+   * Gets the singleton instance of ByteBufferPoolManager.
+   * 
+   * @return the singleton instance
+   */
+  public static ByteBufferPoolManager getInstance() {
+    return INSTANCE;
+  }
+  
+  /**
+   * Acquires a ByteBuffer with at least the requested capacity.
+   * 
+   * @param capacity minimum required capacity
+   * @param order byte order for the buffer
+   * @return a ByteBuffer ready for use
+   */
+  public ByteBuffer acquire(int capacity, ByteOrder order) {
+    acquireCount.increment();
     
-    private static final ByteBufferPoolManager INSTANCE = new ByteBufferPoolManager();
+    // Track whether we get a pooled buffer or allocate a new one
+    long beforeAllocated = totalBytesAllocated.get();
+    ByteBuffer buffer = pool.acquire(capacity, order);
+    long afterAllocated = totalBytesAllocated.get();
     
-    private final ByteBufferPool pool;
-    private final LongAdder acquireCount;
-    private final LongAdder releaseCount;
-    private final LongAdder poolHitCount;
-    private final LongAdder poolMissCount;
-    private final AtomicLong totalBytesAllocated;
-    
-    private ByteBufferPoolManager() {
-        this.pool = new ByteBufferPool();
-        this.acquireCount = new LongAdder();
-        this.releaseCount = new LongAdder();
-        this.poolHitCount = new LongAdder();
-        this.poolMissCount = new LongAdder();
-        this.totalBytesAllocated = new AtomicLong();
-    }
-    
-    /**
-     * Gets the singleton instance of ByteBufferPoolManager.
-     * 
-     * @return the singleton instance
-     */
-    public static ByteBufferPoolManager getInstance() {
-        return INSTANCE;
-    }
-    
-    /**
-     * Acquires a ByteBuffer with at least the requested capacity.
-     * 
-     * @param capacity minimum required capacity
-     * @param order byte order for the buffer
-     * @return a ByteBuffer ready for use
-     */
-    public ByteBuffer acquire(int capacity, ByteOrder order) {
-        acquireCount.increment();
-        
-        // Track whether we get a pooled buffer or allocate a new one
-        long beforeAllocated = totalBytesAllocated.get();
-        ByteBuffer buffer = pool.acquire(capacity, order);
-        long afterAllocated = totalBytesAllocated.get();
-        
-        if (afterAllocated > beforeAllocated) {
-            poolMissCount.increment();
+    if (afterAllocated > beforeAllocated) {
+      poolMissCount.increment();
             totalBytesAllocated.addAndGet(buffer.capacity());
         } else {
             poolHitCount.increment();

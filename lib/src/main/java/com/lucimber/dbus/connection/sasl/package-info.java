@@ -24,6 +24,7 @@
  * <h2>Supported Authentication Mechanisms</h2>
  * 
  * <h3>EXTERNAL Authentication</h3>
+ * 
  * <p>Unix credential-based authentication using process credentials:
  * 
  * <pre>{@code
@@ -39,6 +40,7 @@
  * }</pre>
  * 
  * <h3>DBUS_COOKIE_SHA1 Authentication</h3>
+ * 
  * <p>Cookie-based authentication using SHA1 challenge-response:
  * 
  * <pre>{@code
@@ -53,6 +55,7 @@
  * }</pre>
  * 
  * <h3>ANONYMOUS Authentication</h3>
+ * 
  * <p>Anonymous authentication for public services:
  * 
  * <pre>{@code
@@ -118,6 +121,7 @@
  * <h2>Security Features</h2>
  * 
  * <h3>Secure Credential Handling</h3>
+ * 
  * <p>All credentials are handled securely:
  * 
  * <pre>{@code
@@ -140,6 +144,7 @@
  * }</pre>
  * 
  * <h3>Challenge-Response Security</h3>
+ * 
  * <p>DBUS_COOKIE_SHA1 provides secure challenge-response authentication:
  * 
  * <pre>{@code
@@ -242,6 +247,7 @@
  * <h2>Platform-Specific Considerations</h2>
  * 
  * <h3>Unix Systems</h3>
+ * 
  * <p>EXTERNAL authentication using Unix credentials:
  * 
  * <pre>{@code
@@ -255,6 +261,7 @@
  * }</pre>
  * 
  * <h3>Windows Systems</h3>
+ * 
  * <p>TCP-based authentication for Windows:
  * 
  * <pre>{@code
@@ -324,6 +331,7 @@
  * <li>Cross-platform D-Bus implementations</li>
  * <li>Both system and session bus authentication</li>
  * </ul>
+ * 
  * 
  * @see com.lucimber.dbus.connection.Connection
  * @see com.lucimber.dbus.connection.ConnectionConfig

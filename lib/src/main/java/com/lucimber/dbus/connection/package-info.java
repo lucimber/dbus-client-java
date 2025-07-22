@@ -19,6 +19,7 @@
  * <h2>Core Concepts</h2>
  * 
  * <h3>Connection</h3>
+ * 
  * <p>The {@link Connection} interface is the main entry point for D-Bus communication.
  * It provides methods for:
  * <ul>
@@ -29,6 +30,7 @@
  * </ul>
  * 
  * <h3>Pipeline Architecture</h3>
+ * 
  * <p>The handler pipeline processes messages in a configurable chain:
  * 
  * <pre>{@code
@@ -141,6 +143,7 @@
  * 
  * <p>The {@link com.lucimber.dbus.connection.sasl} sub-package provides
  * SASL authentication mechanisms for secure D-Bus communication.
+ * 
  * 
  * @see Connection
  * @see ConnectionConfig

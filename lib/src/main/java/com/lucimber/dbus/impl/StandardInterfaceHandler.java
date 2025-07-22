@@ -77,7 +77,7 @@ public class StandardInterfaceHandler extends AbstractInboundHandler {
   
   /**
    * Creates a handler for the given object at the specified path.
-   * 
+   *
    * @param objectPath the D-Bus object path
    * @param targetObject the object implementing the interfaces
    */
@@ -247,8 +247,8 @@ public class StandardInterfaceHandler extends AbstractInboundHandler {
       for (Field field : clazz.getDeclaredFields()) {
         DBusProperty propAnnotation = field.getAnnotation(DBusProperty.class);
         if (propAnnotation != null) {
-          String propName = propAnnotation.name().isEmpty() ? 
-              field.getName() : propAnnotation.name();
+          String propName = propAnnotation.name().isEmpty()
+              ? field.getName() : propAnnotation.name();
           field.setAccessible(true);
           ifaceProps.put(propName, field);
         }
@@ -281,8 +281,8 @@ public class StandardInterfaceHandler extends AbstractInboundHandler {
       return DBusVariant.valueOf(DBusString.valueOf(value.toString()));
     }
     
-    throw new UnsupportedOperationException("Type conversion not implemented for: " + 
-        (value != null ? value.getClass() : "null"));
+    throw new UnsupportedOperationException("Type conversion not implemented for: "
+        + (value != null ? value.getClass() : "null"));
   }
   
   private Map<String, DBusVariant> getAllProperties(String iface) throws Exception {

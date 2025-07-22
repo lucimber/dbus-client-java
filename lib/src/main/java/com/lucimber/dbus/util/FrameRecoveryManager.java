@@ -337,16 +337,45 @@ public final class FrameRecoveryManager {
                                    null, -1, -1, -1);
     }
     
-    public boolean isValid() { return valid; }
-    public boolean isPartialFrame() { return partialFrame; }
-    public String getErrorMessage() { return errorMessage; }
-    public CorruptionType getCorruptionType() { return corruptionType; }
-    public int getFrameSize() { return frameSize; }
-    public int getMissingBytes() { return missingBytes; }
-    public ByteOrder getByteOrder() { return byteOrder; }
-    public int getMessageType() { return messageType; }
-    public int getBodyLength() { return bodyLength; }
-    public int getHeaderFieldLength() { return headerFieldLength; }
+    public boolean isValid() {
+      return valid;
+    }
+
+    public boolean isPartialFrame() {
+      return partialFrame;
+    }
+
+    public String getErrorMessage() {
+      return errorMessage;
+    }
+
+    public CorruptionType getCorruptionType() {
+      return corruptionType;
+    }
+
+    public int getFrameSize() {
+      return frameSize;
+    }
+
+    public int getMissingBytes() {
+      return missingBytes;
+    }
+
+    public ByteOrder getByteOrder() {
+      return byteOrder;
+    }
+
+    public int getMessageType() {
+      return messageType;
+    }
+
+    public int getBodyLength() {
+      return bodyLength;
+    }
+
+    public int getHeaderFieldLength() {
+      return headerFieldLength;
+    }
   }
   
   /**
@@ -371,15 +400,30 @@ public final class FrameRecoveryManager {
     private final String hexDump;
     private final FrameAnalysis analysis;
     
+    /**
+     * Creates a frame diagnostic with summary, hex dump and analysis.
+     *
+     * @param summary the diagnostic summary
+     * @param hexDump the hex dump of frame data  
+     * @param analysis the frame analysis result
+     */
     public FrameDiagnostic(String summary, String hexDump, FrameAnalysis analysis) {
       this.summary = summary;
       this.hexDump = hexDump;
       this.analysis = analysis;
     }
     
-    public String getSummary() { return summary; }
-    public String getHexDump() { return hexDump; }
-    public FrameAnalysis getAnalysis() { return analysis; }
+    public String getSummary() {
+      return summary;
+    }
+
+    public String getHexDump() {
+      return hexDump;
+    }
+
+    public FrameAnalysis getAnalysis() {
+      return analysis;
+    }
     
     @Override
     public String toString() {
@@ -396,6 +440,14 @@ public final class FrameRecoveryManager {
     private final long recoveredFrames;
     private final long skippedFrames;
     
+    /**
+     * Creates frame statistics with the given counters.
+     *
+     * @param totalFrames total number of frames processed
+     * @param corruptedFrames number of corrupted frames detected
+     * @param recoveredFrames number of frames successfully recovered
+     * @param skippedFrames number of frames skipped due to corruption
+     */
     public FrameStatistics(long totalFrames, long corruptedFrames, long recoveredFrames, long skippedFrames) {
       this.totalFrames = totalFrames;
       this.corruptedFrames = corruptedFrames;

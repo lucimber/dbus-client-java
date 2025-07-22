@@ -12,8 +12,8 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Transport-agnostic handle representing an active D-Bus connection.
- * <p>
- * This interface abstracts the underlying transport implementation
+ * 
+ * <p>This interface abstracts the underlying transport implementation
  * and provides a unified way to interact with the connection regardless
  * of whether it's using Netty, NIO, or any other networking framework.
  */

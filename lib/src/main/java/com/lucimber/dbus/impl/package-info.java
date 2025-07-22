@@ -65,6 +65,7 @@
  *   <li>Async method support</li>
  * </ul>
  * 
+ * 
  * @see com.lucimber.dbus.annotation
  * @see com.lucimber.dbus.standard
  * @since 2.0

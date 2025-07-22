@@ -10,8 +10,8 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Strategy interface for different D-Bus connection transport types.
- * <p>
- * This interface defines the strategy pattern for handling different transport
+ * 
+ * <p>This interface defines the strategy pattern for handling different transport
  * mechanisms (Unix domain sockets, TCP, etc.) in an implementation-agnostic way.
  * The strategy encapsulates transport-specific connection logic while remaining
  * independent of any particular networking framework.

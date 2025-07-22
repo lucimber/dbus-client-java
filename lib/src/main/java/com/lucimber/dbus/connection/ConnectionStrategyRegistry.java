@@ -14,8 +14,8 @@ import java.util.Optional;
 /**
  * Registry for connection strategies that automatically selects the appropriate
  * strategy based on the socket address type and platform availability.
- * <p>
- * This registry allows pluggable transport implementations while maintaining
+ * 
+ * <p>This registry allows pluggable transport implementations while maintaining
  * a clean abstraction for connection creation.
  */
 public final class ConnectionStrategyRegistry {

@@ -9,8 +9,8 @@ import com.lucimber.dbus.message.InboundMessage;
 
 /**
  * Context interface providing callbacks and handlers for connection strategies.
- * <p>
- * This interface allows connection strategies to interact with the broader
+ * 
+ * <p>This interface allows connection strategies to interact with the broader
  * connection management system in a decoupled way, without depending on
  * specific implementation details.
  */
