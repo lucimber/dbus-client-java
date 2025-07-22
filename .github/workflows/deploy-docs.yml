@@ -42,10 +42,29 @@ jobs:
     - name: Extract coverage percentage
       id: coverage
       run: |
-        # Extract total coverage percentage from JaCoCo XML report - get last counters (report summary)
-        COUNTERS=$(xmllint --format lib/build/reports/jacoco/test/jacocoTestReport.xml | tail -20 | grep '<counter type="INSTRUCTION"')
-        MISSED=$(echo "$COUNTERS" | tail -1 | sed -n 's/.*missed="\([0-9]*\)".*/\1/p' || echo "0")
-        COVERED=$(echo "$COUNTERS" | tail -1 | sed -n 's/.*covered="\([0-9]*\)".*/\1/p' || echo "0")
+        # Extract total coverage percentage from JaCoCo XML report
+        # The report summary is in the last <counter type="INSTRUCTION"> element
+        XML_FILE="lib/build/reports/jacoco/test/jacocoTestReport.xml"
+        
+        # Use Python to parse the XML and extract the last INSTRUCTION counter
+        COVERAGE_DATA=$(python3 -c "
+import xml.etree.ElementTree as ET
+tree = ET.parse('$XML_FILE')
+root = tree.getroot()
+# Find all INSTRUCTION counters
+counters = root.findall('.//counter[@type=\"INSTRUCTION\"]')
+if counters:
+    # Get the last one (report summary)
+    last_counter = counters[-1]
+    missed = last_counter.get('missed', '0')
+    covered = last_counter.get('covered', '0')
+    print(f'{missed} {covered}')
+else:
+    print('0 0')
+" 2>/dev/null || echo "0 0")
+        
+        MISSED=$(echo "$COVERAGE_DATA" | cut -d' ' -f1)
+        COVERED=$(echo "$COVERAGE_DATA" | cut -d' ' -f2)
         
         if [ "$COVERED" != "0" ] || [ "$MISSED" != "0" ]; then
           TOTAL=$((COVERED + MISSED))
