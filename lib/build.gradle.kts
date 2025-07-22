@@ -200,6 +200,12 @@ tasks.register<Exec>("integrationTest") {
     // Build and run the test container in one step with caching
     commandLine("docker", "build", "-f", "../Dockerfile.test", "-t", "dbus-integration-test", "--build-arg", "GRADLE_VERSION=$gradleVersion", "--cache-from", "type=gha", "--cache-to", "type=gha,mode=max", "..")
     
+    doFirst {
+        println("=".repeat(80))
+        println("🏗️  INTEGRATION TEST - CONTAINER BUILD PHASE")
+        println("=".repeat(80))
+    }
+    
     doLast {
         println("🐳 Running integration tests inside Linux container...")
         println("📋 Single entry point for consistent testing across all environments")
@@ -216,7 +222,10 @@ tasks.register<Exec>("integrationTest") {
         } else {
             println("💡 Use --verbose/-PshowOutput for full output, or -Pdebug/-PdebugLogs for debug logs")
         }
-        println("")
+        
+        println("=".repeat(80))
+        println("🐳 INTEGRATION TEST - CONTAINER EXECUTION PHASE")
+        println("=".repeat(80))
         
         // Prepare environment variables for container logging
         val containerEnvVars = mutableListOf<String>()
@@ -264,7 +273,10 @@ tasks.register<Exec>("integrationTest") {
             }
         }
         
-        println("")
+        println("=".repeat(80))
+        println("📊 INTEGRATION TEST - RESULTS SUMMARY")
+        println("=".repeat(80))
+        
         if (result.exitValue == 0) {
             println("✅ Integration tests completed successfully!")
             println("📋 Test results available in: build/test-results/integrationTest/")
@@ -272,8 +284,10 @@ tasks.register<Exec>("integrationTest") {
         } else {
             println("❌ Integration tests failed with exit code: ${result.exitValue}")
             println("📋 Check the test output above for details")
+            println("=".repeat(80))
             throw GradleException("Integration tests failed in container")
         }
+        println("=".repeat(80))
     }
 }
 
