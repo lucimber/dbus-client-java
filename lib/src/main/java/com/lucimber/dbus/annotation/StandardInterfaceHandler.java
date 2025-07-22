@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.lucimber.dbus.impl;
+package com.lucimber.dbus.annotation;
 
 import com.lucimber.dbus.annotation.DBusInterface;
 import com.lucimber.dbus.annotation.DBusMethod;

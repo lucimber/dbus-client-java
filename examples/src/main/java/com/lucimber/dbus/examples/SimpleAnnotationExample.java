@@ -9,7 +9,7 @@ import com.lucimber.dbus.annotation.DBusInterface;
 import com.lucimber.dbus.annotation.DBusProperty;
 import com.lucimber.dbus.connection.Connection;
 import com.lucimber.dbus.connection.ConnectionConfig;
-import com.lucimber.dbus.impl.StandardInterfaceHandler;
+import com.lucimber.dbus.annotation.StandardInterfaceHandler;
 import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.netty.NettyConnection;
 import com.lucimber.dbus.type.DBusObjectPath;

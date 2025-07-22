@@ -14,7 +14,7 @@
  * 
  * <p><strong>For first-time users:</strong> Start by annotating your service class
  * with {@link DBusInterface} and its methods/properties with the appropriate annotations.
- * Then use {@link com.lucimber.dbus.impl.StandardInterfaceHandler} to handle incoming calls.</p>
+ * Then use {@link com.lucimber.dbus.annotation.StandardInterfaceHandler} to handle incoming calls.</p>
  * 
  * <h2>Available Annotations</h2>
  * 
@@ -116,7 +116,7 @@
  * 
  * <h2>Integration with Standard Interfaces</h2>
  * 
- * <p>When using these annotations with {@link com.lucimber.dbus.impl.StandardInterfaceHandler},
+ * <p>When using these annotations with {@link com.lucimber.dbus.annotation.StandardInterfaceHandler},
  * the following standard D-Bus interfaces are automatically implemented:</p>
  * 
  * <ul>
@@ -178,7 +178,7 @@
  *   <li>Method overloading is not supported (D-Bus limitation)</li>
  * </ul>
  * 
- * @see com.lucimber.dbus.impl.StandardInterfaceHandler
+ * @see com.lucimber.dbus.annotation.StandardInterfaceHandler
  * @see com.lucimber.dbus.standard
  * @since 2.0
  */
