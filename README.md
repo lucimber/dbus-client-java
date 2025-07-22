@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/lucimber/dbus-client-java/workflows/Continuous%20Integration/badge.svg)](https://github.com/lucimber/dbus-client-java/actions)
 [![CodeQL](https://github.com/lucimber/dbus-client-java/workflows/Code%20Analysis/badge.svg)](https://github.com/lucimber/dbus-client-java/actions)
-[![codecov](https://codecov.io/gh/lucimber/dbus-client-java/branch/main/graph/badge.svg)](https://codecov.io/gh/lucimber/dbus-client-java)
+[![Coverage](https://img.shields.io/endpoint?url=https://lucimber.github.io/dbus-client-java/coverage-badge.json)](https://lucimber.github.io/dbus-client-java/latest/coverage/)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://lucimber.github.io/dbus-client-java/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)

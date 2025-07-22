@@ -39,18 +39,6 @@ jobs:
       run: ./gradlew build --console=plain --info --stacktrace
     - name: Generate code coverage report
       run: ./gradlew jacocoTestReport
-    - name: Verify coverage report exists
-      run: |
-        echo "Looking for coverage report..."
-        find . -name "jacocoTestReport.xml" -type f
-        ls -la lib/build/reports/jacoco/test/ || echo "JaCoCo test reports directory not found"
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./lib/build/reports/jacoco/test/jacocoTestReport.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     - name: Run integration tests with Docker caching

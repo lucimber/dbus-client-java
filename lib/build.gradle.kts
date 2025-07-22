@@ -83,7 +83,7 @@ tasks.named<Test>("test") {
     finalizedBy(tasks.jacocoTestReport)
 }
 
-// JaCoCo configuration to generate XML reports for Codecov
+// JaCoCo configuration to generate XML and HTML coverage reports
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
     reports {
@@ -164,6 +164,7 @@ tasks.named<Jar>("jar") {
 pmd {
     rulesMinimumPriority.set(2)
 }
+
 
 // Integration test task for running inside container
 tasks.register<Test>("integrationTestContainer") {

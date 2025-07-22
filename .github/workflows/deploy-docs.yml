@@ -1,4 +1,4 @@
-name: Generate and Deploy Javadoc
+name: Generate and Deploy Documentation
 
 on:
   push:
@@ -36,6 +36,40 @@ jobs:
     - name: Generate Javadoc
       run: ./gradlew javadoc
       
+    - name: Generate JaCoCo Coverage Report
+      run: ./gradlew test jacocoTestReport
+      
+    - name: Extract coverage percentage
+      id: coverage
+      run: |
+        # Extract total coverage percentage from JaCoCo XML report
+        COVERAGE=$(grep -oP '(?<=<counter type="INSTRUCTION" missed="\d+" covered=")\d+' lib/build/reports/jacoco/test/jacocoTestReport.xml | head -1 || echo "0")
+        MISSED=$(grep -oP '(?<=<counter type="INSTRUCTION" missed=")\d+' lib/build/reports/jacoco/test/jacocoTestReport.xml | head -1 || echo "0")
+        
+        if [ "$COVERAGE" != "0" ] || [ "$MISSED" != "0" ]; then
+          TOTAL=$((COVERAGE + MISSED))
+          PERCENTAGE=$((COVERAGE * 100 / TOTAL))
+        else
+          PERCENTAGE=0
+        fi
+        
+        echo "COVERAGE_PERCENTAGE=$PERCENTAGE" >> $GITHUB_ENV
+        echo "Coverage: $PERCENTAGE%"
+        
+        # Generate badge JSON for shields.io
+        if [ $PERCENTAGE -ge 80 ]; then
+          COLOR="brightgreen"
+        elif [ $PERCENTAGE -ge 60 ]; then
+          COLOR="yellow"
+        elif [ $PERCENTAGE -ge 40 ]; then
+          COLOR="orange"
+        else
+          COLOR="red"
+        fi
+        
+        # Create badge JSON
+        echo "{\"schemaVersion\": 1, \"label\": \"coverage\", \"message\": \"$PERCENTAGE%\", \"color\": \"$COLOR\"}" > coverage-badge.json
+      
     - name: Determine version and prepare content
       run: |
         # Determine version
@@ -51,20 +85,39 @@ jobs:
         
         # Create version-specific directories
         mkdir -p _site/$VERSION
+        mkdir -p _site/$VERSION/coverage
         cp -r lib/build/docs/javadoc/* _site/$VERSION/
+        cp -r lib/build/reports/jacoco/test/html/* _site/$VERSION/coverage/
+        
+        # Copy coverage badge JSON
+        cp coverage-badge.json _site/
+        
+        # Verify coverage report integrity
+        if [ ! -f "_site/$VERSION/coverage/index.html" ]; then
+          echo "ERROR: Coverage report index.html not found!"
+          exit 1
+        fi
+        if [ ! -d "_site/$VERSION/coverage/jacoco-resources" ]; then
+          echo "ERROR: Coverage report resources directory not found!"
+          exit 1
+        fi
         
         # For releases, also update 'latest' and create/update version index
         if [[ $IS_RELEASE == "true" ]]; then
           # Update latest
           mkdir -p _site/latest
+          mkdir -p _site/latest/coverage
           cp -r lib/build/docs/javadoc/* _site/latest/
+          cp -r lib/build/reports/jacoco/test/html/* _site/latest/coverage/
           
           # Create version entry for index
           echo "$VERSION" >> versions.txt
         else
           # For main branch, just update latest
           mkdir -p _site/latest
+          mkdir -p _site/latest/coverage
           cp -r lib/build/docs/javadoc/* _site/latest/
+          cp -r lib/build/reports/jacoco/test/html/* _site/latest/coverage/
         fi
         
     - name: Download existing site (for version history)
@@ -104,9 +157,9 @@ jobs:
             echo ',' >> versions.json
           fi
           if [ "$version" = "latest" ]; then
-            echo "  {\"name\": \"latest\", \"url\": \"./latest/\", \"title\": \"Latest (Development)\"}" >> versions.json
+            echo "  {\"name\": \"latest\", \"url\": \"./latest/\", \"title\": \"Latest (Development)\", \"javadoc\": \"./latest/\", \"coverage\": \"./latest/coverage/\"}" >> versions.json
           else
-            echo "  {\"name\": \"$version\", \"url\": \"./$version/\", \"title\": \"Version $version\"}" >> versions.json
+            echo "  {\"name\": \"$version\", \"url\": \"./$version/\", \"title\": \"Version $version\", \"javadoc\": \"./$version/\", \"coverage\": \"./$version/coverage/\"}" >> versions.json
           fi
         done
         echo ']}' >> versions.json

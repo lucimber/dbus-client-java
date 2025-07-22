@@ -53,7 +53,6 @@
             background: #f8f9fa;
             border: 2px solid #e9ecef;
             border-radius: 8px;
-            text-decoration: none;
             color: #333;
             transition: all 0.2s;
         }
@@ -176,6 +175,12 @@
         </div>
 
         <div class="card">
+            <h2>📊 Test Coverage</h2>
+            <p>Code coverage reports showing test coverage across all modules.</p>
+            <a href="./latest/coverage/" class="btn" style="background: #28a745;">View Coverage Report</a>
+        </div>
+
+        <div class="card">
             <h2>🛡️ Security & SASL</h2>
             <p>SASL authentication mechanisms: EXTERNAL, DBUS_COOKIE_SHA1, and ANONYMOUS.</p>
             <a href="./latest/com/lucimber/dbus/connection/sasl/package-summary.html" class="btn">SASL Documentation</a>
@@ -213,13 +218,20 @@
             .then(data => {
                 const versionList = document.getElementById('version-list');
                 data.versions.forEach(version => {
-                    const item = document.createElement('a');
-                    item.href = version.url;
+                    const item = document.createElement('div');
                     item.className = 'version-item' + (version.name === 'latest' ? ' latest' : '');
                     item.innerHTML = `
                         <div class="version-name">${version.title}</div>
                         <div class="version-description">
                             ${version.name === 'latest' ? 'Development documentation from main branch' : 'Released version documentation'}
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <a href="${version.javadoc}" class="btn" style="flex: 1; text-align: center; padding: 8px 16px; font-size: 0.9em;">
+                                📚 API Docs
+                            </a>
+                            <a href="${version.coverage}" class="btn" style="flex: 1; text-align: center; padding: 8px 16px; font-size: 0.9em; background: #28a745;">
+                                📊 Coverage
+                            </a>
                         </div>
                     `;
                     versionList.appendChild(item);
@@ -230,10 +242,18 @@
                 // Fallback: create a link to latest
                 const versionList = document.getElementById('version-list');
                 versionList.innerHTML = `
-                    <a href="./latest/" class="version-item latest">
+                    <div class="version-item latest">
                         <div class="version-name">Latest Documentation</div>
                         <div class="version-description">Current development documentation</div>
-                    </a>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <a href="./latest/" class="btn" style="flex: 1; text-align: center; padding: 8px 16px; font-size: 0.9em;">
+                                📚 API Docs
+                            </a>
+                            <a href="./latest/coverage/" class="btn" style="flex: 1; text-align: center; padding: 8px 16px; font-size: 0.9em; background: #28a745;">
+                                📊 Coverage
+                            </a>
+                        </div>
+                    </div>
                 `;
             });
     </script>
