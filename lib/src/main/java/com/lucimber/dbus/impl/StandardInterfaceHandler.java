@@ -21,6 +21,7 @@ import com.lucimber.dbus.type.DBusObjectPath;
 import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.type.DBusVariant;
 import com.lucimber.dbus.type.TypeCode;
 import java.lang.reflect.Field;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +75,7 @@ public class StandardInterfaceHandler extends AbstractInboundHandler {
   private final String objectPath;
   private final Object targetObject;
   private final Map<String, Map<String, Field>> properties = new ConcurrentHashMap<>();
+  private final AtomicInteger serialCounter = new AtomicInteger(1);
   private String interfaceName;
   
   /**
@@ -135,6 +138,7 @@ public class StandardInterfaceHandler extends AbstractInboundHandler {
       String xml = generateIntrospectionXml();
       
       OutboundMethodReturn reply = OutboundMethodReturn.Builder.create()
+          .withSerial(DBusUInt32.valueOf(serialCounter.getAndIncrement()))
           .withReplySerial(call.getSerial())
           .withBody(DBusSignature.valueOf("s"), Arrays.asList(DBusString.valueOf(xml)))
           .build();
@@ -159,6 +163,7 @@ public class StandardInterfaceHandler extends AbstractInboundHandler {
             DBusVariant value = getPropertyValue(iface, prop);
             
             OutboundMethodReturn reply = OutboundMethodReturn.Builder.create()
+                .withSerial(DBusUInt32.valueOf(serialCounter.getAndIncrement()))
                 .withReplySerial(call.getSerial())
                 .withBody(DBusSignature.valueOf("v"), Arrays.asList(value))
                 .build();
@@ -187,6 +192,7 @@ public class StandardInterfaceHandler extends AbstractInboundHandler {
             }
             
             OutboundMethodReturn reply = OutboundMethodReturn.Builder.create()
+                .withSerial(DBusUInt32.valueOf(serialCounter.getAndIncrement()))
                 .withReplySerial(call.getSerial())
                 .withBody(DBusSignature.valueOf("a{sv}"), Arrays.asList(result))
                 .build();
@@ -212,6 +218,7 @@ public class StandardInterfaceHandler extends AbstractInboundHandler {
     switch (memberName) {
       case "Ping":
         OutboundMethodReturn reply = OutboundMethodReturn.Builder.create()
+            .withSerial(DBusUInt32.valueOf(serialCounter.getAndIncrement()))
             .withReplySerial(call.getSerial())
             .build();
         
@@ -222,6 +229,7 @@ public class StandardInterfaceHandler extends AbstractInboundHandler {
         String machineId = getMachineId();
         
         OutboundMethodReturn idReply = OutboundMethodReturn.Builder.create()
+            .withSerial(DBusUInt32.valueOf(serialCounter.getAndIncrement()))
             .withReplySerial(call.getSerial())
             .withBody(DBusSignature.valueOf("s"), Arrays.asList(DBusString.valueOf(machineId)))
             .build();
@@ -376,6 +384,7 @@ public class StandardInterfaceHandler extends AbstractInboundHandler {
   
   private void sendError(Context ctx, InboundMethodCall call, String errorName, String errorMessage) {
     OutboundError error = OutboundError.Builder.create()
+        .withSerial(DBusUInt32.valueOf(serialCounter.getAndIncrement()))
         .withReplySerial(call.getSerial())
         .withErrorName(DBusString.valueOf(errorName))
         .withBody(DBusSignature.valueOf("s"), Arrays.asList(DBusString.valueOf(errorMessage)))
