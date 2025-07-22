@@ -42,13 +42,14 @@ jobs:
     - name: Extract coverage percentage
       id: coverage
       run: |
-        # Extract total coverage percentage from JaCoCo XML report
-        COVERAGE=$(grep -oP '(?<=<counter type="INSTRUCTION" missed="\d+" covered=")\d+' lib/build/reports/jacoco/test/jacocoTestReport.xml | head -1 || echo "0")
-        MISSED=$(grep -oP '(?<=<counter type="INSTRUCTION" missed=")\d+' lib/build/reports/jacoco/test/jacocoTestReport.xml | head -1 || echo "0")
+        # Extract total coverage percentage from JaCoCo XML report - get last counters (report summary)
+        COUNTERS=$(xmllint --format lib/build/reports/jacoco/test/jacocoTestReport.xml | tail -20 | grep '<counter type="INSTRUCTION"')
+        MISSED=$(echo "$COUNTERS" | tail -1 | sed -n 's/.*missed="\([0-9]*\)".*/\1/p' || echo "0")
+        COVERED=$(echo "$COUNTERS" | tail -1 | sed -n 's/.*covered="\([0-9]*\)".*/\1/p' || echo "0")
         
-        if [ "$COVERAGE" != "0" ] || [ "$MISSED" != "0" ]; then
-          TOTAL=$((COVERAGE + MISSED))
-          PERCENTAGE=$((COVERAGE * 100 / TOTAL))
+        if [ "$COVERED" != "0" ] || [ "$MISSED" != "0" ]; then
+          TOTAL=$((COVERED + MISSED))
+          PERCENTAGE=$((COVERED * 100 / TOTAL))
         else
           PERCENTAGE=0
         fi
