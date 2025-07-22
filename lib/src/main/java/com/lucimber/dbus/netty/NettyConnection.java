@@ -49,8 +49,9 @@ public final class NettyConnection implements Connection {
   private final ConnectionLifecycleManager lifecycleManager;
   private final ConnectionThreadPoolManager threadPoolManager;
   private final String connectionId;
-  private ConnectionHealthHandler healthHandler;
-  private ConnectionReconnectHandler reconnectHandler;
+  private volatile ConnectionHealthHandler healthHandler;
+  private volatile ConnectionReconnectHandler reconnectHandler;
+  private final Object handlerInitLock = new Object();
 
   public NettyConnection(SocketAddress serverAddress) {
     this(serverAddress, ConnectionConfig.defaultConfig());
@@ -201,25 +202,41 @@ public final class NettyConnection implements Connection {
       return CompletableFuture.completedFuture(null);
     }
 
-    // Initialize handlers
-    this.healthHandler = new ConnectionHealthHandler(config);
-    this.reconnectHandler = new ConnectionReconnectHandler(config);
-
-    // Add reconnect handler to pipeline if auto-reconnect is enabled
-    if (config.isAutoReconnectEnabled()) {
-      this.pipeline.addLast("reconnect-handler", reconnectHandler);
-    }
-
-    // Add health handler to pipeline if health monitoring is enabled
-    if (config.isHealthCheckEnabled()) {
-      this.pipeline.addLast("health-monitor", healthHandler);
-    }
-
     LOGGER.info("Attempting to connect to DBus server at {} using strategy: {}", 
         serverAddress, strategy.getTransportName());
 
     // Use lifecycle manager to handle connection
     return lifecycleManager.connect(() -> {
+      // Initialize handlers inside the connect supplier to ensure thread safety
+      synchronized (handlerInitLock) {
+        if (this.healthHandler == null) {
+          this.healthHandler = new ConnectionHealthHandler(config);
+          
+          // Add health handler to pipeline if health monitoring is enabled
+          if (config.isHealthCheckEnabled()) {
+            try {
+              this.pipeline.addLast("health-monitor", healthHandler);
+            } catch (IllegalArgumentException e) {
+              // Handler already exists, ignore
+              LOGGER.debug("Health monitor handler already in pipeline");
+            }
+          }
+        }
+        
+        if (this.reconnectHandler == null) {
+          this.reconnectHandler = new ConnectionReconnectHandler(config);
+          
+          // Add reconnect handler to pipeline if auto-reconnect is enabled
+          if (config.isAutoReconnectEnabled()) {
+            try {
+              this.pipeline.addLast("reconnect-handler", reconnectHandler);
+            } catch (IllegalArgumentException e) {
+              // Handler already exists, ignore
+              LOGGER.debug("Reconnect handler already in pipeline");
+            }
+          }
+        }
+      }
       // Create connection context for strategy
       NettyConnectionContext context = new NettyConnectionContext(
           pipeline, threadPoolManager.getApplicationTaskExecutor(), this);

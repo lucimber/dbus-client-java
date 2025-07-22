@@ -20,6 +20,7 @@ import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.type.DBusVariant;
+import com.lucimber.dbus.util.HeaderFieldExtractor;
 import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.CorruptedFrameException;
@@ -45,112 +46,31 @@ final class InboundMessageDecoder extends MessageToMessageDecoder<Frame> {
 
 
   private static Optional<DBusString> getErrorNameFromHeader(Map<HeaderField, DBusVariant> headerFields) {
-    LOGGER.trace(LoggerUtils.MARSHALLING, "Getting signature from message header.");
-    DBusVariant variant = headerFields.get(HeaderField.ERROR_NAME);
-    if (variant == null) {
-      return Optional.empty();
-    }
-    DBusType variantValue = variant.getDelegate();
-    if (variantValue instanceof DBusString) {
-      return Optional.of((DBusString) variantValue);
-    } else {
-      String msg = "Error name in message header is of wrong type.";
-      throw new CorruptedFrameException(msg);
-    }
+    return HeaderFieldExtractor.extractOptional(headerFields, HeaderField.ERROR_NAME, DBusString.class);
   }
 
   private static Optional<DBusString> getInterfaceNameFromHeader(Map<HeaderField, DBusVariant> headerFields) {
-    LOGGER.trace(LoggerUtils.MARSHALLING, "Getting interface name from message header.");
-    DBusVariant variant = headerFields.get(HeaderField.INTERFACE);
-    if (variant == null) {
-      return Optional.empty();
-    }
-    DBusType variantValue = variant.getDelegate();
-    if (variantValue instanceof DBusString) {
-      return Optional.of((DBusString) variantValue);
-    } else {
-      String msg = "Interface name in message header is of wrong type.";
-      throw new CorruptedFrameException(msg);
-    }
+    return HeaderFieldExtractor.extractOptional(headerFields, HeaderField.INTERFACE, DBusString.class);
   }
 
   private static DBusString getMemberFromHeader(Map<HeaderField, DBusVariant> headerFields) {
-    LOGGER.trace(LoggerUtils.MARSHALLING, "Getting member from message header.");
-    DBusVariant variant = headerFields.get(HeaderField.MEMBER);
-    if (variant == null) {
-      String msg = "Missing member in message header.";
-      throw new CorruptedFrameException(msg);
-    }
-    DBusType variantValue = variant.getDelegate();
-    if (variantValue instanceof DBusString) {
-      return (DBusString) variantValue;
-    } else {
-      String msg = "Member in message header is of wrong type.";
-      throw new CorruptedFrameException(msg);
-    }
+    return HeaderFieldExtractor.extractRequired(headerFields, HeaderField.MEMBER, DBusString.class);
   }
 
   private static DBusObjectPath getObjectPathFromHeader(Map<HeaderField, DBusVariant> headerFields) {
-    LOGGER.trace(LoggerUtils.MARSHALLING, "Getting object path from message header.");
-    DBusVariant variant = headerFields.get(HeaderField.PATH);
-    if (variant == null) {
-      String msg = "Missing object path in message header.";
-      throw new CorruptedFrameException(msg);
-    }
-    DBusType variantValue = variant.getDelegate();
-    if (variantValue instanceof DBusObjectPath) {
-      return (DBusObjectPath) variantValue;
-    } else {
-      String msg = "Object path in message header must be an ObjectPath.";
-      throw new CorruptedFrameException(msg);
-    }
+    return HeaderFieldExtractor.extractRequired(headerFields, HeaderField.PATH, DBusObjectPath.class);
   }
 
   private static DBusUInt32 getReplySerialFromHeader(Map<HeaderField, DBusVariant> headerFields) {
-    LOGGER.trace(LoggerUtils.MARSHALLING, "Getting reply serial from message header.");
-    DBusVariant variant = headerFields.get(HeaderField.REPLY_SERIAL);
-    if (variant == null) {
-      String msg = "Missing reply serial in message header.";
-      throw new CorruptedFrameException(msg);
-    }
-    DBusType variantValue = variant.getDelegate();
-    if (variantValue instanceof DBusUInt32) {
-      return (DBusUInt32) variantValue;
-    } else {
-      String msg = "Reply serial in message header must be an UINT32.";
-      throw new CorruptedFrameException(msg);
-    }
+    return HeaderFieldExtractor.extractRequired(headerFields, HeaderField.REPLY_SERIAL, DBusUInt32.class);
   }
 
   private static Optional<DBusSignature> getSignatureFromHeader(Map<HeaderField, DBusVariant> headerFields) {
-    LOGGER.trace(LoggerUtils.MARSHALLING, "Getting signature from message header.");
-    DBusVariant variant = headerFields.get(HeaderField.SIGNATURE);
-    if (variant == null) {
-      return Optional.empty();
-    }
-    DBusType variantValue = variant.getDelegate();
-    if (variantValue instanceof DBusSignature) {
-      return Optional.of((DBusSignature) variantValue);
-    } else {
-      String msg = "Signature in message header be a signature.";
-      throw new CorruptedFrameException(msg);
-    }
+    return HeaderFieldExtractor.extractOptional(headerFields, HeaderField.SIGNATURE, DBusSignature.class);
   }
 
   private static DBusString getSenderFromHeader(Map<HeaderField, DBusVariant> headerFields) {
-    LOGGER.trace(LoggerUtils.MARSHALLING, "Getting sender from message header.");
-    DBusVariant variant = headerFields.get(HeaderField.SENDER);
-    if (variant == null) {
-      String msg = "Missing sender in message header.";
-      throw new CorruptedFrameException(msg);
-    }
-    DBusType variantValue = variant.getDelegate();
-    if (variantValue instanceof DBusString) {
-      return (DBusString) variantValue;
-    } else {
-      final String msg = "Sender in message header must be a string.";
-      throw new CorruptedFrameException(msg);
-    }
+    return HeaderFieldExtractor.extractRequired(headerFields, HeaderField.SENDER, DBusString.class);
   }
 
   private static InboundError mapToError(Frame frame) {
