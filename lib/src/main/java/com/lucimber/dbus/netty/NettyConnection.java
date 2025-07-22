@@ -10,10 +10,12 @@ import com.lucimber.dbus.connection.ConnectionConfig;
 import com.lucimber.dbus.connection.ConnectionEventListener;
 import com.lucimber.dbus.connection.ConnectionHandle;
 import com.lucimber.dbus.connection.ConnectionHealthHandler;
+import com.lucimber.dbus.connection.ConnectionLifecycleManager;
 import com.lucimber.dbus.connection.ConnectionReconnectHandler;
 import com.lucimber.dbus.connection.ConnectionState;
 import com.lucimber.dbus.connection.ConnectionStrategy;
 import com.lucimber.dbus.connection.ConnectionStrategyRegistry;
+import com.lucimber.dbus.connection.ConnectionThreadPoolManager;
 import com.lucimber.dbus.connection.DefaultPipeline;
 import com.lucimber.dbus.connection.Pipeline;
 import com.lucimber.dbus.message.InboundMessage;
@@ -21,7 +23,6 @@ import com.lucimber.dbus.message.OutboundMessage;
 import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.ErrorRecoveryManager;
 import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreaker;
-import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreakerConfig;
 import com.lucimber.dbus.util.ErrorRecoveryManager.RetryConfig;
 import io.netty.channel.unix.DomainSocketAddress;
 import java.net.InetSocketAddress;
@@ -31,9 +32,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,18 +41,16 @@ public final class NettyConnection implements Connection {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NettyConnection.class);
 
-  private final ExecutorService applicationTaskExecutor;
   private final SocketAddress serverAddress;
   private final Pipeline pipeline;
   private final ConnectionConfig config;
   private final ConnectionStrategy strategy;
   private final AtomicReference<ConnectionHandle> connectionHandle = new AtomicReference<>();
-  private final AtomicBoolean connecting = new AtomicBoolean(false);
-  private final AtomicBoolean closing = new AtomicBoolean(false);
+  private final ConnectionLifecycleManager lifecycleManager;
+  private final ConnectionThreadPoolManager threadPoolManager;
+  private final String connectionId;
   private ConnectionHealthHandler healthHandler;
   private ConnectionReconnectHandler reconnectHandler;
-  private ErrorRecoveryManager errorRecoveryManager;
-  private CircuitBreaker connectionCircuitBreaker;
 
   public NettyConnection(SocketAddress serverAddress) {
     this(serverAddress, ConnectionConfig.defaultConfig());
@@ -62,6 +59,8 @@ public final class NettyConnection implements Connection {
   public NettyConnection(SocketAddress serverAddress, ConnectionConfig config) {
     this.serverAddress = Objects.requireNonNull(serverAddress, "serverAddress must not be null");
     this.config = Objects.requireNonNull(config, "config must not be null");
+    this.connectionId = generateConnectionId(serverAddress);
+    
     ConnectionStrategyRegistry strategyRegistry = createDefaultStrategyRegistry();
     this.strategy = strategyRegistry.findStrategy(serverAddress)
             .orElseThrow(() -> new IllegalArgumentException("No strategy available for: " + serverAddress));
@@ -69,26 +68,21 @@ public final class NettyConnection implements Connection {
     LOGGER.info("Using transport strategy: {}", strategy.getTransportName());
 
     this.pipeline = new DefaultPipeline(this);
+    
+    // Initialize lifecycle and thread pool managers
+    this.lifecycleManager = new ConnectionLifecycleManager(config, connectionId);
+    this.threadPoolManager = new ConnectionThreadPoolManager(connectionId);
+  }
 
-    this.applicationTaskExecutor = Executors.newFixedThreadPool(
-            Math.max(2, Runtime.getRuntime().availableProcessors() / 2),
-            runnable -> {
-              Thread t = new Thread(runnable, "dbus-app-worker-" + System.identityHashCode(runnable));
-              t.setDaemon(true);
-              return t;
-            });
-
-    // Initialize error recovery manager
-    this.errorRecoveryManager = new ErrorRecoveryManager();
-
-    // Create circuit breaker for connection operations
-    CircuitBreakerConfig cbConfig = CircuitBreakerConfig.builder()
-            .failureThreshold(3)
-            .recoveryTimeout(config.getConnectTimeout().multipliedBy(2))
-            .successThreshold(2)
-            .build();
-    this.connectionCircuitBreaker = errorRecoveryManager.createCircuitBreaker(
-            "connection-" + System.identityHashCode(this), cbConfig);
+  /**
+   * Generates a unique connection ID based on the server address.
+   *
+   * @param serverAddress the server address
+   * @return unique connection ID
+   */
+  private static String generateConnectionId(SocketAddress serverAddress) {
+    return serverAddress.toString().replaceAll("[^a-zA-Z0-9]", "-") + 
+           "-" + System.identityHashCode(serverAddress);
   }
 
   /**
@@ -200,22 +194,9 @@ public final class NettyConnection implements Connection {
 
   @Override
   public CompletionStage<Void> connect() {
-    // Don't allow connection if we're closing
-    if (closing.get()) {
-      LOGGER.warn("Cannot connect while connection is being closed.");
-      return CompletableFuture.failedFuture(new IllegalStateException("Connection is being closed"));
-    }
-    
-    // Atomic check-and-set to prevent race conditions
-    if (!connecting.compareAndSet(false, true)) {
-      LOGGER.warn("Connection attempt already in progress.");
-      return CompletableFuture.completedFuture(null);
-    }
-    
     // Check if already connected
     ConnectionHandle currentHandle = this.connectionHandle.get();
     if (currentHandle != null && currentHandle.isActive()) {
-      connecting.set(false); // Reset connecting state
       LOGGER.warn("Already connected.");
       return CompletableFuture.completedFuture(null);
     }
@@ -234,173 +215,137 @@ public final class NettyConnection implements Connection {
       this.pipeline.addLast("health-monitor", healthHandler);
     }
 
-    // Create connection context for strategy
-    NettyConnectionContext context = new NettyConnectionContext(pipeline, applicationTaskExecutor, this);
+    LOGGER.info("Attempting to connect to DBus server at {} using strategy: {}", 
+        serverAddress, strategy.getTransportName());
 
-    LOGGER.info("Attempting to connect to DBus server at {} using strategy: {}", serverAddress, strategy.getTransportName());
-
-    // Create retry configuration for connection attempts
-    RetryConfig retryConfig = RetryConfig.builder()
-            .maxRetries(3)
-            .initialDelay(Duration.ofMillis(500))
-            .maxDelay(config.getConnectTimeout())
-            .backoffMultiplier(2.0)
-            .jitterFactor(0.1)
-            .build();
-
-    // Wrap connection establishment in circuit breaker and retry logic
-    CompletableFuture<ConnectionHandle> connectionWithRecovery = connectionCircuitBreaker.execute(() -> 
-        errorRecoveryManager.executeWithRetry(() -> {
-          LOGGER.debug("Attempting connection to {}", serverAddress);
-          return strategy.connect(serverAddress, config, context).toCompletableFuture();
-        }, retryConfig));
-    
-    CompletableFuture<Void> resultFuture = new CompletableFuture<>();
-    
-    connectionWithRecovery.whenComplete((handle, throwable) -> {
-      if (throwable != null) {
-        connecting.set(false); // Reset connecting state on failure
-        LOGGER.error("Failed to establish connection after retries and circuit breaker protection", throwable);
-        resultFuture.completeExceptionally(throwable);
-      } else {
-        this.connectionHandle.set(handle);
-        connecting.set(false); // Reset connecting state on success
-        LOGGER.info("Connection established successfully");
-        resultFuture.complete(null);
+    // Use lifecycle manager to handle connection
+    return lifecycleManager.connect(() -> {
+      // Create connection context for strategy
+      NettyConnectionContext context = new NettyConnectionContext(
+          pipeline, threadPoolManager.getApplicationTaskExecutor(), this);
+      
+      // Create retry configuration for connection attempts
+      RetryConfig retryConfig = RetryConfig.builder()
+          .maxRetries(3)
+          .initialDelay(Duration.ofMillis(500))
+          .maxDelay(config.getConnectTimeout())
+          .backoffMultiplier(2.0)
+          .jitterFactor(0.1)
+          .build();
+      
+      // Use error recovery from lifecycle manager
+      ErrorRecoveryManager errorRecovery = lifecycleManager.getErrorRecoveryManager();
+      
+      return errorRecovery.executeWithRetry(() -> {
+        LOGGER.debug("Attempting connection to {}", serverAddress);
+        return strategy.connect(serverAddress, config, context).toCompletableFuture();
+      }, retryConfig);
+    }).handle((handle, error) -> {
+      if (error != null) {
+        if (error.getMessage() != null && error.getMessage().contains("already in progress")) {
+          // Connection attempt already in progress - this is OK for concurrent calls
+          LOGGER.debug("Concurrent connection attempt detected, ignoring");
+          return null;
+        }
+        throw new RuntimeException(error);
       }
+      this.connectionHandle.set(handle);
+      LOGGER.info("Connection established successfully");
+      return null;
     });
-    
-    return resultFuture;
   }
 
   @Override
   public boolean isConnected() {
     // Don't report as connected if we're in the process of closing
-    if (closing.get()) {
+    if (lifecycleManager.isClosing()) {
       return false;
     }
     ConnectionHandle handle = connectionHandle.get();
-    return handle != null && handle.isActive();
+    return handle != null && handle.isActive() && lifecycleManager.isConnected();
   }
 
   @Override
   public void close() {
-    // Atomic check-and-set to prevent concurrent close operations
-    if (!closing.compareAndSet(false, true)) {
-      LOGGER.debug("Close operation already in progress, skipping duplicate close");
-      return;
-    }
-
     LOGGER.info("Closing DBus connection to {}...", serverAddress);
 
-    Exception shutdownException = null;
-    
-    try {
-      // Shutdown reconnect handler first
-      if (reconnectHandler != null) {
-        try {
-          reconnectHandler.shutdown();
-          LOGGER.debug("Reconnect handler shut down successfully");
-        } catch (Exception e) {
-          LOGGER.error("Error shutting down reconnect handler", e);
-          if (shutdownException == null) {
-            shutdownException = e;
-          } else {
-            shutdownException.addSuppressed(e);
+    lifecycleManager.disconnect(() -> {
+      CompletableFuture<Void> closeFuture = new CompletableFuture<>();
+      Exception shutdownException = null;
+      
+      try {
+        // Shutdown reconnect handler first
+        if (reconnectHandler != null) {
+          try {
+            reconnectHandler.shutdown();
+            LOGGER.debug("Reconnect handler shut down successfully");
+          } catch (Exception e) {
+            LOGGER.error("Error shutting down reconnect handler", e);
+            shutdownException = addSuppressedException(shutdownException, e);
           }
         }
-      }
 
-      // Shutdown health handler
-      if (healthHandler != null) {
-        try {
-          healthHandler.shutdown();
-          LOGGER.debug("Health handler shut down successfully");
-        } catch (Exception e) {
-          LOGGER.error("Error shutting down health handler", e);
-          if (shutdownException == null) {
-            shutdownException = e;
-          } else {
-            shutdownException.addSuppressed(e);
+        // Shutdown health handler
+        if (healthHandler != null) {
+          try {
+            healthHandler.shutdown();
+            LOGGER.debug("Health handler shut down successfully");
+          } catch (Exception e) {
+            LOGGER.error("Error shutting down health handler", e);
+            shutdownException = addSuppressedException(shutdownException, e);
           }
         }
-      }
 
-      // Close connection handle
-      ConnectionHandle handle = connectionHandle.getAndSet(null);
-      if (handle != null) {
-        try {
-          long timeoutMs = config.getCloseTimeout().toMillis();
-          handle.close().toCompletableFuture().get(timeoutMs, TimeUnit.MILLISECONDS);
-          LOGGER.debug("Connection handle closed successfully");
-        } catch (Exception e) {
-          LOGGER.error("Error closing connection handle", e);
-          if (shutdownException == null) {
-            shutdownException = e;
-          } else {
-            shutdownException.addSuppressed(e);
+        // Close connection handle
+        ConnectionHandle handle = connectionHandle.getAndSet(null);
+        if (handle != null) {
+          try {
+            long timeoutMs = config.getCloseTimeout().toMillis();
+            handle.close().toCompletableFuture().get(timeoutMs, TimeUnit.MILLISECONDS);
+            LOGGER.debug("Connection handle closed successfully");
+          } catch (Exception e) {
+            LOGGER.error("Error closing connection handle", e);
+            shutdownException = addSuppressedException(shutdownException, e);
           }
         }
-      }
 
-      // Shutdown application task executor
-      if (applicationTaskExecutor != null && !applicationTaskExecutor.isShutdown()) {
-        try {
-          applicationTaskExecutor.shutdown();
-          long timeoutMs = config.getCloseTimeout().toMillis();
-          if (!applicationTaskExecutor.awaitTermination(timeoutMs, TimeUnit.MILLISECONDS)) {
-            LOGGER.warn("Application task executor did not terminate within timeout, forcing shutdown");
-            applicationTaskExecutor.shutdownNow();
-            // Give it a brief moment to shutdown forcefully
-            if (!applicationTaskExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
-              LOGGER.error("Application task executor failed to shut down completely");
-            }
-          } else {
-            LOGGER.debug("Application task executor shut down successfully");
-          }
-        } catch (InterruptedException ie) {
-          LOGGER.warn("Interrupted while waiting for application task executor shutdown, forcing shutdown");
-          applicationTaskExecutor.shutdownNow();
-          Thread.currentThread().interrupt();
-          if (shutdownException == null) {
-            shutdownException = new RuntimeException("Connection close interrupted", ie);
-          } else {
-            shutdownException.addSuppressed(ie);
-          }
-        } catch (Exception e) {
-          LOGGER.error("Error shutting down application task executor", e);
-          if (shutdownException == null) {
-            shutdownException = e;
-          } else {
-            shutdownException.addSuppressed(e);
+        // Shutdown thread pool manager
+        threadPoolManager.shutdown();
+
+        // Shutdown error recovery manager
+        ErrorRecoveryManager errorRecovery = lifecycleManager.getErrorRecoveryManager();
+        if (errorRecovery != null) {
+          try {
+            errorRecovery.shutdown();
+            LOGGER.debug("Error recovery manager shut down successfully");
+          } catch (Exception e) {
+            LOGGER.error("Error shutting down error recovery manager", e);
+            shutdownException = addSuppressedException(shutdownException, e);
           }
         }
-      }
 
-      // Shutdown error recovery manager
-      if (errorRecoveryManager != null) {
-        try {
-          errorRecoveryManager.shutdown();
-          LOGGER.debug("Error recovery manager shut down successfully");
-        } catch (Exception e) {
-          LOGGER.error("Error shutting down error recovery manager", e);
-          if (shutdownException == null) {
-            shutdownException = e;
-          } else {
-            shutdownException.addSuppressed(e);
-          }
+        // Complete the future
+        if (shutdownException != null) {
+          LOGGER.warn("DBus connection to {} closed with errors", serverAddress);
+          closeFuture.completeExceptionally(shutdownException);
+        } else {
+          LOGGER.info("DBus connection to {} closed successfully", serverAddress);
+          closeFuture.complete(null);
         }
+      } catch (Exception e) {
+        closeFuture.completeExceptionally(e);
       }
-
-      // Log final status
-      if (shutdownException != null) {
-        LOGGER.warn("DBus connection to {} closed with errors (see above for details)", serverAddress);
-      } else {
-        LOGGER.info("DBus connection to {} closed successfully", serverAddress);
-      }
-    } finally {
-      // Ensure closing flag is reset even if an exception occurs
-      closing.set(false);
+      
+      return closeFuture;
+    }).toCompletableFuture().join();
+  }
+  
+  private Exception addSuppressedException(Exception primary, Exception suppressed) {
+    if (primary == null) {
+      return suppressed;
+    } else {
+      primary.addSuppressed(suppressed);
+      return primary;
     }
   }
 
@@ -428,9 +373,10 @@ public final class NettyConnection implements Connection {
     }
     
     // Apply circuit breaker protection to critical message sending operations
-    if (connectionCircuitBreaker != null && connectionCircuitBreaker.getState() != CircuitBreaker.State.CLOSED) {
+    CircuitBreaker circuitBreaker = lifecycleManager.getConnectionCircuitBreaker();
+    if (circuitBreaker != null && circuitBreaker.getState() != CircuitBreaker.State.CLOSED) {
       LOGGER.debug("Circuit breaker is {} - allowing message through without protection", 
-                   connectionCircuitBreaker.getState());
+                   circuitBreaker.getState());
     }
     
     return handle.sendRequest(msg);
@@ -460,18 +406,15 @@ public final class NettyConnection implements Connection {
 
   @Override
   public ConnectionState getState() {
-    if (healthHandler != null) {
+    // First check lifecycle manager state
+    ConnectionState lifecycleState = lifecycleManager.getState();
+    
+    // If health handler is available, use its more detailed state
+    if (healthHandler != null && lifecycleState == ConnectionState.CONNECTED) {
       return healthHandler.getCurrentState();
     }
-
-    // Fallback to basic state detection if health handler is not available
-    if (isConnected()) {
-      return ConnectionState.CONNECTED;
-    } else if (connectionHandle.get() != null) {
-      return ConnectionState.AUTHENTICATING;
-    } else {
-      return ConnectionState.DISCONNECTED;
-    }
+    
+    return lifecycleState;
   }
 
   @Override
