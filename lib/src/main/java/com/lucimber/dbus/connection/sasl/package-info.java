@@ -15,6 +15,12 @@
  * supporting multiple authentication mechanisms and secure credential exchange.
  * Authentication is performed automatically during connection establishment.
  * 
+ * <h2>Getting Started</h2>
+ * 
+ * <p><strong>For first-time users:</strong> Authentication happens automatically. For custom
+ * authentication, create a {@link SaslAuthConfig} and pass it to {@link com.lucimber.dbus.connection.ConnectionConfig}.
+ * The default EXTERNAL mechanism works for most Unix/Linux systems.</p>
+ * 
  * <h2>Supported Authentication Mechanisms</h2>
  * 
  * <h3>EXTERNAL Authentication</h3>
