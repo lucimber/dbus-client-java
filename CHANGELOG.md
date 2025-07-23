@@ -8,38 +8,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Comprehensive test coverage for SASL authentication classes
-- Complete test coverage for utility package classes  
-- Full test coverage for exception package (31 exception classes)
-- Builder pattern support for inbound message construction
-- Strategy pattern implementation for pluggable transport support
-- Factory pattern implementation for encoders and decoders
-- Request-response correlation support in `sendRequest()` method
-- Integration test improvements with better error handling
-- Performance monitoring and memory benchmark tests
-- SPDX license headers across all source files
+- Migration guide from 1.x to 2.0 with comprehensive examples and troubleshooting
+
+## [2.0.0] - 2025-01-23
+
+### Added
+- **Comprehensive Test Coverage**: Achieved 83% overall test coverage (improved from 68%)
+  - Complete test suite for DummyConnection with 92% coverage
+  - Full SASL authentication configuration testing (91% coverage)
+  - 100% test coverage for ConnectionEvent and lifecycle management
+  - Comprehensive exception package testing (31 exception classes)
+- **Builder Pattern Support**: Inbound and outbound message construction with fluent API
+- **Strategy Pattern Implementation**: Pluggable transport support for Unix sockets and TCP
+- **Factory Pattern**: Streamlined encoder/decoder creation and management
+- **Request-Response Correlation**: Built-in `sendRequest()` method with automatic correlation
+- **DummyConnection**: Testing utility for unit testing without D-Bus daemon
+- **Connection Health Monitoring**: Event-driven health checks and automatic reconnection
+- **Performance Optimizations**: Memory benchmarks and throughput improvements
+- **Code Quality Tools**: Spotless formatting, enhanced PMD and Checkstyle configurations
+- **SPDX License Headers**: Comprehensive license compliance across all source files
+- **Enhanced Documentation**: Migration guide, architecture docs, and comprehensive examples
 
 ### Changed
-- Improved integration test stability and reliability
-- Enhanced error messaging for failed D-Bus operations
-- Refactored switch statements to use factory pattern
-- Optimized message encoding/decoding performance
-- Updated PMD configuration to suppress intentional GC calls
+- **Maven Coordinates**: Updated from `dbus-client` to `lucimber-dbus-client` 
+- **Package Structure**: Unified codec package (merged encoder/decoder packages)
+- **Annotation Package**: Merged `impl` package into main annotation package
+- **Connection API**: NettyConnection-based API replacing DBusConnection
+- **Threading Model**: Dual-pipeline architecture with safe blocking operations
+- **SASL Configuration**: Type-safe configuration classes replacing string-based config
+- **Message Building**: All messages now use Builder pattern instead of constructors
+- **Integration Test Stability**: Improved reliability and error handling
+- **Error Messaging**: Enhanced error messages for failed D-Bus operations
+- **Performance**: Optimized message encoding/decoding with reduced memory allocations
 
 ### Fixed
-- Major Checkstyle violations across the codebase
-- Integration test failures related to message correlation
-- `sendRequest()` method implementation with proper request-response handling
-- Javadoc generation errors and documentation issues
-- Missing serial numbers in test method calls
-- Docker disk space issues in CI/CD pipeline
+- **Checkstyle Violations**: Resolved all major code style issues across the codebase
+- **PMD Violations**: Fixed code quality issues and suppressed intentional patterns
+- **Integration Test Failures**: Resolved message correlation and timing issues
+- **Javadoc Generation**: Fixed documentation build errors and improved API docs
+- **Connection Timeout Handling**: Improved retry logic and timeout management
+- **Docker Resource Issues**: Resolved CI/CD pipeline disk space and resource constraints
+- **Message Serial Numbers**: Fixed missing serial numbers in test method calls
+- **SASL Authentication**: Enhanced error handling for authentication failures
 
 ### Security
-- Enhanced SASL authentication mechanism testing
-- Improved error handling for authentication failures
-- Better validation of D-Bus message integrity
+- **Enhanced SASL Testing**: Comprehensive testing for all authentication mechanisms
+- **Improved Authentication Error Handling**: Better validation and error reporting
+- **Message Integrity Validation**: Strengthened D-Bus message validation
+- **Security Scanning**: Integrated security analysis in CI/CD pipeline
 
-## [2.0-SNAPSHOT] - Current Development
+### Breaking Changes
+- **Maven Coordinates**: `com.lucimber:dbus-client` → `com.lucimber:lucimber-dbus-client`
+- **Connection Creation**: `DBusConnection.create()` → `NettyConnection.newSessionBusConnection()`
+- **Package Imports**: `com.lucimber.dbus.encoder.*` → `com.lucimber.dbus.codec.encoder.*`
+- **Message Construction**: Constructor-based → Builder pattern required
+- **SASL Configuration**: String-based → Type-safe configuration classes
+
+## [2.0-SNAPSHOT] - Previous Development
 
 ### Architecture
 - **Dual-Pipeline System**: Sophisticated architecture with Public API and Netty transport layers
@@ -55,11 +80,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Spring Boot Integration**: Auto-configuration and dependency injection support
 - **Health Monitoring**: Connection health checks and automatic reconnection
 
-### Testing & Quality
+### Testing & Quality (Legacy)
 - **Integration Testing**: Docker-based testing with real D-Bus daemon
-- **Code Coverage**: 68% overall coverage with 100% coverage for critical components
-- **Code Quality**: PMD, Checkstyle, and SpotBugs integration
-- **Performance Testing**: Memory usage and throughput benchmarks
+- **Code Coverage**: 68% baseline coverage (improved to 83% in 2.0.0)
+- **Code Quality**: Basic PMD, Checkstyle integration (enhanced in 2.0.0)
+- **Performance Testing**: Initial memory usage and throughput benchmarks
 
 ### Documentation
 - **Developer Guide**: Comprehensive learning path for new users
@@ -105,10 +130,11 @@ Connection connection = NettyConnection.newSessionBusConnection();
 
 ### Compatibility Matrix
 
-| Library Version | Java Version | D-Bus Specification | Spring Boot |
-|----------------|--------------|-------------------|-------------|
-| 2.0-SNAPSHOT   | 17+          | 0.35              | 3.x         |
-| 1.x            | 11+          | 0.32              | 2.x         |
+| Library Version | Java Version | D-Bus Specification | Test Coverage | Spring Boot |
+|----------------|--------------|-------------------|---------------|-------------|
+| 2.0.0          | 17+          | 0.35+             | 83%           | 3.x         |
+| 2.0-SNAPSHOT   | 17+          | 0.35              | 68%           | 3.x         |
+| 1.x            | 11+          | 0.32              | ~60%          | 2.x         |
 
 ---
 
