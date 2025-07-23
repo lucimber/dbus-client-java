@@ -173,16 +173,30 @@ class ErrorHandlingIntegrationTest extends DBusIntegrationTestBase {
                 },
                 "Connection should timeout and fail");
 
-        // Wait a bit for the internal state to stabilize after timeout
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        // Wait for the state to change from CONNECTING to FAILED
+        // The state change happens asynchronously after the connection timeout
+        int maxWaitTime = 10000; // 10 seconds max wait
+        int waitInterval = 100; // Check every 100ms
+        int waited = 0;
+        
+        ConnectionState state = connection.getState();
+        LOGGER.info("Initial state after timeout: " + state);
+        
+        while (waited < maxWaitTime && state == ConnectionState.CONNECTING) {
+            try {
+                Thread.sleep(waitInterval);
+                waited += waitInterval;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+            state = connection.getState();
         }
+        
+        LOGGER.info("Final state after waiting " + waited + "ms: " + state);
 
         assertFalse(connection.isConnected());
         // After a connection failure, the state should be FAILED, not DISCONNECTED
-        ConnectionState state = connection.getState();
         assertTrue(
                 state == ConnectionState.FAILED || state == ConnectionState.DISCONNECTED,
                 "Expected FAILED or DISCONNECTED state, but was: " + state);
