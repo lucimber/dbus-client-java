@@ -4,7 +4,9 @@ This directory contains examples demonstrating how to use the D-Bus Client Java 
 
 ## Examples Overview
 
-### 1. SimpleAnnotationExample
+### Core Examples
+
+#### 1. SimpleAnnotationExample
 **File:** `SimpleAnnotationExample.java`  
 **Purpose:** Demonstrates the annotation-based approach to implementing D-Bus services.
 
@@ -18,7 +20,7 @@ This example shows how to:
 - Introspection XML generated from annotations
 - Standard Peer interface (Ping, GetMachineId) provided automatically
 
-### 2. SimpleClientExample
+#### 2. SimpleClientExample
 **File:** `SimpleClientExample.java`  
 **Purpose:** Demonstrates how to interact with D-Bus services as a client.
 
@@ -28,6 +30,80 @@ This example shows how to:
 - Handle responses and errors properly
 - List available D-Bus services
 
+#### 3. AuthenticationExample
+**File:** `AuthenticationExample.java`  
+**Purpose:** Shows different SASL authentication mechanisms.
+
+#### 4. BasicClientExample
+**File:** `BasicClientExample.java`  
+**Purpose:** Basic client operations and message handling.
+
+#### 5. ServiceDiscoveryExample
+**File:** `ServiceDiscoveryExample.java`  
+**Purpose:** Discovering and interacting with D-Bus services.
+
+#### 6. SignalHandlingExample
+**File:** `SignalHandlingExample.java`  
+**Purpose:** Handling D-Bus signals and event-driven programming.
+
+#### 7. SimpleReactiveExample
+**File:** `SimpleReactiveExample.java`  
+**Purpose:** Reactive programming patterns with D-Bus.
+
+#### 8. SpringBootIntegrationExample
+**File:** `SpringBootIntegrationExample.java`  
+**Purpose:** Integration with Spring Boot applications.
+
+### New 2.0 Features Examples
+
+#### 9. ConnectionHealthExample
+**File:** `ConnectionHealthExample.java`  
+**Purpose:** Demonstrates connection health monitoring and event handling.
+
+This example shows how to:
+- Monitor connection state changes with event listeners
+- Handle connection health events and failures
+- Configure connection timeouts and retry logic
+- Implement graceful shutdown and reconnection
+
+**Key Features:**
+- Comprehensive event handling for all connection states
+- Health check monitoring with configurable intervals
+- Automatic reconnection with exponential backoff
+- Graceful error handling and logging
+
+#### 10. DummyConnectionTestingExample
+**File:** `DummyConnectionTestingExample.java`  
+**Purpose:** Unit testing with DummyConnection for isolated testing.
+
+This example shows how to:
+- Use DummyConnection for unit testing without a real D-Bus daemon
+- Test custom handlers in isolation
+- Simulate various D-Bus scenarios (success, error, timeout)
+- Verify handler behavior programmatically
+
+**Key Features:**
+- Complete isolation from D-Bus daemon for reliable unit tests
+- Custom handler testing with mock responses
+- Error scenario simulation and testing
+- Programmatic verification of message handling
+
+#### 11. TransportStrategiesExample
+**File:** `TransportStrategiesExample.java`  
+**Purpose:** Different transport strategies and SASL configurations.
+
+This example shows how to:
+- Use Unix domain socket transport (standard for system/session bus)
+- Configure TCP transport for remote D-Bus connections
+- Set up different SASL authentication mechanisms (EXTERNAL, COOKIE, ANONYMOUS)
+- Handle transport-specific connection options
+
+**Key Features:**
+- Strategy pattern implementation for pluggable transports
+- Advanced TCP configuration with keep-alive and timeouts
+- Type-safe SASL configuration classes
+- Comprehensive transport option demonstrations
+
 ## Running the Examples
 
 ### Prerequisites
@@ -35,7 +111,9 @@ This example shows how to:
 - D-Bus daemon running (usually automatic on Linux/macOS)
 - Access to D-Bus session bus
 
-### Running the Annotation-Based Service
+### Core Examples
+
+#### Running the Annotation-Based Service
 
 ```bash
 # Start the annotation-based service
@@ -47,7 +125,7 @@ This example shows how to:
 #    Object Path:  /com/example/Simple
 ```
 
-### Running the Client
+#### Running the Client
 
 ```bash
 # In another terminal, run the client
@@ -59,6 +137,51 @@ This example shows how to:
 # 🏓 Testing ping to org.freedesktop.DBus
 # 📋 Listing available D-Bus services...
 # 🔍 Testing annotation-based service (if running)...
+```
+
+### New 2.0 Features Examples
+
+#### Running the Connection Health Example
+
+```bash
+# Monitor connection health and events
+./gradlew :examples:run -PmainClass=com.lucimber.dbus.examples.ConnectionHealthExample
+
+# Output will show:
+# 🔍 D-Bus Connection Health Monitoring Example
+# 📡 Connecting to system D-Bus...
+# ✅ Connected successfully!
+# 🔄 State change: null → CONNECTED
+# ⏳ Monitoring connection health for 60 seconds...
+```
+
+#### Running the DummyConnection Testing Example
+
+```bash
+# Demonstrate unit testing with DummyConnection
+./gradlew :examples:run -PmainClass=com.lucimber.dbus.examples.DummyConnectionTestingExample
+
+# Output will show:
+# 🧪 D-Bus Unit Testing with DummyConnection Example
+# 📋 Test 1: Basic DummyConnection Usage
+# 🔗 Connecting to DummyConnection...
+# ✅ Connected successfully!
+# 📤 Sending method call: GetVersion
+# 📥 Received reply: OutboundMethodReturn
+```
+
+#### Running the Transport Strategies Example
+
+```bash
+# Explore different transport configurations
+./gradlew :examples:run -PmainClass=com.lucimber.dbus.examples.TransportStrategiesExample
+
+# Output will show:
+# 🚀 D-Bus Transport Strategies Example
+# 📋 Example 1: Unix Domain Socket Connections
+# 🔗 Connecting to session bus...
+# ✅ Session bus connected successfully!
+# 📞 Testing Session Bus with basic D-Bus call...
 ```
 
 ### Testing with D-Bus Tools
