@@ -623,13 +623,29 @@ public class DummyConnection implements Connection {
     public static Function<OutboundMessage, InboundMessage> successResponse(List<DBusType> body) {
         return msg -> {
             if (msg instanceof OutboundMethodCall call) {
-                return InboundMethodReturn.Builder.create()
+                var builder = InboundMethodReturn.Builder.create()
                         .withSerial(
                                 DBusUInt32.valueOf((int) (System.nanoTime() % Integer.MAX_VALUE)))
                         .withReplySerial(call.getSerial())
-                        .withSender(DBusString.valueOf(":1.0"))
-                        .withBody(call.getSignature().orElse(DBusSignature.valueOf("")), body)
-                        .build();
+                        .withSender(DBusString.valueOf(":1.0"));
+                
+                if (body != null && !body.isEmpty()) {
+                    // Create signature based on body types
+                    StringBuilder sigBuilder = new StringBuilder();
+                    for (DBusType item : body) {
+                        if (item instanceof DBusString) {
+                            sigBuilder.append("s");
+                        } else if (item instanceof DBusUInt32) {
+                            sigBuilder.append("u");
+                        } else {
+                            sigBuilder.append("v"); // variant for unknown types
+                        }
+                    }
+                    builder.withBody(DBusSignature.valueOf(sigBuilder.toString()), body);
+                }
+                // For empty bodies, don't call withBody at all - both signature and payload will be null
+                
+                return builder.build();
             }
             throw new IllegalArgumentException("Unsupported message type: " + msg.getClass());
         };
