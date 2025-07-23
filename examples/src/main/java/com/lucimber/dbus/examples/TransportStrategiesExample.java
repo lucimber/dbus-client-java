@@ -58,7 +58,7 @@ public class TransportStrategiesExample {
         try {
             sessionConnection.connect().toCompletableFuture().get(10, TimeUnit.SECONDS);
             System.out.println("✅ Session bus connected successfully!");
-            System.out.println("   Connection ID: " + sessionConnection.getConnectionId());
+            System.out.println("   Connection state: " + sessionConnection.getState());
             System.out.println("   State: " + sessionConnection.getState());
             
             testBasicDbusCall(sessionConnection, "Session Bus");
@@ -78,7 +78,7 @@ public class TransportStrategiesExample {
         try {
             systemConnection.connect().toCompletableFuture().get(10, TimeUnit.SECONDS);
             System.out.println("✅ System bus connected successfully!");
-            System.out.println("   Connection ID: " + systemConnection.getConnectionId());
+            System.out.println("   Connection state: " + systemConnection.getState());
             System.out.println("   State: " + systemConnection.getState());
             
             testBasicDbusCall(systemConnection, "System Bus");
@@ -170,11 +170,11 @@ public class TransportStrategiesExample {
                 .withReplyExpected(true)
                 .build();
             
-            CompletableFuture<InboundMessage> response = connection.sendRequest(call);
+            CompletableFuture<InboundMessage> response = connection.sendRequest(call).toCompletableFuture();
             InboundMessage reply = response.get(5, TimeUnit.SECONDS);
             
             System.out.printf("✅ %s call successful! Reply serial: %d%n", 
-                connectionType, reply.getSerial().getValue());
+                connectionType, reply.getSerial().getDelegate());
             
         } catch (Exception e) {
             System.out.printf("⚠️  %s call failed: %s%n", connectionType, e.getMessage());

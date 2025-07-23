@@ -66,7 +66,7 @@ public class ConnectionHealthExample {
             connection.connect().toCompletableFuture().get(15, TimeUnit.SECONDS);
             
             System.out.println("✅ Connected successfully!");
-            System.out.println("🔧 Connection ID: " + connection.getConnectionId());
+            System.out.println("🔧 Connection state: " + connection.getState());
             System.out.println("📊 Current state: " + connection.getState());
             
             // Wait for health events
@@ -106,21 +106,21 @@ public class ConnectionHealthExample {
         private final CountDownLatch shutdownLatch = new CountDownLatch(1);
         
         @Override
-        public void onConnectionEvent(ConnectionEvent event) {
+        public void onConnectionEvent(Connection connection, ConnectionEvent event) {
             switch (event.getType()) {
                 case STATE_CHANGED:
                     handleStateChange(event);
                     break;
-                case HEALTH_CHECK_FAILED:
+                case HEALTH_CHECK_FAILURE:
                     handleHealthCheckFailed(event);
                     break;
-                case RECONNECTION_STARTED:
+                case RECONNECTION_ATTEMPT:
                     handleReconnectionStarted(event);
                     break;
-                case RECONNECTION_SUCCEEDED:
+                case RECONNECTION_SUCCESS:
                     handleReconnectionSucceeded(event);
                     break;
-                case RECONNECTION_FAILED:
+                case RECONNECTION_FAILURE:
                     handleReconnectionFailed(event);
                     break;
                 default:
@@ -138,18 +138,24 @@ public class ConnectionHealthExample {
                 case CONNECTING:
                     System.out.println("   ⏳ Establishing connection...");
                     break;
+                case AUTHENTICATING:
+                    System.out.println("   🔒 Authenticating...");
+                    break;
                 case CONNECTED:
                     System.out.println("   ✅ Connection established successfully");
                     break;
-                case DISCONNECTING:
-                    System.out.println("   ⏳ Closing connection...");
+                case UNHEALTHY:
+                    System.out.println("   ⚠️ Connection unhealthy");
+                    break;
+                case RECONNECTING:
+                    System.out.println("   🔄 Attempting to reconnect...");
+                    break;
+                case FAILED:
+                    System.out.println("   ❌ Connection failed permanently");
                     break;
                 case DISCONNECTED:
                     System.out.println("   🔌 Connection closed");
                     shutdownLatch.countDown();
-                    break;
-                case RECONNECTING:
-                    System.out.println("   🔄 Attempting to reconnect...");
                     break;
                 default:
                     break;
@@ -158,30 +164,26 @@ public class ConnectionHealthExample {
         
         private void handleHealthCheckFailed(ConnectionEvent event) {
             System.out.println("⚠️  Health check failed");
-            if (event.getFailure().isPresent()) {
-                System.out.println("   Reason: " + event.getFailure().get().getMessage());
-            }
+            // Note: Failure information not available in current ConnectionEvent API
+            System.out.println("   Health check monitoring active");
         }
         
         private void handleReconnectionStarted(ConnectionEvent event) {
             System.out.println("🔄 Reconnection started");
-            event.getAttemptNumber().ifPresent(attempt -> 
-                System.out.println("   Attempt #" + attempt));
+            // Note: Attempt number not available in current ConnectionEvent API
+            System.out.println("   Reconnection in progress...");
         }
         
         private void handleReconnectionSucceeded(ConnectionEvent event) {
             System.out.println("✅ Reconnection succeeded");
-            event.getAttemptNumber().ifPresent(attempt -> 
-                System.out.println("   Succeeded after " + attempt + " attempts"));
+            // Note: Attempt number not available in current ConnectionEvent API
+            System.out.println("   Reconnection successful");
         }
         
         private void handleReconnectionFailed(ConnectionEvent event) {
             System.out.println("❌ Reconnection failed");
-            event.getAttemptNumber().ifPresent(attempt -> 
-                System.out.println("   Failed after " + attempt + " attempts"));
-            if (event.getFailure().isPresent()) {
-                System.out.println("   Final error: " + event.getFailure().get().getMessage());
-            }
+            // Note: Attempt number and failure info not available in current ConnectionEvent API
+            System.out.println("   Reconnection attempts exhausted");
         }
         
         public void awaitShutdown(long timeout, TimeUnit unit) throws InterruptedException {

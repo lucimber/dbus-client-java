@@ -10,13 +10,18 @@ import com.lucimber.dbus.connection.Context;
 import com.lucimber.dbus.connection.DummyConnection;
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.InboundMethodCall;
+import com.lucimber.dbus.message.InboundError;
+import com.lucimber.dbus.message.InboundMethodReturn;
 import com.lucimber.dbus.message.OutboundError;
 import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.message.OutboundMethodReturn;
-import com.lucimber.dbus.type.DBusArray;
 import com.lucimber.dbus.type.DBusInt32;
 import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusType;
+import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -58,10 +63,9 @@ public class DummyConnectionTestingExample {
         System.out.println("\n📋 Test 1: Basic DummyConnection Usage");
         System.out.println("=====================================");
         
-        // Create DummyConnection with auto-response enabled
+        // Create DummyConnection with basic configuration
         DummyConnection connection = DummyConnection.builder()
-            .withAutoResponse(true)
-            .withConnectionId("test-connection-1")
+            .withConnectDelay(Duration.ofMillis(10))
             .build();
         
         try {
@@ -81,13 +85,13 @@ public class DummyConnectionTestingExample {
                 .withReplyExpected(true)
                 .build();
             
-            System.out.println("📤 Sending method call: " + call.getMember().getValue());
+            System.out.println("📤 Sending method call: " + call.getMember().getDelegate());
             
-            CompletableFuture<InboundMessage> response = connection.sendRequest(call);
+            CompletableFuture<InboundMessage> response = connection.sendRequest(call).toCompletableFuture();
             InboundMessage reply = response.get(1, TimeUnit.SECONDS);
             
             System.out.println("📥 Received reply: " + reply.getClass().getSimpleName());
-            System.out.println("   Serial: " + reply.getSerial().getValue());
+            System.out.println("   Serial: " + reply.getSerial().getDelegate());
             
         } finally {
             connection.close();
@@ -102,15 +106,14 @@ public class DummyConnectionTestingExample {
         System.out.println("\n📋 Test 2: Testing Custom Handlers");
         System.out.println("==================================");
         
-        // Create DummyConnection without auto-response
+        // Create DummyConnection with basic configuration
         DummyConnection connection = DummyConnection.builder()
-            .withAutoResponse(false)
-            .withConnectionId("test-connection-2")
+            .withConnectDelay(Duration.ofMillis(10))
             .build();
         
         // Add our custom handler
         CalculatorHandler calculatorHandler = new CalculatorHandler();
-        connection.pipeline().addLast("calculator", calculatorHandler);
+        connection.getPipeline().addLast("calculator", calculatorHandler);
         
         try {
             connection.connect().toCompletableFuture().get(1, TimeUnit.SECONDS);
@@ -124,27 +127,25 @@ public class DummyConnectionTestingExample {
                 .withDestination(DBusString.valueOf("com.example.Calculator"))
                 .withInterface(DBusString.valueOf("com.example.Calculator"))
                 .withReplyExpected(true)
-                .withArguments(new DBusInt32(15), new DBusInt32(25))
+                .withBody(DBusSignature.valueOf("ii"), List.of(DBusInt32.valueOf(15), DBusInt32.valueOf(25)))
                 .build();
             
             System.out.println("🧮 Testing calculator: Add(15, 25)");
             
-            CompletableFuture<InboundMessage> response = connection.sendRequest(addCall);
+            CompletableFuture<InboundMessage> response = connection.sendRequest(addCall).toCompletableFuture();
             InboundMessage reply = response.get(1, TimeUnit.SECONDS);
             
-            if (reply instanceof OutboundMethodReturn) {
-                OutboundMethodReturn methodReturn = (OutboundMethodReturn) reply;
-                if (methodReturn.getArguments().isPresent()) {
-                    DBusArray<?> args = methodReturn.getArguments().get();
-                    if (!args.getElements().isEmpty()) {
-                        DBusInt32 result = (DBusInt32) args.getElements().get(0);
-                        System.out.println("✅ Result: " + result.getValue());
-                        
-                        if (result.getValue() == 40) {
-                            System.out.println("🎉 Calculator test passed!");
-                        } else {
-                            System.out.println("❌ Calculator test failed! Expected 40, got " + result.getValue());
-                        }
+            if (reply instanceof InboundMethodReturn) {
+                InboundMethodReturn methodReturn = (InboundMethodReturn) reply;
+                List<DBusType> payload = methodReturn.getPayload();
+                if (!payload.isEmpty()) {
+                    DBusInt32 result = (DBusInt32) payload.get(0);
+                    System.out.println("✅ Result: " + result.getDelegate());
+                    
+                    if (result.getDelegate().equals(40)) {
+                        System.out.println("🎉 Calculator test passed!");
+                    } else {
+                        System.out.println("❌ Calculator test failed! Expected 40, got " + result.getDelegate());
                     }
                 }
             }
@@ -163,13 +164,12 @@ public class DummyConnectionTestingExample {
         System.out.println("==================================");
         
         DummyConnection connection = DummyConnection.builder()
-            .withAutoResponse(false)
-            .withConnectionId("test-connection-3")
+            .withConnectDelay(Duration.ofMillis(10))
             .build();
         
         // Add handler that generates errors for certain inputs
         ErrorTestHandler errorHandler = new ErrorTestHandler();
-        connection.pipeline().addLast("error-test", errorHandler);
+        connection.getPipeline().addLast("error-test", errorHandler);
         
         try {
             connection.connect().toCompletableFuture().get(1, TimeUnit.SECONDS);
@@ -183,18 +183,22 @@ public class DummyConnectionTestingExample {
                 .withDestination(DBusString.valueOf("com.example.Calculator"))
                 .withInterface(DBusString.valueOf("com.example.Calculator"))
                 .withReplyExpected(true)
-                .withArguments(new DBusInt32(10), new DBusInt32(0))
+                .withBody(DBusSignature.valueOf("ii"), List.of(DBusInt32.valueOf(10), DBusInt32.valueOf(0)))
                 .build();
             
             System.out.println("🧮 Testing error handling: Divide(10, 0)");
             
-            CompletableFuture<InboundMessage> response = connection.sendRequest(divideCall);
+            CompletableFuture<InboundMessage> response = connection.sendRequest(divideCall).toCompletableFuture();
             InboundMessage reply = response.get(1, TimeUnit.SECONDS);
             
-            if (reply instanceof OutboundError) {
-                OutboundError error = (OutboundError) reply;
-                System.out.println("✅ Received expected error: " + error.getErrorName().getValue());
-                System.out.println("   Error message: " + error.getErrorMessage().map(DBusString::getValue).orElse("(no message)"));
+            if (reply instanceof InboundError) {
+                InboundError error = (InboundError) reply;
+                System.out.println("✅ Received expected error: " + error.getErrorName().getDelegate());
+                List<DBusType> payload = error.getPayload();
+                if (!payload.isEmpty()) {
+                    DBusString errorMessage = (DBusString) payload.get(0);
+                    System.out.println("   Error message: " + errorMessage.getDelegate());
+                }
                 System.out.println("🎉 Error handling test passed!");
             } else {
                 System.out.println("❌ Expected error response, got: " + reply.getClass().getSimpleName());
@@ -212,10 +216,15 @@ public class DummyConnectionTestingExample {
     private static class CalculatorHandler extends AbstractInboundHandler {
         
         @Override
+        protected Logger getLogger() {
+            return LOGGER;
+        }
+        
+        @Override
         public void handleInboundMessage(Context ctx, InboundMessage msg) {
             if (msg instanceof InboundMethodCall) {
                 InboundMethodCall methodCall = (InboundMethodCall) msg;
-                String method = methodCall.getMember().getValue();
+                String method = methodCall.getMember().getDelegate();
                 
                 if ("Add".equals(method)) {
                     handleAddition(ctx, methodCall);
@@ -230,46 +239,48 @@ public class DummyConnectionTestingExample {
         
         private void handleAddition(Context ctx, InboundMethodCall call) {
             try {
-                if (call.getArguments().isPresent()) {
-                    DBusArray<?> args = call.getArguments().get();
-                    if (args.getElements().size() >= 2) {
-                        DBusInt32 a = (DBusInt32) args.getElements().get(0);
-                        DBusInt32 b = (DBusInt32) args.getElements().get(1);
-                        
-                        int result = a.getValue() + b.getValue();
-                        
-                        OutboundMethodReturn response = OutboundMethodReturn.Builder
-                            .create()
-                            .withSerial(call.getSerial())
-                            .withArguments(new DBusInt32(result))
-                            .build();
-                        
-                        ctx.propagateOutboundMessage(response);
-                        return;
-                    }
+                List<DBusType> payload = call.getPayload();
+                if (payload.size() >= 2) {
+                    DBusInt32 a = (DBusInt32) payload.get(0);
+                    DBusInt32 b = (DBusInt32) payload.get(1);
+                    
+                    int result = a.getDelegate() + b.getDelegate();
+                    
+                    OutboundMethodReturn response = OutboundMethodReturn.Builder
+                        .create()
+                        .withSerial(call.getSerial())
+                        .withReplySerial(call.getSerial())
+                        .withDestination(DBusString.valueOf("com.example.Calculator"))
+                        .withBody(DBusSignature.valueOf("i"), List.of(DBusInt32.valueOf(result)))
+                        .build();
+                    
+                    ctx.propagateOutboundMessage(response, new CompletableFuture<>());
+                    return;
                 }
                 
                 // Invalid arguments
                 OutboundError error = OutboundError.Builder
                     .create()
                     .withSerial(call.getSerial())
+                    .withReplySerial(call.getSerial())
                     .withErrorName(DBusString.valueOf("org.freedesktop.DBus.Error.InvalidArgs"))
-                    .withErrorMessage(DBusString.valueOf("Add requires two integer arguments"))
+                    .withBody(DBusSignature.valueOf("s"), List.of(DBusString.valueOf("Add requires two integer arguments")))
                     .build();
                 
-                ctx.propagateOutboundMessage(error);
+                ctx.propagateOutboundMessage(error, new CompletableFuture<>());
                 
             } catch (Exception e) {
-                LOGGER.error("Error handling addition", e);
+                getLogger().error("Error handling addition", e);
                 
                 OutboundError error = OutboundError.Builder
                     .create()
                     .withSerial(call.getSerial())
+                    .withReplySerial(call.getSerial())
                     .withErrorName(DBusString.valueOf("org.freedesktop.DBus.Error.Failed"))
-                    .withErrorMessage(DBusString.valueOf("Internal error: " + e.getMessage()))
+                    .withBody(DBusSignature.valueOf("s"), List.of(DBusString.valueOf("Internal error: " + e.getMessage())))
                     .build();
                 
-                ctx.propagateOutboundMessage(error);
+                ctx.propagateOutboundMessage(error, new CompletableFuture<>());
             }
         }
     }
@@ -280,10 +291,15 @@ public class DummyConnectionTestingExample {
     private static class ErrorTestHandler extends AbstractInboundHandler {
         
         @Override
+        protected Logger getLogger() {
+            return LOGGER;
+        }
+        
+        @Override
         public void handleInboundMessage(Context ctx, InboundMessage msg) {
             if (msg instanceof InboundMethodCall) {
                 InboundMethodCall methodCall = (InboundMethodCall) msg;
-                String method = methodCall.getMember().getValue();
+                String method = methodCall.getMember().getDelegate();
                 
                 if ("Divide".equals(method)) {
                     handleDivision(ctx, methodCall);
@@ -297,50 +313,52 @@ public class DummyConnectionTestingExample {
         
         private void handleDivision(Context ctx, InboundMethodCall call) {
             try {
-                if (call.getArguments().isPresent()) {
-                    DBusArray<?> args = call.getArguments().get();
-                    if (args.getElements().size() >= 2) {
-                        DBusInt32 a = (DBusInt32) args.getElements().get(0);
-                        DBusInt32 b = (DBusInt32) args.getElements().get(1);
-                        
-                        if (b.getValue() == 0) {
-                            // Division by zero error
-                            OutboundError error = OutboundError.Builder
-                                .create()
-                                .withSerial(call.getSerial())
-                                .withErrorName(DBusString.valueOf("org.freedesktop.DBus.Error.InvalidArgs"))
-                                .withErrorMessage(DBusString.valueOf("Division by zero is not allowed"))
-                                .build();
-                            
-                            ctx.propagateOutboundMessage(error);
-                            return;
-                        }
-                        
-                        int result = a.getValue() / b.getValue();
-                        
-                        OutboundMethodReturn response = OutboundMethodReturn.Builder
+                List<DBusType> payload = call.getPayload();
+                if (payload.size() >= 2) {
+                    DBusInt32 a = (DBusInt32) payload.get(0);
+                    DBusInt32 b = (DBusInt32) payload.get(1);
+                    
+                    if (b.getDelegate() == 0) {
+                        // Division by zero error
+                        OutboundError error = OutboundError.Builder
                             .create()
                             .withSerial(call.getSerial())
-                            .withArguments(new DBusInt32(result))
+                            .withReplySerial(call.getSerial())
+                            .withErrorName(DBusString.valueOf("org.freedesktop.DBus.Error.InvalidArgs"))
+                            .withBody(DBusSignature.valueOf("s"), List.of(DBusString.valueOf("Division by zero is not allowed")))
                             .build();
                         
-                        ctx.propagateOutboundMessage(response);
+                        ctx.propagateOutboundMessage(error, new CompletableFuture<>());
                         return;
                     }
+                    
+                    int result = a.getDelegate() / b.getDelegate();
+                    
+                    OutboundMethodReturn response = OutboundMethodReturn.Builder
+                        .create()
+                        .withSerial(call.getSerial())
+                        .withReplySerial(call.getSerial())
+                        .withDestination(DBusString.valueOf("com.example.Calculator"))
+                        .withBody(DBusSignature.valueOf("i"), List.of(DBusInt32.valueOf(result)))
+                        .build();
+                    
+                    ctx.propagateOutboundMessage(response, new CompletableFuture<>());
+                    return;
                 }
                 
                 // Invalid arguments
                 OutboundError error = OutboundError.Builder
                     .create()
                     .withSerial(call.getSerial())
+                    .withReplySerial(call.getSerial())
                     .withErrorName(DBusString.valueOf("org.freedesktop.DBus.Error.InvalidArgs"))
-                    .withErrorMessage(DBusString.valueOf("Divide requires two integer arguments"))
+                    .withBody(DBusSignature.valueOf("s"), List.of(DBusString.valueOf("Divide requires two integer arguments")))
                     .build();
                 
-                ctx.propagateOutboundMessage(error);
+                ctx.propagateOutboundMessage(error, new CompletableFuture<>());
                 
             } catch (Exception e) {
-                LOGGER.error("Error handling division", e);
+                getLogger().error("Error handling division", e);
             }
         }
     }

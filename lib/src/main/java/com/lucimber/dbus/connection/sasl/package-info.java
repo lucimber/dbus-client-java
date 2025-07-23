@@ -7,13 +7,15 @@
  * Simple Authentication and Security Layer (SASL) implementation for D-Bus authentication.
  *
  * <p>This package provides core SASL types and data structures used by the D-Bus authentication
- * system. The actual SASL authentication implementation is handled by the 
- * {@link com.lucimber.dbus.netty.sasl} package.
+ * system. The actual SASL authentication implementation is handled by the {@link
+ * com.lucimber.dbus.netty.sasl} package.
  *
  * <h2>Core SASL Types</h2>
  *
  * <h3>SaslMessage</h3>
+ *
  * <p>Represents SASL protocol messages exchanged during authentication:
+ *
  * <pre>{@code
  * SaslMessage authMessage = SaslMessage.create(
  *     SaslCommandName.AUTH,
@@ -23,10 +25,12 @@
  * }</pre>
  *
  * <h3>SaslCommandName</h3>
+ *
  * <p>Enumeration of SASL command types:
+ *
  * <ul>
  *   <li><strong>AUTH:</strong> Authentication initiation
- *   <li><strong>CANCEL:</strong> Authentication cancellation  
+ *   <li><strong>CANCEL:</strong> Authentication cancellation
  *   <li><strong>DATA:</strong> Authentication data exchange
  *   <li><strong>BEGIN:</strong> Start message protocol
  *   <li><strong>REJECTED:</strong> Authentication rejected
@@ -35,7 +39,9 @@
  * </ul>
  *
  * <h3>SaslAuthMechanism</h3>
+ *
  * <p>Enumeration of supported authentication mechanisms:
+ *
  * <ul>
  *   <li><strong>EXTERNAL:</strong> Unix credentials authentication
  *   <li><strong>COOKIE:</strong> Cookie-based authentication (DBUS_COOKIE_SHA1)
@@ -62,17 +68,19 @@
  *
  * <h2>Implementation Notes</h2>
  *
- * <p>This package contains data types and constants only. The actual SASL authentication
- * logic is implemented in:
+ * <p>This package contains data types and constants only. The actual SASL authentication logic is
+ * implemented in:
  *
  * <ul>
- *   <li>{@link com.lucimber.dbus.netty.sasl.SaslAuthenticationHandler} - Main authentication handler
- *   <li>{@link com.lucimber.dbus.netty.sasl.SaslMechanism} - Authentication mechanism implementations  
+ *   <li>{@link com.lucimber.dbus.netty.sasl.SaslAuthenticationHandler} - Main authentication
+ *       handler
+ *   <li>{@link com.lucimber.dbus.netty.sasl.SaslMechanism} - Authentication mechanism
+ *       implementations
  *   <li>{@link com.lucimber.dbus.netty.sasl.SaslCodec} - SASL message encoding/decoding
  * </ul>
  *
- * <p>Authentication is performed automatically during connection establishment. No manual
- * SASL configuration is required for standard D-Bus connections.
+ * <p>Authentication is performed automatically during connection establishment. No manual SASL
+ * configuration is required for standard D-Bus connections.
  *
  * @see com.lucimber.dbus.netty.sasl
  * @see com.lucimber.dbus.connection.Connection

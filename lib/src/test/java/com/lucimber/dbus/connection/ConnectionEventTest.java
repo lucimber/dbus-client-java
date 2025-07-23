@@ -17,15 +17,16 @@ class ConnectionEventTest {
     void testBuilderWithAllFields() {
         Instant timestamp = Instant.now();
         RuntimeException cause = new RuntimeException("Test exception");
-        
-        ConnectionEvent event = ConnectionEvent.builder(ConnectionEventType.STATE_CHANGED)
-                .withOldState(ConnectionState.CONNECTED)
-                .withNewState(ConnectionState.DISCONNECTED)
-                .withTimestamp(timestamp)
-                .withMessage("Test message")
-                .withCause(cause)
-                .build();
-        
+
+        ConnectionEvent event =
+                ConnectionEvent.builder(ConnectionEventType.STATE_CHANGED)
+                        .withOldState(ConnectionState.CONNECTED)
+                        .withNewState(ConnectionState.DISCONNECTED)
+                        .withTimestamp(timestamp)
+                        .withMessage("Test message")
+                        .withCause(cause)
+                        .build();
+
         assertEquals(ConnectionEventType.STATE_CHANGED, event.getType());
         assertEquals(Optional.of(ConnectionState.CONNECTED), event.getOldState());
         assertEquals(Optional.of(ConnectionState.DISCONNECTED), event.getNewState());
@@ -36,9 +37,9 @@ class ConnectionEventTest {
 
     @Test
     void testBuilderWithMinimalFields() {
-        ConnectionEvent event = ConnectionEvent.builder(ConnectionEventType.HEALTH_CHECK_SUCCESS)
-                .build();
-        
+        ConnectionEvent event =
+                ConnectionEvent.builder(ConnectionEventType.HEALTH_CHECK_SUCCESS).build();
+
         assertEquals(ConnectionEventType.HEALTH_CHECK_SUCCESS, event.getType());
         assertEquals(Optional.empty(), event.getOldState());
         assertEquals(Optional.empty(), event.getNewState());
@@ -49,31 +50,27 @@ class ConnectionEventTest {
 
     @Test
     void testBuilderWithNullType() {
-        assertThrows(NullPointerException.class, () -> 
-                ConnectionEvent.builder(null).build()
-        );
+        assertThrows(NullPointerException.class, () -> ConnectionEvent.builder(null).build());
     }
 
     @Test
     void testStateChangedFactory() {
-        ConnectionEvent event = ConnectionEvent.stateChanged(
-                ConnectionState.DISCONNECTED, 
-                ConnectionState.CONNECTING
-        );
-        
+        ConnectionEvent event =
+                ConnectionEvent.stateChanged(
+                        ConnectionState.DISCONNECTED, ConnectionState.CONNECTING);
+
         assertEquals(ConnectionEventType.STATE_CHANGED, event.getType());
         assertEquals(Optional.of(ConnectionState.DISCONNECTED), event.getOldState());
         assertEquals(Optional.of(ConnectionState.CONNECTING), event.getNewState());
         assertEquals(
-                Optional.of("Connection state changed from DISCONNECTED to CONNECTING"), 
-                event.getMessage()
-        );
+                Optional.of("Connection state changed from DISCONNECTED to CONNECTING"),
+                event.getMessage());
     }
 
     @Test
     void testHealthCheckSuccessFactory() {
         ConnectionEvent event = ConnectionEvent.healthCheckSuccess();
-        
+
         assertEquals(ConnectionEventType.HEALTH_CHECK_SUCCESS, event.getType());
         assertEquals(Optional.empty(), event.getOldState());
         assertEquals(Optional.empty(), event.getNewState());
@@ -85,7 +82,7 @@ class ConnectionEventTest {
     void testHealthCheckFailureFactory() {
         RuntimeException cause = new RuntimeException("Connection timeout");
         ConnectionEvent event = ConnectionEvent.healthCheckFailure(cause);
-        
+
         assertEquals(ConnectionEventType.HEALTH_CHECK_FAILURE, event.getType());
         assertEquals(Optional.empty(), event.getOldState());
         assertEquals(Optional.empty(), event.getNewState());
@@ -96,7 +93,7 @@ class ConnectionEventTest {
     @Test
     void testReconnectionAttemptFactory() {
         ConnectionEvent event = ConnectionEvent.reconnectionAttempt(3);
-        
+
         assertEquals(ConnectionEventType.RECONNECTION_ATTEMPT, event.getType());
         assertEquals(Optional.empty(), event.getOldState());
         assertEquals(Optional.empty(), event.getNewState());
@@ -108,15 +105,16 @@ class ConnectionEventTest {
     void testToStringWithAllFields() {
         Instant timestamp = Instant.parse("2024-01-01T12:00:00Z");
         RuntimeException cause = new RuntimeException("Test");
-        
-        ConnectionEvent event = ConnectionEvent.builder(ConnectionEventType.STATE_CHANGED)
-                .withOldState(ConnectionState.CONNECTED)
-                .withNewState(ConnectionState.FAILED)
-                .withTimestamp(timestamp)
-                .withMessage("Connection failed")
-                .withCause(cause)
-                .build();
-        
+
+        ConnectionEvent event =
+                ConnectionEvent.builder(ConnectionEventType.STATE_CHANGED)
+                        .withOldState(ConnectionState.CONNECTED)
+                        .withNewState(ConnectionState.FAILED)
+                        .withTimestamp(timestamp)
+                        .withMessage("Connection failed")
+                        .withCause(cause)
+                        .build();
+
         String str = event.toString();
         assertTrue(str.contains("ConnectionEvent{"));
         assertTrue(str.contains("type=STATE_CHANGED"));
@@ -129,9 +127,9 @@ class ConnectionEventTest {
 
     @Test
     void testToStringWithMinimalFields() {
-        ConnectionEvent event = ConnectionEvent.builder(ConnectionEventType.HEALTH_CHECK_SUCCESS)
-                .build();
-        
+        ConnectionEvent event =
+                ConnectionEvent.builder(ConnectionEventType.HEALTH_CHECK_SUCCESS).build();
+
         String str = event.toString();
         assertTrue(str.contains("ConnectionEvent{"));
         assertTrue(str.contains("type=HEALTH_CHECK_SUCCESS"));
@@ -144,20 +142,22 @@ class ConnectionEventTest {
 
     @Test
     void testToStringWithOnlyNewState() {
-        ConnectionEvent event = ConnectionEvent.builder(ConnectionEventType.STATE_CHANGED)
-                .withNewState(ConnectionState.CONNECTED)
-                .build();
-        
+        ConnectionEvent event =
+                ConnectionEvent.builder(ConnectionEventType.STATE_CHANGED)
+                        .withNewState(ConnectionState.CONNECTED)
+                        .build();
+
         String str = event.toString();
         assertTrue(str.contains("state=null->CONNECTED"));
     }
 
     @Test
     void testToStringWithOnlyOldState() {
-        ConnectionEvent event = ConnectionEvent.builder(ConnectionEventType.STATE_CHANGED)
-                .withOldState(ConnectionState.DISCONNECTED)
-                .build();
-        
+        ConnectionEvent event =
+                ConnectionEvent.builder(ConnectionEventType.STATE_CHANGED)
+                        .withOldState(ConnectionState.DISCONNECTED)
+                        .build();
+
         String str = event.toString();
         assertTrue(str.contains("state=DISCONNECTED->null"));
     }
@@ -165,10 +165,10 @@ class ConnectionEventTest {
     @Test
     void testTimestampDefaultsToNow() {
         Instant before = Instant.now();
-        ConnectionEvent event = ConnectionEvent.builder(ConnectionEventType.HEALTH_CHECK_SUCCESS)
-                .build();
+        ConnectionEvent event =
+                ConnectionEvent.builder(ConnectionEventType.HEALTH_CHECK_SUCCESS).build();
         Instant after = Instant.now();
-        
+
         assertNotNull(event.getTimestamp());
         assertFalse(event.getTimestamp().isBefore(before));
         assertFalse(event.getTimestamp().isAfter(after));
@@ -176,8 +176,9 @@ class ConnectionEventTest {
 
     @Test
     void testBuilderChaining() {
-        ConnectionEvent.Builder builder = ConnectionEvent.builder(ConnectionEventType.STATE_CHANGED);
-        
+        ConnectionEvent.Builder builder =
+                ConnectionEvent.builder(ConnectionEventType.STATE_CHANGED);
+
         assertSame(builder, builder.withOldState(ConnectionState.CONNECTED));
         assertSame(builder, builder.withNewState(ConnectionState.DISCONNECTED));
         assertSame(builder, builder.withTimestamp(Instant.now()));
