@@ -34,14 +34,14 @@ Complete API documentation is available on GitHub Pages with version support:
 <!-- Maven -->
 <dependency>
     <groupId>com.lucimber</groupId>
-    <artifactId>dbus-client-java</artifactId>
+    <artifactId>lucimber-dbus-client</artifactId>
     <version>2.0-SNAPSHOT</version>
 </dependency>
 ```
 
 ```gradle
 // Gradle
-implementation 'com.lucimber:dbus-client-java:2.0-SNAPSHOT'
+implementation 'com.lucimber:lucimber-dbus-client:2.0-SNAPSHOT'
 ```
 
 ### Basic Usage

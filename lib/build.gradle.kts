@@ -55,6 +55,11 @@ java {
     withSourcesJar()
 }
 
+// Set the base name for all archives to match the artifactId
+base {
+    archivesName.set("lucimber-dbus-client")
+}
+
 // Spotless configuration for code formatting
 spotless {
     java {
@@ -163,9 +168,9 @@ tasks.named<JavaCompile>("compileTestJava") {
 
 tasks.named<Javadoc>("javadoc") {
     (options as StandardJavadocDocletOptions).apply {
-        windowTitle = "D-Bus Client Java API ${project.version}"
-        docTitle = "D-Bus Client Java API Documentation"
-        header = "<b>D-Bus Client Java ${project.version}</b>"
+        windowTitle = "D-Bus Client API ${project.version}"
+        docTitle = "D-Bus Client API Documentation"
+        header = "<b>D-Bus Client ${project.version}</b>"
         // footer option is deprecated in newer Java versions
         encoding = "UTF-8"
         charSet = "UTF-8"
@@ -180,7 +185,7 @@ tasks.named<Javadoc>("javadoc") {
 
 tasks.named<Jar>("jar") {
     manifest {
-        attributes(mapOf("Implementation-Title" to project.name,
+        attributes(mapOf("Implementation-Title" to "dbus-client",
             "Implementation-Version" to project.version))
     }
 }
@@ -350,6 +355,43 @@ tasks.register("printTestRuntimeClasspath") {
     
     doLast {
         println(configurations.testRuntimeClasspath.get().asPath)
+    }
+}
+
+// Publishing configuration
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            artifactId = "lucimber-dbus-client"
+            from(components["java"])
+            
+            pom {
+                name.set("D-Bus Client")
+                description.set("A modern Java client library for D-Bus")
+                url.set("https://github.com/lucimber/dbus-client-java")
+                
+                licenses {
+                    license {
+                        name.set("Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                
+                developers {
+                    developer {
+                        id.set("lucimber")
+                        name.set("Lucimber UG")
+                        email.set("info@lucimber.com")
+                    }
+                }
+                
+                scm {
+                    connection.set("scm:git:git://github.com/lucimber/dbus-client-java.git")
+                    developerConnection.set("scm:git:ssh://github.com:lucimber/dbus-client-java.git")
+                    url.set("https://github.com/lucimber/dbus-client-java")
+                }
+            }
+        }
     }
 }
 
