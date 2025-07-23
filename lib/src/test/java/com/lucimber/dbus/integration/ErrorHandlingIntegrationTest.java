@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Tag;
@@ -169,23 +168,29 @@ class ErrorHandlingIntegrationTest extends DBusIntegrationTestBase {
         // The connection will retry 3 times (with delays), so we need to wait longer
         // Total time: initial attempt (1s) + retry delays + 3 retry attempts (3s) = ~4-5s minimum
         long startTime = System.currentTimeMillis();
-        
-        Exception connectionException = assertThrows(
-                Exception.class,
-                () -> {
-                    // Wait up to 15 seconds for all retries to complete
-                    connectFuture.get(15, TimeUnit.SECONDS);
-                },
-                "Connection should fail after retries");
-        
+
+        Exception connectionException =
+                assertThrows(
+                        Exception.class,
+                        () -> {
+                            // Wait up to 15 seconds for all retries to complete
+                            connectFuture.get(15, TimeUnit.SECONDS);
+                        },
+                        "Connection should fail after retries");
+
         long elapsedTime = System.currentTimeMillis() - startTime;
-        LOGGER.info("Connection failed after " + elapsedTime + "ms with: " + 
-                    connectionException.getClass().getName() + " - " + connectionException.getMessage());
+        LOGGER.info(
+                "Connection failed after "
+                        + elapsedTime
+                        + "ms with: "
+                        + connectionException.getClass().getName()
+                        + " - "
+                        + connectionException.getMessage());
 
         // After the future completes exceptionally, the state should be FAILED
         ConnectionState state = connection.getState();
         LOGGER.info("Connection state immediately after failure: " + state);
-        
+
         // If still CONNECTING, wait a bit more for state transition
         if (state == ConnectionState.CONNECTING) {
             try {
