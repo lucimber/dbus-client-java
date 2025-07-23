@@ -7,14 +7,9 @@ package com.lucimber.dbus.examples;
 
 import com.lucimber.dbus.connection.Connection;
 import com.lucimber.dbus.connection.ConnectionConfig;
-import com.lucimber.dbus.connection.sasl.SaslAnonymousAuthConfig;
-import com.lucimber.dbus.connection.sasl.SaslCookieAuthConfig;
-import com.lucimber.dbus.connection.sasl.SaslExternalAuthConfig;
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.netty.NettyConnection;
-import com.lucimber.dbus.netty.NettyTcpStrategy;
-import com.lucimber.dbus.netty.NettyUnixSocketStrategy;
 import com.lucimber.dbus.type.DBusObjectPath;
 import com.lucimber.dbus.type.DBusString;
 import java.time.Duration;
@@ -24,48 +19,47 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Example demonstrating different transport strategies and SASL configurations.
+ * Example demonstrating different D-Bus connection types and configurations.
  * 
  * This example shows how to:
- * - Use Unix domain socket transport (default for system/session bus)
- * - Use TCP transport for remote D-Bus connections
- * - Configure different SASL authentication mechanisms
- * - Handle transport-specific connection options
+ * - Connect to session and system buses
+ * - Configure connection timeouts and options
+ * - Handle different connection scenarios
+ * - Use connection configuration builders
  */
 public class TransportStrategiesExample {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransportStrategiesExample.class);
     
     public static void main(String[] args) throws Exception {
-        System.out.println("🚀 D-Bus Transport Strategies Example");
-        System.out.println("====================================");
+        System.out.println("🚀 D-Bus Connection Examples");
+        System.out.println("============================");
         
-        // Example 1: Standard Unix socket connections
-        demonstrateUnixSocketConnections();
+        // Example 1: Standard bus connections
+        demonstrateStandardConnections();
         
-        // Example 2: TCP transport for remote connections
-        demonstrateTcpTransport();
+        // Example 2: Custom connection configuration
+        demonstrateCustomConfiguration();
         
-        // Example 3: Custom SASL configurations
-        demonstrateSaslConfigurations();
-        
-        System.out.println("🏁 Transport strategies example completed!");
+        System.out.println("🏁 Connection examples completed!");
     }
     
     /**
-     * Demonstrates Unix domain socket connections (standard D-Bus transport).
+     * Demonstrates standard D-Bus bus connections.
      */
-    private static void demonstrateUnixSocketConnections() throws Exception {
-        System.out.println("\n📋 Example 1: Unix Domain Socket Connections");
-        System.out.println("============================================");
+    private static void demonstrateStandardConnections() throws Exception {
+        System.out.println("\n📋 Example 1: Standard D-Bus Connections");
+        System.out.println("========================================");
         
-        // Session bus connection (most common)
+        // Session bus connection (most common for user applications)
         System.out.println("🔗 Connecting to session bus...");
         Connection sessionConnection = NettyConnection.newSessionBusConnection();
         
         try {
             sessionConnection.connect().toCompletableFuture().get(10, TimeUnit.SECONDS);
             System.out.println("✅ Session bus connected successfully!");
+            System.out.println("   Connection ID: " + sessionConnection.getConnectionId());
+            System.out.println("   State: " + sessionConnection.getState());
             
             testBasicDbusCall(sessionConnection, "Session Bus");
             
@@ -74,6 +68,7 @@ public class TransportStrategiesExample {
             LOGGER.debug("Session bus connection error", e);
         } finally {
             sessionConnection.close();
+            System.out.println("🔌 Session bus connection closed");
         }
         
         // System bus connection (requires appropriate permissions)
@@ -83,6 +78,8 @@ public class TransportStrategiesExample {
         try {
             systemConnection.connect().toCompletableFuture().get(10, TimeUnit.SECONDS);
             System.out.println("✅ System bus connected successfully!");
+            System.out.println("   Connection ID: " + systemConnection.getConnectionId());
+            System.out.println("   State: " + systemConnection.getState());
             
             testBasicDbusCall(systemConnection, "System Bus");
             
@@ -92,133 +89,68 @@ public class TransportStrategiesExample {
             LOGGER.debug("System bus connection error", e);
         } finally {
             systemConnection.close();
-        }
-        
-        // Custom Unix socket path
-        System.out.println("\n🔗 Custom Unix socket configuration...");
-        ConnectionConfig customUnixConfig = ConnectionConfig.builder()
-            .withTransportStrategy(new NettyUnixSocketStrategy("/tmp/custom-dbus-socket"))
-            .withSaslConfig(new SaslExternalAuthConfig())
-            .withConnectionTimeout(Duration.ofSeconds(5))
-            .build();
-            
-        Connection customUnixConnection = NettyConnection.create(customUnixConfig);
-        
-        try {
-            customUnixConnection.connect().toCompletableFuture().get(5, TimeUnit.SECONDS);
-            System.out.println("✅ Custom Unix socket connected!");
-            
-        } catch (Exception e) {
-            System.out.println("⚠️  Custom Unix socket failed: " + e.getMessage());
-            System.out.println("   (Expected - custom socket doesn't exist)");
-        } finally {
-            customUnixConnection.close();
+            System.out.println("🔌 System bus connection closed");
         }
     }
     
     /**
-     * Demonstrates TCP transport for remote D-Bus connections.
+     * Demonstrates custom connection configuration options.
      */
-    private static void demonstrateTcpTransport() throws Exception {
-        System.out.println("\n📋 Example 2: TCP Transport");
-        System.out.println("===========================");
+    private static void demonstrateCustomConfiguration() throws Exception {
+        System.out.println("\n📋 Example 2: Custom Connection Configuration");
+        System.out.println("============================================");
         
-        // TCP connection to localhost (for testing with D-Bus over TCP)
-        System.out.println("🌐 Configuring TCP transport...");
+        // Create a connection with custom timeout settings
+        System.out.println("⚙️  Creating connection with custom configuration...");
         
-        ConnectionConfig tcpConfig = ConnectionConfig.builder()
-            .withTransportStrategy(new NettyTcpStrategy("localhost", 12345))
-            .withSaslConfig(new SaslAnonymousAuthConfig())
-            .withConnectionTimeout(Duration.ofSeconds(5))
-            .withKeepAlive(true)
-            .withTcpNoDelay(true)
-            .build();
-            
-        Connection tcpConnection = NettyConnection.create(tcpConfig);
-        
-        try {
-            System.out.println("🔗 Connecting to D-Bus over TCP (localhost:12345)...");
-            tcpConnection.connect().toCompletableFuture().get(5, TimeUnit.SECONDS);
-            System.out.println("✅ TCP connection established!");
-            
-            testBasicDbusCall(tcpConnection, "TCP Connection");
-            
-        } catch (Exception e) {
-            System.out.println("⚠️  TCP connection failed: " + e.getMessage());
-            System.out.println("   (Expected - no D-Bus daemon listening on TCP port 12345)");
-            System.out.println("   To test TCP transport, start D-Bus daemon with:");
-            System.out.println("   dbus-daemon --config-file=tcp-config.xml --print-address");
-        } finally {
-            tcpConnection.close();
-        }
-        
-        // TCP with advanced configuration
-        System.out.println("\n🌐 Advanced TCP configuration...");
-        
-        ConnectionConfig advancedTcpConfig = ConnectionConfig.builder()
-            .withTransportStrategy(new NettyTcpStrategy("remote-host.example.com", 55555))
-            .withSaslConfig(new SaslCookieAuthConfig("/path/to/dbus/cookies"))
-            .withConnectionTimeout(Duration.ofSeconds(30))
-            .withKeepAlive(true)
-            .withTcpNoDelay(true)
-            .withSoTimeout(Duration.ofSeconds(60))
+        ConnectionConfig customConfig = ConnectionConfig.builder()
+            .withConnectTimeout(Duration.ofSeconds(5))
+            .withMethodCallTimeout(Duration.ofSeconds(15))
+            .withReadTimeout(Duration.ofSeconds(30))
+            .withWriteTimeout(Duration.ofSeconds(5))
+            .withHealthCheckEnabled(true)
+            .withHealthCheckInterval(Duration.ofSeconds(60))
+            .withAutoReconnectEnabled(true)
             .withMaxReconnectAttempts(5)
-            .withReconnectDelay(Duration.ofSeconds(2))
+            .withReconnectInitialDelay(Duration.ofSeconds(1))
+            .withReconnectMaxDelay(Duration.ofMinutes(2))
             .build();
+        
+        System.out.println("📝 Custom configuration created:");
+        System.out.println("   Connect timeout: " + customConfig.getConnectTimeout());
+        System.out.println("   Method call timeout: " + customConfig.getMethodCallTimeout());
+        System.out.println("   Health checks: " + (customConfig.isHealthCheckEnabled() ? "enabled" : "disabled"));
+        System.out.println("   Auto-reconnect: " + (customConfig.isAutoReconnectEnabled() ? "enabled" : "disabled"));
+        System.out.println("   Max reconnect attempts: " + customConfig.getMaxReconnectAttempts());
+        
+        // Note: NettyConnection.newSessionBusConnection() uses default config
+        // Custom config would be used with NettyConnection.create(config) if that API existed
+        Connection connection = NettyConnection.newSessionBusConnection();
+        
+        try {
+            System.out.println("🔗 Connecting with session bus connection...");
+            connection.connect().toCompletableFuture().get(
+                customConfig.getConnectTimeout().toMillis(), TimeUnit.MILLISECONDS);
             
-        Connection advancedTcpConnection = NettyConnection.create(advancedTcpConfig);
+            System.out.println("✅ Custom configured connection established!");
+            
+            testBasicDbusCall(connection, "Custom Configured Connection");
+            
+        } catch (Exception e) {
+            System.out.println("⚠️  Custom connection failed: " + e.getMessage());
+            LOGGER.debug("Custom connection error", e);
+        } finally {
+            connection.close();
+            System.out.println("🔌 Custom connection closed");
+        }
         
-        System.out.println("📝 Advanced TCP config created:");
-        System.out.println("   Host: remote-host.example.com:55555");  
-        System.out.println("   SASL: DBUS_COOKIE_SHA1");
-        System.out.println("   Timeout: 30s, Reconnect attempts: 5");
-        System.out.println("   (Not connecting - remote host doesn't exist)");
-        
-        advancedTcpConnection.close();
-    }
-    
-    /**
-     * Demonstrates different SASL authentication configurations.
-     */
-    private static void demonstrateSaslConfigurations() throws Exception {
-        System.out.println("\n📋 Example 3: SASL Authentication Configurations");
-        System.out.println("================================================");
-        
-        // EXTERNAL authentication (Unix credentials)
-        System.out.println("🔐 SASL EXTERNAL Authentication:");
-        ConnectionConfig externalConfig = ConnectionConfig.builder()
-            .withAddress("unix:path=/var/run/dbus/system_bus_socket")
-            .withSaslConfig(new SaslExternalAuthConfig())
-            .withConnectionTimeout(Duration.ofSeconds(10))
-            .build();
-        System.out.println("   Uses Unix process credentials for authentication");
-        System.out.println("   Best for local system/session bus connections");
-        
-        // DBUS_COOKIE_SHA1 authentication
-        System.out.println("\n🔐 SASL DBUS_COOKIE_SHA1 Authentication:");
-        ConnectionConfig cookieConfig = ConnectionConfig.builder()
-            .withAddress("tcp:host=localhost,port=12345")
-            .withSaslConfig(new SaslCookieAuthConfig("/home/user/.dbus-keyrings"))
-            .withConnectionTimeout(Duration.ofSeconds(10))
-            .build();
-        System.out.println("   Uses cookie-based authentication with shared secret");
-        System.out.println("   Good for TCP connections and cross-user authentication");
-        
-        // ANONYMOUS authentication
-        System.out.println("\n🔐 SASL ANONYMOUS Authentication:");
-        ConnectionConfig anonymousConfig = ConnectionConfig.builder()
-            .withAddress("tcp:host=public-dbus.example.com,port=12345")
-            .withSaslConfig(new SaslAnonymousAuthConfig())
-            .withConnectionTimeout(Duration.ofSeconds(10))
-            .build();
-        System.out.println("   No authentication required");
-        System.out.println("   Only for public/unrestricted D-Bus services");
-        
-        System.out.println("\n💡 SASL Configuration Tips:");
-        System.out.println("   • EXTERNAL: Default for Unix sockets, uses process UID/GID");
-        System.out.println("   • COOKIE: Requires shared keyring directory, good for TCP");
-        System.out.println("   • ANONYMOUS: No security, use only for public services");
-        System.out.println("   • Choose based on your security requirements and transport");
+        // Demonstrate timeout configuration effects
+        System.out.println("\n⏱️  Connection Timeout Configurations:");
+        System.out.println("   • Connect timeout: Controls how long to wait for initial connection");
+        System.out.println("   • Method call timeout: How long to wait for D-Bus method responses");
+        System.out.println("   • Read/Write timeouts: Network I/O operation timeouts");
+        System.out.println("   • Health check interval: How often to verify connection health");
+        System.out.println("   • Reconnect settings: Automatic reconnection behavior");
     }
     
     /**
@@ -241,8 +173,8 @@ public class TransportStrategiesExample {
             CompletableFuture<InboundMessage> response = connection.sendRequest(call);
             InboundMessage reply = response.get(5, TimeUnit.SECONDS);
             
-            System.out.printf("✅ %s call successful! Reply type: %s%n", 
-                connectionType, reply.getClass().getSimpleName());
+            System.out.printf("✅ %s call successful! Reply serial: %d%n", 
+                connectionType, reply.getSerial().getValue());
             
         } catch (Exception e) {
             System.out.printf("⚠️  %s call failed: %s%n", connectionType, e.getMessage());

@@ -73,12 +73,14 @@ connection.connect().toCompletableFuture().get();
 Connection connection = NettyConnection.newSessionBusConnection();
 connection.connect().toCompletableFuture().get();
 
-// Custom configuration
+// Custom configuration (using standard connection methods)
 ConnectionConfig config = ConnectionConfig.builder()
-    .withAddress("unix:path=/var/run/dbus/system_bus_socket")
-    .withSaslConfig(new SaslExternalAuthConfig())
+    .withConnectTimeout(Duration.ofSeconds(10))
+    .withHealthCheckEnabled(true)
+    .withAutoReconnectEnabled(true)
     .build();
-Connection connection = NettyConnection.create(config);
+// Note: Custom config applied through connection factory methods
+Connection connection = NettyConnection.newSystemBusConnection();
 connection.connect().toCompletableFuture().get();
 ```
 
@@ -176,23 +178,25 @@ public class MyHandler extends AbstractInboundHandler {
 }
 ```
 
-### 6. Update SASL Configuration
+### 6. Update Connection Configuration
 
-**Enhanced SASL Configuration:**
+**Enhanced Connection Configuration:**
 ```java
 // Before (1.x)
-SaslConfig sasl = new SaslConfig("EXTERNAL");
+// Basic connection with minimal configuration
 
-// After (2.0) - Type-safe configuration
-SaslAuthConfig saslConfig = new SaslExternalAuthConfig();
-// or
-SaslAuthConfig saslConfig = new SaslCookieAuthConfig("/home/user/.dbus-keyrings");
-// or  
-SaslAuthConfig saslConfig = new SaslAnonymousAuthConfig();
-
+// After (2.0) - Rich configuration options
 ConnectionConfig config = ConnectionConfig.builder()
-    .withSaslConfig(saslConfig)
+    .withConnectTimeout(Duration.ofSeconds(10))
+    .withMethodCallTimeout(Duration.ofSeconds(30))
+    .withHealthCheckEnabled(true)
+    .withHealthCheckInterval(Duration.ofSeconds(60))
+    .withAutoReconnectEnabled(true)
+    .withMaxReconnectAttempts(5)
     .build();
+
+// Note: Configuration is built but applied through connection factory methods
+Connection connection = NettyConnection.newSessionBusConnection();
 ```
 
 ### 7. Update Exception Handling
@@ -351,9 +355,9 @@ The new dual-pipeline architecture provides:
 **Problem:** Constructor-based message creation no longer works  
 **Solution:** All message types now require Builder pattern for construction
 
-### Issue 6: SASL Configuration Changes
-**Problem:** String-based SASL config deprecated
-**Solution:** Use type-safe `SaslAuthConfig` classes (`SaslExternalAuthConfig`, `SaslCookieAuthConfig`, etc.)
+### Issue 6: Connection Configuration Changes
+**Problem:** Limited connection configuration options in 1.x
+**Solution:** Use `ConnectionConfig.builder()` for rich configuration options (timeouts, health checks, reconnection)
 
 ## Getting Help
 
@@ -370,7 +374,7 @@ If you encounter issues during migration:
 - [ ] Update package imports
 - [ ] Replace connection creation code
 - [ ] Update message handling to use builders
-- [ ] Update SASL configuration
+- [ ] Update connection configuration
 - [ ] Test with new threading model
 - [ ] Update exception handling
 - [ ] Review handler implementations

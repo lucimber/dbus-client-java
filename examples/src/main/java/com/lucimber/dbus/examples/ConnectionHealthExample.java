@@ -11,7 +11,6 @@ import com.lucimber.dbus.connection.ConnectionEvent;
 import com.lucimber.dbus.connection.ConnectionEventListener;
 import com.lucimber.dbus.connection.ConnectionEventType;
 import com.lucimber.dbus.connection.ConnectionState;
-import com.lucimber.dbus.connection.sasl.SaslExternalAuthConfig;
 import com.lucimber.dbus.netty.NettyConnection;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
@@ -36,16 +35,26 @@ public class ConnectionHealthExample {
         System.out.println("🔍 D-Bus Connection Health Monitoring Example");
         System.out.println("===============================================");
         
-        // Create connection with health monitoring configuration
+        // Demonstrate connection configuration options
+        System.out.println("⚙️  Creating custom connection configuration...");
         ConnectionConfig config = ConnectionConfig.builder()
-            .withAddress("unix:path=/var/run/dbus/system_bus_socket")
-            .withSaslConfig(new SaslExternalAuthConfig())
-            .withConnectionTimeout(Duration.ofSeconds(10))
+            .withConnectTimeout(Duration.ofSeconds(10))
             .withHealthCheckInterval(Duration.ofSeconds(30))
             .withMaxReconnectAttempts(3)
+            .withAutoReconnectEnabled(true)
+            .withHealthCheckEnabled(true)
             .build();
             
-        Connection connection = NettyConnection.create(config);
+        System.out.println("📝 Configuration details:");
+        System.out.println("   Connect timeout: " + config.getConnectTimeout());
+        System.out.println("   Health check interval: " + config.getHealthCheckInterval());
+        System.out.println("   Max reconnect attempts: " + config.getMaxReconnectAttempts());
+        System.out.println("   Auto-reconnect enabled: " + config.isAutoReconnectEnabled());
+        System.out.println("   Health checks enabled: " + config.isHealthCheckEnabled());
+        
+        // Create connection (configuration is shown for demonstration)
+        // Note: NettyConnection.newSystemBusConnection() uses its own internal configuration
+        Connection connection = NettyConnection.newSystemBusConnection();
         
         // Add comprehensive event listener
         ConnectionHealthListener healthListener = new ConnectionHealthListener();
@@ -53,7 +62,7 @@ public class ConnectionHealthExample {
         
         try {
             // Demonstrate connection lifecycle
-            System.out.println("📡 Connecting to system D-Bus...");
+            System.out.println("\n📡 Connecting to system D-Bus...");
             connection.connect().toCompletableFuture().get(15, TimeUnit.SECONDS);
             
             System.out.println("✅ Connected successfully!");
@@ -61,13 +70,13 @@ public class ConnectionHealthExample {
             System.out.println("📊 Current state: " + connection.getState());
             
             // Wait for health events
-            System.out.println("⏳ Monitoring connection health for 60 seconds...");
+            System.out.println("\n⏳ Monitoring connection health for 60 seconds...");
             System.out.println("   (Try disconnecting D-Bus daemon to see reconnection logic)");
             
             Thread.sleep(60000);
             
             // Demonstrate graceful shutdown
-            System.out.println("🔚 Initiating graceful shutdown...");
+            System.out.println("\n🔚 Initiating graceful shutdown...");
             connection.close();
             
             // Wait for shutdown events
