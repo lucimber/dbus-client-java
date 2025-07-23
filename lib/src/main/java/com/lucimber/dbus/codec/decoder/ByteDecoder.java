@@ -5,12 +5,14 @@
 
 package com.lucimber.dbus.codec.decoder;
 
-import com.lucimber.dbus.type.DBusByte;
-import com.lucimber.dbus.util.LoggerUtils;
 import java.nio.ByteBuffer;
 import java.util.Objects;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.lucimber.dbus.type.DBusByte;
+import com.lucimber.dbus.util.LoggerUtils;
 
 /**
  * A decoder which unmarshals a byte from the byte stream format used by D-Bus.
@@ -20,26 +22,30 @@ import org.slf4j.LoggerFactory;
  */
 public final class ByteDecoder implements Decoder<ByteBuffer, DBusByte> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ByteDecoder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ByteDecoder.class);
 
-  @Override
-  public DecoderResult<DBusByte> decode(ByteBuffer buffer, int offset) {
-    Objects.requireNonNull(buffer, "buffer must not be null");
-    try {
-      int consumedBytes = 1;
+    @Override
+    public DecoderResult<DBusByte> decode(ByteBuffer buffer, int offset) {
+        Objects.requireNonNull(buffer, "buffer must not be null");
+        try {
+            int consumedBytes = 1;
 
-      byte rawValue = buffer.get();
-      DBusByte value = DBusByte.valueOf(rawValue);
+            byte rawValue = buffer.get();
+            DBusByte value = DBusByte.valueOf(rawValue);
 
-      DecoderResult<DBusByte> result = new DecoderResultImpl<>(consumedBytes, value);
+            DecoderResult<DBusByte> result = new DecoderResultImpl<>(consumedBytes, value);
 
-      LOGGER.debug(LoggerUtils.MARSHALLING,
-              "BYTE: {}; Offset: {}; Padding: {}; Consumed bytes: {};",
-              value, offset, 0, result.getConsumedBytes());
+            LOGGER.debug(
+                    LoggerUtils.MARSHALLING,
+                    "BYTE: {}; Offset: {}; Padding: {}; Consumed bytes: {};",
+                    value,
+                    offset,
+                    0,
+                    result.getConsumedBytes());
 
-      return result;
-    } catch (Throwable t) {
-      throw new DecoderException("Could not decode BYTE.", t);
+            return result;
+        } catch (Throwable t) {
+            throw new DecoderException("Could not decode BYTE.", t);
+        }
     }
-  }
 }

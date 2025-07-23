@@ -5,72 +5,79 @@
 
 package com.lucimber.dbus.netty.sasl;
 
-import com.lucimber.dbus.netty.DBusChannelEvent;
-import com.lucimber.dbus.netty.WriteOperationListener;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.lucimber.dbus.netty.DBusChannelEvent;
+import com.lucimber.dbus.netty.WriteOperationListener;
+
 /**
- * A Netty channel handler that initiates the DBus SASL authentication process
- * by sending a NUL byte when the channel becomes active.
- * <p>
- * After successfully sending the NUL byte, this handler fires a
- * {@link DBusChannelEvent#SASL_NUL_BYTE_SENT} user event and then
- * removes itself from the pipeline.
- * </p>
+ * A Netty channel handler that initiates the DBus SASL authentication process by sending a NUL byte
+ * when the channel becomes active.
+ *
+ * <p>After successfully sending the NUL byte, this handler fires a {@link
+ * DBusChannelEvent#SASL_NUL_BYTE_SENT} user event and then removes itself from the pipeline.
  */
 public class SaslInitiationHandler extends ChannelInboundHandlerAdapter {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SaslInitiationHandler.class);
-  private static final byte[] NUL_BYTE_ARRAY = new byte[]{0};
+    private static final Logger LOGGER = LoggerFactory.getLogger(SaslInitiationHandler.class);
+    private static final byte[] NUL_BYTE_ARRAY = new byte[] {0};
 
-  @Override
-  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-    // Handle reconnection events
-    if (evt == DBusChannelEvent.RECONNECTION_STARTING) {
-      reset();
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        // Handle reconnection events
+        if (evt == DBusChannelEvent.RECONNECTION_STARTING) {
+            reset();
+        }
+
+        // Always propagate events
+        super.userEventTriggered(ctx, evt);
     }
-    
-    // Always propagate events
-    super.userEventTriggered(ctx, evt);
-  }
 
-  @Override
-  public void channelActive(ChannelHandlerContext ctx) {
-    LOGGER.debug("Channel active. Sending SASL NUL byte to {}.", ctx.channel().remoteAddress());
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) {
+        LOGGER.debug("Channel active. Sending SASL NUL byte to {}.", ctx.channel().remoteAddress());
 
-    // Send the NUL byte
-    ctx.writeAndFlush(Unpooled.wrappedBuffer(NUL_BYTE_ARRAY))
-            .addListener(new WriteOperationListener<>(LOGGER, future -> {
-              if (future.isSuccess()) {
-                LOGGER.debug("SASL NUL byte sent successfully.");
-                // Fire event to signal the next stage of SASL can begin
-                ctx.fireUserEventTriggered(DBusChannelEvent.SASL_NUL_BYTE_SENT);
-                // Remove this handler from the pipeline as its job is done
-                ctx.pipeline().remove(SaslInitiationHandler.this);
-                LOGGER.debug("SaslInitiationHandler removed from pipeline as NUL byte sending is complete.");
-              } else {
-                LOGGER.error("Failed to send SASL NUL byte. Closing channel.", future.cause());
-                ctx.close(); // Close channel on failure to send critical initial byte
-              }
-            }));
-  }
+        // Send the NUL byte
+        ctx.writeAndFlush(Unpooled.wrappedBuffer(NUL_BYTE_ARRAY))
+                .addListener(
+                        new WriteOperationListener<>(
+                                LOGGER,
+                                future -> {
+                                    if (future.isSuccess()) {
+                                        LOGGER.debug("SASL NUL byte sent successfully.");
+                                        // Fire event to signal the next stage of SASL can begin
+                                        ctx.fireUserEventTriggered(
+                                                DBusChannelEvent.SASL_NUL_BYTE_SENT);
+                                        // Remove this handler from the pipeline as its job is done
+                                        ctx.pipeline().remove(SaslInitiationHandler.this);
+                                        LOGGER.debug(
+                                                "SaslInitiationHandler removed from pipeline as NUL byte sending is complete.");
+                                    } else {
+                                        LOGGER.error(
+                                                "Failed to send SASL NUL byte. Closing channel.",
+                                                future.cause());
+                                        ctx.close(); // Close channel on failure to send
+                                        // critical initial byte
+                                    }
+                                }));
+    }
 
-  /**
-   * Resets the SASL initiation handler to its initial state for reconnection.
-   * This method is called when the connection needs to be re-established.
-   */
-  public void reset() {
-    LOGGER.debug("Resetting SASL initiation handler for reconnection");
-    // This handler has no state to reset
-  }
+    /**
+     * Resets the SASL initiation handler to its initial state for reconnection. This method is
+     * called when the connection needs to be re-established.
+     */
+    public void reset() {
+        LOGGER.debug("Resetting SASL initiation handler for reconnection");
+        // This handler has no state to reset
+    }
 
-  @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-    LOGGER.error("Exception in SaslInitiationHandler. Closing channel.", cause);
-    ctx.close();
-  }
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        LOGGER.error("Exception in SaslInitiationHandler. Closing channel.", cause);
+        ctx.close();
+    }
 }

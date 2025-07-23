@@ -12,12 +12,12 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a method as a D-Bus method.
- * 
- * <p>This annotation is used to expose Java methods as D-Bus methods.
- * The method name in D-Bus will match the Java method name unless
- * explicitly specified.</p>
- * 
- * <p>Example usage:</p>
+ *
+ * <p>This annotation is used to expose Java methods as D-Bus methods. The method name in D-Bus will
+ * match the Java method name unless explicitly specified.
+ *
+ * <p>Example usage:
+ *
  * <pre>{@code
  * @DBusMethod(name = "GetStatus")
  * public String getStatus() {
@@ -28,10 +28,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface DBusMethod {
-  /**
-   * The D-Bus method name. If not specified, the Java method name is used.
-   * 
-   * @return the D-Bus method name
-   */
-  String name() default "";
+    /**
+     * The D-Bus method name. If not specified, the Java method name is used.
+     *
+     * @return the D-Bus method name
+     */
+    String name() default "";
 }

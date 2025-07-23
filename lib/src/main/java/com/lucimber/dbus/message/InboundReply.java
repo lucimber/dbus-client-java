@@ -14,10 +14,10 @@ import com.lucimber.dbus.type.DBusUInt32;
  */
 public interface InboundReply extends InboundMessage {
 
-  /**
-   * Gets the serial number of the message this message is a reply to.
-   *
-   * @return The serial number as an {@link DBusUInt32}.
-   */
-  DBusUInt32 getReplySerial();
+    /**
+     * Gets the serial number of the message this message is a reply to.
+     *
+     * @return The serial number as an {@link DBusUInt32}.
+     */
+    DBusUInt32 getReplySerial();
 }

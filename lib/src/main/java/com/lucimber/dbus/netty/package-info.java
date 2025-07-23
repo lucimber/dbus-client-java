@@ -11,23 +11,24 @@
 /**
  * Netty-based transport implementation for high-performance D-Bus communication.
  *
- * <p>This package provides the concrete implementation of the D-Bus client using
- * the Netty framework for efficient, asynchronous network communication. It handles
- * low-level transport details including connection management, message framing,
- * and protocol handling.
+ * <p>This package provides the concrete implementation of the D-Bus client using the Netty
+ * framework for efficient, asynchronous network communication. It handles low-level transport
+ * details including connection management, message framing, and protocol handling.
  *
  * <h2>Getting Started</h2>
  *
  * <p><strong>For first-time users:</strong> The main class you'll use is {@link NettyConnection}.
- * Use {@link NettyConnection#newSystemBusConnection()} or {@link NettyConnection#newSessionBusConnection()}
- * to create connections. Most other classes in this package are internal implementation details.</p>
+ * Use {@link NettyConnection#newSystemBusConnection()} or {@link
+ * NettyConnection#newSessionBusConnection()} to create connections. Most other classes in this
+ * package are internal implementation details.
  *
  * <h2>Core Components</h2>
  *
  * <h3>Connection Implementation</h3>
- * <p>The {@link NettyConnection} class provides the main entry point for D-Bus
- * connections, implementing the {@link com.lucimber.dbus.connection.Connection}
- * interface with Netty-based transport:
+ *
+ * <p>The {@link NettyConnection} class provides the main entry point for D-Bus connections,
+ * implementing the {@link com.lucimber.dbus.connection.Connection} interface with Netty-based
+ * transport:
  *
  * <pre>{@code
  * // System bus connection
@@ -45,6 +46,7 @@
  * }</pre>
  *
  * <h3>Transport Configuration</h3>
+ *
  * <p>The Netty transport can be configured for optimal performance:
  *
  * <pre>{@code
@@ -71,17 +73,19 @@
  * }</pre>
  *
  * <h3>Built-in Handlers</h3>
+ *
  * <ul>
- * <li><strong>Frame Decoder/Encoder:</strong> Handles D-Bus message framing</li>
- * <li><strong>Message Decoder/Encoder:</strong> Converts between bytes and D-Bus messages</li>
- * <li><strong>Authentication Handler:</strong> Manages SASL authentication</li>
- * <li><strong>Error Handler:</strong> Handles protocol and network errors</li>
- * <li><strong>Health Check Handler:</strong> Monitors connection health</li>
+ *   <li><strong>Frame Decoder/Encoder:</strong> Handles D-Bus message framing
+ *   <li><strong>Message Decoder/Encoder:</strong> Converts between bytes and D-Bus messages
+ *   <li><strong>Authentication Handler:</strong> Manages SASL authentication
+ *   <li><strong>Error Handler:</strong> Handles protocol and network errors
+ *   <li><strong>Health Check Handler:</strong> Monitors connection health
  * </ul>
  *
  * <h2>Performance Features</h2>
  *
  * <h3>Connection Pooling</h3>
+ *
  * <pre>{@code
  * // Connection pool for shared resources
  * ConnectionPool pool = NettyConnectionPool.builder()
@@ -99,6 +103,7 @@
  * }</pre>
  *
  * <h3>Native Transport</h3>
+ *
  * <p>Automatic detection and use of native transport libraries:
  *
  * <pre>{@code
@@ -110,6 +115,7 @@
  * <h2>Message Processing</h2>
  *
  * <h3>Asynchronous Operations</h3>
+ *
  * <p>All operations are non-blocking and return CompletableFuture:
  *
  * <pre>{@code
@@ -130,6 +136,7 @@
  * }</pre>
  *
  * <h3>Backpressure Handling</h3>
+ *
  * <p>Built-in backpressure mechanisms prevent memory overflow:
  *
  * <pre>{@code
@@ -165,6 +172,7 @@
  * <h2>Transport Types</h2>
  *
  * <h3>Unix Domain Sockets</h3>
+ *
  * <p>Primary transport for local D-Bus communication:
  *
  * <pre>{@code
@@ -174,6 +182,7 @@
  * }</pre>
  *
  * <h3>TCP Sockets</h3>
+ *
  * <p>Network transport for remote D-Bus communication:
  *
  * <pre>{@code
@@ -222,9 +231,9 @@
  * <p>Netty's event-driven thread model provides high concurrency:
  *
  * <ul>
- * <li><strong>Boss Thread:</strong> Accepts incoming connections</li>
- * <li><strong>Worker Threads:</strong> Handle I/O operations and message processing</li>
- * <li><strong>Application Threads:</strong> Handle user callbacks and business logic</li>
+ *   <li><strong>Boss Thread:</strong> Accepts incoming connections
+ *   <li><strong>Worker Threads:</strong> Handle I/O operations and message processing
+ *   <li><strong>Application Threads:</strong> Handle user callbacks and business logic
  * </ul>
  *
  * <pre>{@code

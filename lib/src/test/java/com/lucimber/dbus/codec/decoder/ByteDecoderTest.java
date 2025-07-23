@@ -5,31 +5,32 @@
 
 package com.lucimber.dbus.codec.decoder;
 
-import com.lucimber.dbus.type.DBusByte;
+import java.nio.ByteBuffer;
+
 import org.junit.jupiter.api.Test;
 
-import java.nio.ByteBuffer;
+import com.lucimber.dbus.type.DBusByte;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class ByteDecoderTest {
 
-  private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
-  private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
+    private static final String ASSERT_BUFFER_EMPTY = "Bytes left in buffer";
+    private static final String ASSERT_CONSUMED_BYTES = "Consumed bytes by decoder";
 
-  @Test
-  void decodeByte() {
-  byte maxValue = (byte) 0xFF;
-  ByteBuffer buffer = ByteBuffer.allocate(1);
-  buffer.put(maxValue);
-  buffer.flip();
+    @Test
+    void decodeByte() {
+        byte maxValue = (byte) 0xFF;
+        ByteBuffer buffer = ByteBuffer.allocate(1);
+        buffer.put(maxValue);
+        buffer.flip();
 
-  ByteDecoder decoder = new ByteDecoder();
-  DecoderResult<DBusByte> result = decoder.decode(buffer, 0);
+        ByteDecoder decoder = new ByteDecoder();
+        DecoderResult<DBusByte> result = decoder.decode(buffer, 0);
 
-  assertEquals(1, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
-  assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
-  byte expected = -1;
-  assertEquals(expected, result.getValue().getDelegate());
-  }
+        assertEquals(1, result.getConsumedBytes(), ASSERT_CONSUMED_BYTES);
+        assertEquals(0, buffer.remaining(), ASSERT_BUFFER_EMPTY);
+        byte expected = -1;
+        assertEquals(expected, result.getValue().getDelegate());
+    }
 }

@@ -11,60 +11,65 @@ import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusVariant;
 
 /**
- * The {@literal org.freedesktop.DBus.ObjectManager} interface provides a standardized way
- * to enumerate all objects below a certain path in the object hierarchy, along with
- * their interfaces and properties.
- * 
- * <p>The ObjectManager interface is particularly useful for:</p>
- * <ul>
- *   <li>Service discovery and enumeration</li>
- *   <li>Dynamic object tree exploration</li>
- *   <li>Efficient bulk queries of object hierarchies</li>
- *   <li>Monitoring object lifecycle through signals</li>
- * </ul>
- * 
- * <p>This interface works in conjunction with the standard Introspectable and Properties
- * interfaces to provide comprehensive object discovery capabilities.</p>
+ * The {@literal org.freedesktop.DBus.ObjectManager} interface provides a standardized way to
+ * enumerate all objects below a certain path in the object hierarchy, along with their interfaces
+ * and properties.
  *
- * @see <a href="https://dbus.freedesktop.org/doc/dbus-specification.html#standard-interfaces-objectmanager">D-Bus Specification - ObjectManager</a>
+ * <p>The ObjectManager interface is particularly useful for:
+ *
+ * <ul>
+ *   <li>Service discovery and enumeration
+ *   <li>Dynamic object tree exploration
+ *   <li>Efficient bulk queries of object hierarchies
+ *   <li>Monitoring object lifecycle through signals
+ * </ul>
+ *
+ * <p>This interface works in conjunction with the standard Introspectable and Properties interfaces
+ * to provide comprehensive object discovery capabilities.
+ *
+ * @see <a
+ *     href="https://dbus.freedesktop.org/doc/dbus-specification.html#standard-interfaces-objectmanager">D-Bus
+ *     Specification - ObjectManager</a>
  */
 public interface ObjectManager {
-  /**
-   * Gets all managed objects below this object path.
-   * 
-   * <p>Returns a dictionary where:</p>
-   * <ul>
-   *   <li>Keys are object paths of managed objects</li>
-   *   <li>Values are dictionaries of interfaces implemented by each object</li>
-   *   <li>Interface dictionaries contain property names and their values</li>
-   * </ul>
-   * 
-   * <p>Example return structure:</p>
-   * <pre>{@code
-   * {
-   *   "/org/example/Object1": {
-   *     "org.example.Interface1": {
-   *       "Property1": <variant:string:"value1">,
-   *       "Property2": <variant:int32:42>
-   *     },
-   *     "org.example.Interface2": {
-   *       "PropertyA": <variant:boolean:true>
-   *     }
-   *   },
-   *   "/org/example/Object2": {
-   *     "org.example.Interface1": {
-   *       "Property1": <variant:string:"value2">
-   *     }
-   *   }
-   * }
-   * }</pre>
-   * 
-   * <p>This method provides a snapshot of the entire managed object tree at the
-   * time of the call. For monitoring changes, use the InterfacesAdded and
-   * InterfacesRemoved signals.</p>
-   *
-   * @return A nested dictionary structure containing all managed objects,
-   *         their interfaces, and properties
-   */
-  DBusDict<DBusObjectPath, DBusDict<DBusString, DBusDict<DBusString, DBusVariant>>> getManagedObjects();
+    /**
+     * Gets all managed objects below this object path.
+     *
+     * <p>Returns a dictionary where:
+     *
+     * <ul>
+     *   <li>Keys are object paths of managed objects
+     *   <li>Values are dictionaries of interfaces implemented by each object
+     *   <li>Interface dictionaries contain property names and their values
+     * </ul>
+     *
+     * <p>Example return structure:
+     *
+     * <pre>{@code
+     * {
+     *   "/org/example/Object1": {
+     *     "org.example.Interface1": {
+     *       "Property1": <variant:string:"value1">,
+     *       "Property2": <variant:int32:42>
+     *     },
+     *     "org.example.Interface2": {
+     *       "PropertyA": <variant:boolean:true>
+     *     }
+     *   },
+     *   "/org/example/Object2": {
+     *     "org.example.Interface1": {
+     *       "Property1": <variant:string:"value2">
+     *     }
+     *   }
+     * }
+     * }</pre>
+     *
+     * <p>This method provides a snapshot of the entire managed object tree at the time of the call.
+     * For monitoring changes, use the InterfacesAdded and InterfacesRemoved signals.
+     *
+     * @return A nested dictionary structure containing all managed objects, their interfaces, and
+     *     properties
+     */
+    DBusDict<DBusObjectPath, DBusDict<DBusString, DBusDict<DBusString, DBusVariant>>>
+            getManagedObjects();
 }

@@ -11,6 +11,7 @@ plugins {
     id("checkstyle")
     id("jacoco")
     id("pmd")
+    id("com.diffplug.spotless") version "6.25.0"
 }
 
 group = "com.lucimber"
@@ -52,6 +53,29 @@ java {
     }
     withJavadocJar()
     withSourcesJar()
+}
+
+// Spotless configuration for code formatting
+spotless {
+    java {
+        // Use Google Java Format
+        googleJavaFormat("1.22.0").aosp()  // AOSP style uses 4 spaces like your checkstyle
+        
+        // Remove unused imports
+        removeUnusedImports()
+        
+        // Fix import order
+        importOrder("java", "javax", "", "com.lucimber", "\\#")
+        
+        // Add trailing whitespace trimming
+        trimTrailingWhitespace()
+        
+        // Ensure files end with newline
+        endWithNewline()
+        
+        // Target all Java files
+        target("src/**/*.java")
+    }
 }
 
 tasks.named<Test>("test") {

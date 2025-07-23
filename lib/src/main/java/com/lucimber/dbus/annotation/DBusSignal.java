@@ -12,12 +12,12 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a method as a D-Bus signal emitter.
- * 
- * <p>This annotation is used to mark methods that emit D-Bus signals.
- * The method should typically return void and its parameters define
- * the signal arguments.</p>
- * 
- * <p>Example usage:</p>
+ *
+ * <p>This annotation is used to mark methods that emit D-Bus signals. The method should typically
+ * return void and its parameters define the signal arguments.
+ *
+ * <p>Example usage:
+ *
  * <pre>{@code
  * @DBusSignal(name = "StatusChanged")
  * public void emitStatusChanged(String oldStatus, String newStatus) {
@@ -28,10 +28,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface DBusSignal {
-  /**
-   * The D-Bus signal name. If not specified, the Java method name is used.
-   * 
-   * @return the D-Bus signal name
-   */
-  String name() default "";
+    /**
+     * The D-Bus signal name. If not specified, the Java method name is used.
+     *
+     * @return the D-Bus signal name
+     */
+    String name() default "";
 }

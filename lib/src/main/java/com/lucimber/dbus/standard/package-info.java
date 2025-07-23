@@ -10,26 +10,25 @@
 
 /**
  * Standard D-Bus interfaces and implementations for common D-Bus functionality.
- * 
- * <p>This package provides Java implementations of standard D-Bus interfaces
- * that are commonly used across different D-Bus applications. These interfaces
- * follow the official D-Bus specification and provide type-safe access to
- * standard D-Bus functionality.
- * 
+ *
+ * <p>This package provides Java implementations of standard D-Bus interfaces that are commonly used
+ * across different D-Bus applications. These interfaces follow the official D-Bus specification and
+ * provide type-safe access to standard D-Bus functionality.
+ *
  * <h2>Getting Started</h2>
- * 
- * <p><strong>For first-time users:</strong> Start with {@link Introspectable} to discover
- * available interfaces and methods, then use {@link Properties} for property access.
- * The {@link Peer} interface provides connectivity testing, while {@link ObjectManager}
- * enables efficient object hierarchy discovery. Most D-Bus interactions use custom
- * interfaces specific to each service.</p>
- * 
+ *
+ * <p><strong>For first-time users:</strong> Start with {@link Introspectable} to discover available
+ * interfaces and methods, then use {@link Properties} for property access. The {@link Peer}
+ * interface provides connectivity testing, while {@link ObjectManager} enables efficient object
+ * hierarchy discovery. Most D-Bus interactions use custom interfaces specific to each service.
+ *
  * <h2>Standard Interfaces</h2>
- * 
+ *
  * <h3>Introspection Interface</h3>
- * <p>The {@code org.freedesktop.DBus.Introspectable} interface allows clients
- * to discover the structure and capabilities of D-Bus objects:
- * 
+ *
+ * <p>The {@code org.freedesktop.DBus.Introspectable} interface allows clients to discover the
+ * structure and capabilities of D-Bus objects:
+ *
  * <pre>{@code
  * // Introspect a D-Bus object
  * OutboundMethodCall introspectCall = OutboundMethodCall.Builder
@@ -40,7 +39,7 @@
  *     .withDestination(DBusString.valueOf("org.example.Service"))
  *     .withReplyExpected(true)
  *     .build();
- * 
+ *
  * CompletableFuture<InboundMessage> response = connection.sendRequest(introspectCall);
  * response.thenAccept(reply -> {
  *     if (reply instanceof InboundMethodReturn) {
@@ -53,11 +52,12 @@
  *     }
  * });
  * }</pre>
- * 
+ *
  * <h3>Properties Interface</h3>
- * <p>The {@code org.freedesktop.DBus.Properties} interface provides standardized
- * property access for D-Bus objects:
- * 
+ *
+ * <p>The {@code org.freedesktop.DBus.Properties} interface provides standardized property access
+ * for D-Bus objects:
+ *
  * <pre>{@code
  * // Get a property value
  * OutboundMethodCall getProperty = OutboundMethodCall.Builder
@@ -72,7 +72,7 @@
  *     ))
  *     .withReplyExpected(true)
  *     .build();
- * 
+ *
  * // Set a property value
  * OutboundMethodCall setProperty = OutboundMethodCall.Builder
  *     .create()
@@ -87,7 +87,7 @@
  *     ))
  *     .withReplyExpected(true)
  *     .build();
- * 
+ *
  * // Get all properties
  * OutboundMethodCall getAllProperties = OutboundMethodCall.Builder
  *     .create()
@@ -101,11 +101,12 @@
  *     .withReplyExpected(true)
  *     .build();
  * }</pre>
- * 
+ *
  * <h3>Peer Interface</h3>
- * <p>The {@code org.freedesktop.DBus.Peer} interface provides basic peer-to-peer
- * functionality for D-Bus connections:
- * 
+ *
+ * <p>The {@code org.freedesktop.DBus.Peer} interface provides basic peer-to-peer functionality for
+ * D-Bus connections:
+ *
  * <pre>{@code
  * // Ping a D-Bus peer
  * OutboundMethodCall ping = OutboundMethodCall.Builder
@@ -116,7 +117,7 @@
  *     .withDestination(DBusString.valueOf("org.example.Service"))
  *     .withReplyExpected(true)
  *     .build();
- * 
+ *
  * // Get machine UUID
  * OutboundMethodCall getMachineId = OutboundMethodCall.Builder
  *     .create()
@@ -127,11 +128,12 @@
  *     .withReplyExpected(true)
  *     .build();
  * }</pre>
- * 
+ *
  * <h3>ObjectManager Interface</h3>
- * <p>The {@code org.freedesktop.DBus.ObjectManager} interface provides efficient
- * enumeration of object hierarchies:
- * 
+ *
+ * <p>The {@code org.freedesktop.DBus.ObjectManager} interface provides efficient enumeration of
+ * object hierarchies:
+ *
  * <pre>{@code
  * // Get all managed objects
  * OutboundMethodCall getManagedObjects = OutboundMethodCall.Builder
@@ -142,7 +144,7 @@
  *     .withDestination(DBusString.valueOf("org.example.Service"))
  *     .withReplyExpected(true)
  *     .build();
- * 
+ *
  * CompletableFuture<InboundMessage> response = connection.sendRequest(getManagedObjects);
  * response.thenAccept(reply -> {
  *     if (reply instanceof InboundMethodReturn) {
@@ -151,7 +153,7 @@
  *         if (!body.isEmpty()) {
  *             DBusDict<DBusObjectPath, DBusDict<DBusString, DBusDict<DBusString, DBusVariant>>>
  *                 managedObjects = (DBusDict) body.get(0);
- *             
+ *
  *             managedObjects.forEach((path, interfaces) -> {
  *                 System.out.println("Object: " + path);
  *                 interfaces.forEach((iface, properties) -> {
@@ -165,12 +167,11 @@
  *     }
  * });
  * }</pre>
- * 
+ *
  * <h2>Bus Interface</h2>
- * 
- * <p>The {@code org.freedesktop.DBus} interface provides access to the D-Bus
- * daemon functionality:
- * 
+ *
+ * <p>The {@code org.freedesktop.DBus} interface provides access to the D-Bus daemon functionality:
+ *
  * <pre>{@code
  * // List available services
  * OutboundMethodCall listNames = OutboundMethodCall.Builder
@@ -181,7 +182,7 @@
  *     .withDestination(DBusString.valueOf("org.freedesktop.DBus"))
  *     .withReplyExpected(true)
  *     .build();
- * 
+ *
  * // Request a service name
  * OutboundMethodCall requestName = OutboundMethodCall.Builder
  *     .create()
@@ -195,7 +196,7 @@
  *     ))
  *     .withReplyExpected(true)
  *     .build();
- * 
+ *
  * // Get service owner
  * OutboundMethodCall getNameOwner = OutboundMethodCall.Builder
  *     .create()
@@ -209,11 +210,11 @@
  *     .withReplyExpected(true)
  *     .build();
  * }</pre>
- * 
+ *
  * <h2>Signal Handling</h2>
- * 
+ *
  * <p>Standard interfaces also define common signals:
- * 
+ *
  * <pre>{@code
  * // Handle PropertiesChanged signals
  * connection.getPipeline().addLast("properties-handler", new AbstractInboundHandler() {
@@ -225,7 +226,7 @@
  *                 .map(DBusString::toString)
  *                 .orElse("");
  *             String memberName = signal.getMember().toString();
- *             
+ *
  *             if ("org.freedesktop.DBus.Properties".equals(interfaceName) &&
  *                 "PropertiesChanged".equals(memberName)) {
  *                 handlePropertiesChanged(signal);
@@ -233,14 +234,14 @@
  *         }
  *         ctx.propagateInboundMessage(msg);
  *     }
- *     
+ *
  *     private void handlePropertiesChanged(InboundSignal signal) {
  *         List<DBusType> arguments = signal.getBody();
  *         if (arguments.size() >= 2) {
  *             DBusString interfaceName = (DBusString) arguments.get(0);
- *             DBusDict<DBusString, DBusVariant> changedProperties = 
+ *             DBusDict<DBusString, DBusVariant> changedProperties =
  *                 (DBusDict<DBusString, DBusVariant>) arguments.get(1);
- *             
+ *
  *             System.out.println("Properties changed on " + interfaceName);
  *             changedProperties.forEach((key, value) -> {
  *                 System.out.println("  " + key + " = " + value);
@@ -248,7 +249,7 @@
  *         }
  *     }
  * });
- * 
+ *
  * // Handle NameOwnerChanged signals
  * connection.getPipeline().addLast("name-owner-handler", new AbstractInboundHandler() {
  *     @Override
@@ -259,7 +260,7 @@
  *                 .map(DBusString::toString)
  *                 .orElse("");
  *             String memberName = signal.getMember().toString();
- *             
+ *
  *             if ("org.freedesktop.DBus".equals(interfaceName) &&
  *                 "NameOwnerChanged".equals(memberName)) {
  *                 handleNameOwnerChanged(signal);
@@ -267,14 +268,14 @@
  *         }
  *         ctx.propagateInboundMessage(msg);
  *     }
- *     
+ *
  *     private void handleNameOwnerChanged(InboundSignal signal) {
  *         List<DBusType> arguments = signal.getBody();
  *         if (arguments.size() >= 3) {
  *             String serviceName = ((DBusString) arguments.get(0)).toString();
  *             String oldOwner = ((DBusString) arguments.get(1)).toString();
  *             String newOwner = ((DBusString) arguments.get(2)).toString();
- *             
+ *
  *             if (oldOwner.isEmpty() && !newOwner.isEmpty()) {
  *                 System.out.println("Service appeared: " + serviceName);
  *             } else if (!oldOwner.isEmpty() && newOwner.isEmpty()) {
@@ -283,7 +284,7 @@
  *         }
  *     }
  * });
- * 
+ *
  * // Handle ObjectManager InterfacesAdded/Removed signals
  * connection.getPipeline().addLast("object-manager-handler", new AbstractInboundHandler() {
  *     @Override
@@ -294,7 +295,7 @@
  *                 .map(DBusString::toString)
  *                 .orElse("");
  *             String memberName = signal.getMember().toString();
- *             
+ *
  *             if ("org.freedesktop.DBus.ObjectManager".equals(interfaceName)) {
  *                 if ("InterfacesAdded".equals(memberName)) {
  *                     handleInterfacesAdded(signal);
@@ -305,27 +306,27 @@
  *         }
  *         ctx.propagateInboundMessage(msg);
  *     }
- *     
+ *
  *     private void handleInterfacesAdded(InboundSignal signal) {
  *         List<DBusType> arguments = signal.getBody();
  *         if (arguments.size() >= 2) {
  *             DBusObjectPath objectPath = (DBusObjectPath) arguments.get(0);
- *             DBusDict<DBusString, DBusDict<DBusString, DBusVariant>> interfaces = 
+ *             DBusDict<DBusString, DBusDict<DBusString, DBusVariant>> interfaces =
  *                 (DBusDict) arguments.get(1);
- *             
+ *
  *             System.out.println("Interfaces added to " + objectPath);
  *             interfaces.forEach((iface, properties) -> {
  *                 System.out.println("  Interface: " + iface);
  *             });
  *         }
  *     }
- *     
+ *
  *     private void handleInterfacesRemoved(InboundSignal signal) {
  *         List<DBusType> arguments = signal.getBody();
  *         if (arguments.size() >= 2) {
  *             DBusObjectPath objectPath = (DBusObjectPath) arguments.get(0);
  *             DBusArray<DBusString> interfaces = (DBusArray) arguments.get(1);
- *             
+ *
  *             System.out.println("Interfaces removed from " + objectPath);
  *             interfaces.forEach(iface -> {
  *                 System.out.println("  Interface: " + iface);
@@ -334,16 +335,16 @@
  *     }
  * });
  * }</pre>
- * 
+ *
  * <h2>Error Handling</h2>
- * 
+ *
  * <p>Standard D-Bus error names are defined for common error conditions:
- * 
+ *
  * <pre>{@code
  * // Handle standard D-Bus errors
  * private void handleStandardErrors(InboundError error) {
  *     String errorName = error.getErrorName().toString();
- *     
+ *
  *     switch (errorName) {
  *         case "org.freedesktop.DBus.Error.ServiceUnknown":
  *             System.err.println("Service not found");
@@ -371,11 +372,11 @@
  *     }
  * }
  * }</pre>
- * 
+ *
  * <h2>Utility Classes</h2>
- * 
+ *
  * <p>Helper classes for working with standard interfaces:
- * 
+ *
  * <pre>{@code
  * // Standard interface constants
  * public static final String INTROSPECTABLE_INTERFACE = "org.freedesktop.DBus.Introspectable";
@@ -383,14 +384,14 @@
  * public static final String PEER_INTERFACE = "org.freedesktop.DBus.Peer";
  * public static final String OBJECT_MANAGER_INTERFACE = "org.freedesktop.DBus.ObjectManager";
  * public static final String DBUS_INTERFACE = "org.freedesktop.DBus";
- * 
+ *
  * // Helper methods for common operations
- * public static CompletableFuture<String> introspectObject(Connection connection, 
- *                                                           String serviceName, 
+ * public static CompletableFuture<String> introspectObject(Connection connection,
+ *                                                           String serviceName,
  *                                                           String objectPath) {
  *     // Implementation for introspection
  * }
- * 
+ *
  * public static CompletableFuture<DBusVariant> getProperty(Connection connection,
  *                                                          String serviceName,
  *                                                          String objectPath,
@@ -399,28 +400,31 @@
  *     // Implementation for property access
  * }
  * }</pre>
- * 
+ *
  * <h2>Best Practices</h2>
- * 
+ *
  * <ul>
- * <li><strong>Use Standard Interfaces:</strong> Always use these standard interfaces when available</li>
- * <li><strong>Error Handling:</strong> Handle standard D-Bus errors appropriately</li>
- * <li><strong>Property Changes:</strong> Subscribe to PropertiesChanged signals for reactive updates</li>
- * <li><strong>Service Discovery:</strong> Use introspection to discover available interfaces and methods</li>
- * <li><strong>Peer Communication:</strong> Use Peer interface for basic connectivity testing</li>
+ *   <li><strong>Use Standard Interfaces:</strong> Always use these standard interfaces when
+ *       available
+ *   <li><strong>Error Handling:</strong> Handle standard D-Bus errors appropriately
+ *   <li><strong>Property Changes:</strong> Subscribe to PropertiesChanged signals for reactive
+ *       updates
+ *   <li><strong>Service Discovery:</strong> Use introspection to discover available interfaces and
+ *       methods
+ *   <li><strong>Peer Communication:</strong> Use Peer interface for basic connectivity testing
  * </ul>
- * 
+ *
  * <h2>Compatibility</h2>
- * 
+ *
  * <p>All standard interfaces in this package are compatible with:
- * 
+ *
  * <ul>
- * <li>D-Bus specification version 1.0 and later</li>
- * <li>Common D-Bus implementations (dbus-daemon, systemd, etc.)</li>
- * <li>Cross-platform D-Bus services</li>
- * <li>Both system and session bus environments</li>
+ *   <li>D-Bus specification version 1.0 and later
+ *   <li>Common D-Bus implementations (dbus-daemon, systemd, etc.)
+ *   <li>Cross-platform D-Bus services
+ *   <li>Both system and session bus environments
  * </ul>
- * 
+ *
  * @see com.lucimber.dbus.message
  * @see com.lucimber.dbus.connection
  * @see com.lucimber.dbus.type
