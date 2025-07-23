@@ -5,14 +5,13 @@
 
 package com.lucimber.dbus.netty.sasl;
 
+import com.lucimber.dbus.netty.DBusChannelEvent;
+import com.lucimber.dbus.netty.WriteOperationListener;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lucimber.dbus.netty.DBusChannelEvent;
-import com.lucimber.dbus.netty.WriteOperationListener;
 
 /**
  * A Netty channel handler that initiates the DBus SASL authentication process by sending a NUL byte

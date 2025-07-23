@@ -5,17 +5,15 @@
 
 package com.lucimber.dbus.codec.encoder;
 
+import com.lucimber.dbus.type.DBusUInt64;
+import com.lucimber.dbus.type.Type;
+import com.lucimber.dbus.util.LoggerUtils;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Objects;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lucimber.dbus.type.DBusUInt64;
-import com.lucimber.dbus.type.Type;
-import com.lucimber.dbus.util.LoggerUtils;
 
 /**
  * An encoder which encodes an unsigned 64-bit integer to the D-Bus marshalling format using

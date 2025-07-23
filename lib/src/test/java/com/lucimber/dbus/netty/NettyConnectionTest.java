@@ -5,19 +5,8 @@
 
 package com.lucimber.dbus.netty;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.time.Duration;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import io.netty.channel.unix.DomainSocketAddress;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import com.lucimber.dbus.connection.ConnectionConfig;
 import com.lucimber.dbus.connection.ConnectionEventListener;
@@ -31,9 +20,18 @@ import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.type.DBusObjectPath;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusUInt32;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import io.netty.channel.unix.DomainSocketAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 class NettyConnectionTest {
 

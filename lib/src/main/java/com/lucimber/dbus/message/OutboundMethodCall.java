@@ -5,15 +5,14 @@
 
 package com.lucimber.dbus.message;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
-
 import com.lucimber.dbus.type.DBusObjectPath;
 import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusUInt32;
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * An outbound method call.

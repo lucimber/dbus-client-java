@@ -10,13 +10,8 @@
 
 package com.lucimber.dbus.netty;
 
-import java.nio.ByteOrder;
-import java.util.HashMap;
-import java.util.Map;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.embedded.EmbeddedChannel;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageType;
@@ -24,9 +19,12 @@ import com.lucimber.dbus.type.DBusObjectPath;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.type.DBusVariant;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.embedded.EmbeddedChannel;
+import java.nio.ByteOrder;
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
 
 final class FrameEncoderSignalTest {
 

@@ -7,7 +7,6 @@ package com.lucimber.dbus.integration;
 
 import java.io.IOException;
 import java.time.Duration;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;

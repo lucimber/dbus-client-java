@@ -5,17 +5,15 @@
 
 package com.lucimber.dbus.netty;
 
-import java.lang.invoke.MethodHandles;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.util.concurrent.Promise;
+import java.lang.invoke.MethodHandles;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lucimber.dbus.util.LoggerUtils;
 
 final class DBusChannelInitializer extends ChannelInitializer<Channel> {
 

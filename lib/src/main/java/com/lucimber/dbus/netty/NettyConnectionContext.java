@@ -5,16 +5,14 @@
 
 package com.lucimber.dbus.netty;
 
-import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.lucimber.dbus.connection.ConnectionContext;
 import com.lucimber.dbus.connection.ConnectionState;
 import com.lucimber.dbus.connection.Pipeline;
 import com.lucimber.dbus.message.InboundMessage;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Netty-specific implementation of ConnectionContext that bridges the strategy pattern with the

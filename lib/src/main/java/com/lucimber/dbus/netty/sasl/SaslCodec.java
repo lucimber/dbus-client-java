@@ -5,16 +5,14 @@
 
 package com.lucimber.dbus.netty.sasl;
 
-import java.util.NoSuchElementException;
-
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandlerContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.lucimber.dbus.netty.DBusChannelEvent;
 import com.lucimber.dbus.netty.DBusHandlerNames;
 import com.lucimber.dbus.util.LoggerUtils;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandlerContext;
+import java.util.NoSuchElementException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class SaslCodec extends ChannelDuplexHandler {
 

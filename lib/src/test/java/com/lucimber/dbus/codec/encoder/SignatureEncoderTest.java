@@ -5,14 +5,12 @@
 
 package com.lucimber.dbus.codec.encoder;
 
-import java.nio.ByteBuffer;
-
-import org.junit.jupiter.api.Test;
-
-import com.lucimber.dbus.type.DBusSignature;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.lucimber.dbus.type.DBusSignature;
+import java.nio.ByteBuffer;
+import org.junit.jupiter.api.Test;
 
 final class SignatureEncoderTest {
 

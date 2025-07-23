@@ -5,6 +5,15 @@
 
 package com.lucimber.dbus.connection;
 
+import com.lucimber.dbus.message.InboundError;
+import com.lucimber.dbus.message.InboundMessage;
+import com.lucimber.dbus.message.InboundMethodReturn;
+import com.lucimber.dbus.message.OutboundMessage;
+import com.lucimber.dbus.message.OutboundMethodCall;
+import com.lucimber.dbus.type.DBusSignature;
+import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.DBusUInt32;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,16 +32,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import com.lucimber.dbus.message.InboundError;
-import com.lucimber.dbus.message.InboundMessage;
-import com.lucimber.dbus.message.InboundMethodReturn;
-import com.lucimber.dbus.message.OutboundMessage;
-import com.lucimber.dbus.message.OutboundMethodCall;
-import com.lucimber.dbus.type.DBusSignature;
-import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.DBusUInt32;
 
 /**
  * A dummy implementation of {@link Connection} for testing D-Bus applications without requiring a
@@ -466,7 +465,7 @@ public class DummyConnection implements Connection {
      * @param methodName the method name
      * @param responseFunction function to generate the response
      */
-    public void setMethodCallResponse(
+    public final void setMethodCallResponse(
             String interfaceName,
             String methodName,
             Function<OutboundMessage, InboundMessage> responseFunction) {

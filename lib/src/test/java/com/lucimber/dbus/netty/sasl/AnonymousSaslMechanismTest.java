@@ -5,15 +5,14 @@
 
 package com.lucimber.dbus.netty.sasl;
 
-import java.util.concurrent.ExecutionException;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.Future;
+import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 
 class AnonymousSaslMechanismTest {
 

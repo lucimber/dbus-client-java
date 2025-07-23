@@ -5,9 +5,8 @@
 
 package com.lucimber.dbus.message;
 
-import java.util.Optional;
-
 import com.lucimber.dbus.type.DBusString;
+import java.util.Optional;
 
 /**
  * An outbound message is a message that should be sent from this service to another service on the

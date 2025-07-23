@@ -5,13 +5,11 @@
 
 package com.lucimber.dbus.connection;
 
+import com.lucimber.dbus.message.OutboundMessage;
 import java.util.concurrent.CompletableFuture;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
-
-import com.lucimber.dbus.message.OutboundMessage;
 
 class AbstractOutboundHandlerTest {
 

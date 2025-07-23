@@ -5,9 +5,8 @@
 
 package com.lucimber.dbus.codec.decoder;
 
-import java.util.Objects;
-
 import com.lucimber.dbus.type.DBusType;
+import java.util.Objects;
 
 /**
  * Default implementation of the decoder result interface.

@@ -5,11 +5,10 @@
 
 package com.lucimber.dbus.codec.encoder;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.Type;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * Factory interface for creating D-Bus encoders.

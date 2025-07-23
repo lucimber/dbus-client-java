@@ -5,19 +5,6 @@
 
 package com.lucimber.dbus.netty;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.EncoderException;
-import io.netty.handler.codec.MessageToMessageEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.lucimber.dbus.codec.encoder.EncoderResult;
 import com.lucimber.dbus.codec.encoder.EncoderResultImpl;
 import com.lucimber.dbus.codec.encoder.EncoderUtils;
@@ -37,6 +24,17 @@ import com.lucimber.dbus.type.TypeUtils;
 import com.lucimber.dbus.util.ByteBufferPoolManager;
 import com.lucimber.dbus.util.LoggerUtils;
 import com.lucimber.dbus.util.MemoryOptimizer;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.EncoderException;
+import io.netty.handler.codec.MessageToMessageEncoder;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Encodes {@link OutboundMessage}s to the D-Bus marshalling format. */
 final class OutboundMessageEncoder extends MessageToMessageEncoder<OutboundMessage> {

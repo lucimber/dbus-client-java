@@ -5,10 +5,6 @@
 
 package com.lucimber.dbus.codec.encoder;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Objects;
-
 import com.lucimber.dbus.type.DBusArray;
 import com.lucimber.dbus.type.DBusBasicType;
 import com.lucimber.dbus.type.DBusContainerType;
@@ -20,6 +16,9 @@ import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusVariant;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.type.TypeAlignment;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Objects;
 
 /** Various methods used by the ByteBuffer-based implementations of the encoders. */
 public final class EncoderUtils {

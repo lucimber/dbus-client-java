@@ -5,16 +5,14 @@
 
 package com.lucimber.dbus.codec.encoder;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.Type;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class DefaultEncoderFactoryTest {
 

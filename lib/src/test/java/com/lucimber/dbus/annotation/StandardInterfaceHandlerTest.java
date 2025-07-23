@@ -5,15 +5,9 @@
 
 package com.lucimber.dbus.annotation;
 
-import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import com.lucimber.dbus.connection.Context;
 import com.lucimber.dbus.message.InboundMethodCall;
@@ -21,10 +15,14 @@ import com.lucimber.dbus.message.InboundSignal;
 import com.lucimber.dbus.message.OutboundError;
 import com.lucimber.dbus.message.OutboundMethodReturn;
 import com.lucimber.dbus.type.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 class StandardInterfaceHandlerTest {
 

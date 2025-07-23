@@ -5,17 +5,16 @@
 
 package com.lucimber.dbus.connection;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import io.netty.channel.unix.DomainSocketAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
-
-import io.netty.channel.unix.DomainSocketAddress;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ConnectionStrategyRegistryTest {
 

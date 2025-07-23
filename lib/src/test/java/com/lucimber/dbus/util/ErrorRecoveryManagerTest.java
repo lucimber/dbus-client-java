@@ -5,6 +5,13 @@
 
 package com.lucimber.dbus.util;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreaker;
+import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreakerConfig;
+import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreakerOpenException;
+import com.lucimber.dbus.util.ErrorRecoveryManager.ErrorClassification;
+import com.lucimber.dbus.util.ErrorRecoveryManager.RetryConfig;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -13,19 +20,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-
-import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreaker;
-import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreakerConfig;
-import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreakerOpenException;
-import com.lucimber.dbus.util.ErrorRecoveryManager.ErrorClassification;
-import com.lucimber.dbus.util.ErrorRecoveryManager.RetryConfig;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ErrorRecoveryManagerTest {
 

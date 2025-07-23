@@ -5,19 +5,17 @@
 
 package com.lucimber.dbus.codec.encoder;
 
-import java.nio.ByteOrder;
-
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import com.lucimber.dbus.type.DBusArray;
 import com.lucimber.dbus.type.DBusByte;
 import com.lucimber.dbus.type.DBusInt32;
 import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.DBusString;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import java.nio.ByteOrder;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /** Unit tests for D-Bus array encoder size limit validation compliance. */
 final class ArrayEncoderValidationTest {

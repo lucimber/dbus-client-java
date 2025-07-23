@@ -5,16 +5,14 @@
 
 package com.lucimber.dbus.codec.encoder;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.lucimber.dbus.type.DBusByte;
 import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.util.LoggerUtils;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An encoder which encodes a signature to the D-Bus marshalling format using ByteBuffer.

@@ -5,11 +5,10 @@
 
 package com.lucimber.dbus.exception;
 
-import java.lang.reflect.Constructor;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.lucimber.dbus.type.DBusString;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.lang.reflect.Constructor;
 
 /** Utility class for testing D-Bus exception classes. */
 class ExceptionTestUtils {

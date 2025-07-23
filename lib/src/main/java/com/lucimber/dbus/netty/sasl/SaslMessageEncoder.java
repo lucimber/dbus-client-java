@@ -5,16 +5,14 @@
 
 package com.lucimber.dbus.netty.sasl;
 
-import java.nio.charset.StandardCharsets;
-
+import com.lucimber.dbus.connection.sasl.SaslMessage;
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lucimber.dbus.connection.sasl.SaslMessage;
-import com.lucimber.dbus.util.LoggerUtils;
 
 /**
  * Encodes a SaslMessage into a US-ASCII line terminated with CRLF, as required by the D-Bus SASL

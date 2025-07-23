@@ -5,18 +5,7 @@
 
 package com.lucimber.dbus.integration;
 
-import java.net.InetSocketAddress;
-import java.time.Duration;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIf;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.lucimber.dbus.connection.AbstractInboundHandler;
 import com.lucimber.dbus.connection.Connection;
@@ -30,8 +19,17 @@ import com.lucimber.dbus.type.DBusObjectPath;
 import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.net.InetSocketAddress;
+import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Integration tests for D-Bus signal subscription and handling. */
 @Tag("integration")

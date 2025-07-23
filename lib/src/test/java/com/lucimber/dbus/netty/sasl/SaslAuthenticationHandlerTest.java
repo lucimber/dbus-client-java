@@ -5,24 +5,22 @@
 
 package com.lucimber.dbus.netty.sasl;
 
-import java.util.List;
-
-import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.ImmediateEventExecutor;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import com.lucimber.dbus.connection.sasl.SaslCommandName;
-import com.lucimber.dbus.connection.sasl.SaslMessage;
-import com.lucimber.dbus.netty.DBusChannelEvent;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+
+import com.lucimber.dbus.connection.sasl.SaslCommandName;
+import com.lucimber.dbus.connection.sasl.SaslMessage;
+import com.lucimber.dbus.netty.DBusChannelEvent;
+import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.ImmediateEventExecutor;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 class SaslAuthenticationHandlerTest {
 

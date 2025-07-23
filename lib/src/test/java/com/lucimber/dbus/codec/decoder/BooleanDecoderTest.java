@@ -5,14 +5,12 @@
 
 package com.lucimber.dbus.codec.decoder;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.lucimber.dbus.type.DBusBoolean;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import org.junit.jupiter.api.Test;
 
 final class BooleanDecoderTest {
 

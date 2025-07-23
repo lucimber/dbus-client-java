@@ -5,16 +5,14 @@
 
 package com.lucimber.dbus.util;
 
-import java.util.Map;
-import java.util.Optional;
-
-import io.netty.handler.codec.CorruptedFrameException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusVariant;
+import io.netty.handler.codec.CorruptedFrameException;
+import java.util.Map;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for extracting typed values from D-Bus message header fields. This class provides a

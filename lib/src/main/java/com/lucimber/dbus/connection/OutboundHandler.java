@@ -5,9 +5,8 @@
 
 package com.lucimber.dbus.connection;
 
-import java.util.concurrent.CompletableFuture;
-
 import com.lucimber.dbus.message.OutboundMessage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A specialized {@link Handler} for processing outbound events in a {@link Pipeline}.

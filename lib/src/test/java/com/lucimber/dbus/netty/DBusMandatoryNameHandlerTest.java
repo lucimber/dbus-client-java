@@ -5,16 +5,7 @@
 
 package com.lucimber.dbus.netty;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.embedded.EmbeddedChannel;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.slf4j.MDC;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.lucimber.dbus.message.InboundError;
 import com.lucimber.dbus.message.InboundMethodReturn;
@@ -23,8 +14,15 @@ import com.lucimber.dbus.type.DBusObjectPath;
 import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusUInt32;
-
-import static org.junit.jupiter.api.Assertions.*;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.embedded.EmbeddedChannel;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 
 class DBusMandatoryNameHandlerTest {
 

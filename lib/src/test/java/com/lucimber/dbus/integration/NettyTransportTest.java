@@ -5,11 +5,10 @@
 
 package com.lucimber.dbus.integration;
 
-import java.net.InetSocketAddress;
-
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.kqueue.KQueue;
 import io.netty.channel.unix.DomainSocketAddress;
+import java.net.InetSocketAddress;
 
 /** Simple test to check Netty transport availability */
 public class NettyTransportTest {

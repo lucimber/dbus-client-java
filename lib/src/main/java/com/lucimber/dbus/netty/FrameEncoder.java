@@ -5,18 +5,8 @@
 
 package com.lucimber.dbus.netty;
 
-import java.lang.invoke.MethodHandles;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Map;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.EncoderException;
-import io.netty.handler.codec.MessageToByteEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.nio.ByteOrder.BIG_ENDIAN;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import com.lucimber.dbus.codec.encoder.ArrayEncoder;
 import com.lucimber.dbus.codec.encoder.Encoder;
@@ -33,9 +23,17 @@ import com.lucimber.dbus.type.DBusStruct;
 import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.type.DBusVariant;
 import com.lucimber.dbus.util.LoggerUtils;
-
-import static java.nio.ByteOrder.BIG_ENDIAN;
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.EncoderException;
+import io.netty.handler.codec.MessageToByteEncoder;
+import java.lang.invoke.MethodHandles;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class FrameEncoder extends MessageToByteEncoder<Frame> {
 

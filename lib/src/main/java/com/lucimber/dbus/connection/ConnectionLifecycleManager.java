@@ -5,18 +5,16 @@
 
 package com.lucimber.dbus.connection;
 
+import com.lucimber.dbus.util.ErrorRecoveryManager;
+import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreaker;
+import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreakerConfig;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lucimber.dbus.util.ErrorRecoveryManager;
-import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreaker;
-import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreakerConfig;
 
 /**
  * Manages the lifecycle of a connection including connect, disconnect, and state transitions. This

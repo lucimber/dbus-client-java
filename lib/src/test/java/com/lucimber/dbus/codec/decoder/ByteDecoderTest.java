@@ -5,13 +5,11 @@
 
 package com.lucimber.dbus.codec.decoder;
 
-import java.nio.ByteBuffer;
-
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.lucimber.dbus.type.DBusByte;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.nio.ByteBuffer;
+import org.junit.jupiter.api.Test;
 
 final class ByteDecoderTest {
 

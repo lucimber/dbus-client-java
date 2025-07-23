@@ -5,18 +5,16 @@
 
 package com.lucimber.dbus.util;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.lucimber.dbus.util.FrameRecoveryManager.CorruptionType;
 import com.lucimber.dbus.util.FrameRecoveryManager.FrameAnalysis;
 import com.lucimber.dbus.util.FrameRecoveryManager.FrameDiagnostic;
 import com.lucimber.dbus.util.FrameRecoveryManager.FrameStatistics;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class FrameRecoveryManagerTest {
 

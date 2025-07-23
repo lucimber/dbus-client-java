@@ -5,14 +5,13 @@
 
 package com.lucimber.dbus.codec.encoder;
 
+import com.lucimber.dbus.type.DBusType;
+import com.lucimber.dbus.type.Type;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
-
-import com.lucimber.dbus.type.DBusType;
-import com.lucimber.dbus.type.Type;
 
 /**
  * Default implementation of EncoderFactory that provides encoders for all standard D-Bus types.

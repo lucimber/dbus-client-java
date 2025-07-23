@@ -5,15 +5,13 @@
 
 package com.lucimber.dbus.netty;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-
-import io.netty.channel.unix.DomainSocketAddress;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.lucimber.dbus.connection.ConnectionConfig;
-
-import static org.junit.jupiter.api.Assertions.*;
+import io.netty.channel.unix.DomainSocketAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import org.junit.jupiter.api.Test;
 
 /**
  * Integration test to verify that NettyConnection properly uses the strategy pattern for different

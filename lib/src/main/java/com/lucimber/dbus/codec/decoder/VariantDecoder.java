@@ -5,16 +5,14 @@
 
 package com.lucimber.dbus.codec.decoder;
 
-import java.nio.ByteBuffer;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusVariant;
 import com.lucimber.dbus.util.LoggerUtils;
+import java.nio.ByteBuffer;
+import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A decoder which unmarshals a variant from the byte stream format used by D-Bus.

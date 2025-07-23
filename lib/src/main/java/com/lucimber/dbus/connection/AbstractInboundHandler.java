@@ -5,9 +5,8 @@
 
 package com.lucimber.dbus.connection;
 
-import org.slf4j.Logger;
-
 import com.lucimber.dbus.message.InboundMessage;
+import org.slf4j.Logger;
 
 /**
  * A skeletal implementation of the {@link InboundHandler} interface.

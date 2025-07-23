@@ -5,13 +5,6 @@
 
 package com.lucimber.dbus.connection;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.lucimber.dbus.message.InboundError;
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.InboundMethodCall;
@@ -20,6 +13,11 @@ import com.lucimber.dbus.message.OutboundError;
 import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.DBusString;
 import com.lucimber.dbus.type.DBusType;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Internal tail handler that processes messages that reach the end of the pipeline.

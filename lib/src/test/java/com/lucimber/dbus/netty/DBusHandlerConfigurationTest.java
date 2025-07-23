@@ -5,28 +5,26 @@
 
 package com.lucimber.dbus.netty;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+import com.lucimber.dbus.netty.sasl.SaslAuthenticationHandler;
+import com.lucimber.dbus.netty.sasl.SaslCodec;
+import com.lucimber.dbus.netty.sasl.SaslInitiationHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import com.lucimber.dbus.netty.sasl.SaslAuthenticationHandler;
-import com.lucimber.dbus.netty.sasl.SaslCodec;
-import com.lucimber.dbus.netty.sasl.SaslInitiationHandler;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class DBusHandlerConfigurationTest {
 

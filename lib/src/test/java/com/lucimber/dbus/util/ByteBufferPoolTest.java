@@ -5,13 +5,12 @@
 
 package com.lucimber.dbus.util;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /** Tests for ByteBufferPool memory optimization utility. */
 class ByteBufferPoolTest {

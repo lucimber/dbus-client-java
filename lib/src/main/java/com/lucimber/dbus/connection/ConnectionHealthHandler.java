@@ -5,6 +5,12 @@
 
 package com.lucimber.dbus.connection;
 
+import com.lucimber.dbus.message.InboundMessage;
+import com.lucimber.dbus.message.InboundMethodReturn;
+import com.lucimber.dbus.message.OutboundMethodCall;
+import com.lucimber.dbus.type.DBusObjectPath;
+import com.lucimber.dbus.type.DBusString;
+import com.lucimber.dbus.type.DBusUInt32;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -18,16 +24,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lucimber.dbus.message.InboundMessage;
-import com.lucimber.dbus.message.InboundMethodReturn;
-import com.lucimber.dbus.message.OutboundMethodCall;
-import com.lucimber.dbus.type.DBusObjectPath;
-import com.lucimber.dbus.type.DBusString;
-import com.lucimber.dbus.type.DBusUInt32;
 
 /**
  * A connection handler that monitors the health of a D-Bus connection by performing periodic ping

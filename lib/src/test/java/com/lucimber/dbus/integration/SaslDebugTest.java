@@ -5,12 +5,11 @@
 
 package com.lucimber.dbus.integration;
 
+import com.lucimber.dbus.netty.sasl.AuthorizationIdResolver;
+import com.lucimber.dbus.netty.sasl.SaslMechanismException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
-import com.lucimber.dbus.netty.sasl.AuthorizationIdResolver;
-import com.lucimber.dbus.netty.sasl.SaslMechanismException;
 
 /** Test class to debug SASL authorization ID resolution */
 public class SaslDebugTest {

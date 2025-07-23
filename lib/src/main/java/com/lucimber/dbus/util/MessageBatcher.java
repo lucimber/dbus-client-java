@@ -5,6 +5,9 @@
 
 package com.lucimber.dbus.util;
 
+import com.lucimber.dbus.message.OutboundMessage;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.concurrent.ScheduledFuture;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,13 +15,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.concurrent.ScheduledFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lucimber.dbus.message.OutboundMessage;
 
 /**
  * Message batcher for improved throughput by grouping multiple small messages.

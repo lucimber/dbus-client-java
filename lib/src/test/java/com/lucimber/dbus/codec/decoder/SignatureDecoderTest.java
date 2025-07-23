@@ -5,15 +5,13 @@
 
 package com.lucimber.dbus.codec.decoder;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-
-import org.junit.jupiter.api.Test;
-
-import com.lucimber.dbus.type.DBusSignature;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.lucimber.dbus.type.DBusSignature;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import org.junit.jupiter.api.Test;
 
 final class SignatureDecoderTest {
 

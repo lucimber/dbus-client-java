@@ -5,14 +5,6 @@
 
 package com.lucimber.dbus.codec.encoder;
 
-import java.lang.invoke.MethodHandles;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.lucimber.dbus.type.DBusBasicType;
 import com.lucimber.dbus.type.DBusDict;
 import com.lucimber.dbus.type.DBusDictEntry;
@@ -21,6 +13,12 @@ import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.type.Type;
 import com.lucimber.dbus.util.LoggerUtils;
+import java.lang.invoke.MethodHandles;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An encoder which encodes a dictionary to the D-Bus marshalling format using ByteBuffer.

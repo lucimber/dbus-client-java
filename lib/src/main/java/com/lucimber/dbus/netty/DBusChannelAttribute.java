@@ -5,11 +5,9 @@
 
 package com.lucimber.dbus.netty;
 
-import java.util.concurrent.atomic.AtomicLong;
-
-import io.netty.util.AttributeKey;
-
 import com.lucimber.dbus.type.DBusString;
+import io.netty.util.AttributeKey;
+import java.util.concurrent.atomic.AtomicLong;
 
 final class DBusChannelAttribute {
 

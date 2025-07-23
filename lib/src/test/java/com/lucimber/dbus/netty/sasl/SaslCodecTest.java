@@ -5,22 +5,20 @@
 
 package com.lucimber.dbus.netty.sasl;
 
-import java.util.NoSuchElementException;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
+import com.lucimber.dbus.netty.DBusChannelEvent;
+import com.lucimber.dbus.netty.DBusHandlerNames;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import com.lucimber.dbus.netty.DBusChannelEvent;
-import com.lucimber.dbus.netty.DBusHandlerNames;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 class SaslCodecTest {
 

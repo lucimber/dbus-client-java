@@ -5,24 +5,6 @@
 
 package com.lucimber.dbus.netty;
 
-import java.nio.channels.ClosedChannelException;
-import java.time.Duration;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GlobalEventExecutor;
-import io.netty.util.concurrent.Promise;
-import io.netty.util.concurrent.ScheduledFuture;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.lucimber.dbus.connection.Connection;
 import com.lucimber.dbus.connection.InboundHandler;
 import com.lucimber.dbus.connection.Pipeline;
@@ -36,6 +18,22 @@ import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.ErrorRecoveryManager;
 import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreaker;
 import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreakerConfig;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GlobalEventExecutor;
+import io.netty.util.concurrent.Promise;
+import io.netty.util.concurrent.ScheduledFuture;
+import java.nio.channels.ClosedChannelException;
+import java.time.Duration;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The critical bridge between the Netty pipeline and public API pipeline systems.

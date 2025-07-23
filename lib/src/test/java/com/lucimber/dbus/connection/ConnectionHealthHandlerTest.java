@@ -5,6 +5,12 @@
 
 package com.lucimber.dbus.connection;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import com.lucimber.dbus.message.InboundMessage;
+import com.lucimber.dbus.message.InboundMethodReturn;
+import com.lucimber.dbus.type.DBusUInt32;
 import java.lang.reflect.Field;
 import java.time.Duration;
 import java.util.Map;
@@ -12,17 +18,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import com.lucimber.dbus.message.InboundMessage;
-import com.lucimber.dbus.message.InboundMethodReturn;
-import com.lucimber.dbus.type.DBusUInt32;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class ConnectionHealthHandlerTest {
 

@@ -5,16 +5,14 @@
 
 package com.lucimber.dbus.netty;
 
-import java.util.Set;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import org.junit.jupiter.api.Test;
-
-import com.lucimber.dbus.message.MessageFlag;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.lucimber.dbus.message.MessageFlag;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import java.util.Set;
+import org.junit.jupiter.api.Test;
 
 final class InboundUtilsTest {
 

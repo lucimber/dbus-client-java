@@ -5,12 +5,10 @@
 
 package com.lucimber.dbus.connection;
 
-import java.util.concurrent.CompletableFuture;
-
-import org.slf4j.Logger;
-
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
+import java.util.concurrent.CompletableFuture;
+import org.slf4j.Logger;
 
 /**
  * An abstract base class that combines both {@link InboundHandler} and {@link OutboundHandler}

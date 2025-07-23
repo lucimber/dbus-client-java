@@ -17,6 +17,15 @@ plugins {
 group = "com.lucimber"
 version = "2.0-SNAPSHOT"
 
+// Tool versions
+checkstyle {
+    toolVersion = "10.20.2"
+}
+
+pmd {
+    toolVersion = "7.8.0"
+}
+
 dependencies {
     // Common
     implementation("io.netty:netty-all:4.2.3.Final")
@@ -69,8 +78,8 @@ spotless {
         // Remove unused imports
         removeUnusedImports()
         
-        // Fix import order
-        importOrder("java", "javax", "", "com.lucimber", "\\#")
+        // Fix import order - matches checkstyle configuration
+        importOrder("\\#", "")
         
         // Add trailing whitespace trimming
         trimTrailingWhitespace()

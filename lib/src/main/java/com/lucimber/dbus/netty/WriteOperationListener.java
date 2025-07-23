@@ -5,14 +5,12 @@
 
 package com.lucimber.dbus.netty;
 
-import java.util.Objects;
-import java.util.function.Consumer;
-
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import java.util.Objects;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
-
-import com.lucimber.dbus.util.LoggerUtils;
 
 /**
  * A {@link GenericFutureListener} that provides consistent logging for write operations and

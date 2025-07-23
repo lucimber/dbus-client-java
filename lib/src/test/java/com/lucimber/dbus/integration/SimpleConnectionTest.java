@@ -5,16 +5,14 @@
 
 package com.lucimber.dbus.integration;
 
+import com.lucimber.dbus.connection.ConnectionConfig;
+import com.lucimber.dbus.netty.NettyConnection;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lucimber.dbus.connection.ConnectionConfig;
-import com.lucimber.dbus.netty.NettyConnection;
 
 /** Simple connection test to debug D-Bus connection issues */
 public class SimpleConnectionTest {

@@ -5,11 +5,10 @@
 
 package com.lucimber.dbus.connection;
 
-import java.util.concurrent.CompletionStage;
-
 import com.lucimber.dbus.message.InboundMessage;
 import com.lucimber.dbus.message.OutboundMessage;
 import com.lucimber.dbus.type.DBusUInt32;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Represents a virtual channel for communication over D-Bus.

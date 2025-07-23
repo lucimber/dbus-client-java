@@ -5,23 +5,21 @@
 
 package com.lucimber.dbus.netty;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.embedded.EmbeddedChannel;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.lucimber.dbus.codec.encoder.ArrayEncoder;
 import com.lucimber.dbus.codec.encoder.Encoder;
 import com.lucimber.dbus.codec.encoder.EncoderResult;
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.type.*;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.embedded.EmbeddedChannel;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 final class FrameDecoderTest {
 

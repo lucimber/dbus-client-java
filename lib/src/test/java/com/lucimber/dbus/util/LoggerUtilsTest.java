@@ -5,10 +5,10 @@
 
 package com.lucimber.dbus.util;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Marker;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class LoggerUtilsTest {
 

@@ -5,19 +5,6 @@
 
 package com.lucimber.dbus.netty;
 
-import java.lang.invoke.MethodHandles;
-import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.Map;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
-import io.netty.handler.codec.CorruptedFrameException;
-import io.netty.handler.codec.TooLongFrameException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.lucimber.dbus.codec.decoder.ArrayDecoder;
 import com.lucimber.dbus.codec.decoder.Decoder;
 import com.lucimber.dbus.codec.decoder.DecoderException;
@@ -34,6 +21,17 @@ import com.lucimber.dbus.util.FrameRecoveryManager;
 import com.lucimber.dbus.util.FrameRecoveryManager.CorruptionType;
 import com.lucimber.dbus.util.FrameRecoveryManager.FrameDiagnostic;
 import com.lucimber.dbus.util.LoggerUtils;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.codec.CorruptedFrameException;
+import io.netty.handler.codec.TooLongFrameException;
+import java.lang.invoke.MethodHandles;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An inbound handler that decodes buffer into frame.

@@ -5,19 +5,6 @@
 
 package com.lucimber.dbus.netty;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.time.Duration;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import io.netty.channel.unix.DomainSocketAddress;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.lucimber.dbus.connection.Connection;
 import com.lucimber.dbus.connection.ConnectionConfig;
 import com.lucimber.dbus.connection.ConnectionEventListener;
@@ -37,6 +24,17 @@ import com.lucimber.dbus.type.DBusUInt32;
 import com.lucimber.dbus.util.ErrorRecoveryManager;
 import com.lucimber.dbus.util.ErrorRecoveryManager.CircuitBreaker;
 import com.lucimber.dbus.util.ErrorRecoveryManager.RetryConfig;
+import io.netty.channel.unix.DomainSocketAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.time.Duration;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class NettyConnection implements Connection {
 

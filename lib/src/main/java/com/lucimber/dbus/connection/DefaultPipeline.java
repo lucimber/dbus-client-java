@@ -5,13 +5,12 @@
 
 package com.lucimber.dbus.connection;
 
+import com.lucimber.dbus.message.InboundMessage;
+import com.lucimber.dbus.message.OutboundMessage;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import com.lucimber.dbus.message.InboundMessage;
-import com.lucimber.dbus.message.OutboundMessage;
 
 /**
  * A thread-safe pipeline of {@link OutboundHandler} instances associated with a {@link Connection}.

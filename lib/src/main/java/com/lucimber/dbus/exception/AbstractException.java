@@ -10,9 +10,8 @@
 
 package com.lucimber.dbus.exception;
 
-import java.util.Objects;
-
 import com.lucimber.dbus.type.DBusString;
+import java.util.Objects;
 
 /** Base class for exceptions related to this framework. */
 public abstract class AbstractException extends Exception {

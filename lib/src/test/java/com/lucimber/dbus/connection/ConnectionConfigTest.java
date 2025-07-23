@@ -5,11 +5,10 @@
 
 package com.lucimber.dbus.connection;
 
-import java.time.Duration;
-
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.Duration;
+import org.junit.jupiter.api.Test;
 
 class ConnectionConfigTest {
 

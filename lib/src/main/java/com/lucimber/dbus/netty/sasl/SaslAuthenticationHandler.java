@@ -5,23 +5,21 @@
 
 package com.lucimber.dbus.netty.sasl;
 
+import com.lucimber.dbus.connection.sasl.SaslCommandName;
+import com.lucimber.dbus.connection.sasl.SaslMessage;
+import com.lucimber.dbus.netty.DBusChannelEvent;
+import com.lucimber.dbus.netty.WriteOperationListener;
+import com.lucimber.dbus.util.LoggerUtils;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandlerContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
-
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lucimber.dbus.connection.sasl.SaslCommandName;
-import com.lucimber.dbus.connection.sasl.SaslMessage;
-import com.lucimber.dbus.netty.DBusChannelEvent;
-import com.lucimber.dbus.netty.WriteOperationListener;
-import com.lucimber.dbus.util.LoggerUtils;
 
 public final class SaslAuthenticationHandler extends ChannelDuplexHandler {
 

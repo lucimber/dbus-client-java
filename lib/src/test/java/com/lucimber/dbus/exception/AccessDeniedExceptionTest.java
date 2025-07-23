@@ -5,11 +5,10 @@
 
 package com.lucimber.dbus.exception;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.lucimber.dbus.type.DBusString;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class AccessDeniedExceptionTest {
 

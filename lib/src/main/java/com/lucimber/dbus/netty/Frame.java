@@ -5,18 +5,17 @@
 
 package com.lucimber.dbus.netty;
 
+import com.lucimber.dbus.message.HeaderField;
+import com.lucimber.dbus.message.MessageFlag;
+import com.lucimber.dbus.message.MessageType;
+import com.lucimber.dbus.type.DBusUInt32;
+import com.lucimber.dbus.type.DBusVariant;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import com.lucimber.dbus.message.HeaderField;
-import com.lucimber.dbus.message.MessageFlag;
-import com.lucimber.dbus.message.MessageType;
-import com.lucimber.dbus.type.DBusUInt32;
-import com.lucimber.dbus.type.DBusVariant;
 
 final class Frame {
 

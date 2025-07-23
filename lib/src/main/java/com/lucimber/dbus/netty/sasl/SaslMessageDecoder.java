@@ -5,19 +5,17 @@
 
 package com.lucimber.dbus.netty.sasl;
 
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
+import com.lucimber.dbus.connection.sasl.SaslCommandName;
+import com.lucimber.dbus.connection.sasl.SaslMessage;
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.DecoderException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lucimber.dbus.connection.sasl.SaslCommandName;
-import com.lucimber.dbus.connection.sasl.SaslMessage;
-import com.lucimber.dbus.util.LoggerUtils;
 
 /** Decoder: Accumulates ASCII bytes until CRLF, then maps to SaslMessage. */
 public class SaslMessageDecoder extends ByteToMessageDecoder {

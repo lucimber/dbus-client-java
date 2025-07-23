@@ -5,18 +5,16 @@
 
 package com.lucimber.dbus.netty;
 
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Supplier;
-
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.concurrent.Promise;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lucimber.dbus.util.LoggerUtils;
 
 /**
  * Handler responsible for managing pipeline handlers during reconnection. This handler listens for

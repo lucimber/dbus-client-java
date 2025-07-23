@@ -5,20 +5,18 @@
 
 package com.lucimber.dbus.netty;
 
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.List;
-
-import io.netty.channel.embedded.EmbeddedChannel;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.lucimber.dbus.message.MessageType;
 import com.lucimber.dbus.message.OutboundMethodCall;
 import com.lucimber.dbus.type.*;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import io.netty.channel.embedded.EmbeddedChannel;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 final class OutboundMethodCallHandlerTest {
 

@@ -5,12 +5,11 @@
 
 package com.lucimber.dbus.message;
 
-import java.util.List;
-import java.util.Objects;
-
 import com.lucimber.dbus.type.DBusSignature;
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusUInt32;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * An abstract implementation of a reply message.

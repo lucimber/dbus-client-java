@@ -5,10 +5,11 @@
 
 package com.lucimber.dbus.netty;
 
-import java.net.SocketAddress;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-
+import com.lucimber.dbus.connection.Connection;
+import com.lucimber.dbus.connection.ConnectionConfig;
+import com.lucimber.dbus.connection.ConnectionContext;
+import com.lucimber.dbus.connection.ConnectionHandle;
+import com.lucimber.dbus.connection.ConnectionStrategy;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
@@ -21,14 +22,11 @@ import io.netty.channel.kqueue.KQueueDomainSocketChannel;
 import io.netty.channel.kqueue.KQueueIoHandler;
 import io.netty.channel.unix.DomainSocketAddress;
 import io.netty.util.concurrent.Promise;
+import java.net.SocketAddress;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lucimber.dbus.connection.Connection;
-import com.lucimber.dbus.connection.ConnectionConfig;
-import com.lucimber.dbus.connection.ConnectionContext;
-import com.lucimber.dbus.connection.ConnectionHandle;
-import com.lucimber.dbus.connection.ConnectionStrategy;
 
 /**
  * Netty-based connection strategy for Unix domain socket transport.

@@ -5,22 +5,20 @@
 
 package com.lucimber.dbus.netty;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.function.Supplier;
-
+import com.lucimber.dbus.netty.sasl.SaslAuthenticationHandler;
+import com.lucimber.dbus.netty.sasl.SaslCodec;
+import com.lucimber.dbus.netty.sasl.SaslInitiationHandler;
+import com.lucimber.dbus.util.LoggerUtils;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.Promise;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lucimber.dbus.netty.sasl.SaslAuthenticationHandler;
-import com.lucimber.dbus.netty.sasl.SaslCodec;
-import com.lucimber.dbus.netty.sasl.SaslInitiationHandler;
-import com.lucimber.dbus.util.LoggerUtils;
 
 /**
  * Centralized configuration for D-Bus pipeline handlers. This class maintains the definitive order

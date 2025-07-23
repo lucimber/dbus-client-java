@@ -10,16 +10,6 @@
 
 package com.lucimber.dbus.netty;
 
-import java.nio.ByteOrder;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import io.netty.buffer.ByteBuf;
-
 import com.lucimber.dbus.codec.decoder.DecoderException;
 import com.lucimber.dbus.message.HeaderField;
 import com.lucimber.dbus.message.MessageFlag;
@@ -28,6 +18,14 @@ import com.lucimber.dbus.type.DBusByte;
 import com.lucimber.dbus.type.DBusStruct;
 import com.lucimber.dbus.type.DBusType;
 import com.lucimber.dbus.type.DBusVariant;
+import io.netty.buffer.ByteBuf;
+import java.nio.ByteOrder;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /** Utility class for common methods used for decoding and encoding messages. */
 final class InboundUtils {

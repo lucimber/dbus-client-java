@@ -5,11 +5,10 @@
 
 package com.lucimber.dbus.netty;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 class NettyFutureConverter {
     static <T> CompletionStage<T> toCompletionStage(Future<T> nettyFuture) {

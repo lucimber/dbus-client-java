@@ -5,10 +5,10 @@
 
 package com.lucimber.dbus.util;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /** Tests for MemoryOptimizer memory monitoring utility. */
 class MemoryOptimizerTest {

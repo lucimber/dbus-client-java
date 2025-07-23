@@ -5,24 +5,22 @@
 
 package com.lucimber.dbus.netty;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.lucimber.dbus.codec.encoder.EncoderResult;
+import com.lucimber.dbus.codec.encoder.EncoderUtils;
+import com.lucimber.dbus.message.*;
+import com.lucimber.dbus.type.*;
+import io.netty.channel.embedded.EmbeddedChannel;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
-
-import com.lucimber.dbus.codec.encoder.EncoderResult;
-import com.lucimber.dbus.codec.encoder.EncoderUtils;
-import com.lucimber.dbus.message.*;
-import com.lucimber.dbus.type.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 final class InboundMessageDecoderTest {
 

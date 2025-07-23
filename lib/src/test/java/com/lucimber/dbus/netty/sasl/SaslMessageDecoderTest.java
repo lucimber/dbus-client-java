@@ -5,15 +5,14 @@
 
 package com.lucimber.dbus.netty.sasl;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.lucimber.dbus.connection.sasl.SaslCommandName;
+import com.lucimber.dbus.connection.sasl.SaslMessage;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.DecoderException;
 import org.junit.jupiter.api.Test;
-
-import com.lucimber.dbus.connection.sasl.SaslCommandName;
-import com.lucimber.dbus.connection.sasl.SaslMessage;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SaslMessageDecoderTest {
 
