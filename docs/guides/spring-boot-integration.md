@@ -10,7 +10,7 @@ Add the D-Bus client dependency to your `build.gradle` or `pom.xml`:
 
 ```gradle
 dependencies {
-    implementation 'com.lucimber:dbus-client:2.0-SNAPSHOT'
+    implementation 'com.lucimber:lucimber-dbus-client:2.0-SNAPSHOT'
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-actuator' // For health checks
 }

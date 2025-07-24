@@ -14,7 +14,7 @@ This guide will get you up and running with the D-Bus Client Java library in 5 m
 
 ```gradle
 dependencies {
-    implementation 'com.lucimber:dbus-client:2.0-SNAPSHOT'
+    implementation 'com.lucimber:lucimber-dbus-client:2.0-SNAPSHOT'
 }
 ```
 
@@ -23,7 +23,7 @@ dependencies {
 ```xml
 <dependency>
     <groupId>com.lucimber</groupId>
-    <artifactId>dbus-client</artifactId>
+    <artifactId>lucimber-dbus-client</artifactId>
     <version>2.0-SNAPSHOT</version>
 </dependency>
 ```
