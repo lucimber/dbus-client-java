@@ -4,9 +4,18 @@ This directory contains documentation files for the D-Bus Client Java library wi
 
 ## Contents
 
-- `index-template.html` - Dynamic landing page template with version selector
-- `version-switcher.js` - JavaScript for version switching in Javadoc pages
 - `README.md` - This file
+- `developer-guide.md` - Comprehensive developer learning path
+- `architecture/` - Technical architecture documentation
+- `guides/` - Practical implementation guides
+- `examples/` - Code examples and usage patterns
+- Other documentation files for API reference, testing, etc.
+
+## Website Generation Files
+
+The website generation files have been moved to `scripts/docs-website/` to keep the documentation content separate from build artifacts:
+- `scripts/docs-website/index-template.html` - Dynamic landing page template with version selector
+- `scripts/docs-website/version-switcher.js` - JavaScript for version switching in Javadoc pages
 
 ## Versioned Documentation System
 
@@ -69,7 +78,7 @@ To generate and preview documentation locally:
 # Create a local version structure
 mkdir -p _site/latest
 cp -r lib/build/docs/javadoc/* _site/latest/
-cp docs/index-template.html _site/index.html
+cp scripts/docs-website/index-template.html _site/index.html
 echo '{"versions":[{"name":"latest","url":"./latest/","title":"Latest (Development)"}]}' > _site/versions.json
 
 # Serve the documentation locally

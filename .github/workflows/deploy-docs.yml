@@ -171,10 +171,10 @@ jobs:
         echo ']}' >> versions.json
         
         # Copy the dynamic index page template
-        cp ../docs/index-template.html index.html
+        cp ../scripts/docs-website/index-template.html index.html
         
         # Add version switcher to all Javadoc HTML files
-        cp ../docs/version-switcher.js version-switcher.js
+        cp ../scripts/docs-website/version-switcher.js version-switcher.js
         
         # Inject version switcher script into all HTML files in version directories
         for version_dir in */; do
