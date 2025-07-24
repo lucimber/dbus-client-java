@@ -47,39 +47,39 @@ pmd {
 spotless {
     java {
         // Use Google Java Format
-        googleJavaFormat("1.22.0").aosp()  // AOSP style uses 4 spaces like your checkstyle
-        
+        googleJavaFormat("1.22.0").aosp() // AOSP style uses 4 spaces like your checkstyle
+
         // Remove unused imports
         removeUnusedImports()
-        
+
         // Fix import order - matches checkstyle configuration
         importOrder("\\#", "")
-        
+
         // Add trailing whitespace trimming
         trimTrailingWhitespace()
-        
+
         // Ensure files end with newline
         endWithNewline()
-        
+
         // License header management
         licenseHeaderFile("$rootDir/config/license-header.txt")
             .updateYearWithLatest(true) // Update year to current year
             .yearSeparator("-") // Use hyphen for year ranges (e.g., 2023-2025)
-        
+
         // Target all Java files
         target("src/**/*.java")
     }
-    
+
     // Also format Kotlin/Gradle files
     kotlin {
         // Use ktlint for Kotlin formatting
         ktlint("0.50.0")
-        
+
         // License header for Kotlin files
-        licenseHeaderFile("$rootDir/config/license-header.txt")
+        licenseHeaderFile("$rootDir/config/license-header.txt", "(^(?![\\/ ]\\*).*$)")
             .updateYearWithLatest(true)
             .yearSeparator("-")
-        
+
         // Target build files and any Kotlin source
         target("*.gradle.kts", "src/**/*.kt")
     }
@@ -96,10 +96,10 @@ tasks.register<JavaExec>("runBasicClient") {
     description = "Runs the basic D-Bus client example"
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass.set("com.lucimber.dbus.examples.BasicClientExample")
-    
+
     // Allow passing system properties
     systemProperties = System.getProperties().toMap() as Map<String, Any>
-    
+
     // Allow passing command line arguments
     args = if (project.hasProperty("args")) {
         (project.property("args") as String).split(" ")
@@ -113,10 +113,10 @@ tasks.register<JavaExec>("runSignalHandling") {
     description = "Runs the signal handling example"
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass.set("com.lucimber.dbus.examples.SignalHandlingExample")
-    
+
     // Allow passing system properties
     systemProperties = System.getProperties().toMap() as Map<String, Any>
-    
+
     // Allow passing command line arguments
     args = if (project.hasProperty("args")) {
         (project.property("args") as String).split(" ")
@@ -130,10 +130,10 @@ tasks.register<JavaExec>("runServiceDiscovery") {
     description = "Runs the service discovery example"
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass.set("com.lucimber.dbus.examples.ServiceDiscoveryExample")
-    
+
     // Allow passing system properties
     systemProperties = System.getProperties().toMap() as Map<String, Any>
-    
+
     // Allow passing command line arguments
     args = if (project.hasProperty("args")) {
         (project.property("args") as String).split(" ")
@@ -147,10 +147,10 @@ tasks.register<JavaExec>("runAuthentication") {
     description = "Runs the authentication example"
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass.set("com.lucimber.dbus.examples.AuthenticationExample")
-    
+
     // Allow passing system properties
     systemProperties = System.getProperties().toMap() as Map<String, Any>
-    
+
     // Allow passing command line arguments
     args = if (project.hasProperty("args")) {
         (project.property("args") as String).split(" ")
@@ -163,9 +163,10 @@ tasks.register<JavaExec>("runAuthentication") {
 tasks.register("listExamples") {
     group = "examples"
     description = "Lists all available examples"
-    
+
     doLast {
-        println("""
+        println(
+            """
         |Available D-Bus Examples:
         |
         |./gradlew :examples:runBasicClient
@@ -205,7 +206,8 @@ tasks.register("listExamples") {
         |Environment Setup Example:
         |  export DBUS_SESSION_BUS_ADDRESS=unix:path=/tmp/dbus-session
         |  ./gradlew :examples:runBasicClient
-        """.trimMargin())
+            """.trimMargin(),
+        )
     }
 }
 
@@ -217,12 +219,12 @@ tasks.named<JavaCompile>("compileJava") {
 tasks.register("runAllExamples") {
     group = "examples"
     description = "Runs all examples in sequence"
-    
+
     doLast {
         println("Running all examples...")
         println("Note: Each example will run for a short time to demonstrate functionality")
     }
-    
+
     // Run with short timeouts to demonstrate all examples
     finalizedBy("runBasicClientDemo", "runSignalHandlingDemo", "runServiceDiscoveryDemo", "runAuthenticationDemo")
 }
