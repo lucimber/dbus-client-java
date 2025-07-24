@@ -164,6 +164,53 @@ public class MyDBusService {
 
 ---
 
+## 🎯 High-Level Abstractions (20 minutes)
+
+Simplify D-Bus programming with powerful abstractions.
+
+### Service Proxy Pattern (Client-side)
+```java
+// Define interface with annotations
+@DBusInterface("org.freedesktop.DBus")
+public interface DBusService {
+    @DBusMethod("GetId")
+    String getId();
+    
+    @DBusMethod("ListNames")
+    CompletableFuture<String[]> listNames();
+}
+
+// Create proxy - no manual message building!
+DBusService service = ServiceProxy.create(
+    connection, 
+    "/org/freedesktop/DBus", 
+    DBusService.class
+);
+
+// Use like a regular Java interface
+String id = service.getId();
+```
+
+**Note:** ServiceProxy is for simple client request/response scenarios only. For implementing D-Bus services (server-side), use `StandardInterfaceHandler` instead.
+
+### Promise-Style Async Operations
+```java
+DBusPromise.from(connection.sendRequest(call))
+    .timeout(Duration.ofSeconds(5))
+    .mapReturn()
+    .firstAs(DBusString.class)
+    .map(DBusString::getDelegate)
+    .thenAccept(result -> System.out.println("Result: " + result))
+    .exceptionally(error -> {
+        System.err.println("Failed: " + error.getMessage());
+        return null;
+    });
+```
+
+**📖 Detailed Documentation**: [High-Level Abstractions Example](../../examples/src/main/java/com/lucimber/dbus/examples/HighLevelAbstractionExample.java)
+
+---
+
 ## 🔧 Advanced Features (30 minutes)
 
 Explore sophisticated features for production applications.

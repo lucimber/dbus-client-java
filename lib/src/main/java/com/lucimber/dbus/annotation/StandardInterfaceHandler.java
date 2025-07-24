@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Handler that implements standard D-Bus interfaces using reflection and annotations.
  *
- * <p>This handler automatically provides implementations for:
+ * <p>This handler automatically provides server-side implementations for:
  *
  * <ul>
  *   <li>org.freedesktop.DBus.Introspectable - generates XML from annotations
@@ -41,6 +41,12 @@ import org.slf4j.LoggerFactory;
  *   <li>org.freedesktop.DBus.Peer - standard implementation
  * </ul>
  *
+ * <p><strong>Relationship to ServiceProxy:</strong>
+ * <ul>
+ *   <li>{@code StandardInterfaceHandler} - Server-side handler for implementing D-Bus services
+ *   <li>{@code ServiceProxy} - Client-side proxy for calling remote D-Bus services
+ * </ul>
+ * 
  * <p>Example usage:
  *
  * <pre>{@code
