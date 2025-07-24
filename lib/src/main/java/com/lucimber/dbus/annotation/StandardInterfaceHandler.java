@@ -42,11 +42,12 @@ import org.slf4j.LoggerFactory;
  * </ul>
  *
  * <p><strong>Relationship to ServiceProxy:</strong>
+ *
  * <ul>
  *   <li>{@code StandardInterfaceHandler} - Server-side handler for implementing D-Bus services
  *   <li>{@code ServiceProxy} - Client-side proxy for calling remote D-Bus services
  * </ul>
- * 
+ *
  * <p>Example usage:
  *
  * <pre>{@code

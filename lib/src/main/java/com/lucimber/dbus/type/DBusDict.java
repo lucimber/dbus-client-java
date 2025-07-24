@@ -146,20 +146,31 @@ public final class DBusDict<KeyT extends DBusBasicType, ValueT extends DBusType>
      */
     public static DBusDict<DBusString, DBusVariant> fromVariantMap(final Map<String, Object> map) {
         final DBusDict<DBusString, DBusVariant> dict = ofStringToVariant();
-        map.forEach((k, v) -> {
-            if (v instanceof String) {
-                dict.put(DBusString.valueOf(k), DBusVariant.valueOf(DBusString.valueOf((String) v)));
-            } else if (v instanceof Integer) {
-                dict.put(DBusString.valueOf(k), DBusVariant.valueOf(DBusInt32.valueOf((Integer) v)));
-            } else if (v instanceof Long) {
-                dict.put(DBusString.valueOf(k), DBusVariant.valueOf(DBusInt64.valueOf((Long) v)));
-            } else if (v instanceof Boolean) {
-                dict.put(DBusString.valueOf(k), DBusVariant.valueOf(DBusBoolean.valueOf((Boolean) v)));
-            } else if (v instanceof Double) {
-                dict.put(DBusString.valueOf(k), DBusVariant.valueOf(DBusDouble.valueOf((Double) v)));
-            }
-            // Add more type conversions as needed
-        });
+        map.forEach(
+                (k, v) -> {
+                    if (v instanceof String) {
+                        dict.put(
+                                DBusString.valueOf(k),
+                                DBusVariant.valueOf(DBusString.valueOf((String) v)));
+                    } else if (v instanceof Integer) {
+                        dict.put(
+                                DBusString.valueOf(k),
+                                DBusVariant.valueOf(DBusInt32.valueOf((Integer) v)));
+                    } else if (v instanceof Long) {
+                        dict.put(
+                                DBusString.valueOf(k),
+                                DBusVariant.valueOf(DBusInt64.valueOf((Long) v)));
+                    } else if (v instanceof Boolean) {
+                        dict.put(
+                                DBusString.valueOf(k),
+                                DBusVariant.valueOf(DBusBoolean.valueOf((Boolean) v)));
+                    } else if (v instanceof Double) {
+                        dict.put(
+                                DBusString.valueOf(k),
+                                DBusVariant.valueOf(DBusDouble.valueOf((Double) v)));
+                    }
+                    // Add more type conversions as needed
+                });
         return dict;
     }
 
