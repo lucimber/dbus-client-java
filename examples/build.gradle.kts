@@ -4,8 +4,8 @@
  */
 
 plugins {
-    java
-    application
+    id("java")
+    id("application")
     id("checkstyle")
     id("pmd")
     id("com.diffplug.spotless") version "6.25.0"
