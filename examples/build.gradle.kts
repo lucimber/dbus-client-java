@@ -6,6 +6,9 @@
 plugins {
     java
     application
+    id("checkstyle")
+    id("pmd")
+    id("com.diffplug.spotless") version "6.25.0"
 }
 
 dependencies {
@@ -21,6 +24,45 @@ repositories {
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+// Tool versions
+checkstyle {
+    toolVersion = "10.20.2"
+    configFile = file("../config/checkstyle/checkstyle.xml")
+    // Examples focus on clarity over strict style compliance
+    isIgnoreFailures = true
+}
+
+pmd {
+    toolVersion = "7.8.0"
+    ruleSetFiles = files("../config/pmd/ruleset.xml")
+    // Examples are meant to be educational, not necessarily production-perfect
+    // Allow unused parameters and variables for demonstration purposes
+    isIgnoreFailures = true
+}
+
+// Spotless configuration
+spotless {
+    java {
+        // Use Google Java Format
+        googleJavaFormat("1.22.0").aosp()  // AOSP style uses 4 spaces like your checkstyle
+        
+        // Remove unused imports
+        removeUnusedImports()
+        
+        // Fix import order - matches checkstyle configuration
+        importOrder("\\#", "")
+        
+        // Add trailing whitespace trimming
+        trimTrailingWhitespace()
+        
+        // Ensure files end with newline
+        endWithNewline()
+        
+        // Target all Java files
+        target("src/**/*.java")
     }
 }
 
