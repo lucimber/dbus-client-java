@@ -7,158 +7,132 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.0] - 2025-01-24
+## [2.0.0] - 2025-07-24
 
 ### Added
-- **Comprehensive Test Coverage**: Achieved 83% overall test coverage (improved from 68%)
-  - Complete test suite for DummyConnection with 92% coverage
-  - Full SASL authentication configuration testing (91% coverage)
-  - 100% test coverage for ConnectionEvent and lifecycle management
-  - Comprehensive exception package testing (31 exception classes)
-- **Builder Pattern Support**: Inbound and outbound message construction with fluent API
-- **Strategy Pattern Implementation**: Pluggable transport support for Unix sockets and TCP
-- **Factory Pattern**: Streamlined encoder/decoder creation and management
-- **Request-Response Correlation**: Built-in `sendRequest()` method with automatic correlation
-- **DummyConnection**: Testing utility for unit testing without D-Bus daemon
-- **Connection Health Monitoring**: Event-driven health checks and automatic reconnection
-- **Performance Optimizations**: Memory benchmarks and throughput improvements
-- **Code Quality Tools**: Spotless formatting, enhanced PMD and Checkstyle configurations
-- **SPDX License Headers**: Comprehensive license compliance across all source files
-- **Enhanced Documentation**: Migration guide, architecture docs, and comprehensive examples
-- **High-Level Abstractions**: ServiceProxy for client-side proxies and DBusPromise for async operations
-- **Type System Factory Methods**: Simplified D-Bus type creation with methods like `DBusArray.ofStrings()`
-- **Platform Setup Guide**: Comprehensive cross-platform development instructions with Docker support
-- **Client-Server Patterns Guide**: Clear documentation on using ServiceProxy vs StandardInterfaceHandler
+
+#### Core Features
+- **High-Level Abstractions**
+  - `ServiceProxy` for client-side dynamic proxy generation
+  - `DBusPromise` for promise-style asynchronous operations
+  - Annotation-based interface mapping with `@DBusInterface` and `@DBusMethod`
+
+- **Type System Improvements**
+  - Factory methods for common D-Bus types (`DBusArray.ofStrings()`, `DBusDict.ofStringToString()`, etc.)
+  - Conversion methods from Java collections (`DBusDict.fromStringMap()`)
+  - Simplified type creation without manual signature handling
+
+- **Connection & Communication**
+  - `sendRequest()` method with automatic request-response correlation
+  - Comprehensive connection health monitoring with event-driven architecture
+  - Automatic reconnection with exponential backoff
+  - Configurable timeout system for all operations
+  - `DummyConnection` for unit testing without D-Bus daemon
+
+- **Transport & Architecture**
+  - Strategy pattern for pluggable transport support (Unix sockets, TCP)
+  - Factory pattern for streamlined encoder/decoder creation
+  - Builder pattern for all message types
+  - Dual-pipeline architecture with thread isolation (RealityCheckpoint)
+
+- **Standard D-Bus Interfaces**
+  - `StandardInterfaceHandler` for server-side D-Bus service implementation
+  - Automatic implementation of Introspectable, Properties, and Peer interfaces
+  - Annotation-based property and method exposure
+
+- **Documentation & Examples**
+  - Comprehensive developer guide with structured learning path
+  - Platform setup guide for Windows, macOS, and Linux
+  - Client-server patterns documentation
+  - Migration guide from 1.x to 2.0
+  - Docker support for cross-platform development
+  - Extensive code examples demonstrating all major features
+
+- **Testing Infrastructure**
+  - Container-based integration testing with cross-platform SASL support
+  - Memory-intensive test tagging system with configurable heap allocation
+  - Testcontainers framework integration
+  - Performance benchmarks for memory and throughput
+  - Test coverage increased from 68% to 83%
+
+- **Development Tools**
+  - Spotless plugin for automatic code formatting
+  - Enhanced Checkstyle and PMD configurations
+  - SPDX license headers with automated management
+  - Versioned documentation system with GitHub Pages
+  - GitHub Actions workflows with comprehensive caching
 
 ### Changed
-- **Maven Coordinates**: Updated from `dbus-client` to `lucimber-dbus-client` 
-- **Package Structure**: Unified codec package (merged encoder/decoder packages)
-- **Annotation Package**: Merged `impl` package into main annotation package
-- **Connection API**: NettyConnection-based API replacing DBusConnection
-- **Threading Model**: Dual-pipeline architecture with safe blocking operations
-- **SASL Configuration**: Type-safe configuration classes replacing string-based config
-- **Message Building**: All messages now use Builder pattern instead of constructors
-- **Integration Test Stability**: Improved reliability and error handling
-- **Error Messaging**: Enhanced error messages for failed D-Bus operations
-- **Performance**: Optimized message encoding/decoding with reduced memory allocations
-- **Docker Organization**: Separated development and integration test Docker configurations
-- **Documentation Consistency**: Fixed artifact naming inconsistencies across all documentation
-
-### Fixed
-- **Checkstyle Violations**: Resolved all major code style issues across the codebase
-- **PMD Violations**: Fixed code quality issues and suppressed intentional patterns
-- **Integration Test Failures**: Resolved message correlation and timing issues
-- **Javadoc Generation**: Fixed documentation build errors and improved API docs
-- **Connection Timeout Handling**: Improved retry logic and timeout management
-- **Docker Resource Issues**: Resolved CI/CD pipeline disk space and resource constraints
-- **Message Serial Numbers**: Fixed missing serial numbers in test method calls
-- **SASL Authentication**: Enhanced error handling for authentication failures
-
-### Security
-- **Enhanced SASL Testing**: Comprehensive testing for all authentication mechanisms
-- **Improved Authentication Error Handling**: Better validation and error reporting
-- **Message Integrity Validation**: Strengthened D-Bus message validation
-- **Security Scanning**: Integrated security analysis in CI/CD pipeline
-
-### Breaking Changes
-- **Maven Coordinates**: `com.lucimber:dbus-client` → `com.lucimber:lucimber-dbus-client`
-- **Connection Creation**: `DBusConnection.create()` → `NettyConnection.newSessionBusConnection()`
-- **Package Imports**: `com.lucimber.dbus.encoder.*` → `com.lucimber.dbus.codec.encoder.*`
-- **Message Construction**: Constructor-based → Builder pattern required
-- **SASL Configuration**: String-based → Type-safe configuration classes
-
-## [2.0-SNAPSHOT] - Previous Development
-
-### Architecture
-- **Dual-Pipeline System**: Sophisticated architecture with Public API and Netty transport layers
-- **RealityCheckpoint**: Bridge component between pipeline layers for thread isolation
-- **Thread Safety**: ApplicationTaskExecutor vs Netty EventLoop separation
-- **Event Propagation**: Robust message flow through the system
-
-### Core Features
-- **Multiple Transport Options**: Unix Domain Sockets, TCP/IP connections
-- **SASL Authentication**: EXTERNAL, DBUS_COOKIE_SHA1, ANONYMOUS mechanisms
-- **Message Types**: Method calls, signals, errors, and replies
-- **Asynchronous Operations**: CompletableFuture-based API
-- **Spring Boot Integration**: Auto-configuration and dependency injection support
-- **Health Monitoring**: Connection health checks and automatic reconnection
-
-### Testing & Quality (Legacy)
-- **Integration Testing**: Docker-based testing with real D-Bus daemon
-- **Code Coverage**: 68% baseline coverage (improved to 83% in 2.0.0)
-- **Code Quality**: Basic PMD, Checkstyle integration (enhanced in 2.0.0)
-- **Performance Testing**: Initial memory usage and throughput benchmarks
-
-### Documentation
-- **Developer Guide**: Comprehensive learning path for new users
-- **Architecture Documentation**: Detailed technical documentation
-- **Examples**: Working code samples for common use cases
-- **Integration Guides**: Spring Boot and reactive programming patterns
-
-## Previous Versions
-
-### [1.x] - Legacy Version
-- Initial D-Bus client implementation
-- Basic message handling capabilities
-- Unix Domain Socket transport support
-- Foundation for current architecture
-
----
-
-## Migration Guides
-
-### Migrating to 2.0
 
 #### Breaking Changes
-- Package restructuring for better organization
-- Updated API for connection management
-- Enhanced error handling patterns
-- SASL authentication improvements
+- **Maven Coordinates**: `com.lucimber:dbus-client` → `com.lucimber:lucimber-dbus-client`
+- **Java Version**: Now requires Java 17 (upgraded from Java 11)
+- **Connection API**: `DBusConnection.create()` → `NettyConnection.newSessionBusConnection()`
+- **Message Construction**: All messages now require builder pattern instead of constructors
+- **Package Structure**:
+  - Merged encoder/decoder packages into unified `codec` package
+  - Merged `impl` package into `annotation` package
+  - Unified pipeline interfaces and removed legacy implementations
 
-#### Migration Steps
-1. **Update Dependencies**: Update to version 2.0 in your build configuration
-2. **Package Imports**: Update package imports to reflect new structure
-3. **Connection API**: Migrate to new connection configuration API
-4. **Error Handling**: Update exception handling to use new exception hierarchy
-5. **SASL Configuration**: Review and update authentication configurations
+#### Architecture Improvements
+- **Threading Model**: Introduced dual-pipeline architecture with safe blocking operations
+- **SASL Configuration**: Type-safe configuration classes replacing string-based config
+- **Handler Architecture**: Centralized handler configuration for reconnection support
+- **Error Handling**: Enhanced exception handling with detailed error messages
+- **Performance**: Optimized message encoding/decoding with reduced memory allocations
 
-#### Example Migration
-```java
-// Before (1.x)
-Connection connection = DBusConnection.create();
+#### Documentation Updates
+- Reorganized documentation structure with guides consolidated in `docs/guides/`
+- Professional tone with selective emoji usage
+- Added "Getting Started" sections to all package-info.java files
+- Separated development and integration test Docker configurations
 
-// After (2.0)
-Connection connection = NettyConnection.newSessionBusConnection();
-```
+### Fixed
 
-### Compatibility Matrix
+#### Critical Fixes
+- **Security Vulnerabilities**:
+  - Fixed buffer overflow risks in FrameDecoder
+  - Fixed path traversal vulnerability in CookieSaslMechanism
+  - Fixed information disclosure in SASL authentication
+  - Upgraded Netty to 4.2.3.Final for security patches
 
-| Library Version | Java Version | D-Bus Specification | Test Coverage | Spring Boot |
-|----------------|--------------|-------------------|---------------|-------------|
-| 2.0.0          | 17+          | 0.35+             | 83%           | 3.x         |
-| 2.0-SNAPSHOT   | 17+          | 0.35              | 68%           | 3.x         |
-| 1.x            | 11+          | 0.32              | ~60%          | 2.x         |
+- **Connection & Authentication**:
+  - Resolved D-Bus SASL authentication failures in integration tests
+  - Fixed race conditions in connection close operations
+  - Fixed thread-safe handler initialization in NettyConnection
+  - Corrected byte order handling in message body decoding
 
----
+- **Test Reliability**:
+  - Fixed integration test failure reporting
+  - Resolved connection timeout test reliability issues
+  - Fixed Java compilation encoding issues in Docker containers
+  - Corrected exit code handling for failed integration tests
 
-## Support
+- **Code Quality**:
+  - Resolved all major Checkstyle violations
+  - Fixed PMD violations and suppressed intentional patterns
+  - Fixed Javadoc generation errors
+  - Resolved Gradle build errors and deprecation warnings
 
-### Getting Help
-- **Documentation**: [Developer Guide](docs/guides/developer-guide.md)
-- **Examples**: [Working Examples](examples/README.md)
-- **Architecture**: [Architecture Documentation](docs/architecture/)
-- **Issues**: [GitHub Issues](https://github.com/lucimber/dbus-client-java/issues)
+### Removed
+- Redundant `test-container.sh` script (functionality moved to Gradle tasks)
+- Security workflow for OWASP dependency check
+- Unused SASL configuration classes
+- Legacy implementation packages
 
-### Contributing
-- **Guidelines**: [Contributing Guide](CONTRIBUTING.md)
-- **Code of Conduct**: [Code of Conduct](CODE_OF_CONDUCT.md)
-- **Security**: [Security Policy](SECURITY.md)
+### Dependencies
+- **Runtime**:
+  - Netty: 4.1.115.Final → 4.2.3.Final
+  - SLF4J API: 2.0.11 → 2.0.17
+  - JNA: 5.14.0 → 5.17.0
+  - Replaced Log4j with Logback (1.5.18)
 
-### Versioning Policy
-- **Major**: Breaking API changes, architectural changes
-- **Minor**: New features, enhancements, deprecated APIs
-- **Patch**: Bug fixes, documentation updates, security patches
+- **Test**:
+  - JUnit: 5.12.0 → 5.13.3
+  - Mockito: → 5.8.0
+  - Awaitility: 4.2.2 → 4.3.0
+  - Testcontainers: → 1.21.3
 
----
+## [1.x] - Previous Releases
 
-*This changelog is automatically updated with each release. For development changes, see the [git commit history](https://github.com/lucimber/dbus-client-java/commits).*
+For changes in 1.x releases, please refer to the git history or previous documentation.
