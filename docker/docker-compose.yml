@@ -1,0 +1,85 @@
+# D-Bus Development Environment
+# 
+# Quick start:
+#   docker-compose up -d
+#   ./gradlew test
+#
+# For detailed platform setup, see docs/guides/platform-setup.md
+
+version: '3.8'
+
+services:
+  dbus:
+    image: ubuntu:22.04
+    container_name: dbus-dev
+    command: |
+      bash -c "
+        # Install D-Bus
+        apt-get update && apt-get install -y dbus dbus-x11 && 
+        
+        # Create directories
+        mkdir -p /var/run/dbus &&
+        
+        # Start system bus
+        dbus-daemon --system --fork &&
+        
+        # Start session bus and save address
+        eval \$$(dbus-launch --sh-syntax) &&
+        echo \$$DBUS_SESSION_BUS_ADDRESS > /tmp/session_bus_address &&
+        
+        # Start TCP listener for cross-platform access
+        dbus-daemon --session --fork --print-address \
+          --address=tcp:host=0.0.0.0,port=6667 > /tmp/tcp_bus_address &&
+        
+        # Print connection info
+        echo '=== D-Bus Development Environment Ready ===' &&
+        echo 'System bus: unix:path=/var/run/dbus/system_bus_socket' &&
+        echo -n 'Session bus: ' && cat /tmp/session_bus_address &&
+        echo -n 'TCP bus: ' && cat /tmp/tcp_bus_address &&
+        echo '=========================================' &&
+        
+        # Keep container running
+        tail -f /dev/null
+      "
+    volumes:
+      - dbus-data:/var/run/dbus
+      - ./test-policies:/etc/dbus-1/system.d:ro
+    ports:
+      - "6667:6667"  # TCP D-Bus for non-Linux platforms
+    healthcheck:
+      test: ["CMD", "dbus-send", "--system", "--dest=org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus.GetId"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - dbus-net
+
+  # Example: Run tests in container with D-Bus access
+  test-runner:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    depends_on:
+      dbus:
+        condition: service_healthy
+    volumes:
+      - .:/workspace
+      - dbus-data:/var/run/dbus:ro
+      - gradle-cache:/home/gradle/.gradle
+    environment:
+      - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket
+      - GRADLE_USER_HOME=/home/gradle/.gradle
+    working_dir: /workspace
+    command: ./gradlew test
+    profiles:
+      - test
+    networks:
+      - dbus-net
+
+volumes:
+  dbus-data:
+  gradle-cache:
+
+networks:
+  dbus-net:
+    driver: bridge

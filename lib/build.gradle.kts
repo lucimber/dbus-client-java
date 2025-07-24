@@ -237,7 +237,7 @@ tasks.register<Exec>("integrationTest") {
     val gradleVersion = gradle.gradleVersion
     
     // Build and run the test container in one step with caching
-    commandLine("docker", "build", "-f", "../Dockerfile.test", "-t", "dbus-integration-test", "--build-arg", "GRADLE_VERSION=$gradleVersion", "--cache-from", "type=gha", "--cache-to", "type=gha,mode=max", "..")
+    commandLine("docker", "build", "-f", "src/test/docker/Dockerfile.integration", "-t", "dbus-integration-test", "--build-arg", "GRADLE_VERSION=$gradleVersion", "--cache-from", "type=gha", "--cache-to", "type=gha,mode=max", "..")
     
     doFirst {
         println("=".repeat(80))

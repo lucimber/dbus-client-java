@@ -1,0 +1,22 @@
+# Development test runner for D-Bus client
+# This is a lightweight container for running tests during development
+# For integration tests, see Dockerfile.test
+
+FROM eclipse-temurin:17-jdk
+
+# Install basic tools
+RUN apt-get update && apt-get install -y \
+    netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create gradle user
+RUN groupadd -r gradle && useradd -r -g gradle gradle
+
+# Set working directory
+WORKDIR /workspace
+
+# Switch to gradle user
+USER gradle
+
+# Default command
+CMD ["./gradlew", "test"]

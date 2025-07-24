@@ -85,20 +85,34 @@ public class MyHandler extends AbstractInboundHandler {
 
 ## Testing
 
+### Linux
 ```bash
-# Build and test
+# Build and test directly
 ./gradlew build
 
 # Run integration tests (containerized)
 ./gradlew integrationTest
-
-# Run with verbose output
-./gradlew integrationTest -PshowOutput
 ```
+
+### macOS / Windows
+```bash
+# Start D-Bus in Docker
+docker-compose -f docker/docker-compose.yml up -d
+
+# Run tests against Docker D-Bus
+./gradlew test
+
+# Or run tests inside container
+docker-compose -f docker/docker-compose.yml run --rm test-runner
+```
+
+See [Platform Setup Guide](docs/guides/platform-setup.md) for detailed cross-platform instructions.
 
 ## Documentation
 
 - **[Developer Guide](docs/guides/developer-guide.md)** - Comprehensive usage guide
+- **[Platform Setup](docs/guides/platform-setup.md)** - Cross-platform development setup
+- **[Client-Server Patterns](docs/guides/client-server-patterns.md)** - Using ServiceProxy and StandardInterfaceHandler
 - **[Standard Interfaces](docs/standard-interfaces.md)** - Using D-Bus standard interfaces
 - **[D-Bus Compatibility](docs/dbus-compatibility.md)** - Specification version support
 - **[Contributing Guidelines](CONTRIBUTING.md)** - How to contribute
