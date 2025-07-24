@@ -169,8 +169,7 @@ public final class ServiceProxy {
                         "Method " + method.getName() + " is not annotated with @DBusMethod");
             }
 
-            String methodName =
-                    dbusMethod.name().isEmpty() ? method.getName() : dbusMethod.name();
+            String methodName = dbusMethod.name().isEmpty() ? method.getName() : dbusMethod.name();
 
             // Build the D-Bus method call
             OutboundMethodCall.Builder callBuilder =
