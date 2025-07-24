@@ -258,7 +258,7 @@ git commit -s -m "your commit message"
 
 - **Issues**: Use GitHub issues for bug reports and feature requests
 - **Discussions**: Use GitHub discussions for questions and ideas
-- **Documentation**: Check the [developer guide](docs/developer-guide.md) for detailed information
+- **Documentation**: Check the [developer guide](docs/guides/developer-guide.md) for detailed information
 
 ## Recognition
 

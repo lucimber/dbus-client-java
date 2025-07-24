@@ -98,7 +98,7 @@ public class MyHandler extends AbstractInboundHandler {
 
 ## Documentation
 
-- **[Developer Guide](docs/developer-guide.md)** - Comprehensive usage guide
+- **[Developer Guide](docs/guides/developer-guide.md)** - Comprehensive usage guide
 - **[Standard Interfaces](docs/standard-interfaces.md)** - Using D-Bus standard interfaces
 - **[D-Bus Compatibility](docs/dbus-compatibility.md)** - Specification version support
 - **[Contributing Guidelines](CONTRIBUTING.md)** - How to contribute

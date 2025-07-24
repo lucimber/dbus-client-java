@@ -320,7 +320,7 @@ All major IDEs provide code completion for:
 - **[Quick Start](guides/quick-start.md)** - Get started quickly
 - **[Integration Patterns](guides/integration-patterns.md)** - Common integration approaches
 - **[Error Handling](guides/error-handling.md)** - Robust error handling
-- **[Testing Guide](testing-guide.md)** - Testing strategies
+- **[Testing Guide](guides/testing-guide.md)** - Testing strategies
 
 ---
 

@@ -5,7 +5,7 @@ This directory contains documentation files for the D-Bus Client Java library wi
 ## Contents
 
 - `README.md` - This file
-- `developer-guide.md` - Comprehensive developer learning path
+- `guides/developer-guide.md` - Comprehensive developer learning path
 - `architecture/` - Technical architecture documentation
 - `guides/` - Practical implementation guides
 - `examples/` - Code examples and usage patterns

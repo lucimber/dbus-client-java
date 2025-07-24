@@ -141,7 +141,7 @@ Connection connection = NettyConnection.newSessionBusConnection();
 ## Support
 
 ### Getting Help
-- **Documentation**: [Developer Guide](docs/developer-guide.md)
+- **Documentation**: [Developer Guide](docs/guides/developer-guide.md)
 - **Examples**: [Working Examples](examples/README.md)
 - **Architecture**: [Architecture Documentation](docs/architecture/)
 - **Issues**: [GitHub Issues](https://github.com/lucimber/dbus-client-java/issues)

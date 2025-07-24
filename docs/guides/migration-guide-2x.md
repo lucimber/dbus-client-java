@@ -363,7 +363,7 @@ The new dual-pipeline architecture provides:
 
 If you encounter issues during migration:
 
-1. **Check Documentation**: [Developer Guide](../developer-guide.md)
+1. **Check Documentation**: [Developer Guide](developer-guide.md)
 2. **Review Examples**: [Working Examples](../../examples/README.md)  
 3. **Architecture Guide**: [Architecture Documentation](../architecture/)
 4. **GitHub Issues**: [Report Problems](https://github.com/lucimber/dbus-client-java/issues)
