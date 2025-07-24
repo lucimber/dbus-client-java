@@ -61,6 +61,108 @@ public final class DBusDict<KeyT extends DBusBasicType, ValueT extends DBusType>
         signature = other.signature;
     }
 
+    // Factory methods for common dictionary types
+
+    /**
+     * Creates a dictionary with string keys and string values.
+     *
+     * @return a new empty DBusDict with string keys and values
+     */
+    public static DBusDict<DBusString, DBusString> ofStringToString() {
+        return new DBusDict<>(DBusSignature.valueOf("a{ss}"));
+    }
+
+    /**
+     * Creates a dictionary with string keys and variant values.
+     *
+     * @return a new empty DBusDict with string keys and variant values
+     */
+    public static DBusDict<DBusString, DBusVariant> ofStringToVariant() {
+        return new DBusDict<>(DBusSignature.valueOf("a{sv}"));
+    }
+
+    /**
+     * Creates a dictionary with string keys and int32 values.
+     *
+     * @return a new empty DBusDict with string keys and int32 values
+     */
+    public static DBusDict<DBusString, DBusInt32> ofStringToInt32() {
+        return new DBusDict<>(DBusSignature.valueOf("a{si}"));
+    }
+
+    /**
+     * Creates a dictionary with string keys and int64 values.
+     *
+     * @return a new empty DBusDict with string keys and int64 values
+     */
+    public static DBusDict<DBusString, DBusInt64> ofStringToInt64() {
+        return new DBusDict<>(DBusSignature.valueOf("a{sx}"));
+    }
+
+    /**
+     * Creates a dictionary with string keys and boolean values.
+     *
+     * @return a new empty DBusDict with string keys and boolean values
+     */
+    public static DBusDict<DBusString, DBusBoolean> ofStringToBoolean() {
+        return new DBusDict<>(DBusSignature.valueOf("a{sb}"));
+    }
+
+    /**
+     * Creates a dictionary with int32 keys and string values.
+     *
+     * @return a new empty DBusDict with int32 keys and string values
+     */
+    public static DBusDict<DBusInt32, DBusString> ofInt32ToString() {
+        return new DBusDict<>(DBusSignature.valueOf("a{is}"));
+    }
+
+    /**
+     * Creates a dictionary with object path keys and string values.
+     *
+     * @return a new empty DBusDict with object path keys and string values
+     */
+    public static DBusDict<DBusObjectPath, DBusString> ofObjectPathToString() {
+        return new DBusDict<>(DBusSignature.valueOf("a{os}"));
+    }
+
+    /**
+     * Creates a dictionary with string keys and string values from a Java Map.
+     *
+     * @param map the Java map to convert
+     * @return a new DBusDict containing the map entries
+     */
+    public static DBusDict<DBusString, DBusString> fromStringMap(final Map<String, String> map) {
+        final DBusDict<DBusString, DBusString> dict = ofStringToString();
+        map.forEach((k, v) -> dict.put(DBusString.valueOf(k), DBusString.valueOf(v)));
+        return dict;
+    }
+
+    /**
+     * Creates a dictionary with string keys and variant values from a Java Map.
+     *
+     * @param map the Java map to convert
+     * @return a new DBusDict containing the map entries as variants
+     */
+    public static DBusDict<DBusString, DBusVariant> fromVariantMap(final Map<String, Object> map) {
+        final DBusDict<DBusString, DBusVariant> dict = ofStringToVariant();
+        map.forEach((k, v) -> {
+            if (v instanceof String) {
+                dict.put(DBusString.valueOf(k), DBusVariant.valueOf(DBusString.valueOf((String) v)));
+            } else if (v instanceof Integer) {
+                dict.put(DBusString.valueOf(k), DBusVariant.valueOf(DBusInt32.valueOf((Integer) v)));
+            } else if (v instanceof Long) {
+                dict.put(DBusString.valueOf(k), DBusVariant.valueOf(DBusInt64.valueOf((Long) v)));
+            } else if (v instanceof Boolean) {
+                dict.put(DBusString.valueOf(k), DBusVariant.valueOf(DBusBoolean.valueOf((Boolean) v)));
+            } else if (v instanceof Double) {
+                dict.put(DBusString.valueOf(k), DBusVariant.valueOf(DBusDouble.valueOf((Double) v)));
+            }
+            // Add more type conversions as needed
+        });
+        return dict;
+    }
+
     @Override
     public DBusSignature getSignature() {
         return signature;

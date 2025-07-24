@@ -58,6 +58,104 @@ public final class DBusArray<ElementT extends DBusType>
         signature = other.signature;
     }
 
+    // Factory methods for common array types
+
+    /**
+     * Creates an array of strings.
+     *
+     * @param strings the strings to add to the array
+     * @return a new DBusArray containing DBusString elements
+     */
+    public static DBusArray<DBusString> ofStrings(final String... strings) {
+        final DBusArray<DBusString> array = new DBusArray<>(DBusSignature.valueOf("as"));
+        for (final String str : strings) {
+            array.add(DBusString.valueOf(str));
+        }
+        return array;
+    }
+
+    /**
+     * Creates an array of 32-bit integers.
+     *
+     * @param integers the integers to add to the array
+     * @return a new DBusArray containing DBusInt32 elements
+     */
+    public static DBusArray<DBusInt32> ofInt32s(final int... integers) {
+        final DBusArray<DBusInt32> array = new DBusArray<>(DBusSignature.valueOf("ai"));
+        for (final int i : integers) {
+            array.add(DBusInt32.valueOf(i));
+        }
+        return array;
+    }
+
+    /**
+     * Creates an array of 64-bit integers.
+     *
+     * @param longs the longs to add to the array
+     * @return a new DBusArray containing DBusInt64 elements
+     */
+    public static DBusArray<DBusInt64> ofInt64s(final long... longs) {
+        final DBusArray<DBusInt64> array = new DBusArray<>(DBusSignature.valueOf("ax"));
+        for (final long l : longs) {
+            array.add(DBusInt64.valueOf(l));
+        }
+        return array;
+    }
+
+    /**
+     * Creates an array of booleans.
+     *
+     * @param booleans the booleans to add to the array
+     * @return a new DBusArray containing DBusBoolean elements
+     */
+    public static DBusArray<DBusBoolean> ofBooleans(final boolean... booleans) {
+        final DBusArray<DBusBoolean> array = new DBusArray<>(DBusSignature.valueOf("ab"));
+        for (final boolean b : booleans) {
+            array.add(DBusBoolean.valueOf(b));
+        }
+        return array;
+    }
+
+    /**
+     * Creates an array of doubles.
+     *
+     * @param doubles the doubles to add to the array
+     * @return a new DBusArray containing DBusDouble elements
+     */
+    public static DBusArray<DBusDouble> ofDoubles(final double... doubles) {
+        final DBusArray<DBusDouble> array = new DBusArray<>(DBusSignature.valueOf("ad"));
+        for (final double d : doubles) {
+            array.add(DBusDouble.valueOf(d));
+        }
+        return array;
+    }
+
+    /**
+     * Creates an array of object paths.
+     *
+     * @param paths the paths to add to the array
+     * @return a new DBusArray containing DBusObjectPath elements
+     */
+    public static DBusArray<DBusObjectPath> ofObjectPaths(final String... paths) {
+        final DBusArray<DBusObjectPath> array = new DBusArray<>(DBusSignature.valueOf("ao"));
+        for (final String path : paths) {
+            array.add(DBusObjectPath.valueOf(path));
+        }
+        return array;
+    }
+
+    /**
+     * Creates an empty array with the specified element signature.
+     *
+     * @param elementSignature the signature of the array elements (e.g., "s" for strings)
+     * @param <T> the element type
+     * @return a new empty DBusArray
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends DBusType> DBusArray<T> empty(final String elementSignature) {
+        return new DBusArray<>(DBusSignature.valueOf("a" + elementSignature));
+    }
+
     @Override
     public int size() {
         return delegate.size();

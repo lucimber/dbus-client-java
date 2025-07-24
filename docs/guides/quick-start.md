@@ -208,17 +208,28 @@ DBusString text = DBusString.valueOf("Hello, D-Bus!");
 DBusInt32 number = DBusInt32.valueOf(42);
 DBusBoolean flag = DBusBoolean.valueOf(true);
 
-// Container types
-DBusSignature arraySignature = DBusSignature.valueOf("as");
-DBusArray<DBusString> stringArray = new DBusArray<>(arraySignature);
-stringArray.add(DBusString.valueOf("first"));
-stringArray.add(DBusString.valueOf("second"));
+// Arrays - NEW simplified factory methods (v2.0+)
+DBusArray<DBusString> stringArray = DBusArray.ofStrings("first", "second", "third");
+DBusArray<DBusInt32> intArray = DBusArray.ofInt32s(1, 2, 3, 4, 5);
+DBusArray<DBusBoolean> boolArray = DBusArray.ofBooleans(true, false, true);
 
-// Dictionary
-DBusSignature dictSignature = DBusSignature.valueOf("a{si}");
-DBusDict<DBusString, DBusInt32> dictionary = new DBusDict<>(dictSignature);
-dictionary.put(DBusString.valueOf("key1"), DBusInt32.valueOf(100));
-dictionary.put(DBusString.valueOf("key2"), DBusInt32.valueOf(200));
+// Dictionaries - NEW simplified factory methods (v2.0+)
+DBusDict<DBusString, DBusString> config = DBusDict.ofStringToString();
+config.put(DBusString.valueOf("host"), DBusString.valueOf("localhost"));
+config.put(DBusString.valueOf("port"), DBusString.valueOf("8080"));
+
+// Convert from Java collections
+Map<String, String> javaMap = Map.of("key1", "value1", "key2", "value2");
+DBusDict<DBusString, DBusString> dbusDict = DBusDict.fromStringMap(javaMap);
+
+// Properties dictionary (string->variant) - common pattern
+DBusDict<DBusString, DBusVariant> properties = DBusDict.ofStringToVariant();
+properties.put(DBusString.valueOf("Active"), DBusVariant.valueOf(DBusBoolean.valueOf(true)));
+properties.put(DBusString.valueOf("Count"), DBusVariant.valueOf(DBusInt32.valueOf(42)));
+
+// Legacy approach (still supported)
+DBusSignature arraySignature = DBusSignature.valueOf("as");
+DBusArray<DBusString> legacyArray = new DBusArray<>(arraySignature);
 ```
 
 ## Transport Options
