@@ -30,18 +30,20 @@ Complete API documentation is available on GitHub Pages with version support:
 
 ### Installation
 
+Available on Maven Central:
+
 ```xml
 <!-- Maven -->
 <dependency>
     <groupId>com.lucimber</groupId>
     <artifactId>lucimber-dbus-client</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
 ```gradle
 // Gradle
-implementation 'com.lucimber:lucimber-dbus-client:2.0-SNAPSHOT'
+implementation 'com.lucimber:lucimber-dbus-client:2.0.0'
 ```
 
 ### Basic Usage
@@ -138,7 +140,7 @@ See [D-Bus Compatibility](docs/dbus-compatibility.md) for detailed version suppo
 
 ## Status
 
-**Current**: v2.0-SNAPSHOT - Core features stable, API may change based on feedback
+**Current**: v2.0.0 - Production-ready release with stable API
 
 - ✅ **Stable Core**: D-Bus client operations, SASL authentication, message handling
 - ✅ **Production Architecture**: Thread-safe with comprehensive error handling

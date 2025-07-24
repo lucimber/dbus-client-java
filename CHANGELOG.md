@@ -7,10 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- Migration guide from 1.x to 2.0 with comprehensive examples and troubleshooting
-
-## [2.0.0] - 2025-01-23
+## [2.0.0] - 2025-01-24
 
 ### Added
 - **Comprehensive Test Coverage**: Achieved 83% overall test coverage (improved from 68%)
@@ -28,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Code Quality Tools**: Spotless formatting, enhanced PMD and Checkstyle configurations
 - **SPDX License Headers**: Comprehensive license compliance across all source files
 - **Enhanced Documentation**: Migration guide, architecture docs, and comprehensive examples
+- **High-Level Abstractions**: ServiceProxy for client-side proxies and DBusPromise for async operations
+- **Type System Factory Methods**: Simplified D-Bus type creation with methods like `DBusArray.ofStrings()`
+- **Platform Setup Guide**: Comprehensive cross-platform development instructions with Docker support
+- **Client-Server Patterns Guide**: Clear documentation on using ServiceProxy vs StandardInterfaceHandler
 
 ### Changed
 - **Maven Coordinates**: Updated from `dbus-client` to `lucimber-dbus-client` 
@@ -40,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Integration Test Stability**: Improved reliability and error handling
 - **Error Messaging**: Enhanced error messages for failed D-Bus operations
 - **Performance**: Optimized message encoding/decoding with reduced memory allocations
+- **Docker Organization**: Separated development and integration test Docker configurations
+- **Documentation Consistency**: Fixed artifact naming inconsistencies across all documentation
 
 ### Fixed
 - **Checkstyle Violations**: Resolved all major code style issues across the codebase

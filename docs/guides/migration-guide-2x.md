@@ -41,7 +41,7 @@ Version 2.0 represents a major evolution of the library with:
 <dependency>
     <groupId>com.lucimber</groupId>
     <artifactId>lucimber-dbus-client</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
@@ -51,7 +51,7 @@ Version 2.0 represents a major evolution of the library with:
 implementation 'com.lucimber:dbus-client:1.x.x'
 
 // After (2.0)
-implementation 'com.lucimber:lucimber-dbus-client:2.0-SNAPSHOT'
+implementation 'com.lucimber:lucimber-dbus-client:2.0.0'
 ```
 
 ### 2. Update Connection Creation

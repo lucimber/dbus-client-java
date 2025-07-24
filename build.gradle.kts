@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "com.lucimber"
-version = "2.0-SNAPSHOT"
+version = "2.0.0"
 
 // Copyright validation and update tasks
 tasks.register<Exec>("checkCopyright") {
