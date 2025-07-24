@@ -29,26 +29,26 @@ public class HighLevelAbstractionExample {
     // Define a Java interface for the D-Bus service
     @DBusInterface("org.freedesktop.DBus")
     public interface DBusService {
-        @DBusMethod("GetId")
+        @DBusMethod(name = "GetId")
         String getId();
         
-        @DBusMethod("ListNames")
+        @DBusMethod(name = "ListNames")
         CompletableFuture<String[]> listNames();
         
-        @DBusMethod("GetNameOwner")
+        @DBusMethod(name = "GetNameOwner")
         CompletableFuture<String> getNameOwner(String name);
     }
     
     // Example custom service interface
     @DBusInterface("com.example.Calculator")
     public interface CalculatorService {
-        @DBusMethod("Add")
+        @DBusMethod(name = "Add")
         int add(int a, int b);
         
-        @DBusMethod("AddAsync")
+        @DBusMethod(name = "AddAsync")
         CompletableFuture<Integer> addAsync(int a, int b);
         
-        @DBusMethod("Divide")
+        @DBusMethod(name = "Divide")
         double divide(double a, double b);
     }
     
