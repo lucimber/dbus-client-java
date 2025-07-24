@@ -61,8 +61,27 @@ spotless {
         // Ensure files end with newline
         endWithNewline()
         
+        // License header management
+        licenseHeaderFile("$rootDir/config/license-header.txt")
+            .updateYearWithLatest(true) // Update year to current year
+            .yearSeparator("-") // Use hyphen for year ranges (e.g., 2023-2025)
+        
         // Target all Java files
         target("src/**/*.java")
+    }
+    
+    // Also format Kotlin/Gradle files
+    kotlin {
+        // Use ktlint for Kotlin formatting
+        ktlint("0.50.0")
+        
+        // License header for Kotlin files
+        licenseHeaderFile("$rootDir/config/license-header.txt")
+            .updateYearWithLatest(true)
+            .yearSeparator("-")
+        
+        // Target build files and any Kotlin source
+        target("*.gradle.kts", "src/**/*.kt")
     }
 }
 

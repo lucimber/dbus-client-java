@@ -2,7 +2,6 @@
  * SPDX-FileCopyrightText: 2025 Lucimber UG
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package com.lucimber.dbus.annotation;
 
 import com.lucimber.dbus.connection.AbstractInboundHandler;

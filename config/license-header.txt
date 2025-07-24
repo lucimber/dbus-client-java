@@ -1,0 +1,4 @@
+/*
+ * SPDX-FileCopyrightText: $YEAR Lucimber UG
+ * SPDX-License-Identifier: Apache-2.0
+ */

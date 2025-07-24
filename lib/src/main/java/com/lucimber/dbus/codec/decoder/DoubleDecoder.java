@@ -2,7 +2,6 @@
  * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package com.lucimber.dbus.codec.decoder;
 
 import com.lucimber.dbus.type.DBusDouble;
