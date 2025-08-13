@@ -269,7 +269,7 @@ tasks.register<Exec>("integrationTest") {
         "type=gha",
         "--cache-to",
         "type=gha,mode=max",
-        ".."
+        "..",
     )
 
     doFirst {
@@ -331,9 +331,9 @@ tasks.register<Exec>("integrationTest") {
                     "docker", "run", "--rm",
                     "--name", "dbus-integration-test-run",
                 ) +
-                        testResultsMount +
-                        containerEnvVars +
-                        listOf("dbus-integration-test")
+                    testResultsMount +
+                    containerEnvVars +
+                    listOf("dbus-integration-test")
                 standardOutput = System.out
                 errorOutput = System.err
                 isIgnoreExitValue = true
@@ -345,9 +345,9 @@ tasks.register<Exec>("integrationTest") {
                     "docker", "run", "--rm",
                     "--name", "dbus-integration-test-run",
                 ) +
-                        testResultsMount +
-                        containerEnvVars +
-                        listOf("dbus-integration-test")
+                    testResultsMount +
+                    containerEnvVars +
+                    listOf("dbus-integration-test")
                 if (showDebugLogs) {
                     standardOutput = System.out
                     errorOutput = System.err

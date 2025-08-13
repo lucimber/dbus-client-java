@@ -20,8 +20,8 @@
  * <h2>Getting Started</h2>
  *
  * <p><strong>For first-time users:</strong> This package handles authentication automatically. You
- * typically won't interact with these classes directly. Authentication is configured through
- * the connection configuration when establishing a D-Bus connection.
+ * typically won't interact with these classes directly. Authentication is configured through the
+ * connection configuration when establishing a D-Bus connection.
  *
  * <p>The authentication process is handled by:
  *
