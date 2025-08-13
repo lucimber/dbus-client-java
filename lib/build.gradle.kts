@@ -4,15 +4,14 @@
  */
 
 
-import org.gradle.external.javadoc.StandardJavadocDocletOptions
-
 plugins {
     id("java-library")
-    id("maven-publish")
     id("checkstyle")
     id("jacoco")
     id("pmd")
     id("com.diffplug.spotless") version "6.25.0"
+    id("com.vanniktech.maven.publish") version "0.34.0"
+    id("signing")
 }
 
 group = "com.lucimber"
@@ -258,7 +257,21 @@ tasks.register<Exec>("integrationTest") {
     val gradleVersion = gradle.gradleVersion
 
     // Build and run the test container in one step with caching
-    commandLine("docker", "build", "-f", "src/test/docker/Dockerfile.integration", "-t", "dbus-integration-test", "--build-arg", "GRADLE_VERSION=$gradleVersion", "--cache-from", "type=gha", "--cache-to", "type=gha,mode=max", "..")
+    commandLine(
+        "docker",
+        "build",
+        "-f",
+        "src/test/docker/Dockerfile.integration",
+        "-t",
+        "dbus-integration-test",
+        "--build-arg",
+        "GRADLE_VERSION=$gradleVersion",
+        "--cache-from",
+        "type=gha",
+        "--cache-to",
+        "type=gha,mode=max",
+        ".."
+    )
 
     doFirst {
         println("=".repeat(80))
@@ -319,9 +332,9 @@ tasks.register<Exec>("integrationTest") {
                     "docker", "run", "--rm",
                     "--name", "dbus-integration-test-run",
                 ) +
-                    testResultsMount +
-                    containerEnvVars +
-                    listOf("dbus-integration-test")
+                        testResultsMount +
+                        containerEnvVars +
+                        listOf("dbus-integration-test")
                 standardOutput = System.out
                 errorOutput = System.err
                 isIgnoreExitValue = true
@@ -333,9 +346,9 @@ tasks.register<Exec>("integrationTest") {
                     "docker", "run", "--rm",
                     "--name", "dbus-integration-test-run",
                 ) +
-                    testResultsMount +
-                    containerEnvVars +
-                    listOf("dbus-integration-test")
+                        testResultsMount +
+                        containerEnvVars +
+                        listOf("dbus-integration-test")
                 if (showDebugLogs) {
                     standardOutput = System.out
                     errorOutput = System.err
@@ -403,38 +416,40 @@ tasks.register("printTestRuntimeClasspath") {
 }
 
 // Publishing configuration
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            artifactId = "lucimber-dbus-client"
-            from(components["java"])
+mavenPublishing {
+    publishToMavenCentral()
 
-            pom {
-                name.set("D-Bus Client")
-                description.set("A modern Java client library for D-Bus")
-                url.set("https://github.com/lucimber/dbus-client-java")
+    signAllPublications()
 
-                licenses {
-                    license {
-                        name.set("Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
+    coordinates("com.lucimber", "lucimber-dbus-client", "2.0.0")
 
-                developers {
-                    developer {
-                        id.set("lucimber")
-                        name.set("Lucimber UG")
-                        email.set("devdev@lucimber.com")
-                    }
-                }
+    pom {
+        name.set("D-Bus Client")
+        description.set("A modern Java client library for D-Bus")
+        inceptionYear.set("2021")
+        url.set("https://github.com/lucimber/dbus-client-java")
 
-                scm {
-                    connection.set("scm:git:git://github.com/lucimber/dbus-client-java.git")
-                    developerConnection.set("scm:git:ssh://github.com:lucimber/dbus-client-java.git")
-                    url.set("https://github.com/lucimber/dbus-client-java")
-                }
+        licenses {
+            license {
+                name.set("Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
             }
+        }
+
+        developers {
+            developer {
+                id.set("lucimber")
+                name.set("Lucimber UG")
+                url.set("https://github.com/lucimber/")
+                email.set("devdev@lucimber.com")
+            }
+        }
+
+        scm {
+            connection.set("scm:git:git://github.com/lucimber/dbus-client-java.git")
+            developerConnection.set("scm:git:ssh://github.com:lucimber/dbus-client-java.git")
+            url.set("https://github.com/lucimber/dbus-client-java")
         }
     }
 }
