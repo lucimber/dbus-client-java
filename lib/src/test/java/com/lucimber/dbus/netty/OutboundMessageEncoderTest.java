@@ -2,6 +2,7 @@
  * SPDX-FileCopyrightText: 2023-2025 Lucimber UG
  * SPDX-License-Identifier: Apache-2.0
  */
+
 package com.lucimber.dbus.netty;
 
 import static org.junit.jupiter.api.Assertions.*;
