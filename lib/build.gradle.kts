@@ -60,8 +60,7 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
     }
-    withJavadocJar()
-    withSourcesJar()
+    // Javadoc and sources JARs are handled by the Vanniktech Maven Publish plugin
 }
 
 // Set the base name for all archives to match the artifactId
