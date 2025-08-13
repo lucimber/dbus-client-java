@@ -17,7 +17,7 @@ The D-Bus Client Java team takes security seriously. If you discover a security 
 
 **Please do NOT report security vulnerabilities through public GitHub issues.**
 
-Instead, please send an email to security@lucimber.com with the following information:
+Instead, please send an email to devdev@lucimber.com with the following information:
 
 - A description of the vulnerability
 - Steps to reproduce the issue
@@ -167,7 +167,7 @@ The project uses several security tools:
 
 For security-related questions or concerns:
 
-- **Email**: security@lucimber.com
+- **Email**: devdev@lucimber.com
 - **GPG Key**: Available on request
 - **Response Time**: 48 hours for initial response
 

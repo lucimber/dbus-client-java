@@ -30,7 +30,7 @@ Community leaders are responsible for clarifying and enforcing our standards. Th
 
 ## Reporting
 
-If you experience or witness behavior that violates these guidelines, please report it to the project maintainers at conduct@lucimber.com.
+If you experience or witness behavior that violates these guidelines, please report it to the project maintainers at devdev@lucimber.com.
 
 All reports will be handled with discretion and confidentiality.
 

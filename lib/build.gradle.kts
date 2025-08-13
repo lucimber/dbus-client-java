@@ -424,7 +424,7 @@ publishing {
                     developer {
                         id.set("lucimber")
                         name.set("Lucimber UG")
-                        email.set("info@lucimber.com")
+                        email.set("devdev@lucimber.com")
                     }
                 }
 
