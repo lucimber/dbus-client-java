@@ -452,3 +452,8 @@ mavenPublishing {
         }
     }
 }
+
+// Configure signing to use GPG
+signing {
+    useGpgCmd()
+}
