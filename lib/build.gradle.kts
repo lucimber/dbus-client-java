@@ -9,7 +9,7 @@ plugins {
     id("checkstyle")
     id("jacoco")
     id("pmd")
-    id("com.diffplug.spotless") version "6.25.0"
+    id("com.diffplug.spotless") version "7.2.1"
     id("com.vanniktech.maven.publish") version "0.34.0"
     id("signing")
 }
