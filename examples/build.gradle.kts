@@ -15,7 +15,7 @@ plugins {
 dependencies {
     implementation(project(":lib"))
     implementation("org.slf4j:slf4j-api:2.0.17")
-    runtimeOnly("ch.qos.logback:logback-classic:1.5.21")
+    runtimeOnly("ch.qos.logback:logback-classic:1.5.22")
 }
 
 repositories {
