@@ -46,7 +46,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.8.0")
 
     // Integration and Performance Testing
-    testImplementation(platform("org.testcontainers:testcontainers-bom:1.21.3"))
+    testImplementation(platform("org.testcontainers:testcontainers-bom:2.0.3"))
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql") // For general container support
     testImplementation("org.awaitility:awaitility:4.3.0")
