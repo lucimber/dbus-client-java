@@ -9,7 +9,7 @@ plugins {
     id("checkstyle")
     id("jacoco")
     id("pmd")
-    id("com.diffplug.spotless") version "8.0.0"
+    id("com.diffplug.spotless") version "8.1.0"
     id("com.vanniktech.maven.publish") version "0.35.0"
     id("signing")
 }
@@ -98,7 +98,7 @@ spotless {
     // Also format Kotlin/Gradle files
     kotlin {
         // Use ktlint for Kotlin formatting
-        ktlint("0.50.0")
+        ktlint()
 
         // License header for Kotlin files
         licenseHeaderFile("$rootDir/config/license-header.txt", "(^(?![\\/ ]\\*).*$)")
