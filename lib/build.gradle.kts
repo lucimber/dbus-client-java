@@ -98,7 +98,7 @@ spotless {
     // Also format Kotlin/Gradle files
     kotlin {
         // Use ktlint for Kotlin formatting
-        ktlint("0.50.0")
+        ktlint()
 
         // License header for Kotlin files
         licenseHeaderFile("$rootDir/config/license-header.txt", "(^(?![\\/ ]\\*).*$)")
