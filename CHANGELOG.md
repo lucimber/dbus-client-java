@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-01-26
+
+### Security
+- Updated Logback from 1.5.18 to 1.5.25 to address:
+  - CVE-2025-11226: Arbitrary Code Execution through conditional configuration file processing
+  - CVE-2026-1225: Arbitrary Code Execution through component instantiation in configuration files
+
+### Fixed
+- Removed duplicate Gradle caching configuration in CI workflows
+- Updated Testcontainers artifact names for v2 compatibility (`testcontainers-junit-jupiter`, `testcontainers-postgresql`)
+
+### Dependencies
+- Testcontainers: 1.21.3 → 2.0.3
+- Spotless: 6.25.0 → 8.1.0
+- JUnit: 6.0.1 → 6.0.2
+- Logback: 1.5.18 → 1.5.25
+- Maven Publish Plugin: 0.35.0 → 0.36.0
+
 ## [2.0.0] - 2025-07-24
 
 ### Added

@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "com.lucimber"
-version = "2.0.0"
+version = "2.0.1"
 
 // Tool versions
 checkstyle {
