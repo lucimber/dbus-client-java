@@ -47,8 +47,8 @@ dependencies {
 
     // Integration and Performance Testing
     testImplementation(platform("org.testcontainers:testcontainers-bom:2.0.3"))
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql") // For general container support
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql") // For general container support
     testImplementation("org.awaitility:awaitility:4.3.0")
 }
 
