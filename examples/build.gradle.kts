@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2025 Lucimber UG
+ * SPDX-FileCopyrightText: 2025-2026 Lucimber UG
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -102,11 +102,12 @@ tasks.register<JavaExec>("runBasicClient") {
     systemProperties = System.getProperties().toMap() as Map<String, Any>
 
     // Allow passing command line arguments
-    args = if (project.hasProperty("args")) {
-        (project.property("args") as String).split(" ")
-    } else {
-        emptyList()
-    }
+    args =
+        if (project.hasProperty("args")) {
+            (project.property("args") as String).split(" ")
+        } else {
+            emptyList()
+        }
 }
 
 tasks.register<JavaExec>("runSignalHandling") {
@@ -119,11 +120,12 @@ tasks.register<JavaExec>("runSignalHandling") {
     systemProperties = System.getProperties().toMap() as Map<String, Any>
 
     // Allow passing command line arguments
-    args = if (project.hasProperty("args")) {
-        (project.property("args") as String).split(" ")
-    } else {
-        emptyList()
-    }
+    args =
+        if (project.hasProperty("args")) {
+            (project.property("args") as String).split(" ")
+        } else {
+            emptyList()
+        }
 }
 
 tasks.register<JavaExec>("runServiceDiscovery") {
@@ -136,11 +138,12 @@ tasks.register<JavaExec>("runServiceDiscovery") {
     systemProperties = System.getProperties().toMap() as Map<String, Any>
 
     // Allow passing command line arguments
-    args = if (project.hasProperty("args")) {
-        (project.property("args") as String).split(" ")
-    } else {
-        emptyList()
-    }
+    args =
+        if (project.hasProperty("args")) {
+            (project.property("args") as String).split(" ")
+        } else {
+            emptyList()
+        }
 }
 
 tasks.register<JavaExec>("runAuthentication") {
@@ -153,11 +156,12 @@ tasks.register<JavaExec>("runAuthentication") {
     systemProperties = System.getProperties().toMap() as Map<String, Any>
 
     // Allow passing command line arguments
-    args = if (project.hasProperty("args")) {
-        (project.property("args") as String).split(" ")
-    } else {
-        emptyList()
-    }
+    args =
+        if (project.hasProperty("args")) {
+            (project.property("args") as String).split(" ")
+        } else {
+            emptyList()
+        }
 }
 
 // Create a task to list all available examples

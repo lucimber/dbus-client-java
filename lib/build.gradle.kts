@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2025 Lucimber UG
+ * SPDX-FileCopyrightText: 2025-2026 Lucimber UG
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -315,46 +315,54 @@ tasks.register<Exec>("integrationTest") {
         }
 
         // Add volume mount to copy test results back
-        val testResultsMount = listOf(
-            "-v",
-            "${project.projectDir}/build/test-results:/app/lib/build/test-results",
-            "-v",
-            "${project.projectDir}/build/reports:/app/lib/build/reports",
-        )
+        val testResultsMount =
+            listOf(
+                "-v",
+                "${project.projectDir}/build/test-results:/app/lib/build/test-results",
+                "-v",
+                "${project.projectDir}/build/reports:/app/lib/build/reports",
+            )
 
         // Run the container and execute tests
         @Suppress("DEPRECATION")
-        val result = if (showFullOutput) {
-            // Use direct exec with complete output shown
-            project.exec {
-                commandLine = listOf(
-                    "docker", "run", "--rm",
-                    "--name", "dbus-integration-test-run",
-                ) +
-                    testResultsMount +
-                    containerEnvVars +
-                    listOf("dbus-integration-test")
-                standardOutput = System.out
-                errorOutput = System.err
-                isIgnoreExitValue = true
-            }
-        } else {
-            // Use exec with limited output filtering
-            project.exec {
-                commandLine = listOf(
-                    "docker", "run", "--rm",
-                    "--name", "dbus-integration-test-run",
-                ) +
-                    testResultsMount +
-                    containerEnvVars +
-                    listOf("dbus-integration-test")
-                if (showDebugLogs) {
+        val result =
+            if (showFullOutput) {
+                // Use direct exec with complete output shown
+                project.exec {
+                    commandLine = listOf(
+                        "docker",
+                        "run",
+                        "--rm",
+                        "--name",
+                        "dbus-integration-test-run",
+                    ) +
+                        testResultsMount +
+                        containerEnvVars +
+                        listOf("dbus-integration-test")
                     standardOutput = System.out
                     errorOutput = System.err
+                    isIgnoreExitValue = true
                 }
-                isIgnoreExitValue = true
+            } else {
+                // Use exec with limited output filtering
+                project.exec {
+                    commandLine = listOf(
+                        "docker",
+                        "run",
+                        "--rm",
+                        "--name",
+                        "dbus-integration-test-run",
+                    ) +
+                        testResultsMount +
+                        containerEnvVars +
+                        listOf("dbus-integration-test")
+                    if (showDebugLogs) {
+                        standardOutput = System.out
+                        errorOutput = System.err
+                    }
+                    isIgnoreExitValue = true
+                }
             }
-        }
 
         println("=".repeat(80))
         println("📊 INTEGRATION TEST - RESULTS SUMMARY")
