@@ -19,36 +19,48 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-    
+
     - name: Set up Gradle
       uses: gradle/actions/setup-gradle@v4
       with:
         cache-disabled: false
         gradle-version: wrapper
-    
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-    
-    - name: Build project
-      run: ./gradlew build
-    
-    - name: Run tests
-      run: ./gradlew test
-    
+
+    - name: Compile main sources
+      run: ./gradlew classes --console=plain
+
+    - name: Compile test sources
+      run: ./gradlew testClasses --console=plain
+
+    - name: Run Checkstyle
+      run: ./gradlew checkstyleMain checkstyleTest --console=plain
+
+    - name: Run PMD
+      run: ./gradlew pmdMain pmdTest --console=plain
+
+    - name: Run unit tests
+      run: ./gradlew test --console=plain
+
     - name: Run integration tests
-      run: ./gradlew integrationTest
+      run: ./gradlew integrationTest --console=plain
       env:
         DOCKER_BUILDKIT: 1
-    
+
+    - name: Build JAR
+      run: ./gradlew jar --console=plain
+
     - name: Generate JavaDoc
-      run: ./gradlew javadoc
-    
+      run: ./gradlew javadoc --console=plain
+
     - name: Create release archive
       run: |
         mkdir -p release
@@ -56,21 +68,35 @@ jobs:
         cp -r lib/build/docs/javadoc release/
         cp README.md LICENSE release/
         tar -czf dbus-client-java-${GITHUB_REF#refs/tags/}.tar.gz -C release .
-    
+
     - name: Extract release notes
       id: extract_notes
       run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+
         if [ -f CHANGELOG.md ]; then
           # Extract section for this version from CHANGELOG.md
-          awk '/^## \[/{if(found) exit; if($0 ~ /\['"${GITHUB_REF#refs/tags/v}"'\]/) found=1; next} found' CHANGELOG.md > release_notes.txt
-        else
-          # Generate basic release notes
-          echo "Release ${GITHUB_REF#refs/tags/}" > release_notes.txt
-          echo "" >> release_notes.txt
-          echo "## Changes" >> release_notes.txt
-          git log --oneline $(git describe --tags --abbrev=0 HEAD^)..HEAD >> release_notes.txt
+          awk '/^## \['"$VERSION"'\]/{found=1; next} /^## \[/{if(found) exit} found' CHANGELOG.md > release_notes.txt
         fi
-    
+
+        # If no changelog entry or file, generate basic release notes
+        if [ ! -s release_notes.txt ]; then
+          echo "## Release ${GITHUB_REF#refs/tags/}" > release_notes.txt
+          echo "" >> release_notes.txt
+          echo "### Changes" >> release_notes.txt
+          echo "" >> release_notes.txt
+
+          # Get previous tag if it exists
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          if [ -n "$PREV_TAG" ]; then
+            git log --oneline "${PREV_TAG}..HEAD" >> release_notes.txt
+          else
+            # First release - show all commits
+            git log --oneline >> release_notes.txt
+          fi
+        fi
+
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:

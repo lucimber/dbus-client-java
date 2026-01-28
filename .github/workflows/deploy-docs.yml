@@ -19,50 +19,65 @@ concurrency:
 jobs:
   javadoc:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-        
+
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-      
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Compile sources
+      run: ./gradlew classes --console=plain
+
     - name: Generate Javadoc
-      run: ./gradlew javadoc
-      
+      run: ./gradlew javadoc --console=plain
+
+    - name: Run unit tests
+      run: ./gradlew test --console=plain
+
     - name: Generate JaCoCo Coverage Report
-      run: ./gradlew test jacocoTestReport
-      
+      run: ./gradlew jacocoTestReport --console=plain
+
     - name: Extract coverage percentage
       id: coverage
       run: |
         # Extract total coverage percentage from JaCoCo XML report
-        # The report summary is in the last <counter type="INSTRUCTION"> element
         XML_FILE="lib/build/reports/jacoco/test/jacocoTestReport.xml"
-        
+
         # Use Python to parse the XML and extract the last INSTRUCTION counter
-        COVERAGE_DATA=$(python3 -c "import xml.etree.ElementTree as ET; tree = ET.parse('$XML_FILE'); root = tree.getroot(); counters = root.findall('.//counter[@type=\"INSTRUCTION\"]'); last_counter = counters[-1] if counters else None; print(f\"{last_counter.get('missed', '0')} {last_counter.get('covered', '0')}\") if last_counter is not None else print('0 0')" 2>/dev/null || echo "0 0")
-        
+        COVERAGE_DATA=$(python3 -c "
+        import xml.etree.ElementTree as ET
+        tree = ET.parse('$XML_FILE')
+        root = tree.getroot()
+        counters = root.findall('.//counter[@type=\"INSTRUCTION\"]')
+        if counters:
+            last = counters[-1]
+            print(f\"{last.get('missed', '0')} {last.get('covered', '0')}\")
+        else:
+            print('0 0')
+        " 2>/dev/null || echo "0 0")
+
         MISSED=$(echo "$COVERAGE_DATA" | cut -d' ' -f1)
         COVERED=$(echo "$COVERAGE_DATA" | cut -d' ' -f2)
-        
+
         if [ "$COVERED" != "0" ] || [ "$MISSED" != "0" ]; then
           TOTAL=$((COVERED + MISSED))
           PERCENTAGE=$((COVERED * 100 / TOTAL))
         else
           PERCENTAGE=0
         fi
-        
+
         echo "COVERAGE_PERCENTAGE=$PERCENTAGE" >> $GITHUB_ENV
         echo "Coverage: $PERCENTAGE%"
-        
-        # Generate badge JSON for shields.io
+
+        # Determine badge color
         if [ $PERCENTAGE -ge 80 ]; then
           COLOR="brightgreen"
         elif [ $PERCENTAGE -ge 60 ]; then
@@ -72,10 +87,10 @@ jobs:
         else
           COLOR="red"
         fi
-        
+
         # Create badge JSON
         echo "{\"schemaVersion\": 1, \"label\": \"coverage\", \"message\": \"$PERCENTAGE%\", \"color\": \"$COLOR\"}" > coverage-badge.json
-      
+
     - name: Determine version and prepare content
       run: |
         # Determine version
@@ -88,16 +103,16 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "IS_RELEASE=false" >> $GITHUB_ENV
         fi
-        
+
         # Create version-specific directories
         mkdir -p _site/$VERSION
         mkdir -p _site/$VERSION/coverage
         cp -r lib/build/docs/javadoc/* _site/$VERSION/
         cp -r lib/build/reports/jacoco/test/html/* _site/$VERSION/coverage/
-        
+
         # Copy coverage badge JSON
         cp coverage-badge.json _site/
-        
+
         # Verify coverage report integrity
         if [ ! -f "_site/$VERSION/coverage/index.html" ]; then
           echo "ERROR: Coverage report index.html not found!"
@@ -107,52 +122,52 @@ jobs:
           echo "ERROR: Coverage report resources directory not found!"
           exit 1
         fi
-        
-        # For releases, also update 'latest' and create/update version index
+
+        # For releases, also update 'latest'
         if [[ $IS_RELEASE == "true" ]]; then
-          # Update latest
-          mkdir -p _site/latest
-          mkdir -p _site/latest/coverage
-          cp -r lib/build/docs/javadoc/* _site/latest/
-          cp -r lib/build/reports/jacoco/test/html/* _site/latest/coverage/
-          
-          # Create version entry for index
-          echo "$VERSION" >> versions.txt
-        else
-          # For main branch, just update latest
           mkdir -p _site/latest
           mkdir -p _site/latest/coverage
           cp -r lib/build/docs/javadoc/* _site/latest/
           cp -r lib/build/reports/jacoco/test/html/* _site/latest/coverage/
         fi
-        
+
     - name: Download existing site (for version history)
       continue-on-error: true
       run: |
-        # Try to download existing site to preserve version history
-        curl -s -f -o existing-site.tar.gz \
-          "https://github.com/${{ github.repository }}/archive/gh-pages.tar.gz" || true
-        
-        if [ -f existing-site.tar.gz ]; then
-          tar -xzf existing-site.tar.gz --strip-components=1 || true
-          
-          # Copy existing versions (preserve version history)
-          if [ -d existing_versions ]; then
-            cp -r existing_versions/* _site/ 2>/dev/null || true
+        # Try to download existing gh-pages content to preserve version history
+        git fetch origin gh-pages:gh-pages 2>/dev/null || true
+
+        if git rev-parse --verify gh-pages >/dev/null 2>&1; then
+          echo "Found existing gh-pages branch, extracting version history..."
+          mkdir -p existing_site
+          git archive gh-pages | tar -x -C existing_site
+
+          # Copy existing versioned directories (v*) to preserve history
+          for dir in existing_site/v*/; do
+            if [ -d "$dir" ]; then
+              version_name=$(basename "$dir")
+              if [ ! -d "_site/$version_name" ]; then
+                echo "Preserving existing version: $version_name"
+                cp -r "$dir" "_site/$version_name"
+              fi
+            fi
+          done
+
+          # Preserve existing versions.json if we don't have new release versions
+          if [ -f "existing_site/versions.json" ] && [ ! -f "_site/versions.json" ]; then
+            cp existing_site/versions.json _site/
           fi
-          
-          # Merge version lists
-          if [ -f existing_versions.json ]; then
-            cp existing_versions.json _site/ || true
-          fi
+        else
+          echo "No existing gh-pages branch found, starting fresh"
         fi
-        
+
     - name: Generate version index and main page
       run: |
-        # Collect all versions
         cd _site
-        VERSIONS=$(find . -maxdepth 1 -type d -name 'v*' -o -name 'latest' | sed 's|./||' | sort -V -r)
-        
+
+        # Collect all versions (directories starting with v or named latest)
+        VERSIONS=$(find . -maxdepth 1 -type d \( -name 'v*' -o -name 'latest' \) | sed 's|./||' | sort -V -r)
+
         # Generate versions.json for API consumption
         echo '{"versions": [' > versions.json
         first=true
@@ -169,38 +184,38 @@ jobs:
           fi
         done
         echo ']}' >> versions.json
-        
+
         # Copy the dynamic index page template
         cp ../scripts/docs-website/index-template.html index.html
-        
+
         # Add version switcher to all Javadoc HTML files
         cp ../scripts/docs-website/version-switcher.js version-switcher.js
-        
+
         # Inject version switcher script into all HTML files in version directories
         for version_dir in */; do
           if [ -d "$version_dir" ]; then
             find "$version_dir" -name "*.html" -type f -exec sed -i 's|</body>|<script src="/version-switcher.js"></script></body>|g' {} \;
           fi
         done
-        
+
     - name: Setup Pages
       uses: actions/configure-pages@v4
-      
+
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
         path: '_site'
-        
+
   deploy:
     needs: javadoc
-    if: github.ref == 'refs/heads/main'
-    
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+
     runs-on: ubuntu-latest
-    
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-      
+
     steps:
     - name: Deploy to GitHub Pages
       id: deployment

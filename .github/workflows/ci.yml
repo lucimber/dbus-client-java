@@ -1,10 +1,9 @@
 # Continuous Integration Pipeline
-# 
+#
 # This workflow runs on every push and pull request to main branch:
 # 1. Builds the project with Gradle
 # 2. Runs unit tests with coverage reporting
 # 3. Executes integration tests in Docker containers
-# 4. Reports coverage to Codecov
 #
 # Optimized with caching for faster builds
 
@@ -24,23 +23,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
+
     - name: Set up Gradle
       uses: gradle/actions/setup-gradle@v4
       with:
         cache-disabled: false
         gradle-version: wrapper
-    - name: Build and run tests with detailed output
-      run: ./gradlew build --console=plain --info --stacktrace
+
+    - name: Compile main sources
+      run: ./gradlew classes --console=plain
+
+    - name: Compile test sources
+      run: ./gradlew testClasses --console=plain
+
+    - name: Run Checkstyle
+      run: ./gradlew checkstyleMain checkstyleTest --console=plain
+
+    - name: Run PMD
+      run: ./gradlew pmdMain pmdTest --console=plain
+
+    - name: Run unit tests
+      run: ./gradlew test --console=plain
+
     - name: Generate code coverage report
-      run: ./gradlew jacocoTestReport
+      run: ./gradlew jacocoTestReport --console=plain
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-    - name: Run integration tests with Docker caching
-      run: ./gradlew integrationTest
+
+    - name: Run integration tests
+      run: ./gradlew integrationTest --console=plain
       env:
         DOCKER_BUILDKIT: 1
