@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Dependencies
 - Testcontainers: 1.21.3 → 2.0.3
-- Spotless: 6.25.0 → 8.1.0
+- Spotless: 6.25.0 → 8.2.0
 - JUnit: 6.0.1 → 6.0.2
 - Logback: 1.5.18 → 1.5.25
 - Maven Publish Plugin: 0.35.0 → 0.36.0
