@@ -12,6 +12,7 @@ name: Continuous Integration
 on:
   push:
     branches: [ "main" ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ "main" ]
 
@@ -54,6 +55,15 @@ jobs:
 
     - name: Generate code coverage report
       run: ./gradlew jacocoTestReport --console=plain
+
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports
+        path: |
+          lib/build/reports/jacoco/test/html/
+          lib/build/reports/jacoco/test/jacocoTestReport.xml
+        retention-days: 1
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
