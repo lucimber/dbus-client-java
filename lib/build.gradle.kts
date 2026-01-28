@@ -428,7 +428,7 @@ mavenPublishing {
 
     signAllPublications()
 
-    coordinates("com.lucimber", "lucimber-dbus-client", "2.0.0")
+    coordinates("com.lucimber", "lucimber-dbus-client", version.toString())
 
     pom {
         name.set("D-Bus Client")

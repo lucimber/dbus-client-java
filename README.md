@@ -37,13 +37,13 @@ Available on Maven Central:
 <dependency>
     <groupId>com.lucimber</groupId>
     <artifactId>lucimber-dbus-client</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
 </dependency>
 ```
 
 ```gradle
 // Gradle
-implementation 'com.lucimber:lucimber-dbus-client:2.0.0'
+implementation 'com.lucimber:lucimber-dbus-client:2.0.1'
 ```
 
 ### Basic Usage
@@ -140,7 +140,7 @@ See [D-Bus Compatibility](docs/dbus-compatibility.md) for detailed version suppo
 
 ## Status
 
-**Current**: v2.0.0 - Production-ready release with stable API
+**Current**: v2.0.1 - Production-ready release with stable API
 
 - ✅ **Stable Core**: D-Bus client operations, SASL authentication, message handling
 - ✅ **Production Architecture**: Thread-safe with comprehensive error handling
@@ -157,4 +157,4 @@ For security issues, see our [Security Policy](SECURITY.md).
 
 Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for details.
 
-Copyright 2021-2025 Lucimber UG
+Copyright 2021-2026 Lucimber UG
