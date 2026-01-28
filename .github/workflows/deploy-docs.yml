@@ -18,6 +18,7 @@ concurrency:
 
 jobs:
   javadoc:
+    if: github.repository == 'lucimber/dbus-client-java'
     runs-on: ubuntu-latest
 
     steps:
