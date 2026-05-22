@@ -28,8 +28,8 @@ pmd {
 
 dependencies {
     // Common
-    implementation("io.netty:netty-all:4.2.13.Final")
-    implementation("io.netty:netty-transport-native-epoll:4.2.13.Final")
+    implementation("io.netty:netty-all:4.2.14.Final")
+    implementation("io.netty:netty-transport-native-epoll:4.2.14.Final")
     implementation("org.slf4j:slf4j-api:2.0.17")
 
     // SASL ID Resolver
