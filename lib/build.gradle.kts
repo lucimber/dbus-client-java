@@ -30,7 +30,7 @@ dependencies {
     // Common
     implementation("io.netty:netty-all:4.2.13.Final")
     implementation("io.netty:netty-transport-native-epoll:4.2.13.Final")
-    implementation("org.slf4j:slf4j-api:2.0.17")
+    implementation("org.slf4j:slf4j-api:2.0.18")
 
     // SASL ID Resolver
     implementation("net.java.dev.jna:jna:5.18.1")
