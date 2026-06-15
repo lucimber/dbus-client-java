@@ -33,8 +33,8 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.18")
 
     // SASL ID Resolver
-    implementation("net.java.dev.jna:jna:5.19.0")
-    implementation("net.java.dev.jna:jna-platform:5.19.0")
+    implementation("net.java.dev.jna:jna:5.19.1")
+    implementation("net.java.dev.jna:jna-platform:5.19.1")
 
     // Testing
     testImplementation("ch.qos.logback:logback-classic:1.5.34")
