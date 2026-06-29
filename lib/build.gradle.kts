@@ -37,7 +37,7 @@ dependencies {
     implementation("net.java.dev.jna:jna-platform:5.19.1")
 
     // Testing
-    testImplementation("ch.qos.logback:logback-classic:1.5.34")
+    testImplementation("ch.qos.logback:logback-classic:1.5.37")
     testImplementation(platform("org.junit:junit-bom:6.1.0"))
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
