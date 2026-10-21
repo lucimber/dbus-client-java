@@ -9,7 +9,7 @@ plugins {
     id("application")
     id("checkstyle")
     id("pmd")
-    id("com.diffplug.spotless") version "8.7.0"
+    id("com.diffplug.spotless") version "8.10.1"
 }
 
 dependencies {
